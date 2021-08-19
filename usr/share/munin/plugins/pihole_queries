@@ -1,0 +1,45 @@
+#!/bin/sh
+
+# Sample setup for '/etc/munin/plugin-conf.d/munin-node':
+#
+# [pihole_*]
+# user root
+# env.host 127.0.0.1
+# env.port 80
+# env.api /admin/api.php
+
+envhost=${host:-127.0.0.1}
+envport=${port:-80}
+envapi=${api:-/admin/api.php}
+
+apicall=$(curl -s "$envhost:$envport$envapi" 2>/dev/null)
+stats=$(echo $apicall | sed 's/[{}"]//g' | tr "," "\n")
+
+case $1 in
+  config)
+    echo "graph_title Pi-hole Queries"
+    echo "graph_vlabel queries rate"
+    echo "graph_category pihole"
+    echo "graph_info This graph shows statistics on queries seen by Pi-hole."
+
+    for stat in $stats
+    do
+        uid=$(echo $stat | sed 's/:.*//')
+        if [ $uid = "dns_queries_today" ] || [ $uid = "ads_blocked_today" ]; then
+            echo "$uid.label $(echo $uid | sed 's/_today//')"
+            echo "$uid.type DERIVE"
+            echo "$uid.min 0"
+        fi
+    done
+
+  exit 0;;
+esac
+
+for stat in $stats
+do
+    uid=$(echo $stat | sed 's/:.*//')
+    if [ $uid = "dns_queries_today" ] || [ $uid = "ads_blocked_today" ]; then
+        value=$(echo $stat | sed 's/.*://')
+        echo "$uid.value $value"
+    fi
+done
