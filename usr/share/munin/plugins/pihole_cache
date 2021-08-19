@@ -19,7 +19,7 @@ case $1 in
   config)
     echo "graph_title Pi-hole Queries Cached"
     echo "graph_vlabel queries rate"
-    echo "graph_category pihole"
+    echo "graph_category pi-hole"
     echo "graph_info This graph shows statistics on queries cached by Pi-hole."
 
     for stat in $stats

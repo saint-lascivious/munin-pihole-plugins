@@ -19,7 +19,7 @@ case $1 in
   config)
     echo "graph_title Pi-hole Blocked Domains"
     echo "graph_vlabel count"
-    echo "graph_category pihole"
+    echo "graph_category pi-hole"
     echo "graph_info This graph shows statistics on domains blocked by Pi-hole."
 
     for stat in $stats
