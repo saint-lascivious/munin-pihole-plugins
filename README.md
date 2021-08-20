@@ -27,19 +27,19 @@ sudo wget https://raw.githubusercontent.com/saint-lascivious/munin_pihole_plugin
 
 * Create the symbolic links
 ```
-sudo ln -s plugins_blocked /etc/munin/plugins/pihole_blocked
+sudo ln -s /usr/share/munin/plugins/pihole_blocked /etc/munin/plugins/pihole_blocked
 ```
 ```
-sudo ln -s plugins_cache /etc/munin/plugins/pihole_cache
+sudo ln -s /usr/share/munin/plugins/pihole_cache /etc/munin/plugins/pihole_cache
 ```
 ```
-sudo ln -s plugins_clients /etc/munin/plugins/pihole_clients
+sudo ln -s /usr/share/munin/plugins/pihole_clients /etc/munin/plugins/pihole_clients
 ```
 ```
-sudo ln -s plugins_queries /etc/munin/plugins/pihole_queries
+sudo ln -s /usr/share/munin/plugins/pihole_queries /etc/munin/plugins/pihole_queries
 ```
 ```
-sudo ln -s plugins_unique /etc/munin/plugins/pihole_unique
+sudo ln -s /usr/share/munin/plugins/pihole_unique /etc/munin/plugins/pihole_unique
 ```
 
 Or let "munin-node-configure --shell | bash" do it for you.
