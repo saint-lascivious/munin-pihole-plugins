@@ -1,13 +1,5 @@
 #!/bin/sh
 
-# Sample setup for '/etc/munin/plugin-conf.d/munin-node':
-#
-# [pihole_*]
-# user root
-# env.host 127.0.0.1
-# env.port 80
-# env.api /admin/api.php
-
 envhost=${host:-127.0.0.1}
 envport=${port:-80}
 envapi=${api:-/admin/api.php}
