@@ -1,4 +1,4 @@
-# munin_pihole_plugins
+# munin-pihole-plugins
 
 Munin plugins for monitoring [Pi-Hole](https://github.com/pi-hole/pi-hole), a hard fork of [MuninPiholePlugins](https://github.com/Rauks/MuninPiholePlugins)
 
@@ -10,19 +10,19 @@ cd /usr/share/munin/plugins
 
 * Download the plugins
 ```
-sudo wget https://raw.githubusercontent.com/saint-lascivious/munin_pihole_plugins/master/usr/share/munin/plugins/pihole_blocked
+sudo wget https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/usr/share/munin/plugins/pihole_blocked
 ```
 ```
-sudo wget https://raw.githubusercontent.com/saint-lascivious/munin_pihole_plugins/master/usr/share/munin/plugins/pihole_cache
+sudo wget https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/usr/share/munin/plugins/pihole_cache
 ```
 ```
-sudo wget https://raw.githubusercontent.com/saint-lascivious/munin_pihole_plugins/master/usr/share/munin/plugins/pihole_clients
+sudo wget https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/usr/share/munin/plugins/pihole_clients
 ```
 ```
-sudo wget https://raw.githubusercontent.com/saint-lascivious/munin_pihole_plugins/master/usr/share/munin/plugins/pihole_queries
+sudo wget https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/usr/share/munin/plugins/pihole_queries
 ```
 ```
-sudo wget https://raw.githubusercontent.com/saint-lascivious/munin_pihole_plugins/master/usr/share/munin/plugins/pihole_unique
+sudo wget https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/usr/share/munin/plugins/pihole_unique
 ```
 
 * Create the symbolic links
@@ -58,10 +58,10 @@ Not required if using default Pi-hole configuration.
 
 ## Contact
 * Discord
-[SaintLascivious](https://discord.gg/9Cq4gRg)
+[SaintLascivious](https://discord.gg/NC7taVyn)
 
 * Email
-saint.lascivious@gmail.com
+saint@sainternet.xyz
 
 * IRC
 [##saint-lascivious](https://webchat.freenode.net/##saint-lascivious)
