@@ -22,8 +22,12 @@ sudo wget https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugin
 sudo wget https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/usr/share/munin/plugins/pihole_queries
 ```
 ```
+sudo wget https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/usr/share/munin/plugins/pihole_reply
+```
+```
 sudo wget https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/usr/share/munin/plugins/pihole_unique
 ```
+
 
 * Create the symbolic links
 ```
@@ -39,22 +43,23 @@ sudo ln -s /usr/share/munin/plugins/pihole_clients /etc/munin/plugins/pihole_cli
 sudo ln -s /usr/share/munin/plugins/pihole_queries /etc/munin/plugins/pihole_queries
 ```
 ```
+sudo ln -s /usr/share/munin/plugins/pihole_reply /etc/munin/plugins/pihole_reply
+```
+```
 sudo ln -s /usr/share/munin/plugins/pihole_unique /etc/munin/plugins/pihole_unique
 ```
 
 Or let "munin-node-configure --shell | bash" do it for you.
 
 # Configuration
-* Sample setup for '/etc/munin/plugin-conf.d/munin-node':
+* Sample setup for '/etc/munin/plugin-conf.d/pihole':
 ```
 [pihole_*]
     user root
-    env.host 127.0.0.1
+    env.host pi.hole
     env.port 80
     env.api /admin/api.php
 ```
-
-Not required if using default Pi-hole configuration.
 
 ## Contact
 * Discord

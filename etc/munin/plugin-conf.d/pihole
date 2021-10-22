@@ -1,0 +1,5 @@
+[pihole_*]
+    user root
+    env.host pi.hole
+    env.port 80
+    env.api /admin/api.php

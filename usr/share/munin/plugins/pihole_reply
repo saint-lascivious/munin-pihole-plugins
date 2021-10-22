@@ -1,0 +1,37 @@
+#!/bin/sh
+
+envhost=${host:-127.0.0.1}
+envport=${port:-80}
+envapi=${api:-/admin/api.php}
+
+apicall=$(curl -s "$envhost:$envport$envapi" 2>/dev/null)
+stats=$(echo $apicall | sed 's/[{}"]//g' | tr "," "\n")
+
+case $1 in
+  config)
+    echo "graph_title Pi-hole Reply Type"
+    echo "graph_vlabel reply type"
+    echo "graph_category pi-hole"
+    echo "graph_info This graph shows statistics on Pi-hole reply type."
+
+    for stat in $stats
+    do
+        uid=$(echo $stat | sed 's/:.*//')
+        if [ $uid = "reply_NODATA" ] || [ $uid = "reply_NXDOMAIN" ] || [ $uid = "reply_CNAME" ] || [ $uid = "reply_IP" ]; then
+            echo "$uid.label $uid"
+            echo "$uid.type DERIVE"
+            echo "$uid.min 0"
+        fi
+    done
+
+  exit 0;;
+esac
+
+for stat in $stats
+do
+    uid=$(echo $stat | sed 's/:.*//')
+    if [ $uid = "reply_NODATA" ] || [ $uid = "reply_NXDOMAIN" ] || [ $uid = "reply_CNAME" ] || [ $uid = "reply_IP" ]; then
+        value=$(echo $stat | sed 's/.*://')
+        echo "$uid.value $value"
+    fi
+done
