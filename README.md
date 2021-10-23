@@ -29,6 +29,12 @@ sudo wget https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugin
 ```
 
 
+* Ensure they're executable
+```
+sudo chmod a+x /usr/share/munin/plugins/pihole_*
+```
+
+
 * Create the symbolic links
 ```
 sudo ln -s /usr/share/munin/plugins/pihole_blocked /etc/munin/plugins/pihole_blocked
