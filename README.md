@@ -52,14 +52,28 @@ sudo ln -s /usr/share/munin/plugins/pihole_unique /etc/munin/plugins/pihole_uniq
 Or let "munin-node-configure --shell | bash" do it for you.
 
 # Configuration
-* Sample setup for '/etc/munin/plugin-conf.d/pihole':
+* Edit the exiting `plugins.conf` file
+
+Sample setup for '/etc/munin/plugin-conf.d/plugins.conf'
 ```
 [pihole_*]
     user root
-    env.host pi.hole
+    env.host 192.168.1.123
     env.port 80
     env.api /admin/api.php
 ```
+
+* Or download the example configuration from this repo:
+```
+cd /etc/munin/plugin-conf.d/
+```
+```
+sudo wget https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/etc/munin/plugin-conf.d/plugins.conf
+```
+
+
+Note: It's assumed you'll edit the `env.host` value to properly reflect the host.
+
 
 ## Contact
 * Discord

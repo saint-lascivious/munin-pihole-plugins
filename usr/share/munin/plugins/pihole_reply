@@ -19,7 +19,7 @@ case $1 in
         uid=$(echo $stat | sed 's/:.*//')
         if [ $uid = "reply_NODATA" ] || [ $uid = "reply_NXDOMAIN" ] || [ $uid = "reply_CNAME" ] || [ $uid = "reply_IP" ]; then
             echo "$uid.label $uid"
-            echo "$uid.type DERIVE"
+            echo "$uid.type GAUGE"
             echo "$uid.min 0"
         fi
     done

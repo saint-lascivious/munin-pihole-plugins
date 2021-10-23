@@ -19,6 +19,7 @@ case $1 in
         uid=$(echo $stat | sed 's/:.*//')
         if [ $uid = "unique_domains" ]; then
             echo "$uid.label $uid"
+            echo "$uid.type GAUGE"
             echo "$uid.min 0"
         fi
     done
