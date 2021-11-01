@@ -4,6 +4,7 @@ Munin plugins for monitoring [Pi-Hole](https://github.com/pi-hole/pi-hole), a ha
 
 # Related projects
 * [lighttpd-external-munin-proxy](https://github.com/saint-lascivious/lighttpd-external-munin-proxy)
+
 lighttpd external.conf for Munin webserver proxy
 
 * [Munin](https://github.com/munin-monitoring/munin)
