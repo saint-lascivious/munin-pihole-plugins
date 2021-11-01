@@ -2,6 +2,21 @@
 
 Munin plugins for monitoring [Pi-Hole](https://github.com/pi-hole/pi-hole), a hard fork of [MuninPiholePlugins](https://github.com/Rauks/MuninPiholePlugins)
 
+# Related projects
+* [lighttpd-external-munin-proxy](https://github.com/saint-lascivious/lighttpd-external-munin-proxy)
+lighttpd external.conf for Munin webserver proxy
+
+* [Munin](https://github.com/munin-monitoring/munin)
+
+Main repository for munin master / node / plugins
+
+* [Pi-hole](https://github.com/pi-hole/pi-hole)
+
+A black hole for Internet advertisements
+
+# Install Munin
+* See the instructions in my [lighttpd-external-munin-proxy](https://github.com/saint-lascivious/lighttpd-external-munin-proxy) repository
+
 # Usage
 * Download the plugins
 ```
@@ -68,7 +83,6 @@ Sample setup for '/etc/munin/plugin-conf.d/plugins.conf'
 ```
 sudo wget https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/etc/munin/plugin-conf.d/plugins.conf -P /etc/munin/plugin-conf.d
 ```
-
 
 Note: It's assumed you'll edit the `env.host` value to properly reflect the host.
 
