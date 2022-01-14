@@ -45,7 +45,6 @@ case $1 in
     do
         uid=$(echo $stat | sed 's/:.*//')
         if [ $uid = "cache-live-freed" ] || [ $uid = "cache-inserted" ] || [ $uid = "ip4" ] || [ $uid = "ip6" ] || [ $uid = "srv" ] || [ $uid = "cname" ] || [ $uid = "ds" ] || [ $uid = "dnskey" ] || [ $uid = "other" ] || [ $uid = "expired" ] || [ $uid = "immortal" ]; then
-            echo "$uid.label $(echo $uid | sed 's/cache-//')"
             echo "$uid.label $uid"
             echo "$uid.type GAUGE"
             echo "$uid.min 0"

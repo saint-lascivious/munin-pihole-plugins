@@ -25,16 +25,17 @@ stats=$(echo $apicall | sed 's/[{}"]//g' | tr "," "\n")
 
 case $1 in
   config)
-    echo "graph_title Pi-hole Clients"
+    echo "graph_title Pi-hole Unique Clients"
     echo "graph_args --base 1000 -l 0"
     echo "graph_vlabel number of clients"
     echo "graph_scale no"
-    echo "graph_info This graph shows statistics on clients seen by Pi-hole."
+    echo "graph_category pi-hole"
+    echo "graph_info This graph shows statistics on unique clients seen by Pi-hole."
 
     for stat in $stats
     do
         uid=$(echo $stat | sed 's/:.*//')
-        if [ $uid = "clients_ever_seen" ] || [ $uid = "unique_clients" ]; then
+        if [ $uid = "unique_clients" ]; then
             echo "$uid.label $uid"
             echo "$uid.type GAUGE"
             echo "$uid.min 0"
@@ -47,7 +48,7 @@ esac
 for stat in $stats
 do
     uid=$(echo $stat | sed 's/:.*//')
-    if [ $uid = "clients_ever_seen" ] || [ $uid = "unique_clients" ]; then
+    if [ $uid = "unique_clients" ]; then
         value=$(echo $stat | sed 's/.*://')
         echo "$uid.value $value"
     fi
