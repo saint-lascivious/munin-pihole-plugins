@@ -1,5 +1,21 @@
 #!/bin/sh
 
+# A Munin plugin to monitor Pi-hole, part of munin-pihole-plugins
+
+# Environment variables for this script
+#
+#     host      - Pi-hole host address
+#     port      - Pi-hole web interface port
+#     api       - Pi-hole API query path
+#
+# You can set them in your munin/plugin-conf.d/plugins.conf file with:
+#
+# [pihole_*]
+#     user root
+#     env.host 127.0.0.1
+#     env.port 80
+#     env.api /admin/api.php
+
 envhost=${host:-127.0.0.1}
 envport=${port:-80}
 envapi=${api:-/admin/api.php}
@@ -10,14 +26,17 @@ stats=$(echo $apicall | sed 's/[{}"]//g' | tr "," "\n")
 case $1 in
   config)
     echo "graph_title Pi-hole Reply Type"
-    echo "graph_vlabel reply type"
+    echo "graph_args --base 1000 -l 0"
+    echo "graph_vlabel answer packets"
+    echo "graph_scale no"
     echo "graph_category pi-hole"
     echo "graph_info This graph shows statistics on Pi-hole reply type."
 
     for stat in $stats
     do
         uid=$(echo $stat | sed 's/:.*//')
-        if [ $uid = "reply_NODATA" ] || [ $uid = "reply_NXDOMAIN" ] || [ $uid = "reply_CNAME" ] || [ $uid = "reply_IP" ]; then
+        if [ $uid = "dns_queries_all_types" ] || [ $uid = "reply_NODATA" ] || [ $uid = "reply_NXDOMAIN" ] || [ $uid = "reply_CNAME" ] || [ $uid = "reply_IP" ]; then
+            echo "$uid.label $(echo $uid | sed 's/dns_queries_all_types/ALL/' | sed 's/reply_//')"
             echo "$uid.label $uid"
             echo "$uid.type GAUGE"
             echo "$uid.min 0"
@@ -30,7 +49,7 @@ esac
 for stat in $stats
 do
     uid=$(echo $stat | sed 's/:.*//')
-    if [ $uid = "reply_NODATA" ] || [ $uid = "reply_NXDOMAIN" ] || [ $uid = "reply_CNAME" ] || [ $uid = "reply_IP" ]; then
+    if [ $uid = "dns_queries_all_types" ] || [ $uid = "reply_NODATA" ] || [ $uid = "reply_NXDOMAIN" ] || [ $uid = "reply_CNAME" ] || [ $uid = "reply_IP" ]; then
         value=$(echo $stat | sed 's/.*://')
         echo "$uid.value $value"
     fi

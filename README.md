@@ -2,7 +2,7 @@
 
 Munin plugins for monitoring [Pi-Hole](https://github.com/pi-hole/pi-hole), a hard fork of [MuninPiholePlugins](https://github.com/Rauks/MuninPiholePlugins)
 
-# Related projects
+## Related projects
 * [lighttpd-external-munin-proxy](https://github.com/saint-lascivious/lighttpd-external-munin-proxy)
 
 lighttpd external.conf for Munin webserver proxy
@@ -15,16 +15,19 @@ Main repository for munin master / node / plugins
 
 A black hole for Internet advertisements
 
-# Install Munin
+## Install Munin
 * See the instructions in my [lighttpd-external-munin-proxy](https://github.com/saint-lascivious/lighttpd-external-munin-proxy) repository
 
-# Usage
+## Usage
 * Download the plugins
 ```
 sudo wget https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/usr/share/munin/plugins/pihole_blocked -P /usr/share/munin/plugins
 ```
 ```
 sudo wget https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/usr/share/munin/plugins/pihole_cache -P /usr/share/munin/plugins
+```
+```
+sudo wget https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/usr/share/munin/plugins/pihole_cache_info -P /usr/share/munin/plugins
 ```
 ```
 sudo wget https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/usr/share/munin/plugins/pihole_clients -P /usr/share/munin/plugins
@@ -46,12 +49,15 @@ sudo chmod a+x /usr/share/munin/plugins/pihole_*
 ```
 
 
-* Create the symbolic links
+* Create symbolic links
 ```
 sudo ln -s /usr/share/munin/plugins/pihole_blocked /etc/munin/plugins/pihole_blocked
 ```
 ```
 sudo ln -s /usr/share/munin/plugins/pihole_cache /etc/munin/plugins/pihole_cache
+```
+```
+sudo ln -s /usr/share/munin/plugins/pihole_cache /etc/munin/plugins/pihole_cache_info
 ```
 ```
 sudo ln -s /usr/share/munin/plugins/pihole_clients /etc/munin/plugins/pihole_clients
@@ -66,27 +72,28 @@ sudo ln -s /usr/share/munin/plugins/pihole_reply /etc/munin/plugins/pihole_reply
 sudo ln -s /usr/share/munin/plugins/pihole_unique /etc/munin/plugins/pihole_unique
 ```
 
-Or let "munin-node-configure --shell | bash" do it for you.
+## Configuration
 
-# Configuration
-* Edit the exiting `plugins.conf` file
+Provided munin-node and Pi-hole exist on the same host, the default configuration should Just Work. If you have a non-standard configuration or Pi-hole is running on a seperate host, you can do one of the following.
 
-Sample setup for '/etc/munin/plugin-conf.d/plugins.conf'
+* Edit the existing `plugins.conf` file
+
+Sample setup for `/etc/munin/plugin-conf.d/plugins.conf`
 ```
 [pihole_*]
     user root
-    env.host 192.168.1.123
+    env.host 127.0.0.1
     env.port 80
     env.api /admin/api.php
+    env.cachesuffix ?getCacheInfo&auth=
+    env.webpassword PIHOLE_SETUPVARS_WEBPASSWORD_HERE
 ```
 
-* Or download the example configuration from this repo:
+* Download and edit a sample `plugins.conf` file from this repo:
 ```
-sudo wget https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/etc/munin/plugin-conf.d/plugins.conf -P /etc/munin/plugin-conf.d
+wget https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/etc/munin/plugin-conf.d/plugins.conf -q -O - | sudo tee /etc/munin/plugin-conf.d/plugins.conf
 ```
-
-Note: It's assumed you'll edit the `env.host` value to properly reflect the host.
-
+The `env.webpassword` value can be obtained from the Pihole host's `/etc/pihole/setupVars.conf` file. The plugin attempts to obtain this value itself.
 
 ## Contact
 * Discord
