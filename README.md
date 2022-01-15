@@ -24,6 +24,9 @@ A black hole for Internet advertisements
 sudo wget https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/usr/share/munin/plugins/pihole_blocked -P /usr/share/munin/plugins
 ```
 ```
+sudo wget https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/usr/share/munin/plugins/pihole_blockrate -P /usr/share/munin/plugins
+```
+```
 sudo wget https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/usr/share/munin/plugins/pihole_cache -P /usr/share/munin/plugins
 ```
 ```
@@ -52,6 +55,9 @@ sudo chmod a+x /usr/share/munin/plugins/pihole_*
 * Create symbolic links
 ```
 sudo ln -s /usr/share/munin/plugins/pihole_blocked /etc/munin/plugins/pihole_blocked
+```
+```
+sudo ln -s /usr/share/munin/plugins/pihole_blocked /etc/munin/plugins/pihole_blockrate
 ```
 ```
 sudo ln -s /usr/share/munin/plugins/pihole_cache /etc/munin/plugins/pihole_cache

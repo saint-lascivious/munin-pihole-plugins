@@ -35,7 +35,7 @@ case $1 in
     for stat in $stats
     do
         uid=$(echo $stat | sed 's/:.*//')
-        if [ $uid = "dns_queries_today" ] || [ $uid = "ads_blocked_today" ] || [ $uid = "ads_percentage_today" ]; then
+        if [ $uid = "dns_queries_today" ] || [ $uid = "ads_blocked_today" ]; then
             echo "$uid.label $(echo $uid | sed 's/_today//')"
             echo "$uid.type GAUGE"
             echo "$uid.min 0"
@@ -48,7 +48,7 @@ esac
 for stat in $stats
 do
     uid=$(echo $stat | sed 's/:.*//')
-    if [ $uid = "dns_queries_today" ] || [ $uid = "ads_blocked_today" ] || [ $uid = "ads_percentage_today" ]; then
+    if [ $uid = "dns_queries_today" ] || [ $uid = "ads_blocked_today" ]; then
         value=$(echo $stat | sed 's/.*://')
         echo "$uid.value $value"
     fi
