@@ -36,7 +36,7 @@ case $1 in
     do
         uid=$(echo $stat | sed 's/:.*//')
         if [ $uid = "ads_percentage_today" ]; then
-            echo "$uid.label $(echo $uid | sed 's/ads_percentage_today/percentage_blocked/')"
+            echo "$uid.label percentage blocked"
             echo "$uid.type GAUGE"
             echo "$uid.min 0"
         fi

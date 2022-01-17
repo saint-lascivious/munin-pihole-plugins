@@ -36,7 +36,7 @@ case $1 in
     do
         uid=$(echo $stat | sed 's/:.*//')
         if [ $uid = "queries_forwarded" ] || [ $uid = "queries_cached" ]; then
-            echo "$uid.label $uid"
+            echo "$uid.label $(echo $uid | sed 's/queries_//')"
             echo "$uid.type GAUGE"
             echo "$uid.min 0"
         fi
