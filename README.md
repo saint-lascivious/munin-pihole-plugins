@@ -57,13 +57,13 @@ sudo chmod a+x /usr/share/munin/plugins/pihole_*
 sudo ln -s /usr/share/munin/plugins/pihole_blocked /etc/munin/plugins/pihole_blocked
 ```
 ```
-sudo ln -s /usr/share/munin/plugins/pihole_blocked /etc/munin/plugins/pihole_blockrate
+sudo ln -s /usr/share/munin/plugins/pihole_blockrate /etc/munin/plugins/pihole_blockrate
 ```
 ```
 sudo ln -s /usr/share/munin/plugins/pihole_cache /etc/munin/plugins/pihole_cache
 ```
 ```
-sudo ln -s /usr/share/munin/plugins/pihole_cache /etc/munin/plugins/pihole_cache_info
+sudo ln -s /usr/share/munin/plugins/pihole_cache_info /etc/munin/plugins/pihole_cache_info
 ```
 ```
 sudo ln -s /usr/share/munin/plugins/pihole_clients /etc/munin/plugins/pihole_clients
