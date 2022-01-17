@@ -19,7 +19,7 @@ A black hole for Internet advertisements
 * See the instructions in my [lighttpd-external-munin-proxy](https://github.com/saint-lascivious/lighttpd-external-munin-proxy) repository
 
 ## Usage
-* Download the plugins
+* Download any/all desired plugins
 ```
 sudo wget https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/usr/share/munin/plugins/pihole_blocked -P /usr/share/munin/plugins
 ```
@@ -40,6 +40,9 @@ sudo wget https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugin
 ```
 ```
 sudo wget https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/usr/share/munin/plugins/pihole_reply -P /usr/share/munin/plugins
+```
+```
+sudo wget https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/usr/share/munin/plugins/pihole_status -P /usr/share/munin/plugins
 ```
 ```
 sudo wget https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/usr/share/munin/plugins/pihole_unique -P /usr/share/munin/plugins
@@ -73,6 +76,9 @@ sudo ln -s /usr/share/munin/plugins/pihole_queries /etc/munin/plugins/pihole_que
 ```
 ```
 sudo ln -s /usr/share/munin/plugins/pihole_reply /etc/munin/plugins/pihole_reply
+```
+```
+sudo ln -s /usr/share/munin/plugins/pihole_status /etc/munin/plugins/pihole_status
 ```
 ```
 sudo ln -s /usr/share/munin/plugins/pihole_unique /etc/munin/plugins/pihole_unique
