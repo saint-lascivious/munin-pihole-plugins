@@ -84,6 +84,15 @@ sudo ln -s /usr/share/munin/plugins/pihole_status /etc/munin/plugins/pihole_stat
 sudo ln -s /usr/share/munin/plugins/pihole_unique /etc/munin/plugins/pihole_unique
 ```
 
+* Restart Munin services
+```
+sudo systemctl restart munin munin-node
+```
+
+* Help! My graphs aren't showing up!
+
+Wait. Graphs should be generated at five minute intervals. If you still do not see graphs after this time, try restarting the machine and waiting a further five minutes. If you still can not get any graphs to display, contact me for further support.
+
 ## Configuration
 
 Provided munin-node and Pi-hole exist on the same host, the default configuration should Just Work. If you have a non-standard configuration or Pi-hole is running on a seperate host, you can do one of the following.
