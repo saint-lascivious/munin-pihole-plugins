@@ -89,9 +89,11 @@ sudo ln -s /usr/share/munin/plugins/pihole_unique /etc/munin/plugins/pihole_uniq
 sudo systemctl restart munin munin-node
 ```
 
-* Help! My graphs aren't showing up!
+## Help! My graphs aren't showing up!
 
-Wait. Graphs should be generated at five minute intervals. If you still do not see graphs after this time, try restarting the machine and waiting a further five minutes. If you still can not get any graphs to display, contact me for further support.
+* Be patient
+
+Graphs should be generated at five minute intervals. If you still do not see graphs after this time, try restarting the machine and waiting a further five minutes. If you still can not get any graphs to display, contact me for further support.
 
 ## Configuration
 
