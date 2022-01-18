@@ -66,7 +66,7 @@ sudo ln -s /usr/share/munin/plugins/pihole_blockrate /etc/munin/plugins/pihole_b
 sudo ln -s /usr/share/munin/plugins/pihole_cache /etc/munin/plugins/pihole_cache
 ```
 ```
-sudo ln -s /usr/share/munin/plugins/pihole_cache_info /etc/munin/plugins/pihole_cacheinfo
+sudo ln -s /usr/share/munin/plugins/pihole_cacheinfo /etc/munin/plugins/pihole_cacheinfo
 ```
 ```
 sudo ln -s /usr/share/munin/plugins/pihole_clients /etc/munin/plugins/pihole_clients
