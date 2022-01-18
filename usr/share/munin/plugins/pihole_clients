@@ -36,7 +36,7 @@ case $1 in
     do
         uid=$(echo $stat | sed 's/:.*//')
         if [ $uid = "unique_clients" ] || [ $uid = "clients_ever_seen" ]; then
-            echo "$uid.label $(echo $uid | sed 's/_/ /')"
+            echo "$uid.label $(echo $uid | sed 's/_/ /g')"
             echo "$uid.min 0"
         fi
     done
