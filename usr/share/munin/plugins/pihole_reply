@@ -30,7 +30,7 @@ case $1 in
     echo "graph_vlabel answer packets"
     echo "graph_scale no"
     echo "graph_category pi-hole"
-    echo "graph_info This graph shows statistics on Pi-hole reply type."
+    echo "graph_info This graph shows statistics on Pi-hole's reply type."
 
     for stat in $stats
     do

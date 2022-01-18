@@ -30,7 +30,7 @@ sudo wget https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugin
 sudo wget https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/usr/share/munin/plugins/pihole_cache -P /usr/share/munin/plugins
 ```
 ```
-sudo wget https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/usr/share/munin/plugins/pihole_cache_info -P /usr/share/munin/plugins
+sudo wget https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/usr/share/munin/plugins/pihole_cacheinfo -P /usr/share/munin/plugins
 ```
 ```
 sudo wget https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/usr/share/munin/plugins/pihole_clients -P /usr/share/munin/plugins
@@ -66,7 +66,7 @@ sudo ln -s /usr/share/munin/plugins/pihole_blockrate /etc/munin/plugins/pihole_b
 sudo ln -s /usr/share/munin/plugins/pihole_cache /etc/munin/plugins/pihole_cache
 ```
 ```
-sudo ln -s /usr/share/munin/plugins/pihole_cache_info /etc/munin/plugins/pihole_cache_info
+sudo ln -s /usr/share/munin/plugins/pihole_cache_info /etc/munin/plugins/pihole_cacheinfo
 ```
 ```
 sudo ln -s /usr/share/munin/plugins/pihole_clients /etc/munin/plugins/pihole_clients

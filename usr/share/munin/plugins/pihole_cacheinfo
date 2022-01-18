@@ -39,13 +39,13 @@ case $1 in
     echo "graph_vlabel cache packets"
     echo "graph_scale no"
     echo "graph_category pi-hole"
-    echo "graph_info This graph shows statistics on Pi-hole's cache contents."
+    echo "graph_info This graph shows statistics on Pi-hole's cache content."
 
     for stat in $stats
     do
         uid=$(echo $stat | sed 's/:.*//')
         if [ $uid = "cache-live-freed" ] || [ $uid = "cache-inserted" ] || [ $uid = "ip4" ] || [ $uid = "ip6" ] || [ $uid = "srv" ] || [ $uid = "cname" ] || [ $uid = "ds" ] || [ $uid = "dnskey" ] || [ $uid = "other" ] || [ $uid = "expired" ] || [ $uid = "immortal" ]; then
-            echo "$uid.label $(echo $uid | sed 's/cache-live-//; s/cache-//; s/srv/SRV/; s/cname/CNAME/; s/ds/DS/; s/dnskey/DNSKEY/')"
+            echo "$uid.label $(echo $uid | sed 's/-/ /g; s/srv/SRV/; s/cname/CNAME/; s/ds/DS/; s/dnskey/DNSKEY/')"
             echo "$uid.type GAUGE"
             echo "$uid.min 0"
         fi

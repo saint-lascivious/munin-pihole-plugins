@@ -30,7 +30,7 @@ case $1 in
     echo "graph_vlabel percent blocked"
     echo "graph_scale no"
     echo "graph_category pi-hole"
-    echo "graph_info This graph shows statistics on queries blocked by Pi-hole."
+    echo "graph_info This graph shows statistics on Pi-hole's blocked query percentile."
 
     for stat in $stats
     do
