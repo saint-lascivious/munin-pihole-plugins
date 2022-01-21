@@ -20,30 +20,40 @@ A black hole for Internet advertisements
 
 ## Usage
 * Download any/all desired plugins
+
+Number of domains in blocklist
 ```
 sudo wget https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/usr/share/munin/plugins/pihole_blocked -P /usr/share/munin/plugins
 ```
+Block rate as a percentile
 ```
 sudo wget https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/usr/share/munin/plugins/pihole_blockrate -P /usr/share/munin/plugins
 ```
-```
-sudo wget https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/usr/share/munin/plugins/pihole_cacherate -P /usr/share/munin/plugins
-```
+Cache content information
 ```
 sudo wget https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/usr/share/munin/plugins/pihole_cacheinfo -P /usr/share/munin/plugins
 ```
+Cache hits/misses (cached/forwarded)
+```
+sudo wget https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/usr/share/munin/plugins/pihole_cacherate -P /usr/share/munin/plugins
+```
+Number of unique clients currently/ever seen
 ```
 sudo wget https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/usr/share/munin/plugins/pihole_clients -P /usr/share/munin/plugins
 ```
+Total queries/blocked queries
 ```
 sudo wget https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/usr/share/munin/plugins/pihole_queries -P /usr/share/munin/plugins
 ```
+Reply type (IP, NXDOMAIN, CNAME, etc.)
 ```
 sudo wget https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/usr/share/munin/plugins/pihole_reply -P /usr/share/munin/plugins
 ```
+Blocking status
 ```
 sudo wget https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/usr/share/munin/plugins/pihole_status -P /usr/share/munin/plugins
 ```
+Number of unique domains seen
 ```
 sudo wget https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/usr/share/munin/plugins/pihole_unique -P /usr/share/munin/plugins
 ```
@@ -63,10 +73,10 @@ sudo ln -s /usr/share/munin/plugins/pihole_blocked /etc/munin/plugins/pihole_blo
 sudo ln -s /usr/share/munin/plugins/pihole_blockrate /etc/munin/plugins/pihole_blockrate
 ```
 ```
-sudo ln -s /usr/share/munin/plugins/pihole_cache /etc/munin/plugins/pihole_cacherate
-```
-```
 sudo ln -s /usr/share/munin/plugins/pihole_cacheinfo /etc/munin/plugins/pihole_cacheinfo
+```
+```
+sudo ln -s /usr/share/munin/plugins/pihole_cacherate /etc/munin/plugins/pihole_cacherate
 ```
 ```
 sudo ln -s /usr/share/munin/plugins/pihole_clients /etc/munin/plugins/pihole_clients
