@@ -165,3 +165,7 @@ Main repository for munin master / node / plugins
 * [Pi-hole](https://github.com/pi-hole/pi-hole)
 
 A black hole for Internet advertisements
+
+* [Unbound](https://github.com/NLnetLabs/unbound)
+
+Unbound is a validating, recursive, caching DNS resolver.
