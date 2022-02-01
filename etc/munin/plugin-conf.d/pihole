@@ -4,4 +4,4 @@
     env.port 80
     env.api /admin/api.php
     env.cachesuffix ?getCacheInfo&auth=
-    env.webpassword PIHOLE_SETUPVARS_WEBPASSWORD_HERE
+    #env.webpassword PIHOLE_SETUPVARS_WEBPASSWORD_HERE

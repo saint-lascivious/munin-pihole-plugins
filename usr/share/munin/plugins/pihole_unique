@@ -25,12 +25,12 @@ stats=$(echo $apicall | sed 's/[{}"]//g' | tr "," "\n")
 
 case $1 in
   config)
-    echo "graph_title Pi-hole Unique Domains"
+    echo "graph_title Pi-hole unique domains"
     echo "graph_args --base 1000 -l 0"
     echo "graph_vlabel unique domains"
     echo "graph_scale no"
-    echo "graph_category pi-hole"
-    echo "graph_info This graph shows statistics on unique domains seen by Pi-hole."
+    echo "graph_category dns"
+    echo "graph_info This graph shows the number of unique domains seen by Pi-hole."
 
     for stat in $stats
     do

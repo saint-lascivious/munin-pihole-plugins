@@ -25,12 +25,12 @@ stats=$(echo $apicall | sed 's/[{}"]//g' | tr "," "\n")
 
 case $1 in
   config)
-    echo "graph_title Pi-hole Status"
+    echo "graph_title Pi-hole blocking status"
     echo "graph_args --base 1000 -l -1 -u 1"
     echo "graph_vlabel offline / disabled / enabled"
     echo "graph_scale no"
-    echo "graph_category pi-hole"
-    echo "graph_info This graph shows statistics on Pi-hole's blocking status."
+    echo "graph_category dns"
+    echo "graph_info This graph shows Pi-hole's blocking status."
 
     for stat in $stats
     do

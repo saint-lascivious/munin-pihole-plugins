@@ -25,18 +25,18 @@ stats=$(echo $apicall | sed 's/[{}"]//g' | tr "," "\n")
 
 case $1 in
   config)
-    echo "graph_title Pi-hole Cache Rate"
-    echo "graph_args --base 1000 -l 0"
-    echo "graph_vlabel queries"
+    echo "graph_title Pi-hole blocked query percent"
+    echo "graph_args --base 1000 -l 0 -u 100"
+    echo "graph_vlabel percent blocked"
     echo "graph_scale no"
-    echo "graph_category pi-hole"
-    echo "graph_info This graph shows statistics on Pi-hole's cache hits and misses."
+    echo "graph_category dns"
+    echo "graph_info This graph shows Pi-hole's blocked query percentage."
 
     for stat in $stats
     do
         uid=$(echo $stat | sed 's/:.*//')
-        if [ $uid = "queries_forwarded" ] || [ $uid = "queries_cached" ]; then
-            echo "$uid.label $(echo $uid | sed 's/queries_//')"
+        if [ $uid = "ads_percentage_today" ]; then
+            echo "$uid.label percentage blocked"
             echo "$uid.type GAUGE"
             echo "$uid.min 0"
         fi
@@ -48,7 +48,7 @@ esac
 for stat in $stats
 do
     uid=$(echo $stat | sed 's/:.*//')
-    if [ $uid = "queries_forwarded" ] || [ $uid = "queries_cached" ]; then
+    if [ $uid = "ads_percentage_today" ]; then
         value=$(echo $stat | sed 's/.*://')
         echo "$uid.value $value"
     fi
