@@ -14,7 +14,7 @@ plugin_list="${PLUGIN_LIST:-blocked cache clients hits percent queries replies s
 plugin_repo="https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master"
 proxy_config_dir="${PROXY_CONFIG_DIR:-/etc/lighttpd}"
 proxy_repo="https://raw.githubusercontent.com/saint-lascivious/lighttpd-external-munin-proxy/master"
-script_version="0.1"
+script_version="0.2"
 service_list="lighttpd munin munin-node"
 
 obnoxious_header() {
@@ -52,7 +52,12 @@ configure_proxy() {
         else
             rm "$proxy_config_dir"/external.conf || return
         fi
-        wget -q --show-progress "$proxy_repo"/etc/lighttpd/external.conf -P "$proxy_config_dir"
+        if [[ -x "$(command -v wget)" ]]; then
+            wget -q --show-progress "$proxy_repo"/etc/lighttpd/external.conf -P "$proxy_config_dir"
+        else
+            echo -e " * \e[31;1m[ERROR]\e[0m The required package 'wget' was not found"
+            exit 1
+        fi
     else
         echo -e " * \e[31;1m[ERROR]\e[0m No Lighttpd configuration directory found at"
         echo "$proxy_config_dir"
@@ -79,13 +84,17 @@ configure_munin() {
 
 remove_existing() {
     if [[ -d "$munin_plugin_dir" ]]; then
-        for plugin_id in "$munin_plugin_dir"/pihole_*; do
-            rm "$munin_plugin_dir"/pihole_"$plugin_id" || return
+        for plugin_id in $plugin_list; do
+            if [[ -f "$munin_plugin_dir"/pihole_"$plugin_id" ]]; then
+                rm "$munin_plugin_dir"/pihole_"$plugin_id" || return
+            fi
         done
     fi
     if [[ -d "$node_plugin_dir" ]]; then
-        for plugin_id in "$node_plugin_dir"/pihole_*; do
-            rm "$node_plugin_dir"/pihole_"$plugin_id" || return
+        for plugin_id in $plugin_list; do
+            if [[ -f "$node_plugin_dir"/pihole_"$plugin_id" ]]; then
+                rm "$node_plugin_dir"/pihole_"$plugin_id" || return
+            fi
         done
     fi
 }
@@ -94,7 +103,12 @@ install_plugins() {
     if [[ -d "$munin_plugin_dir" ]]; then
         if [[ -d "$node_plugin_dir" ]]; then
             for plugin_id in $plugin_list; do
-                wget -q --show-progress "$plugin_repo"/usr/share/munin/plugins/pihole_"$plugin_id" -P "$munin_plugin_dir" || return
+                if [[ -x "$(command -v wget)" ]]; then
+                    wget -q --show-progress "$plugin_repo"/usr/share/munin/plugins/pihole_"$plugin_id" -P "$munin_plugin_dir" || return
+                else
+                    echo -e " * \e[31;1m[ERROR]\e[0m The required package 'wget' was not found"
+                    exit 1
+                fi
                 chmod +x "$munin_plugin_dir"/pihole_"$plugin_id" || return
                 ln -s "$munin_plugin_dir"/pihole_"$plugin_id" "$node_plugin_dir"/pihole_"$plugin_id" || return
             done
@@ -113,7 +127,12 @@ install_plugins() {
 configure_plugins() {
     if [[ -d "$plugin_config_dir" ]]; then
         if [[ ! -f  "$plugin_config_dir/pihole" ]]; then
-            wget -q --show-progress "$plugin_repo"/etc/munin/plugin-conf.d/pihole -P "$plugin_config_dir"
+            if [[ -x "$(command -v wget)" ]]; then
+                wget -q --show-progress "$plugin_repo"/etc/munin/plugin-conf.d/pihole -P "$plugin_config_dir"
+            else
+                echo -e " * \e[31;1m[ERROR]\e[0m The required package 'wget' was not found"
+                exit 1
+            fi
         fi
     else
         echo -e " * \e[31;1m[ERROR]\e[0m No Munin plugin configuration directory found at"
