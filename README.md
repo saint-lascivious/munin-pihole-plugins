@@ -4,6 +4,9 @@ Munin plugins for monitoring [Pi-Hole](https://github.com/pi-hole/pi-hole), a ha
 
 ## Automated Installation
 Automated installation script for Debian/Ubuntu derivatives
+
+Note: Automated installation is in its infacy right now and not particularly well tested
+
 * Download the munin-pihole-plugins script
 ```
 wget https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/script/munin-pihole-plugins
