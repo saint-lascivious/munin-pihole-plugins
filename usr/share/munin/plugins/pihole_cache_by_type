@@ -34,17 +34,17 @@ stats=$(echo $apicall | sed 's/[{}"]//g' | tr "," "\n")
 
 case $1 in
   config)
-    echo "graph_title Pi-hole cache"
+    echo "graph_title Pi-hole cache by type"
     echo "graph_args --base 1000 -l 0"
     echo "graph_vlabel cache packets"
     echo "graph_scale no"
     echo "graph_category dns"
-    echo "graph_info This graph shows statistics on Pi-hole's cache."
+    echo "graph_info This graph shows statistics on Pi-hole's cache content by type."
 
     for stat in $stats
     do
         uid=$(echo $stat | sed 's/:.*//')
-        if [ $uid = "cache-live-freed" ] || [ $uid = "cache-inserted" ] || [ $uid = "expired" ] || [ $uid = "immortal" ]; then
+        if [ $uid = "cache-live-freed" ] || [ $uid = "cache-inserted" ] || [ $uid = "ipv4" ] || [ $uid = "ipv6" ] || [ $uid = "srv" ] || [ $uid = "cname" ] || [ $uid = "ds" ] || [ $uid = "dnskey" ] || [ $uid = "other" ] || [ $uid = "expired" ] || [ $uid = "immortal" ]; then
             echo "$uid.label $(echo $uid | sed 's/-/ /g; s/ipv4/A/; s/ipv6/AAAA/; s/srv/SRV/; s/cname/CNAME/; s/ds/DS/; s/dnskey/DNSKEY/')"
             echo "$uid.type GAUGE"
             echo "$uid.min 0"
@@ -57,7 +57,7 @@ esac
 for stat in $stats
 do
     uid=$(echo $stat | sed 's/:.*//')
-    if [ $uid = "cache-live-freed" ] || [ $uid = "cache-inserted" ] || [ $uid = "expired" ] || [ $uid = "immortal" ]; then
+    if [ $uid = "cache-live-freed" ] || [ $uid = "cache-inserted" ] || [ $uid = "ipv4" ] || [ $uid = "ipv6" ] || [ $uid = "srv" ] || [ $uid = "cname" ] || [ $uid = "ds" ] || [ $uid = "dnskey" ] || [ $uid = "other" ] || [ $uid = "expired" ] || [ $uid = "immortal" ]; then
         value=$(echo $stat | sed 's/.*://')
         echo "$uid.value $value"
     fi

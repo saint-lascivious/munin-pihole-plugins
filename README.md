@@ -28,6 +28,12 @@ For detailed usage information use
 * Install Munin
 See the instructions in my [lighttpd-external-munin-proxy](https://github.com/saint-lascivious/lighttpd-external-munin-proxy) repository
 
+* Remove any existing munin-pihole-plugins plugins (optional)
+If you have previously installed munin-pihole-plugins manually
+```
+sudo rm /usr/share/munin/plugins/pihole_*
+```
+
 * Download any/all desired plugins
 
 Number of domains in blocklist
@@ -38,23 +44,23 @@ Cache information
 ```
 sudo wget https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/usr/share/munin/plugins/pihole_cache -P /usr/share/munin/plugins
 ```
+Cache information by type
+```
+sudo wget https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/usr/share/munin/plugins/pihole_cache_by_type -P /usr/share/munin/plugins
+```
 Number of unique clients currently/ever seen
 ```
 sudo wget https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/usr/share/munin/plugins/pihole_clients -P /usr/share/munin/plugins
-```
-Forwarded queries and cache hits
-```
-sudo wget https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/usr/share/munin/plugins/pihole_hits -P /usr/share/munin/plugins
 ```
 Block rate as a percentile
 ```
 sudo wget https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/usr/share/munin/plugins/pihole_percent -P /usr/share/munin/plugins
 ```
-Total queries/blocked queries
+Queries/blocked queries/forwarded/cached
 ```
 sudo wget https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/usr/share/munin/plugins/pihole_queries -P /usr/share/munin/plugins
 ```
-Reply type (IP, NXDOMAIN, CNAME, etc.)
+Replies by type (IP, NXDOMAIN, CNAME, etc.)
 ```
 sudo wget https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/usr/share/munin/plugins/pihole_replies -P /usr/share/munin/plugins
 ```
@@ -64,17 +70,21 @@ sudo wget https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugin
 ```
 Number of unique domains seen
 ```
-sudo wget https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/usr/share/munin/plugins/pihole_unique -P /usr/share/munin/plugins
+sudo wget https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/usr/share/munin/plugins/pihole_unique_domains -P /usr/share/munin/plugins
 ```
-
 
 * Ensure they're executable
 ```
 sudo chmod a+x /usr/share/munin/plugins/pihole_*
 ```
 
+* Remove any existing munin-pihole-plugins symbolic links
+If you have previously installed munin-pihole-plugins manually
+```
+sudo rm /etc/munin/plugins/pihole_*
+```
 
-* Create symbolic links
+* Create any/all desired symbolic links
 ```
 sudo ln -s /usr/share/munin/plugins/pihole_blocked /etc/munin/plugins/pihole_blocked
 ```
@@ -82,10 +92,10 @@ sudo ln -s /usr/share/munin/plugins/pihole_blocked /etc/munin/plugins/pihole_blo
 sudo ln -s /usr/share/munin/plugins/pihole_cache /etc/munin/plugins/pihole_cache
 ```
 ```
+sudo ln -s /usr/share/munin/plugins/pihole_cache /etc/munin/plugins/pihole_cache_by_type
+```
+```
 sudo ln -s /usr/share/munin/plugins/pihole_clients /etc/munin/plugins/pihole_clients
-```
-```
-sudo ln -s /usr/share/munin/plugins/pihole_hits /etc/munin/plugins/pihole_hits
 ```
 ```
 sudo ln -s /usr/share/munin/plugins/pihole_percent /etc/munin/plugins/pihole_percent
@@ -94,13 +104,13 @@ sudo ln -s /usr/share/munin/plugins/pihole_percent /etc/munin/plugins/pihole_per
 sudo ln -s /usr/share/munin/plugins/pihole_queries /etc/munin/plugins/pihole_queries
 ```
 ```
-sudo ln -s /usr/share/munin/plugins/pihole_replies /etc/munin/plugins/pihole_replies
+sudo ln -s /usr/share/munin/plugins/pihole_replies /etc/munin/plugins/pihole_replies_by_type
 ```
 ```
 sudo ln -s /usr/share/munin/plugins/pihole_status /etc/munin/plugins/pihole_status
 ```
 ```
-sudo ln -s /usr/share/munin/plugins/pihole_unique /etc/munin/plugins/pihole_unique
+sudo ln -s /usr/share/munin/plugins/pihole_unique /etc/munin/plugins/pihole_unique_domains
 ```
 
 * Restart Munin services

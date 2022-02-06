@@ -9,11 +9,11 @@ munin_config_dir="${MUNIN_CONFIG_DIR:-/etc/munin}"
 munin_plugin_dir="${MUNIN_PLUGIN_DIR:-/usr/share/munin/plugins}"
 node_plugin_dir="${NODE_PLUGIN_DIR:-$munin_config_dir/plugins}"
 plugin_config_dir="${PLUGIN_CONFIG_DIR:-$munin_config_dir/plugin-conf.d}"
-plugin_list="${PLUGIN_LIST:-blocked cache clients hits percent queries replies status unique}"
+plugin_list="${PLUGIN_LIST:-blocked cache cache_by_type clients percent queries replies_by_type status unique}"
 plugin_repo="https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master"
 proxy_config_dir="${PROXY_CONFIG_DIR:-/etc/lighttpd}"
 proxy_repo="https://raw.githubusercontent.com/saint-lascivious/lighttpd-external-munin-proxy/master"
-script_version="0.3"
+script_version="0.4"
 service_list="lighttpd munin munin-node"
 
 obnoxious_header() {
@@ -48,6 +48,8 @@ configure_proxy() {
     if [[ -d "$proxy_config_dir" ]]; then
         if [[ -s "$proxy_config_dir/external.conf" ]]; then
             mv "$proxy_config_dir"/external.conf "$proxy_config_dir"/external.conf.bak || return
+            echo -e " * \e[32;1m[INFO]\e[0m Existing lighttpd external.conf backed up to"
+            echo "$proxy_config_dir"/external.conf.bak"
         else
             rm "$proxy_config_dir"/external.conf || return
         fi
@@ -160,10 +162,10 @@ Where OPTION is one of
 
     -i              Install and configure munin-pihole-plugins, you can use
     --install       PLUGIN_LIST to override the default plugin list:
-                    blocked, cache, clients, hits, percent, queries, replies,
-                    status, unique
+                    blocked, cache, cache_by_type, clients, percent, queries,
+                    replies_by_type, status, unique_domains
 
-                    Example: export PLUGIN_LIST=\"blocked hits replies\"
+                    Example: export PLUGIN_LIST=\"blocked clients replies_by_type\"
 
     -u
     --uninstall     Uninstall munin-pihole-plugins
@@ -189,8 +191,12 @@ uninstall_function() {
     remove_existing
     if [[ -f "$proxy_config_dir/external.conf.bak" ]]; then
         mv "$proxy_config_dir"/external.conf.bak "$proxy_config_dir"/external.conf || return
+        echo -e " * \e[32;1m[INFO]\e[0m Original lighttpd external.conf restored from"
+        echo "$proxy_config_dir"/external.conf.bak"
     else
-        rm "$proxy_config_dir"/external.conf
+        if [[ -f "$proxy_config_dir"/external.conf ]]; then
+            rm "$proxy_config_dir"/external.conf || return
+        fi
     fi
 }
 

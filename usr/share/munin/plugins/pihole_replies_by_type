@@ -25,18 +25,18 @@ stats=$(echo $apicall | sed 's/[{}"]//g' | tr "," "\n")
 
 case $1 in
   config)
-    echo "graph_title Pi-hole forwarded queries and cache hits"
+    echo "graph_title Pi-hole replies by type"
     echo "graph_args --base 1000 -l 0"
-    echo "graph_vlabel queries"
+    echo "graph_vlabel answer packets"
     echo "graph_scale no"
     echo "graph_category dns"
-    echo "graph_info This graph shows the number of Pi-hole forwarded queries and cache hits."
+    echo "graph_info This graph shows statistics on Pi-hole's replies by type."
 
     for stat in $stats
     do
         uid=$(echo $stat | sed 's/:.*//')
-        if [ $uid = "queries_forwarded" ] || [ $uid = "queries_cached" ]; then
-            echo "$uid.label $(echo $uid | sed 's/queries_//')"
+        if [ $uid = "reply_NODATA" ] || [ $uid = "reply_NXDOMAIN" ] || [ $uid = "reply_CNAME" ] || [ $uid = "reply_IP" ]; then
+            echo "$uid.label $(echo $uid | sed 's/dns_queries_all_types/all types/; s/reply_//')"
             echo "$uid.type GAUGE"
             echo "$uid.min 0"
         fi
@@ -48,7 +48,7 @@ esac
 for stat in $stats
 do
     uid=$(echo $stat | sed 's/:.*//')
-    if [ $uid = "queries_forwarded" ] || [ $uid = "queries_cached" ]; then
+    if [ $uid = "reply_NODATA" ] || [ $uid = "reply_NXDOMAIN" ] || [ $uid = "reply_CNAME" ] || [ $uid = "reply_IP" ]; then
         value=$(echo $stat | sed 's/.*://')
         echo "$uid.value $value"
     fi
