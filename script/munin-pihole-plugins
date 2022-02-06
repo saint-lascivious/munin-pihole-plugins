@@ -13,16 +13,16 @@ plugin_list="${PLUGIN_LIST:-blocked cache cache_by_type clients percent queries 
 plugin_repo="https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master"
 proxy_config_dir="${PROXY_CONFIG_DIR:-/etc/lighttpd}"
 proxy_repo="https://raw.githubusercontent.com/saint-lascivious/lighttpd-external-munin-proxy/master"
-script_version="0.4"
+script_version="0.5"
 service_list="lighttpd munin munin-node"
 
 obnoxious_header() {
-    echo -e "\e[31;1m                  _             _ _        _            _           _   v$script_version    "
-    echo -e "\e[33;1m   _ __ _  _ _ _ (_)_ _ __ _ __(_) |_  ___| |___ _ _ __| |_  _ __ _(_)_ _  ___  "
-    echo -e "\e[32;1m  | '  \\ || | ' \\| | ' \\__| '_ \\ | ' \\/ _ \\ / -_)_| '_ \\ | || / _\` | | ' \(_-<  "
-    echo -e "\e[34;1m  |_|_|_\\_,_|_||_|_|_||_| | .__/_|_||_\\___/_\\___| | .__/_|\\_,_\\__, |_|_||_/__/  "
-    echo -e "\e[36;1m                          |_|                     |_|         |___/             "
-    echo -e "\n\e[35;1m        A set of Munin plugins for monitoring various Pi-hole statistics        \e[0m\n"
+    echo -e "\\e[31;1m                  _             _ _        _            _           _   v$script_version    "
+    echo -e "\\e[33;1m   _ __ _  _ _ _ (_)_ _ __ _ __(_) |_  ___| |___ _ _ __| |_  _ __ _(_)_ _  ___  "
+    echo -e "\\e[32;1m  | '  \\ || | ' \\| | ' \\__| '_ \\ | ' \\/ _ \\ / -_)_| '_ \\ | || / _\` | | ' \\(_-<  "
+    echo -e "\\e[34;1m  |_|_|_\\_,_|_||_|_|_||_| | .__/_|_||_\\___/_\\___| | .__/_|\\_,_\\__, |_|_||_/__/  "
+    echo -e "\\e[36;1m                          |_|                     |_|         |___/             "
+    echo -e "\\n\\e[35;1m        A set of Munin plugins for monitoring various Pi-hole statistics        \\e[0m\\n"
 }
 
 install_dependencies() {
@@ -35,11 +35,11 @@ install_dependencies() {
                 fi
             done
         else
-            echo -e " * \e[31;1m[ERROR]\e[0m The required package 'apt' was not found"
+            echo -e " * \\e[31;1m[ERROR]\\e[0m The required package 'apt' was not found"
             exit 1
         fi
     else
-        echo -e " * \e[31;1m[ERROR]\e[0m The required package 'dpkg-query' was not found"
+        echo -e " * \\e[31;1m[ERROR]\\e[0m The required package 'dpkg-query' was not found"
         exit 1
     fi
 }
@@ -48,19 +48,19 @@ configure_proxy() {
     if [[ -d "$proxy_config_dir" ]]; then
         if [[ -s "$proxy_config_dir/external.conf" ]]; then
             mv "$proxy_config_dir"/external.conf "$proxy_config_dir"/external.conf.bak || return
-            echo -e " * \e[32;1m[INFO]\e[0m Existing lighttpd external.conf backed up to"
-            echo "$proxy_config_dir"/external.conf.bak"
+            echo -e " * \\e[32;1m[INFO]\\e[0m Existing lighttpd external.conf backed up to"
+            echo "$proxy_config_dir"/external.conf.bak
         else
             rm "$proxy_config_dir"/external.conf || return
         fi
         if [[ -x "$(command -v wget)" ]]; then
             wget -q --show-progress "$proxy_repo"/etc/lighttpd/external.conf -P "$proxy_config_dir"
         else
-            echo -e " * \e[31;1m[ERROR]\e[0m The required package 'wget' was not found"
+            echo -e " * \\e[31;1m[ERROR]\\e[0m The required package 'wget' was not found"
             exit 1
         fi
     else
-        echo -e " * \e[31;1m[ERROR]\e[0m No Lighttpd configuration directory found at"
+        echo -e " * \\e[31;1m[ERROR]\\e[0m No Lighttpd configuration directory found at"
         echo "$proxy_config_dir"
         exit 1
     fi
@@ -72,12 +72,12 @@ configure_munin() {
             sed -i '/#html_strategy cron/html_strategy cgi/' "$munin_config_dir"/munin.conf
             sed -i '/#graph_strategy cron/graph_strategy cgi/' "$munin_config_dir"/munin.conf
         else
-            echo -e " * \e[31;1m[ERROR]\e[0m No Munin configuration file found at"
+            echo -e " * \\e[31;1m[ERROR]\\e[0m No Munin configuration file found at"
             echo "$munin_config_dir/munin.conf"
             exit 1
         fi
     else
-        echo -e " * \e[31;1m[ERROR]\e[0m No Munin configuration directory found at"
+        echo -e " * \\e[31;1m[ERROR]\\e[0m No Munin configuration directory found at"
         echo "$munin_config_dir"
         exit 1
     fi
@@ -90,13 +90,17 @@ remove_existing() {
                 rm "$munin_plugin_dir"/pihole_"$plugin_id" || return
             fi
         done
+    else
+        echo -e " * \\e[33;1m[WARNING]\\e[0m No Munin plugin directory found at"
+        echo "$munin_plugin_dir"
     fi
     if [[ -d "$node_plugin_dir" ]]; then
-        for plugin_id in $plugin_list; do
-            if [[ -f "$node_plugin_dir"/pihole_"$plugin_id" ]]; then
-                rm "$node_plugin_dir"/pihole_"$plugin_id" || return
-            fi
+        for plugin_id in "$node_plugin_dir"/pihole_*; do
+                rm "$plugin_id" || return
         done
+    else
+        echo -e " * \\e[33;1m[WARNING]\\e[0m No Munin node plugin directory found at"
+        echo "$node_plugin_dir"
     fi
 }
 
@@ -107,19 +111,19 @@ install_plugins() {
                 if [[ -x "$(command -v wget)" ]]; then
                     wget -q --show-progress "$plugin_repo"/usr/share/munin/plugins/pihole_"$plugin_id" -P "$munin_plugin_dir" || return
                 else
-                    echo -e " * \e[31;1m[ERROR]\e[0m The required package 'wget' was not found"
+                    echo -e " * \\e[31;1m[ERROR]\\e[0m The required package 'wget' was not found"
                     exit 1
                 fi
                 chmod +x "$munin_plugin_dir"/pihole_"$plugin_id" || return
                 ln -s "$munin_plugin_dir"/pihole_"$plugin_id" "$node_plugin_dir"/pihole_"$plugin_id" || return
             done
         else
-            echo -e " * \e[31;1m[ERROR]\e[0m No Munin node plugin directory found at"
+            echo -e " * \\e[31;1m[ERROR]\\e[0m No Munin node plugin directory found at"
             echo "$node_plugin_dir"
             exit 1
         fi
     else
-        echo -e " * \e[31;1m[ERROR]\e[0m No Munin plugin directory found at"
+        echo -e " * \\e[31;1m[ERROR]\\e[0m No Munin plugin directory found at"
         echo "$munin_plugin_dir"
         exit 1
     fi
@@ -131,12 +135,12 @@ configure_plugins() {
             if [[ -x "$(command -v wget)" ]]; then
                 wget -q --show-progress "$plugin_repo"/etc/munin/plugin-conf.d/pihole -P "$plugin_config_dir"
             else
-                echo -e " * \e[31;1m[ERROR]\e[0m The required package 'wget' was not found"
+                echo -e " * \\e[31;1m[ERROR]\\e[0m The required package 'wget' was not found"
                 exit 1
             fi
         fi
     else
-        echo -e " * \e[31;1m[ERROR]\e[0m No Munin plugin configuration directory found at"
+        echo -e " * \\e[31;1m[ERROR]\\e[0m No Munin plugin configuration directory found at"
         echo "$plugin_config_dir"
         exit 1
     fi
@@ -148,31 +152,31 @@ restart_services() {
             service "$service_id" restart
         done
     else
-        echo -e " * \e[31;1m[ERROR]\e[0m The required command 'service' was not found"
+        echo -e " * \\e[31;1m[ERROR]\\e[0m The required command 'service' was not found"
     fi
 }
 
 help_function() {
-    echo "Usage: munin-pihole-plugins [OPTION]
+     echo -e "\\nUsage: munin-pihole-plugins \\e[33;1mOPTION\\e[0m
 
-Where OPTION is one of
+Where \\e[33;1mOPTION\\e[0m is \\e[31;1mone\\e[0m of
 
-    -h              Display this help dislogue
-    --help
+    \\e[33;1m-h\\e[0m              Display this help dislogue
+    \\e[33;1m--help\\e[0m
 
-    -i              Install and configure munin-pihole-plugins, you can use
-    --install       PLUGIN_LIST to override the default plugin list:
+    \\e[33;1m-i\\e[0m              Install and configure munin-pihole-plugins, you can use
+    \\e[33;1m--install\\e[0m       PLUGIN_LIST to override the default plugin list:
                     blocked, cache, cache_by_type, clients, percent, queries,
                     replies_by_type, status, unique_domains
 
                     Example: export PLUGIN_LIST=\"blocked clients replies_by_type\"
 
-    -u
-    --uninstall     Uninstall munin-pihole-plugins
+    \\e[33;1m-u\\e[0m              Uninstall munin-pihole-plugins
+    \\e[33;1m--uninstall\\e[0m
 
-    -v              Display the munin-pihole-plugins script version
-    --version
-                    Current munin-pihole-plugins script version v$script_version"
+    \\e[33;1m-v\\e[0m              Display the munin-pihole-plugins script version
+    \\e[33;1m--version\\e[0m
+                    Current munin-pihole-plugins script version v$script_version\\n"
 }
 
 install_function() {
@@ -189,10 +193,11 @@ install_function() {
 uninstall_function() {
     obnoxious_header
     remove_existing
-    if [[ -f "$proxy_config_dir/external.conf.bak" ]]; then
+    if [[ -f "$proxy_config_dir"/external.conf.bak ]]; then
         mv "$proxy_config_dir"/external.conf.bak "$proxy_config_dir"/external.conf || return
-        echo -e " * \e[32;1m[INFO]\e[0m Original lighttpd external.conf restored from"
-        echo "$proxy_config_dir"/external.conf.bak"
+        echo -e " * \\e[32;1m[INFO]\\e[0m Original lighttpd external.conf restored from"
+        echo "$proxy_config_dir"/external.conf.bak
+
     else
         if [[ -f "$proxy_config_dir"/external.conf ]]; then
             rm "$proxy_config_dir"/external.conf || return
@@ -209,7 +214,7 @@ if [[ ! "$EUID" -eq "0" ]];then
         exec sudo -E bash "$0" "$@"
         exit "$?"
     else
-        echo -e " * \e[31;1m[ERROR]\e[0m Insufficient privileges"
+        echo -e " * \\e[31;1m[ERROR]\\e[0m Insufficient privileges"
         echo -e "Install sudo or run munin-pihole-plugins as root"
         exit 1
     fi
