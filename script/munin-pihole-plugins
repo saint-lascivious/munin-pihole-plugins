@@ -1,4 +1,3 @@
-#!/bin/sh
 #!/usr/bin/env bash
 
 # munin-pihole-plugins
@@ -14,7 +13,7 @@ plugin_list="${PLUGIN_LIST:-blocked cache clients hits percent queries replies s
 plugin_repo="https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master"
 proxy_config_dir="${PROXY_CONFIG_DIR:-/etc/lighttpd}"
 proxy_repo="https://raw.githubusercontent.com/saint-lascivious/lighttpd-external-munin-proxy/master"
-script_version="0.2"
+script_version="0.3"
 service_list="lighttpd munin munin-node"
 
 obnoxious_header() {
