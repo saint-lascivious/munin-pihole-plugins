@@ -46,7 +46,7 @@ install_dependencies() {
             for dependency_id in $dependency_list; do
                 package_query="$(dpkg-query -W --showformat='${Status}\n' "$dependency_id" | grep "install ok installed")"
                 if [[ -z "$package_query" ]]; then
-                    apt install --yes "$dependency_id"
+                    apt install "$dependency_id"
                 fi
             done
         else
