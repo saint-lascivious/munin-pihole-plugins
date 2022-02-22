@@ -21,7 +21,7 @@ envport=${port:-80}
 envapi=${api:-/admin/api.php}
 
 apicall=$(curl -s "$envhost:$envport$envapi" 2>/dev/null)
-stats=$(echo $apicall | sed 's/[{}"]//g' | tr "," "\n")
+stats=$(echo "$apicall" | sed 's/[{}"]//g' | tr "," "\\n")
 
 case $1 in
   config)
@@ -34,8 +34,8 @@ case $1 in
 
     for stat in $stats
     do
-        uid=$(echo $stat | sed 's/:.*//')
-        if [ $uid = "ads_percentage_today" ]; then
+        uid=$(echo "$stat" | sed 's/:.*//')
+        if [ "$uid" = "ads_percentage_today" ]; then
             echo "$uid.label percentage blocked"
             echo "$uid.type GAUGE"
             echo "$uid.min 0"
@@ -47,9 +47,9 @@ esac
 
 for stat in $stats
 do
-    uid=$(echo $stat | sed 's/:.*//')
-    if [ $uid = "ads_percentage_today" ]; then
-        value=$(echo $stat | sed 's/.*://')
+    uid=$(echo "$stat" | sed 's/:.*//')
+    if [ "$uid" = "ads_percentage_today" ]; then
+        value=$(echo "$stat" | sed 's/.*://')
         echo "$uid.value $value"
     fi
 done

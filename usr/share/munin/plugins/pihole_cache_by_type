@@ -21,7 +21,7 @@
 #     env.webpassword PIHOLE_SETUPVARS_WEBPASSWORD_HERE
 
 setupvars="/etc/pihole/setupVars.conf"
-get_webpassword="$(cat $setupvars | grep WEBPASSWORD | sed s/WEBPASSWORD=//g)"
+get_webpassword="$(cat < "$setupvars" | grep WEBPASSWORD | sed s/WEBPASSWORD=//g)"
 
 envhost=${host:-127.0.0.1}
 envport=${port:-80}
@@ -30,7 +30,7 @@ envcachesuffix=${cachesuffix:-?getCacheInfo&auth=}
 envwebpassword=${webpassword:-$get_webpassword}
 
 apicall=$(curl -s "$envhost:$envport$envapi$envcachesuffix$envwebpassword" 2>/dev/null)
-stats=$(echo $apicall | sed 's/[{}"]//g' | tr "," "\n")
+stats=$(echo "$apicall" | sed 's/[{}"]//g' | tr "," "\\n")
 
 case $1 in
   config)
@@ -43,9 +43,9 @@ case $1 in
 
     for stat in $stats
     do
-        uid=$(echo $stat | sed 's/:.*//')
-        if [ $uid = "cache-live-freed" ] || [ $uid = "cache-inserted" ] || [ $uid = "ipv4" ] || [ $uid = "ipv6" ] || [ $uid = "srv" ] || [ $uid = "cname" ] || [ $uid = "ds" ] || [ $uid = "dnskey" ] || [ $uid = "other" ] || [ $uid = "expired" ] || [ $uid = "immortal" ]; then
-            echo "$uid.label $(echo $uid | sed 's/-/ /g; s/ipv4/A/; s/ipv6/AAAA/; s/srv/SRV/; s/cname/CNAME/; s/ds/DS/; s/dnskey/DNSKEY/')"
+        uid=$(echo "$stat" | sed 's/:.*//')
+        if [ "$uid" = "ipv4" ] || [ "$uid" = "ipv6" ] || [ "$uid" = "srv" ] || [ "$uid" = "cname" ] || [ "$uid" = "ds" ] || [ "$uid" = "dnskey" ] || [ "$uid" = "other" ]; then
+            echo "$uid.label $(echo "$uid" | sed 's/ipv4/A/; s/ipv6/AAAA/; s/srv/SRV/; s/cname/CNAME/; s/ds/DS/; s/dnskey/DNSKEY/')"
             echo "$uid.type GAUGE"
             echo "$uid.min 0"
         fi
@@ -56,9 +56,9 @@ esac
 
 for stat in $stats
 do
-    uid=$(echo $stat | sed 's/:.*//')
-    if [ $uid = "cache-live-freed" ] || [ $uid = "cache-inserted" ] || [ $uid = "ipv4" ] || [ $uid = "ipv6" ] || [ $uid = "srv" ] || [ $uid = "cname" ] || [ $uid = "ds" ] || [ $uid = "dnskey" ] || [ $uid = "other" ] || [ $uid = "expired" ] || [ $uid = "immortal" ]; then
-        value=$(echo $stat | sed 's/.*://')
+    uid=$(echo "$stat" | sed 's/:.*//')
+    if [ "$uid" = "ipv4" ] || [ "$uid" = "ipv6" ] || [ "$uid" = "srv" ] || [ "$uid" = "cname" ] || [ "$uid" = "ds" ] || [ "$uid" = "dnskey" ] || [ "$uid" = "other" ]; then
+        value=$(echo "$stat" | sed 's/.*://')
         echo "$uid.value $value"
     fi
 done
