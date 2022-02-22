@@ -183,7 +183,8 @@ Where \\e[33;1mOPTION\\e[0m is \\e[31;1mone\\e[0m of
 
     \\e[33;1m-h, --help\\e[0m           Display this help dislogue
 
-    \\e[33;1m-i, --install\\e[0m        Install and configure munin-pihole-plugins
+    \\e[33;1m-i, --install\\e[0m        Install and configure munin-pihole-plugins, can also
+                         be used to update an existing installation
 
     \\e[33;1m-u, --uninstall\\e[0m      Uninstall munin-pihole-plugins
 
