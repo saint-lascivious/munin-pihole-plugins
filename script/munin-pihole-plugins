@@ -16,7 +16,8 @@ plugin_services="munin-node"
 proxy_config_dir="${PROXY_CONFIG_DIR:-/etc/lighttpd}"
 proxy_repo="https://raw.githubusercontent.com/saint-lascivious/lighttpd-external-munin-proxy/master"
 script_dependencies="init-system-helpers wget"
-script_version="1.1"
+script_version="1.2"
+skip_dependency_check="${SKIP_DEPENDENCY_CHECK:-false}"
 webserver_dependencies="lighttpd munin"
 webserver_services="lighttpd munin"
 
@@ -77,6 +78,8 @@ configure_proxy() {
     else
         echo -e " * \\e[31;1m[ERROR]\\e[0m No Lighttpd configuration directory found at"
         echo "$proxy_config_dir"
+        echo -e " * \\e[32;1m[INFO]\\e[0m If this directory is located at a different path try"
+        echo "export PROXY_CONFIG_DIR=\"/path/to/directory\""
         exit 1
     fi
 }
@@ -89,11 +92,15 @@ configure_munin() {
         else
             echo -e " * \\e[31;1m[ERROR]\\e[0m No Munin configuration file found at"
             echo "$munin_config_dir/munin.conf"
+            echo -e " * \\e[32;1m[INFO]\\e[0m If this file is located at a different path try"
+            echo "export MUNIN_CONFIG_DIR=\"/path/to/file\""
             exit 1
         fi
     else
         echo -e " * \\e[31;1m[ERROR]\\e[0m No Munin configuration directory found at"
         echo "$munin_config_dir"
+        echo -e " * \\e[32;1m[INFO]\\e[0m If this directory is located at a different path try"
+        echo "export MUNIN_CONFIG_DIR=\"/path/to/directory\""
         exit 1
     fi
 }
@@ -108,6 +115,8 @@ remove_existing() {
     else
         echo -e " * \\e[33;1m[WARNING]\\e[0m No Munin plugin directory found at"
         echo "$munin_plugin_dir"
+        echo -e " * \\e[32;1m[INFO]\\e[0m If this directory is located at a different path try"
+        echo "export MUNIN_PLUGIN_DIR=\"/path/to/directory\""
     fi
     if [[ -d "$node_plugin_dir" ]]; then
         for plugin_link in "$node_plugin_dir"/pihole_*; do
@@ -116,6 +125,8 @@ remove_existing() {
     else
         echo -e " * \\e[33;1m[WARNING]\\e[0m No Munin node plugin directory found at"
         echo "$node_plugin_dir"
+        echo -e " * \\e[32;1m[INFO]\\e[0m If this directory is located at a different path try"
+        echo "export NODE_PLUGIN_DIR=\"/path/to/directory\""
     fi
 }
 
@@ -135,11 +146,15 @@ install_plugins() {
         else
             echo -e " * \\e[31;1m[ERROR]\\e[0m No Munin node plugin directory found at"
             echo "$node_plugin_dir"
+            echo -e " * \\e[32;1m[INFO]\\e[0m If this directory is located at a different path try"
+            echo "export NODE_PLUGIN_DIR=\"/path/to/directory\""
             exit 1
         fi
     else
         echo -e " * \\e[31;1m[ERROR]\\e[0m No Munin plugin directory found at"
         echo "$munin_plugin_dir"
+        echo -e " * \\e[32;1m[INFO]\\e[0m If this directory is located at a different path try"
+        echo "export MUNIN_PLUGIN_DIR=\"/path/to/directory\""
         exit 1
     fi
 }
@@ -157,6 +172,8 @@ configure_plugins() {
     else
         echo -e " * \\e[31;1m[ERROR]\\e[0m No Munin plugin configuration directory found at"
         echo "$plugin_config_dir"
+        echo -e " * \\e[32;1m[INFO]\\e[0m If this directory is located at a different path try"
+        echo "export PLUGIN_CONFIG_DIR=\"/path/to/directory\""
         exit 1
     fi
 }
@@ -206,7 +223,9 @@ Where \\e[33;1mOPTION\\e[0m is \\e[31;1mone\\e[0m of
 install_function() {
     obnoxious_header
     check_pihole
-    install_dependencies
+    if [[ "$skip_dependency_check" != "false" ]]; then
+        install_dependencies
+    fi
     if [[ "$install_webserver" == "true" ]]; then
         configure_proxy
         configure_munin

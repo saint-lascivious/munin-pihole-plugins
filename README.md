@@ -1,28 +1,25 @@
 # munin-pihole-plugins
 
-Munin plugins for monitoring [Pi-Hole](https://github.com/pi-hole/pi-hole), a hard fork of [MuninPiholePlugins](https://github.com/Rauks/MuninPiholePlugins)
+[Munin](https://munin-monitoring.org) [plugins](https://gallery.munin-monitoring.org) for monitoring [Pi-Hole](https://github.com/pi-hole/pi-hole), in four easy steps.
 
-## Automated Installation
-Automated installation script for Debian/Ubuntu derivatives
-
-Note: Automated installation is in its infacy right now and not particularly well tested
-
-* Download the munin-pihole-plugins script
+## Step One: Download
+* Download munin-pihole-plugins
 ```
 wget https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/script/munin-pihole-plugins
 ```
-* Ensure it is executable
-```
-chmod +x munin-pihole-plugins
-```
+
+## Step Two: Install
 * Install munin-pihole-plugins
 ```
 ./munin-pihole-plugins --install
 ```
-For detailed usage information use
-```
-./munin-pihole-plugins --help
-```
+
+## Step Three: Wait
+* Wait at least five minutes
+
+## Step Four: Monitor
+* Navigate to http://127.0.0.1/munin to view the Munin monitoring interface
+
 
 ## Manual Installation
 * Install Munin
