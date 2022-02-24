@@ -1,6 +1,6 @@
 # munin-pihole-plugins
 
-[Munin](https://munin-monitoring.org) [plugins](https://gallery.munin-monitoring.org) for monitoring [Pi-Hole](https://github.com/pi-hole/pi-hole), in four easy steps.
+[Munin](https://munin-monitoring.org) [plugins](https://gallery.munin-monitoring.org) for monitoring [Pi-Hole](https://github.com/pi-hole/pi-hole). Transforms a server into a powerful monitoring platform, as simple as [one](https://github.com/saint-lascivious/munin-pihole-plugins#step-one-download), [two](https://github.com/saint-lascivious/munin-pihole-plugins#step-two-install), [three](https://github.com/saint-lascivious/munin-pihole-plugins#step-three-wait), [four](https://github.com/saint-lascivious/munin-pihole-plugins#step-four-monitor).
 
 ## Step One: Download
 * Download munin-pihole-plugins
@@ -20,6 +20,34 @@ wget https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/mas
 ## Step Four: Monitor
 * Navigate to http://127.0.0.1/munin to view the Munin monitoring interface
 
+
+## Full Help Text
+```
+Usage: munin-pihole-plugins OPTION
+
+Where OPTION is one of
+
+    -h, --help           Display this help dialogue
+
+    -i, --install        Install and configure munin-pihole-plugins, can also
+                         be used to update an existing installation
+
+    -u, --uninstall      Uninstall munin-pihole-plugins
+
+    -v, --version        Display the munin-pihole-plugins script version
+                         Current munin-pihole-plugins script version v1.3
+
+    Set the PLUGIN_LIST variable to override the default plugin list:
+    blocked, cache, cache_by_type, clients, percent, queries, replies_by_type,
+    status, unique_domains
+
+    Example: export PLUGIN_LIST="blocked clients replies_by_type"
+
+    Set the INSTALL_WEBSERVER variable to any value other than "true" to skip
+    installation of the Munin webserver, useful for adding additional nodes
+
+    Example: export INSTALL_WEBSERVER="false"
+```
 
 ## Manual Installation
 * Install Munin
