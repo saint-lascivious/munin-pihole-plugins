@@ -29,17 +29,18 @@ Where OPTION is one of
 
     -h, --help           Display this help dialogue
 
-    -i, --install        Install and configure munin-pihole-plugins, can also
-                         be used to update an existing installation
+    -i, --install        Install and configure munin-pihole-plugins
 
     -u, --uninstall      Uninstall munin-pihole-plugins
 
+    -U, --update         Update munin-pihole-plugins
+
     -v, --version        Display the munin-pihole-plugins script version
-                         Current munin-pihole-plugins script version v1.3
+                         Current munin-pihole-plugins script version v1.4
 
     Set the PLUGIN_LIST variable to override the default plugin list:
-    blocked, cache, cache_by_type, clients, percent, queries, replies_by_type,
-    status, unique_domains
+    "blocked cache cache_by_type clients percent queries replies_by_type
+    status unique_domains"
 
     Example: export PLUGIN_LIST="blocked clients replies_by_type"
 
