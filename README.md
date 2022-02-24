@@ -50,6 +50,17 @@ Where OPTION is one of
     Example: export INSTALL_WEBSERVER="false"
 ```
 
+## Example Graphs
+![pihole_blocked-day.png](https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/gallery/pihole_blocked-day.png)
+![pihole_cache-day.png](https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/gallery/pihole_cache-day.png)
+![pihole_cache_by_type-day.png](https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/gallery/pihole_cache_by_type-day.png)
+![pihole_clients-day.png](https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/gallery/pihole_clients-day.png)
+![pihole_percent-day.png](https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/gallery/pihole_percent-day.png)
+![pihole_queries-day.png](https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/gallery/pihole_queries-day.png)
+![pihole_replies_by_type-day.png](https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/gallery/pihole_replies_by_type-day.png)
+![pihole_status-day.png](https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/gallery/pihole_status-day.png)
+![pihole_unique_domains-day.png](https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/gallery/pihole_unique_domains-day.png)
+
 ## Manual Installation
 * Install Munin
 See the instructions in my [lighttpd-external-munin-proxy](https://github.com/saint-lascivious/lighttpd-external-munin-proxy) repository
