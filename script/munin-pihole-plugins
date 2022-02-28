@@ -19,7 +19,7 @@ plugin_repo="https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plu
 plugin_services="munin-node"
 proxy_repo="https://raw.githubusercontent.com/saint-lascivious/lighttpd-external-munin-proxy/master"
 script_dependencies="init-system-helpers wget"
-script_version="1.6"
+script_version="1.6.1"
 webserver_dependencies="lighttpd munin"
 webserver_services="lighttpd munin"
 
@@ -233,11 +233,6 @@ Options:
                          munin-pihole-plugins, and their current values"
 }
 
-mini_help_function() {
-    echo "Invalid option: $1
-Use -h or --help for a complete list of options"
-}
-
 install_function() {
     obnoxious_header
     check_pihole
@@ -311,6 +306,11 @@ Variables:
 
     SKIP_DEPENDENCY_CHECK=\"$skip_dependency_check\""
 
+}
+
+mini_help_function() {
+    echo "Invalid option: $1
+Use -h or --help for a complete list of options"
 }
 
 if [[ ! "$EUID" -eq "0" ]];then
