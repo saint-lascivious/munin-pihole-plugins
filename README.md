@@ -18,7 +18,7 @@ wget https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/mas
 * Wait at least five minutes
 
 ## Step Four: Monitor
-* Navigate to http://127.0.0.1/munin to view the Munin monitoring interface
+* Navigate to http://SERVER_HOSTNAME_OR_IP/munin in your browser to view the Munin monitoring interface
 
 
 ## Full Help Text
@@ -36,18 +36,13 @@ Where OPTION is one of
     -U, --update         Update munin-pihole-plugins
 
     -v, --version        Display the munin-pihole-plugins script version
-                         Current munin-pihole-plugins script version v1.4
+                         Current munin-pihole-plugins script version v1.5
 
-    Set the PLUGIN_LIST variable to override the default plugin list:
-    "blocked cache cache_by_type clients percent queries replies_by_type
-    status unique_domains"
+    -V, --variables      Display a list of environment variables used by
+                         munin-pihole-plugins and their current values, which
+                         can be overridden using:
 
-    Example: export PLUGIN_LIST="blocked clients replies_by_type"
-
-    Set the INSTALL_WEBSERVER variable to any value other than "true" to skip
-    installation of the Munin webserver, useful for adding additional nodes
-
-    Example: export INSTALL_WEBSERVER="false"
+                         export VARIABLE="value"
 ```
 
 ## Example Graphs
