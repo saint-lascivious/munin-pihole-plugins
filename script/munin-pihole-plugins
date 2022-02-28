@@ -19,7 +19,7 @@ plugin_repo="https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plu
 plugin_services="munin-node"
 proxy_repo="https://raw.githubusercontent.com/saint-lascivious/lighttpd-external-munin-proxy/master"
 script_dependencies="init-system-helpers wget"
-script_version="1.6.1"
+script_version="1.7"
 webserver_dependencies="lighttpd munin"
 webserver_services="lighttpd munin"
 
@@ -29,12 +29,13 @@ obnoxious_header() {
     echo -e "\\e[32;1m  | '  \\ || | ' \\| | ' \\__| '_ \\ | ' \\/ _ \\ / -_)_| '_ \\ | || / _\` | | ' \\(_-<  "
     echo -e "\\e[34;1m  |_|_|_\\_,_|_||_|_|_||_| | .__/_|_||_\\___/_\\___| | .__/_|\\_,_\\__, |_|_||_/__/  "
     echo -e "\\e[36;1m                          |_|                     |_|         |___/             "
-    echo -e "\\n\\e[35;1m        A set of Munin plugins for monitoring various Pi-hole statistics        \\e[0m\\n"
+    echo -e "\\n\\e[35;1m          A set of Munin plugins for monitoring various Pi-hole® stats          \\e[0m\\n"
 }
 
 check_pihole() {
     if [[ ! -x "$(command -v pihole)" ]]; then
-        echo -e " * \\e[33;1m[WARNING]\\e[0m Pi-hole was not found"
+        pihole_on_host="no"
+        echo -e " * \\e[33;1m[WARNING]\\e[0m the 'pihole' command was not found"
     fi
 }
 
@@ -196,6 +197,12 @@ configure_plugins() {
         echo -e " * \\e[32;1m[INFO]\\e[0m If this directory is located at a different path try"
         echo "export PLUGIN_CONFIG_DIR=\"/path/to/directory\""
         exit 1
+    fi
+    if [[ "$pihole_on_host" == "no" ]]; then
+        echo -e " * \\e[33;1m[WARNING]\\e[0m The 'pihole' command was not found on this host"
+        echo "If this was not a mistake, edit"
+        echo "$plugin_config_dir/pihole"
+        echo "and replace env.host and env.setupvars values with those of your Pi-hole® host"
     fi
 }
 
