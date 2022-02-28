@@ -19,7 +19,7 @@ plugin_repo="https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plu
 plugin_services="munin-node"
 proxy_repo="https://raw.githubusercontent.com/saint-lascivious/lighttpd-external-munin-proxy/master"
 script_dependencies="init-system-helpers wget"
-script_version="1.5"
+script_version="1.6"
 webserver_dependencies="lighttpd munin"
 webserver_services="lighttpd munin"
 
@@ -215,26 +215,27 @@ restart_services() {
 }
 
 help_function() {
-     echo -e "Usage: munin-pihole-plugins \\e[33;1mOPTION\\e[0m
+    echo -e "Usage: munin-pihole-plugins [option]
+Example: munin-pihole-plugins --install
 
-Where \\e[33;1mOPTION\\e[0m is \\e[31;1mone\\e[0m of
+Options:
+    -h, --help           Display this help dialogue
 
-    \\e[33;1m-h, --help\\e[0m           Display this help dialogue
+    -i, --install        Install and configure munin-pihole-plugins
 
-    \\e[33;1m-i, --install\\e[0m        Install and configure munin-pihole-plugins
+    -u, --uninstall      Uninstall munin-pihole-plugins
 
-    \\e[33;1m-u, --uninstall\\e[0m      Uninstall munin-pihole-plugins
+    -U, --update         Update munin-pihole-plugins
 
-    \\e[33;1m-U, --update\\e[0m         Update munin-pihole-plugins
+    -v, --version        Display the munin-pihole-plugins script version
 
-    \\e[33;1m-v, --version\\e[0m        Display the munin-pihole-plugins script version
-                         Current munin-pihole-plugins script version v$script_version
+    -V, --variables      Display a list of environment variables used by
+                         munin-pihole-plugins, and their current values"
+}
 
-    \\e[33;1m-V, --variables\\e[0m      Display a list of environment variables used by
-                         munin-pihole-plugins and their current values, which
-                         can be overridden using:
-
-                         export \\e[33;1mVARIABLE\\e[0m=\"\\e[31;1mvalue\\e[0m\""
+mini_help_function() {
+    echo "Invalid option: $1
+Use -h or --help for a complete list of options"
 }
 
 install_function() {
@@ -288,25 +289,27 @@ version_function() {
 }
 
 variable_function() {
-    echo -e "Usage: export \\e[33;1mVARIABLE\\e[0m=\"\\e[31;1mvalue\\e[0m\"
+    echo -e "Usage: export [VARIABLE]=\"value\"
+Example: export PLUGIN_LIST=\"blocked cache replies_by_type\"
 
-    \\e[33;1mINSTALL_WEBSERVER\\e[0m=\"\\e[31;1m$install_webserver\\e[0m\"
+Variables:
+    INSTALL_WEBSERVER=\"$install_webserver\"
 
-    \\e[33;1mMUNIN_DIR\\e[0m=\"\\e[31;1m$munin_dir\\e[0m\"
+    MUNIN_DIR=\"$munin_dir\"
 
-    \\e[33;1mMUNIN_CONFIG_DIR\\e[0m=\"\\e[31;1m$munin_config_dir\\e[0m\"
+    MUNIN_CONFIG_DIR=\"$munin_config_dir\"
 
-    \\e[33;1mMUNIN_PLUGIN_DIR\\e[0m=\"\\e[31;1m$munin_plugin_dir\\e[0m\"
+    MUNIN_PLUGIN_DIR=\"$munin_plugin_dir\"
 
-    \\e[33;1mNODE_PLUGIN_DIR\\e[0m=\"\\e[31;1m$node_plugin_dir\\e[0m\"
+    NODE_PLUGIN_DIR=\"$node_plugin_dir\"
 
-    \\e[33;1mPLUGIN_CONFIG_DIR\\e[0m=\"\\e[31;1m$plugin_config_dir\\e[0m\"
+    PLUGIN_CONFIG_DIR=\"$plugin_config_dir\"
 
-    \\e[33;1mPLUGIN_LIST\\e[0m=\"\\e[31;1m$plugin_list\\e[0m\"
+    PLUGIN_LIST=\"$plugin_list\"
 
-    \\e[33;1mPROXY_CONFIG_DIR\\e[0m=\"\\e[31;1m$proxy_config_dir\\e[0m\"
+    PROXY_CONFIG_DIR=\"$proxy_config_dir\"
 
-    \\e[33;1mSKIP_DEPENDENCY_CHECK\\e[0m=\"\\e[31;1m$skip_dependency_check\\e[0m\""
+    SKIP_DEPENDENCY_CHECK=\"$skip_dependency_check\""
 
 }
 
@@ -328,5 +331,5 @@ case "${1}" in
     "-U" | "--update"       ) update_function ;;
     "-v" | "--version"      ) version_function ;;
     "-V" | "--variables"    ) variable_function ;;
-    *                       ) help_function ;;
+    *                       ) mini_help_function "$@" ;;
 esac

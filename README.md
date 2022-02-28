@@ -23,10 +23,10 @@ wget https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/mas
 
 ## Full Help Text
 ```
-Usage: munin-pihole-plugins OPTION
+Usage: munin-pihole-plugins [option]
+Example: munin-pihole-plugins --install
 
-Where OPTION is one of
-
+Options:
     -h, --help           Display this help dialogue
 
     -i, --install        Install and configure munin-pihole-plugins
@@ -36,13 +36,9 @@ Where OPTION is one of
     -U, --update         Update munin-pihole-plugins
 
     -v, --version        Display the munin-pihole-plugins script version
-                         Current munin-pihole-plugins script version v1.5
 
     -V, --variables      Display a list of environment variables used by
-                         munin-pihole-plugins and their current values, which
-                         can be overridden using:
-
-                         export VARIABLE="value"
+                         munin-pihole-plugins, and their current values
 ```
 
 ## Example Graphs
