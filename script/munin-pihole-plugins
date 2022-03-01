@@ -18,8 +18,9 @@ plugin_dependencies="munin-node"
 plugin_repo="https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master"
 plugin_services="munin-node"
 proxy_repo="https://raw.githubusercontent.com/saint-lascivious/lighttpd-external-munin-proxy/master"
+remote_script_version="$(dig TXT +short munin-pihole-plugins.sainternet.xyz @8.8.8.8 -p 53 | sed s'/version: //; s/"//'g)"
 script_dependencies="init-system-helpers wget"
-script_version="1.7"
+script_version="1.8"
 webserver_dependencies="lighttpd munin"
 webserver_services="lighttpd munin"
 
@@ -287,7 +288,10 @@ update_function() {
 }
 
 version_function() {
-    echo "munin-pihole-plugins v$script_version"
+    if [[ "$remote_script_version" > "$script_version" ]]; then
+        echo "An update to the munin-pihole-plugins script is available"
+    fi
+    echo "munin-pihole-plugins script version is v$script_version (Latest: v$remote_script_version)"
 }
 
 variable_function() {
