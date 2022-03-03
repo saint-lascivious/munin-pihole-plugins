@@ -20,7 +20,7 @@ plugin_services="munin-node"
 proxy_repo="https://raw.githubusercontent.com/saint-lascivious/lighttpd-external-munin-proxy/master"
 remote_script_version="$(dig TXT +short munin-pihole-plugins.sainternet.xyz @8.8.8.8 -p 53 | sed s'/version: //; s/"//'g)"
 script_dependencies="init-system-helpers wget"
-script_version="1.8"
+script_version="1.9"
 webserver_dependencies="lighttpd munin"
 webserver_services="lighttpd munin"
 
@@ -219,7 +219,9 @@ restart_services() {
         done
     else
         echo -e " * \\e[31;1m[ERROR]\\e[0m The required command 'service' was not found"
+        exit 1
     fi
+    echo -e " * \\e[32;1m[INFO]\\e[0m Done"
 }
 
 help_function() {
@@ -279,6 +281,7 @@ uninstall_function() {
         echo -e " * \\e[33;1m[WARNING]\\e[0m No Lighttpd configuration directory found at"
         echo "$proxy_config_dir"
     fi
+    restart_services
 }
 
 update_function() {
