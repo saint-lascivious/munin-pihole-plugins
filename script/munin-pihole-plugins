@@ -4,6 +4,7 @@
 # saint-lascivious (Hayden Pearce) 2022
 # saint@sainternet.xyz
 
+install_script="${INSTALL_SCRIPT:-true}"
 install_webserver="${INSTALL_WEBSERVER:-true}"
 munin_dir="${MUNIN_DIR:-/etc/munin}"
 munin_config_dir="${MUNIN_CONFIG_DIR:-$munin_dir/munin-conf.d}"
@@ -12,15 +13,16 @@ node_plugin_dir="${NODE_PLUGIN_DIR:-$munin_dir/plugins}"
 plugin_config_dir="${PLUGIN_CONFIG_DIR:-$munin_dir/plugin-conf.d}"
 plugin_list="${PLUGIN_LIST:-blocked cache cache_by_type clients percent queries replies_by_type status unique_domains}"
 proxy_config_dir="${PROXY_CONFIG_DIR:-/etc/lighttpd}"
+script_dir="${SCRIPT_DIR:-/usr/local/bin}"
 skip_dependency_check="${SKIP_DEPENDENCY_CHECK:-false}"
 
 plugin_dependencies="munin-node"
 plugin_repo="https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master"
 plugin_services="munin-node"
 proxy_repo="https://raw.githubusercontent.com/saint-lascivious/lighttpd-external-munin-proxy/master"
-remote_script_version="$(dig TXT +short munin-pihole-plugins.sainternet.xyz @8.8.8.8 -p 53 | sed s'/version: //; s/"//'g)"
+remote_script_version="$(dig TXT +short munin-pihole-plugins.sainternet.xyz @8.8.8.8 -p 53 | sed s'/[^0-9.]//g')"
 script_dependencies="init-system-helpers wget"
-script_version="1.9"
+script_version="2.0"
 webserver_dependencies="lighttpd munin"
 webserver_services="lighttpd munin"
 
@@ -55,11 +57,39 @@ install_dependencies() {
                 fi
             done
         else
-            echo -e " * \\e[31;1m[ERROR]\\e[0m The required package 'apt' was not found"
+            echo -e " * \\e[31;1m[ERROR]\\e[0m The required command 'apt' was not found"
             exit 1
         fi
     else
-        echo -e " * \\e[31;1m[ERROR]\\e[0m The required package 'dpkg-query' was not found"
+        echo -e " * \\e[31;1m[ERROR]\\e[0m The required command 'dpkg-query' was not found"
+        exit 1
+    fi
+}
+
+install_script() {
+    if [[ -d "$script_dir" ]]; then
+        if [[ -f "$script_dir/munin-pihole-plugins" ]]; then
+            if [[ "$remote_script_version" > "$script_version" ]]; then
+                if [[ -x "$(command -v wget)" ]]; then
+                    wget -q --show-progress "$plugin_repo/script/munin-pihole-plugins" -O "$script_dir/munin-pihole-plugins"
+                else
+                    echo -e " * \\e[31;1m[ERROR]\\e[0m The required command 'wget' was not found"
+                    exit 1
+                fi
+            fi
+        else
+            if [[ -x "$(command -v wget)" ]]; then
+                wget -q --show-progress "$plugin_repo/script/munin-pihole-plugins" -P "$script_dir"
+            else
+                echo -e " * \\e[31;1m[ERROR]\\e[0m The required command 'wget' was not found"
+                exit 1
+            fi
+        fi
+    else
+        echo -e " * \\e[31;1m[ERROR]\\e[0m No directory found at"
+        echo "$script_dir"
+        echo -e " * \\e[32;1m[INFO]\\e[0m If this directory is located at a different path try"
+        echo "export SCRIPT_DIR=\"/path/to/directory\""
         exit 1
     fi
 }
@@ -76,11 +106,11 @@ configure_proxy() {
         if [[ -x "$(command -v wget)" ]]; then
             wget -q --show-progress "$proxy_repo/etc/lighttpd/external.conf" -P "$proxy_config_dir"
         else
-            echo -e " * \\e[31;1m[ERROR]\\e[0m The required package 'wget' was not found"
+            echo -e " * \\e[31;1m[ERROR]\\e[0m The required command 'wget' was not found"
             exit 1
         fi
     else
-        echo -e " * \\e[31;1m[ERROR]\\e[0m No Lighttpd configuration directory found at"
+        echo -e " * \\e[31;1m[ERROR]\\e[0m No lighttpd configuration directory found at"
         echo "$proxy_config_dir"
         echo -e " * \\e[32;1m[INFO]\\e[0m If this directory is located at a different path try"
         echo "export PROXY_CONFIG_DIR=\"/path/to/directory\""
@@ -94,7 +124,7 @@ configure_munin() {
             if [[ -x "$(command -v wget)" ]]; then
                 wget -q --show-progress "$plugin_repo/etc/munin/munin-conf.d/99-graph-strategy.conf" -P "$munin_config_dir" || return
             else
-                echo -e " * \\e[31;1m[ERROR]\\e[0m The required package 'wget' was not found"
+                echo -e " * \\e[31;1m[ERROR]\\e[0m The required command 'wget' was not found"
                 exit 1
             fi
         fi
@@ -158,7 +188,7 @@ install_plugins() {
                 if [[ -x "$(command -v wget)" ]]; then
                     wget -q --show-progress "$plugin_repo/usr/share/munin/plugins/pihole_$plugin_id" -P "$munin_plugin_dir" || return
                 else
-                    echo -e " * \\e[31;1m[ERROR]\\e[0m The required package 'wget' was not found"
+                    echo -e " * \\e[31;1m[ERROR]\\e[0m The required command 'wget' was not found"
                     exit 1
                 fi
                 chmod +x "$munin_plugin_dir/pihole_$plugin_id" || return
@@ -188,7 +218,7 @@ configure_plugins() {
                 echo -e " * \\e[32;1m[INFO]\\e[0m Default plugin configuration saved to"
                 echo "$plugin_config_dir/pihole"
             else
-                echo -e " * \\e[31;1m[ERROR]\\e[0m The required package 'wget' was not found"
+                echo -e " * \\e[31;1m[ERROR]\\e[0m The required command 'wget' was not found"
                 exit 1
             fi
         fi
@@ -221,7 +251,6 @@ restart_services() {
         echo -e " * \\e[31;1m[ERROR]\\e[0m The required command 'service' was not found"
         exit 1
     fi
-    echo -e " * \\e[32;1m[INFO]\\e[0m Done"
 }
 
 help_function() {
@@ -251,6 +280,11 @@ install_function() {
     else
         echo -e " * \\e[32;1m[INFO]\\e[0m Skipping dependency checks"
     fi
+    if [[ "$install_script" == "true" ]]; then
+        install_script
+    else
+        echo -e " * \\e[32;1m[INFO]\\e[0m Skipping script installation"
+    fi
     if [[ "$install_webserver" == "true" ]]; then
         configure_proxy
         configure_munin
@@ -261,6 +295,7 @@ install_function() {
     install_plugins
     configure_plugins
     restart_services
+    echo -e " * \\e[32;1m[INFO]\\e[0m Done"
 }
 
 uninstall_function() {
@@ -278,16 +313,27 @@ uninstall_function() {
             fi
         fi
     else
-        echo -e " * \\e[33;1m[WARNING]\\e[0m No Lighttpd configuration directory found at"
+        echo -e " * \\e[33;1m[WARNING]\\e[0m No lighttpd configuration directory found at"
         echo "$proxy_config_dir"
     fi
     restart_services
+    if [[ -f "$script_dir/munin-pihole-plugins" ]]; then
+        rm "$script_dir/munin-pihole-plugins" || return
+    fi
+    echo -e " * \\e[32;1m[INFO]\\e[0m Done"
 }
 
 update_function() {
     obnoxious_header
     remove_existing
     install_plugins
+    restart_services
+    if [[ "$install_script" == "true" ]]; then
+        install_script
+    else
+        echo -e " * \\e[32;1m[INFO]\\e[0m Skipping script installation"
+    fi
+    echo -e " * \\e[32;1m[INFO]\\e[0m Done"
 }
 
 version_function() {
@@ -302,6 +348,8 @@ variable_function() {
 Example: export PLUGIN_LIST=\"blocked cache replies_by_type\"
 
 Variables:
+    INSTALL_SCRIPT=\"$install_script\"
+
     INSTALL_WEBSERVER=\"$install_webserver\"
 
     MUNIN_DIR=\"$munin_dir\"
@@ -318,8 +366,9 @@ Variables:
 
     PROXY_CONFIG_DIR=\"$proxy_config_dir\"
 
-    SKIP_DEPENDENCY_CHECK=\"$skip_dependency_check\""
+    SCRIPT_DIR=\"$script_dir\"
 
+    SKIP_DEPENDENCY_CHECK=\"$skip_dependency_check\""
 }
 
 mini_help_function() {
