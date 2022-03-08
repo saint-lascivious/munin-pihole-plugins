@@ -23,7 +23,7 @@ plugin_services="munin-node"
 proxy_repo="https://raw.githubusercontent.com/saint-lascivious/lighttpd-external-munin-proxy/master"
 remote_script_version="$(dig TXT +short munin-pihole-plugins.sainternet.xyz @8.8.8.8 -p 53 | sed s'/[^0-9.]//g')"
 script_dependencies="init-system-helpers wget"
-script_version="2.1.1"
+script_version="2.2"
 webserver_dependencies="lighttpd munin"
 webserver_services="lighttpd munin"
 
@@ -45,7 +45,6 @@ obnoxious_header() {
 check_pihole() {
     if [[ ! -x "$(command -v pihole)" ]]; then
         pihole_on_host="no"
-        echo -e " * \\e[33;1m[WARNING]\\e[0m the 'pihole' command was not found"
     fi
 }
 
@@ -138,7 +137,7 @@ configure_munin() {
             fi
         fi
     else
-        echo -e " * \\e[33;1m[WARNING]\\e[0m Attempting fallback configuration editing munin.conf directly"
+        output " * \\e[32;1m[INFO]\\e[0m Attempting fallback configuration editing munin.conf directly"
         if [[ -d "$munin_dir" ]]; then
             if [[ -f "$munin_dir/munin.conf" ]]; then
                 sed -i "s/#html_strategy cron/html_strategy cgi/g" "$munin_dir/munin.conf"
@@ -172,21 +171,11 @@ remove_existing() {
                 rm "$munin_plugin_dir/pihole_$plugin_id" || return
             fi
         done
-    else
-        echo -e " * \\e[33;1m[WARNING]\\e[0m No Munin plugin directory found at"
-        echo "$munin_plugin_dir"
-        output " * \\e[32;1m[INFO]\\e[0m If this directory is located at a different path try"
-        output "export MUNIN_PLUGIN_DIR=\"/path/to/directory\""
     fi
     if [[ -d "$node_plugin_dir" ]]; then
         for plugin_link in "$node_plugin_dir"/pihole_*; do
                 rm "$plugin_link" 2> /dev/null
         done
-    else
-        echo -e " * \\e[33;1m[WARNING]\\e[0m No Munin node plugin directory found at"
-        echo "$node_plugin_dir"
-        output " * \\e[32;1m[INFO]\\e[0m If this directory is located at a different path try"
-        output "export NODE_PLUGIN_DIR=\"/path/to/directory\""
     fi
 }
 
@@ -239,10 +228,10 @@ configure_plugins() {
         exit 1
     fi
     if [[ "$pihole_on_host" == "no" ]]; then
-        echo -e " * \\e[33;1m[WARNING]\\e[0m The 'pihole' command was not found on this host"
-        echo "If this was not a mistake, edit"
-        echo "$plugin_config_dir/pihole"
-        echo "and replace env.host and env.setupvars values with those of your Pi-hole® host"
+        output " * \\e[33;1m[WARNING]\\e[0m The Pi-hole® command 'pihole' was not found
+If this is not a mistake, edit
+$plugin_config_dir/pihole
+and replace env.host and env.setupvars values with those of your Pi-hole® host"
     fi
 }
 
@@ -292,7 +281,7 @@ install_function() {
     if [[ "$install_script" == "true" ]]; then
         install_script
     else
-        output " * \\e[32;1m[INFO]\\e[0m Skipping script installation"
+        output " * \\e[32;1m[INFO]\\e[0m Skipping munin-pihole-plugins script installation"
     fi
     if [[ "$install_webserver" == "true" ]]; then
         configure_proxy
@@ -321,9 +310,6 @@ uninstall_function() {
                 touch "$proxy_config_dir/external".conf
             fi
         fi
-    else
-        echo -e " * \\e[33;1m[WARNING]\\e[0m No lighttpd configuration directory found at"
-        echo "$proxy_config_dir"
     fi
     restart_services
     if [[ -f "$script_dir/munin-pihole-plugins" ]]; then
