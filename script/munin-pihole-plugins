@@ -4,6 +4,8 @@
 # saint-lascivious (Hayden Pearce) 2022
 # saint@sainternet.xyz
 
+SCRIPT_VERSION="2.3"
+
 install_script="${INSTALL_SCRIPT:-true}"
 install_webserver="${INSTALL_WEBSERVER:-true}"
 munin_dir="${MUNIN_DIR:-/etc/munin}"
@@ -23,7 +25,6 @@ plugin_services="munin-node"
 proxy_repo="https://raw.githubusercontent.com/saint-lascivious/lighttpd-external-munin-proxy/master"
 remote_script_version="$(dig TXT +short munin-pihole-plugins.sainternet.xyz @8.8.8.8 -p 53 | sed s'/[^0-9.]//g')"
 script_dependencies="init-system-helpers wget"
-script_version="2.2"
 webserver_dependencies="lighttpd munin"
 webserver_services="lighttpd munin"
 
@@ -34,7 +35,7 @@ output() {
 }
 
 obnoxious_header() {
-    output "\\e[31;1m                  _             _ _        _            _           _   v$script_version
+    output "\\e[31;1m                  _             _ _        _            _           _   v$SCRIPT_VERSION
 \\e[33;1m   _ __ _  _ _ _ (_)_ _ __ _ __(_) |_  ___| |___ _ _ __| |_  _ __ _(_)_ _  ___
 \\e[32;1m  | '  \\ || | ' \\| | ' \\__| '_ \\ | ' \\/ _ \\ / -_)_| '_ \\ | || / _\` | | ' \\(_-<
 \\e[34;1m  |_|_|_\\_,_|_||_|_|_||_| | .__/_|_||_\\___/_\\___| | .__/_|\\_,_\\__, |_|_||_/__/
@@ -75,7 +76,7 @@ install_dependencies() {
 install_script() {
     if [[ -d "$script_dir" ]]; then
         if [[ -f "$script_dir/munin-pihole-plugins" ]]; then
-            if [[ "$remote_script_version" > "$script_version" ]]; then
+            if [[ "$remote_script_version" > "$SCRIPT_VERSION" ]]; then
                 if [[ -x "$(command -v wget)" ]]; then
                     wget -q --show-progress "$plugin_repo/script/munin-pihole-plugins" -O "$script_dir/munin-pihole-plugins"
                     chmod +x "$script_dir/munin-pihole-plugins" || return
@@ -92,6 +93,12 @@ install_script() {
                 echo -e " * \\e[31;1m[ERROR]\\e[0m The required command 'wget' was not found"
                 exit 1
             fi
+        fi
+        if [[ ":$PATH:" != *":$script_dir:"* ]]; then
+            output " * \\e[33;1m[WARNING]\\e[0m The munin-pihole-plugins script directory"
+            output "$script_dir"
+            output "is not in your \$PATH variable try"
+            output "export \$PATH=\"\$PATH:$script_dir\""
         fi
     else
         echo -e " * \\e[31;1m[ERROR]\\e[0m No directory found at"
@@ -332,10 +339,10 @@ update_function() {
 }
 
 version_function() {
-    if [[ "$remote_script_version" > "$script_version" ]]; then
+    if [[ "$remote_script_version" > "$SCRIPT_VERSION" ]]; then
         echo "An update to the munin-pihole-plugins script is available"
     fi
-    echo "munin-pihole-plugins script version is v$script_version (Latest: v$remote_script_version)"
+    echo "munin-pihole-plugins script version is v$SCRIPT_VERSION (Latest: v$remote_script_version)"
 }
 
 variable_function() {
