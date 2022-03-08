@@ -4,7 +4,7 @@
 # saint-lascivious (Hayden Pearce) 2022
 # saint@sainternet.xyz
 
-SCRIPT_VERSION="2.3"
+SCRIPT_VERSION="2.4"
 
 install_script="${INSTALL_SCRIPT:-true}"
 install_webserver="${INSTALL_WEBSERVER:-true}"
@@ -95,16 +95,16 @@ install_script() {
             fi
         fi
         if [[ ":$PATH:" != *":$script_dir:"* ]]; then
-            output " * \\e[33;1m[WARNING]\\e[0m The munin-pihole-plugins script directory"
-            output "$script_dir"
-            output "is not in your \$PATH variable try"
-            output "export \$PATH=\"\$PATH:$script_dir\""
+            output " * \\e[33;1m[WARNING]\\e[0m The munin-pihole-plugins script directory
+   $script_dir
+   is not in your \$PATH variable try
+   export \$PATH=\"\$PATH:$script_dir\""
         fi
     else
-        echo -e " * \\e[31;1m[ERROR]\\e[0m No directory found at"
-        echo "$script_dir"
-        output " * \\e[32;1m[INFO]\\e[0m If this directory is located at a different path try"
-        output "export SCRIPT_DIR=\"/path/to/directory\""
+        echo -e " * \\e[31;1m[ERROR]\\e[0m No directory found at
+   $script_dir"
+        output " * \\e[32;1m[INFO]\\e[0m If this directory is located at a different path try
+   export SCRIPT_DIR=\"/path/to/directory\""
         exit 1
     fi
 }
@@ -113,8 +113,8 @@ configure_proxy() {
     if [[ -d "$proxy_config_dir" ]]; then
         if [[ -s "$proxy_config_dir/external.conf" ]]; then
             mv "$proxy_config_dir/external.conf" "$proxy_config_dir/external.conf.bak" || return
-            output " * \\e[32;1m[INFO]\\e[0m Existing lighttpd external.conf backed up to"
-            output "$proxy_config_dir/external.conf.bak"
+            output " * \\e[32;1m[INFO]\\e[0m Existing lighttpd external.conf backed up to
+   $proxy_config_dir/external.conf.bak"
         else
             rm "$proxy_config_dir/external.conf" || return
         fi
@@ -125,10 +125,10 @@ configure_proxy() {
             exit 1
         fi
     else
-        echo -e " * \\e[31;1m[ERROR]\\e[0m No lighttpd configuration directory found at"
-        echo "$proxy_config_dir"
-        output " * \\e[32;1m[INFO]\\e[0m If this directory is located at a different path try"
-        output "export PROXY_CONFIG_DIR=\"/path/to/directory\""
+        echo -e " * \\e[31;1m[ERROR]\\e[0m No lighttpd configuration directory found at
+   $proxy_config_dir"
+        output " * \\e[32;1m[INFO]\\e[0m If this directory is located at a different path try
+   export PROXY_CONFIG_DIR=\"/path/to/directory\""
         exit 1
     fi
 }
@@ -150,23 +150,23 @@ configure_munin() {
                 sed -i "s/#html_strategy cron/html_strategy cgi/g" "$munin_dir/munin.conf"
                 sed -i "s/#graph_strategy cron/graph_strategy cgi/g" "$munin_dir/munin.conf"
             else
-                echo -e " * \\e[31;1m[ERROR]\\e[0m No munin.conf file found at"
-                echo "$munin_dir/munin.conf"
-                output " * \\e[32;1m[INFO]\\e[0m If this file is located at a different path try"
-                output "export MUNIN_DIR=\"/path/to/directory\""
+                echo -e " * \\e[31;1m[ERROR]\\e[0m No munin.conf file found at
+   $munin_dir/munin.conf"
+                output " * \\e[32;1m[INFO]\\e[0m If this file is located at a different path try
+   export MUNIN_DIR=\"/path/to/directory\""
                 exit 1
             fi
         else
-            echo -e " * \\e[31;1m[ERROR]\\e[0m No Munin directory found at"
-            echo "$munin_dir"
-            output " * \\e[32;1m[INFO]\\e[0m If this directory is located at a different path try"
-            output "export MUNIN_DIR=\"/path/to/directory\""
+            echo -e " * \\e[31;1m[ERROR]\\e[0m No Munin directory found at
+   $munin_dir"
+            output " * \\e[32;1m[INFO]\\e[0m If this directory is located at a different path try
+   export MUNIN_DIR=\"/path/to/directory\""
             exit 1
         fi
-        echo -e " * \\e[31;1m[ERROR]\\e[0m No Munin configuration directory found at"
-        echo "$munin_config_dir"
-        output " * \\e[32;1m[INFO]\\e[0m If this directory is located at a different path try"
-        output "export MUNIN_CONFIG_DIR=\"/path/to/directory\""
+        echo -e " * \\e[31;1m[ERROR]\\e[0m No Munin configuration directory found at
+   $munin_config_dir"
+        output " * \\e[32;1m[INFO]\\e[0m If this directory is located at a different path try
+   export MUNIN_CONFIG_DIR=\"/path/to/directory\""
         exit 1
     fi
 }
@@ -200,17 +200,17 @@ install_plugins() {
                 ln -s "$munin_plugin_dir/pihole_$plugin_id" "$node_plugin_dir/pihole_$plugin_id" || return
             done
         else
-            echo -e " * \\e[31;1m[ERROR]\\e[0m No Munin node plugin directory found at"
-            echo "$node_plugin_dir"
-            output " * \\e[32;1m[INFO]\\e[0m If this directory is located at a different path try"
-            output "export NODE_PLUGIN_DIR=\"/path/to/directory\""
+            echo -e " * \\e[31;1m[ERROR]\\e[0m No Munin node plugin directory found at
+   $node_plugin_dir"
+            output " * \\e[32;1m[INFO]\\e[0m If this directory is located at a different path try
+   export NODE_PLUGIN_DIR=\"/path/to/directory\""
             exit 1
         fi
     else
-        echo -e " * \\e[31;1m[ERROR]\\e[0m No Munin plugin directory found at"
-        echo "$munin_plugin_dir"
-        output " * \\e[32;1m[INFO]\\e[0m If this directory is located at a different path try"
-        output "export MUNIN_PLUGIN_DIR=\"/path/to/directory\""
+        echo -e " * \\e[31;1m[ERROR]\\e[0m No Munin plugin directory found at
+   $munin_plugin_dir"
+        output " * \\e[32;1m[INFO]\\e[0m If this directory is located at a different path try
+   export MUNIN_PLUGIN_DIR=\"/path/to/directory\""
         exit 1
     fi
 }
@@ -220,25 +220,25 @@ configure_plugins() {
         if [[ ! -f  "$plugin_config_dir/pihole" ]]; then
             if [[ -x "$(command -v wget)" ]]; then
                 wget -q --show-progress "$plugin_repo/etc/munin/plugin-conf.d/pihole" -P "$plugin_config_dir"
-                output " * \\e[32;1m[INFO]\\e[0m Default plugin configuration saved to"
-                output "$plugin_config_dir/pihole"
+                output " * \\e[32;1m[INFO]\\e[0m Default plugin configuration saved to
+   $plugin_config_dir/pihole"
             else
                 echo -e " * \\e[31;1m[ERROR]\\e[0m The required command 'wget' was not found"
                 exit 1
             fi
         fi
     else
-        echo -e " * \\e[31;1m[ERROR]\\e[0m No Munin plugin configuration directory found at"
-        echo "$plugin_config_dir"
-        output " * \\e[32;1m[INFO]\\e[0m If this directory is located at a different path try"
-        output "export PLUGIN_CONFIG_DIR=\"/path/to/directory\""
+        echo -e " * \\e[31;1m[ERROR]\\e[0m No Munin plugin configuration directory found at
+   $plugin_config_dir"
+        output " * \\e[32;1m[INFO]\\e[0m If this directory is located at a different path try
+   export PLUGIN_CONFIG_DIR=\"/path/to/directory\""
         exit 1
     fi
     if [[ "$pihole_on_host" == "no" ]]; then
         output " * \\e[33;1m[WARNING]\\e[0m The Pi-hole® command 'pihole' was not found
-If this is not a mistake, edit
-$plugin_config_dir/pihole
-and replace env.host and env.setupvars values with those of your Pi-hole® host"
+   If this is not a mistake, edit
+   $plugin_config_dir/pihole
+   and replace the host and setupvars values with those of your Pi-hole® host"
     fi
 }
 
@@ -263,18 +263,18 @@ help_function() {
 Example: munin-pihole-plugins --install
 
 Options:
-    -h, --help           Display this help dialogue
+   -h, --help           Display this help dialogue
 
-    -i, --install        Install and configure munin-pihole-plugins
+   -i, --install        Install and configure munin-pihole-plugins
 
-    -u, --uninstall      Uninstall munin-pihole-plugins
+   -u, --uninstall      Uninstall munin-pihole-plugins
 
-    -U, --update         Update munin-pihole-plugins
+   -U, --update         Update munin-pihole-plugins
 
-    -v, --version        Display the munin-pihole-plugins script version
+   -v, --version        Display the munin-pihole-plugins script version
 
-    -V, --variables      Display a list of environment variables used by
-                         munin-pihole-plugins, and their current values"
+   -V, --variables      Display a list of environment variables used by
+                        munin-pihole-plugins, and their current values"
 }
 
 install_function() {
@@ -309,8 +309,8 @@ uninstall_function() {
     if [[ -d "$proxy_config_dir" ]]; then
         if [[ -f "$proxy_config_dir/external.conf.bak" ]]; then
             mv "$proxy_config_dir/external.conf.bak" "$proxy_config_dir/external.conf" || return
-            output " * \\e[32;1m[INFO]\\e[0m Original lighttpd external.conf restored from"
-            output "$proxy_config_dir/external.conf.bak"
+            output " * \\e[32;1m[INFO]\\e[0m Original lighttpd external.conf restored from
+   $proxy_config_dir/external.conf.bak"
         else
             if [[ -f "$proxy_config_dir/external.conf" ]]; then
                 rm "$proxy_config_dir/external.conf" || return
@@ -350,29 +350,29 @@ variable_function() {
 Example: export PLUGIN_LIST=\"blocked cache replies_by_type\"
 
 Variables:
-    INSTALL_SCRIPT=\"$install_script\"
+   INSTALL_SCRIPT=\"$install_script\"
 
-    INSTALL_WEBSERVER=\"$install_webserver\"
+   INSTALL_WEBSERVER=\"$install_webserver\"
 
-    MUNIN_DIR=\"$munin_dir\"
+   MUNIN_DIR=\"$munin_dir\"
 
-    MUNIN_CONFIG_DIR=\"$munin_config_dir\"
+   MUNIN_CONFIG_DIR=\"$munin_config_dir\"
 
-    MUNIN_PLUGIN_DIR=\"$munin_plugin_dir\"
+   MUNIN_PLUGIN_DIR=\"$munin_plugin_dir\"
 
-    NODE_PLUGIN_DIR=\"$node_plugin_dir\"
+   NODE_PLUGIN_DIR=\"$node_plugin_dir\"
 
-    PLUGIN_CONFIG_DIR=\"$plugin_config_dir\"
+   PLUGIN_CONFIG_DIR=\"$plugin_config_dir\"
 
-    PLUGIN_LIST=\"$plugin_list\"
+   PLUGIN_LIST=\"$plugin_list\"
 
-    PROXY_CONFIG_DIR=\"$proxy_config_dir\"
+   PROXY_CONFIG_DIR=\"$proxy_config_dir\"
 
-    SCRIPT_DIR=\"$script_dir\"
+   SCRIPT_DIR=\"$script_dir\"
 
-    SKIP_DEPENDENCY_CHECK=\"$skip_dependency_check\"
+   SKIP_DEPENDENCY_CHECK=\"$skip_dependency_check\"
 
-    VERBOSE_OUTPUT=\"$verbose_output\""
+   VERBOSE_OUTPUT=\"$verbose_output\""
 }
 
 mini_help_function() {
@@ -385,8 +385,8 @@ if [[ ! "$EUID" -eq "0" ]];then
         exec sudo -E bash "$0" "$@"
         exit "$?"
     else
-        echo -e " * \\e[31;1m[ERROR]\\e[0m Insufficient privileges"
-        echo -e "Install sudo or run munin-pihole-plugins as root"
+        echo -e " * \\e[31;1m[ERROR]\\e[0m Insufficient privileges
+   Install sudo or run munin-pihole-plugins as root"
         exit 1
     fi
 fi
