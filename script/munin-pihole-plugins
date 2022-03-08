@@ -22,8 +22,8 @@ plugin_repo="https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plu
 plugin_services="munin-node"
 proxy_repo="https://raw.githubusercontent.com/saint-lascivious/lighttpd-external-munin-proxy/master"
 remote_script_version="$(dig TXT +short munin-pihole-plugins.sainternet.xyz @8.8.8.8 -p 53 | sed s'/[^0-9.]//g')"
-script_dependencies="init-system-helpers sudo wget"
-script_version="2.1"
+script_dependencies="init-system-helpers wget"
+script_version="2.1.1"
 webserver_dependencies="lighttpd munin"
 webserver_services="lighttpd munin"
 
