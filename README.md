@@ -5,7 +5,7 @@
 ## Step One: Download
 * Download munin-pihole-plugins
 ```
-wget https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/script/munin-pihole-plugins
+wget munin-pihole-plugins.sainternet.xyz -O munin-pihole-plugins && chmod +x munin-pihole-plugins
 ```
 
 ## Step Two: Install
