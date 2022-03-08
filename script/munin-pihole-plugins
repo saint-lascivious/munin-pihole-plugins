@@ -4,7 +4,7 @@
 # saint-lascivious (Hayden Pearce) 2022
 # saint@sainternet.xyz
 
-SCRIPT_VERSION="2.4"
+SCRIPT_VERSION="2.4.1"
 
 install_script="${INSTALL_SCRIPT:-true}"
 install_webserver="${INSTALL_WEBSERVER:-true}"
@@ -271,7 +271,8 @@ Options:
 
    -U, --update         Update munin-pihole-plugins
 
-   -v, --version        Display the munin-pihole-plugins script version
+   -v, --version        Display the current and latest munin-pihole-plugins
+                        script versions
 
    -V, --variables      Display a list of environment variables used by
                         munin-pihole-plugins, and their current values"
