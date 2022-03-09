@@ -5,7 +5,7 @@
 # saint@sainternet.xyz
 
 # munin-pihole-plugins script version
-SCRIPT_VERSION="2.4.3"
+SCRIPT_VERSION="2.5"
 
 # environment variables with overrides
 install_script="${INSTALL_SCRIPT:-true}"
@@ -28,10 +28,25 @@ plugin_services="munin-node"
 proxy_repo="https://raw.githubusercontent.com/saint-lascivious/lighttpd-external-munin-proxy/master"
 remote_script_version="$(dig TXT +short munin-pihole-plugins.sainternet.xyz @8.8.8.8 -p 53 | sed s'/[^0-9.]//g')"
 script_dependencies="init-system-helpers wget"
+terminal_width="$(stty size | cut -d " " -f2)"
 webserver_dependencies="lighttpd munin"
 webserver_services="lighttpd munin"
 
-# a simple output function to handle verbosity
+# simple privilege check
+check_privilege() {
+    if [[ ! "$EUID" -eq "0" ]];then
+        if [[ -x "$(command -v sudo)" ]]; then
+            exec sudo -E bash "$0" "$@"
+            exit "$?"
+        else
+            echo -e " * \\e[31;1m[ERROR]\\e[0m Insufficient privileges
+   Install sudo or run munin-pihole-plugins as root"
+        exit 1
+        fi
+    fi
+}
+
+# output function to handle verbosity level
 # if verbose_output is set to any value other than true only error messages
 # are shown
 output() {
@@ -42,12 +57,14 @@ output() {
 
 # manditory horrific ascii header
 obnoxious_header() {
-    output "\\e[31;1m                  _             _ _        _            _           _   v$SCRIPT_VERSION
+    if [[ "$terminal_width" -ge "80" ]]; then
+        output "\\e[31;1m                  _             _ _        _            _           _   v$SCRIPT_VERSION
 \\e[33;1m   _ __ _  _ _ _ (_)_ _ __ _ __(_) |_  ___| |___ _ _ __| |_  _ __ _(_)_ _  ___
 \\e[32;1m  | '  \\ || | ' \\| | ' \\__| '_ \\ | ' \\/ _ \\ / -_)_| '_ \\ | || / _\` | | ' \\(_-<
 \\e[34;1m  |_|_|_\\_,_|_||_|_|_||_| | .__/_|_||_\\___/_\\___| | .__/_|\\_,_\\__, |_|_||_/__/
 \\e[36;1m                          |_|                     |_|         |___/
 \\n\\e[35;1m Munin plugins and management script for monitoring various Pi-hole® statistics \\e[0m\\n"
+    fi
 }
 
 # is this a pihole host?
@@ -309,6 +326,7 @@ Options:
 
 # primary installation function, installation exceptions are handled here
 install_function() {
+    privilege_check
     obnoxious_header
     check_pihole
     if [[ "$skip_dependency_check" == "false" ]]; then
@@ -337,6 +355,7 @@ install_function() {
 # uninstall munin-pihole-plugins
 # does not uninstall dependencies at this point
 uninstall_function() {
+    privilege_check
     obnoxious_header
     remove_existing
     if [[ -d "$proxy_config_dir" ]]; then
@@ -360,6 +379,7 @@ uninstall_function() {
 
 # update an existing munin-pihole-plugins installation
 update_function() {
+    privilege_check
     obnoxious_header
     remove_existing
     install_plugins
@@ -417,18 +437,6 @@ mini_help_function() {
     echo "Invalid option: $1
 Use -h or --help for a complete list of options"
 }
-
-# simple privilege check
-if [[ ! "$EUID" -eq "0" ]];then
-    if [[ -x "$(command -v sudo)" ]]; then
-        exec sudo -E bash "$0" "$@"
-        exit "$?"
-    else
-        echo -e " * \\e[31;1m[ERROR]\\e[0m Insufficient privileges
-   Install sudo or run munin-pihole-plugins as root"
-        exit 1
-    fi
-fi
 
 # simple input handler
 case "${1}" in
