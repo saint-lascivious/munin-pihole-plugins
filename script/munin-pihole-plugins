@@ -5,7 +5,7 @@
 # saint@sainternet.xyz
 
 # munin-pihole-plugins script version
-SCRIPT_VERSION="2.6"
+SCRIPT_VERSION="2.6.1"
 
 # environment variables with overrides
 install_script="${INSTALL_SCRIPT:-true}"
@@ -396,6 +396,10 @@ update_function() {
 version_function() {
     if [[ "$remote_script_version" > "$SCRIPT_VERSION" ]]; then
         echo "An update to the munin-pihole-plugins script is available"
+    else
+        if [[ "$remote_script_version" < "$SCRIPT_VERSION" ]]; then
+            echo "Thank you for using munin-pihole-plugins, Professor Hawking"
+        fi
     fi
     echo "munin-pihole-plugins script version is v$SCRIPT_VERSION (Latest: v$remote_script_version)"
 }
