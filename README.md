@@ -1,6 +1,6 @@
 # munin-pihole-plugins
 
-[Munin](https://munin-monitoring.org) [plugins](https://gallery.munin-monitoring.org) for monitoring [Pi-hole®](https://github.com/pi-hole/pi-hole). Transforms a server into a powerful monitoring platform, as simple as [one](https://github.com/saint-lascivious/munin-pihole-plugins#step-one-download), [two](https://github.com/saint-lascivious/munin-pihole-plugins#step-two-install), [three](https://github.com/saint-lascivious/munin-pihole-plugins#step-three-wait), ...[four](https://github.com/saint-lascivious/munin-pihole-plugins#step-four-monitor).
+[Munin](https://munin-monitoring.org) [plugins](https://gallery.munin-monitoring.org) and management script for monitoring various [Pi-hole®](https://github.com/pi-hole/pi-hole) statistics. Transforms a server into a powerful monitoring platform, as simple as [one](https://github.com/saint-lascivious/munin-pihole-plugins#step-one-download), [two](https://github.com/saint-lascivious/munin-pihole-plugins#step-two-install), [three](https://github.com/saint-lascivious/munin-pihole-plugins#step-three-wait), ...[four](https://github.com/saint-lascivious/munin-pihole-plugins#step-four-monitor).
 
 ## Step One: Download
 * Download munin-pihole-plugins
