@@ -4,8 +4,10 @@
 # saint-lascivious (Hayden Pearce) 2022
 # saint@sainternet.xyz
 
-SCRIPT_VERSION="2.4.1"
+# munin-pihole-plugins script version
+SCRIPT_VERSION="2.4.2"
 
+# environment variables with overrides
 install_script="${INSTALL_SCRIPT:-true}"
 install_webserver="${INSTALL_WEBSERVER:-true}"
 munin_dir="${MUNIN_DIR:-/etc/munin}"
@@ -19,6 +21,7 @@ script_dir="${SCRIPT_DIR:-/usr/local/bin}"
 skip_dependency_check="${SKIP_DEPENDENCY_CHECK:-false}"
 verbose_output="${VERBOSE_OUTPUT:-true}"
 
+# environment variables without
 plugin_dependencies="munin-node"
 plugin_repo="https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master"
 plugin_services="munin-node"
@@ -28,12 +31,16 @@ script_dependencies="init-system-helpers wget"
 webserver_dependencies="lighttpd munin"
 webserver_services="lighttpd munin"
 
+# a simple output function to handle verbosity
+# if verbose_output is set to any value other than true only error messages
+# are shown
 output() {
   if [ "$verbose_output" == "true" ]; then
     echo -e "$@"
   fi
 }
 
+# manditory horrific ascii header
 obnoxious_header() {
     output "\\e[31;1m                  _             _ _        _            _           _   v$SCRIPT_VERSION
 \\e[33;1m   _ __ _  _ _ _ (_)_ _ __ _ __(_) |_  ___| |___ _ _ __| |_  _ __ _(_)_ _  ___
@@ -43,13 +50,17 @@ obnoxious_header() {
 \\n\\e[35;1m          A set of Munin plugins for monitoring various Pi-hole® stats          \\e[0m\\n"
 }
 
+# is this a pihole host?
 check_pihole() {
     if [[ ! -x "$(command -v pihole)" ]]; then
         pihole_on_host="no"
     fi
 }
 
+# basic dependency handling with dpkg-query and apt
+# can be disabled with SKIP_DEPENDENCY_CHECK set to any value other than false
 install_dependencies() {
+    # check which dependencies are actually required
     if [[ "$install_webserver" == "true" ]]; then
         dependency_list="$plugin_dependencies $script_dependencies $webserver_dependencies"
     else
@@ -73,6 +84,8 @@ install_dependencies() {
     fi
 }
 
+# installs the munin-pihole-plugins script on the host
+# warn the user if script_dir is not in their path and suggest how to add it
 install_script() {
     if [[ -d "$script_dir" ]]; then
         if [[ -f "$script_dir/munin-pihole-plugins" ]]; then
@@ -109,6 +122,9 @@ install_script() {
     fi
 }
 
+# installs a related project lighttpd-external-munin-proxy
+# backup any existing non-zero lighttpd external.conf, merging is out of scope
+# at this point
 configure_proxy() {
     if [[ -d "$proxy_config_dir" ]]; then
         if [[ -s "$proxy_config_dir/external.conf" ]]; then
@@ -133,6 +149,11 @@ configure_proxy() {
     fi
 }
 
+# configure the munin monitoring environment
+# two different approaches may be used to set the graph strategy depending on
+# the existence of the munin_config_dir
+# if it is not found munin-pihole-plugins aill attempt to edit the munin.conf
+# file directly
 configure_munin() {
     if [[ -d "$munin_config_dir" ]]; then
         if [[ ! -f "$munin_config_dir/99-graph-strategy.conf" ]]; then
@@ -171,6 +192,7 @@ configure_munin() {
     fi
 }
 
+# remove any existing munin-pihole-plugins plugins and symbolic links
 remove_existing() {
     if [[ -d "$munin_plugin_dir" ]]; then
         for plugin_id in $plugin_list; do
@@ -186,6 +208,8 @@ remove_existing() {
     fi
 }
 
+# installs munin-pihole-plugins plugins and symbolic links
+# plugins to be installed can be configured using PLUGIN_LIST
 install_plugins() {
     if [[ -d "$munin_plugin_dir" ]]; then
         if [[ -d "$node_plugin_dir" ]]; then
@@ -215,6 +239,9 @@ install_plugins() {
     fi
 }
 
+# install a default configuration file
+# this should not be required but if it does have to be configured it is nicer
+# if it already exists
 configure_plugins() {
     if [[ -d "$plugin_config_dir" ]]; then
         if [[ ! -f  "$plugin_config_dir/pihole" ]]; then
@@ -242,6 +269,7 @@ configure_plugins() {
     fi
 }
 
+# restart relevant services
 restart_services() {
     if [[ "$install_webserver" == "true" ]]; then
         service_list="$plugin_services $webserver_services"
@@ -258,6 +286,7 @@ restart_services() {
     fi
 }
 
+# display munin-pihole-plugins script help text
 help_function() {
     echo "Usage: munin-pihole-plugins [option]
 Example: munin-pihole-plugins --install
@@ -278,6 +307,7 @@ Options:
                         munin-pihole-plugins, and their current values"
 }
 
+# primary installation function, installation exceptions are handled here
 install_function() {
     obnoxious_header
     check_pihole
@@ -304,6 +334,8 @@ install_function() {
     output " * \\e[32;1m[INFO]\\e[0m Done"
 }
 
+# uninstall munin-pihole-plugins
+# does not uninstall dependencies at this point
 uninstall_function() {
     obnoxious_header
     remove_existing
@@ -326,6 +358,7 @@ uninstall_function() {
     output " * \\e[32;1m[INFO]\\e[0m Done"
 }
 
+# update an existing munin-pihole-plugins installation
 update_function() {
     obnoxious_header
     remove_existing
@@ -339,6 +372,7 @@ update_function() {
     output " * \\e[32;1m[INFO]\\e[0m Done"
 }
 
+# display the current and latest munin-pihole-plugins script versions
 version_function() {
     if [[ "$remote_script_version" > "$SCRIPT_VERSION" ]]; then
         echo "An update to the munin-pihole-plugins script is available"
@@ -346,6 +380,8 @@ version_function() {
     echo "munin-pihole-plugins script version is v$SCRIPT_VERSION (Latest: v$remote_script_version)"
 }
 
+# display munin-pihole-plugins environment variables and their current values
+# there were too many variables to list in the main help text
 variable_function() {
     echo -e "Usage: export [VARIABLE]=\"value\"
 Example: export PLUGIN_LIST=\"blocked cache replies_by_type\"
@@ -376,11 +412,13 @@ Variables:
    VERBOSE_OUTPUT=\"$verbose_output\""
 }
 
+# hand invalid input by prompting on how to find valid input
 mini_help_function() {
     echo "Invalid option: $1
 Use -h or --help for a complete list of options"
 }
 
+# simple privilege check
 if [[ ! "$EUID" -eq "0" ]];then
     if [[ -x "$(command -v sudo)" ]]; then
         exec sudo -E bash "$0" "$@"
@@ -392,6 +430,7 @@ if [[ ! "$EUID" -eq "0" ]];then
     fi
 fi
 
+# simple input handler
 case "${1}" in
     "-h" | "--help"         ) help_function ;;
     "-i" | "--install"      ) install_function ;;
