@@ -5,7 +5,7 @@
 # saint@sainternet.xyz
 
 # munin-pihole-plugins script version
-SCRIPT_VERSION="2.5"
+SCRIPT_VERSION="2.6"
 
 # environment variables with overrides
 install_script="${INSTALL_SCRIPT:-true}"
@@ -313,12 +313,12 @@ Options:
 
    -i, --install        Install and configure munin-pihole-plugins
 
-   -u, --uninstall      Uninstall munin-pihole-plugins
-
-   -U, --update         Update munin-pihole-plugins
+   -u, --update         Update munin-pihole-plugins
 
    -v, --version        Display the current and latest munin-pihole-plugins
                         script versions
+
+   -U, --uninstall      Uninstall munin-pihole-plugins
 
    -V, --variables      Display a list of environment variables used by
                         munin-pihole-plugins, and their current values"
@@ -442,9 +442,9 @@ Use -h or --help for a complete list of options"
 case "${1}" in
     "-h" | "--help"         ) help_function ;;
     "-i" | "--install"      ) install_function ;;
-    "-u" | "--uninstall"    ) uninstall_function ;;
-    "-U" | "--update"       ) update_function ;;
+    "-u" | "--update"       ) update_function ;;
     "-v" | "--version"      ) version_function ;;
+    "-U" | "--uninstall"    ) uninstall_function ;;
     "-V" | "--variables"    ) variable_function ;;
     *                       ) mini_help_function "$@" ;;
 esac

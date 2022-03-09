@@ -36,12 +36,12 @@ Options:
 
    -i, --install        Install and configure munin-pihole-plugins
 
-   -u, --uninstall      Uninstall munin-pihole-plugins
-
-   -U, --update         Update munin-pihole-plugins
+   -u, --update         Update munin-pihole-plugins
 
    -v, --version        Display the current and latest munin-pihole-plugins
                         script versions
+
+   -U, --uninstall      Uninstall munin-pihole-plugins
 
    -V, --variables      Display a list of environment variables used by
                         munin-pihole-plugins, and their current values
