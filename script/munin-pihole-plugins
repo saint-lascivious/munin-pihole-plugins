@@ -5,7 +5,7 @@
 # saint@sainternet.xyz
 
 # munin-pihole-plugins script version
-SCRIPT_VERSION="2.6.2"
+SCRIPT_VERSION="2.7"
 
 # environment variables with overrides
 install_script="${INSTALL_SCRIPT:-true}"
@@ -28,6 +28,7 @@ plugin_services="munin-node"
 proxy_repo="https://raw.githubusercontent.com/saint-lascivious/lighttpd-external-munin-proxy/master"
 remote_script_version="$(dig TXT +short munin-pihole-plugins.sainternet.xyz @8.8.8.8 -p 53 | sed s'/[^0-9.]//g')"
 script_dependencies="init-system-helpers wget"
+terminal_height="$(stty size | cut -d " " -f1)"
 terminal_width="$(stty size | cut -d " " -f2)"
 webserver_dependencies="lighttpd munin"
 webserver_services="lighttpd munin"
@@ -46,24 +47,24 @@ check_privilege() {
     fi
 }
 
-# output function to handle verbosity level
+# output function to handle verbosity
 # if verbose_output is set to any value other than true only error messages
 # are shown
 output() {
-  if [ "$verbose_output" == "true" ]; then
-    echo -e "$@"
-  fi
+    if [ "$verbose_output" == "true" ]; then
+      echo -e "$@"
+    fi
 }
 
 # manditory horrific ascii header
 obnoxious_header() {
-    if [[ "$terminal_width" -ge "80" ]]; then
+    if [[ "$terminal_height" -ge "8" ]] && [[ "$terminal_width" -ge "80" ]]; then
         output "\\e[31;1m                  _             _ _        _            _           _   v$SCRIPT_VERSION
 \\e[33;1m   _ __ _  _ _ _ (_)_ _ __ _ __(_) |_  ___| |___ _ _ __| |_  _ __ _(_)_ _  ___
 \\e[32;1m  | '  \\ || | ' \\| | ' \\__| '_ \\ | ' \\/ _ \\ / -_)_| '_ \\ | || / _\` | | ' \\(_-<
 \\e[34;1m  |_|_|_\\_,_|_||_|_|_||_| | .__/_|_||_\\___/_\\___| | .__/_|\\_,_\\__, |_|_||_/__/
 \\e[36;1m                          |_|                     |_|         |___/
-\\n\\e[35;1m Munin plugins and management script for monitoring various Pi-hole® statistics \\e[0m\\n"
+\\e[35;1m Munin plugins and management script for monitoring various Pi-hole® statistics \\e[0m\\n"
     fi
 }
 
@@ -77,7 +78,6 @@ check_pihole() {
 # basic dependency handling with dpkg-query and apt
 # can be disabled with SKIP_DEPENDENCY_CHECK set to any value other than false
 install_dependencies() {
-    # check which dependencies are actually required
     if [[ "$install_webserver" == "true" ]]; then
         dependency_list="$plugin_dependencies $script_dependencies $webserver_dependencies"
     else
@@ -101,28 +101,33 @@ install_dependencies() {
     fi
 }
 
+# creatively named wget wrapper
+# wget output hinges on verbose_output being set to 'true' (default)
+download() {
+    if [[ -x "$(command -v wget)" ]]; then
+        if [[ "$verbose_output" == "true" ]]; then
+            wget -q --show-progress "$@"
+        else
+            wget -q "$@"
+        fi
+    else
+        echo -e " * \\e[31;1m[ERROR]\\e[0m The required command 'wget' was not found"
+        exit 1
+    fi
+}
+
 # installs the munin-pihole-plugins script on the host
 # warn the user if script_dir is not in their path and suggest how to add it
 install_script() {
     if [[ -d "$script_dir" ]]; then
         if [[ -f "$script_dir/munin-pihole-plugins" ]]; then
             if [[ "$remote_script_version" > "$SCRIPT_VERSION" ]]; then
-                if [[ -x "$(command -v wget)" ]]; then
-                    wget -q --show-progress "$plugin_repo/script/munin-pihole-plugins" -O "$script_dir/munin-pihole-plugins"
-                    chmod +x "$script_dir/munin-pihole-plugins" || return
-                else
-                    echo -e " * \\e[31;1m[ERROR]\\e[0m The required command 'wget' was not found"
-                    exit 1
-                fi
+                download "$plugin_repo/script/munin-pihole-plugins" -O "$script_dir/munin-pihole-plugins"
+                chmod +x "$script_dir/munin-pihole-plugins" || return
             fi
         else
-            if [[ -x "$(command -v wget)" ]]; then
-                wget -q --show-progress "$plugin_repo/script/munin-pihole-plugins" -P "$script_dir"
-                chmod +x "$script_dir/munin-pihole-plugins" || return
-            else
-                echo -e " * \\e[31;1m[ERROR]\\e[0m The required command 'wget' was not found"
-                exit 1
-            fi
+            download "$plugin_repo/script/munin-pihole-plugins" -P "$script_dir"
+            chmod +x "$script_dir/munin-pihole-plugins" || return
         fi
         if [[ ":$PATH:" != *":$script_dir:"* ]]; then
             output " * \\e[33;1m[WARNING]\\e[0m The munin-pihole-plugins script directory
@@ -151,12 +156,7 @@ configure_proxy() {
         else
             rm "$proxy_config_dir/external.conf" || return
         fi
-        if [[ -x "$(command -v wget)" ]]; then
-            wget -q --show-progress "$proxy_repo/etc/lighttpd/external.conf" -P "$proxy_config_dir"
-        else
-            echo -e " * \\e[31;1m[ERROR]\\e[0m The required command 'wget' was not found"
-            exit 1
-        fi
+        download "$proxy_repo/etc/lighttpd/external.conf" -P "$proxy_config_dir"
     else
         echo -e " * \\e[31;1m[ERROR]\\e[0m No lighttpd configuration directory found at
    $proxy_config_dir"
@@ -174,12 +174,7 @@ configure_proxy() {
 configure_munin() {
     if [[ -d "$munin_config_dir" ]]; then
         if [[ ! -f "$munin_config_dir/99-graph-strategy.conf" ]]; then
-            if [[ -x "$(command -v wget)" ]]; then
-                wget -q --show-progress "$plugin_repo/etc/munin/munin-conf.d/99-graph-strategy.conf" -P "$munin_config_dir" || return
-            else
-                echo -e " * \\e[31;1m[ERROR]\\e[0m The required command 'wget' was not found"
-                exit 1
-            fi
+            download "$plugin_repo/etc/munin/munin-conf.d/99-graph-strategy.conf" -P "$munin_config_dir" || return
         fi
     else
         output " * \\e[32;1m[INFO]\\e[0m Attempting fallback configuration editing munin.conf directly"
@@ -231,12 +226,7 @@ install_plugins() {
     if [[ -d "$munin_plugin_dir" ]]; then
         if [[ -d "$node_plugin_dir" ]]; then
             for plugin_id in $plugin_list; do
-                if [[ -x "$(command -v wget)" ]]; then
-                    wget -q --show-progress "$plugin_repo/usr/share/munin/plugins/pihole_$plugin_id" -P "$munin_plugin_dir" || return
-                else
-                    echo -e " * \\e[31;1m[ERROR]\\e[0m The required command 'wget' was not found"
-                    exit 1
-                fi
+                download "$plugin_repo/usr/share/munin/plugins/pihole_$plugin_id" -P "$munin_plugin_dir" || return
                 chmod +x "$munin_plugin_dir/pihole_$plugin_id" || return
                 ln -s "$munin_plugin_dir/pihole_$plugin_id" "$node_plugin_dir/pihole_$plugin_id" || return
             done
@@ -256,20 +246,15 @@ install_plugins() {
     fi
 }
 
-# install a default configuration file
+# installs a default configuration file
 # this should not be required but if it does have to be configured it is nicer
 # if it already exists
 configure_plugins() {
     if [[ -d "$plugin_config_dir" ]]; then
         if [[ ! -f  "$plugin_config_dir/pihole" ]]; then
-            if [[ -x "$(command -v wget)" ]]; then
-                wget -q --show-progress "$plugin_repo/etc/munin/plugin-conf.d/pihole" -P "$plugin_config_dir"
-                output " * \\e[32;1m[INFO]\\e[0m Default plugin configuration saved to
+            download "$plugin_repo/etc/munin/plugin-conf.d/pihole" -P "$plugin_config_dir"
+            output " * \\e[32;1m[INFO]\\e[0m Default plugin configuration saved to
    $plugin_config_dir/pihole"
-            else
-                echo -e " * \\e[31;1m[ERROR]\\e[0m The required command 'wget' was not found"
-                exit 1
-            fi
         fi
     else
         echo -e " * \\e[31;1m[ERROR]\\e[0m No Munin plugin configuration directory found at
@@ -303,9 +288,28 @@ restart_services() {
     fi
 }
 
+# opportunistic pagination
+# currently only used for help and variable function output where
+# overflowing terminal height may be an inconvenience
+some() {
+    if [[ "$terminal_height" -lt "18" ]]; then
+        if [[ -x "$(command -v less)" ]]; then
+            echo -e "$@" | less
+        else
+            if [[ -x "$(command -v more)" ]]; then
+                echo -e "$@" | more
+            else
+                echo -e "$@"
+            fi
+        fi
+    else
+        echo -e "$@"
+    fi
+}
+
 # display munin-pihole-plugins script help text
 help_function() {
-    echo "Usage: munin-pihole-plugins [option]
+    some "Usage: munin-pihole-plugins [option]
 Example: munin-pihole-plugins --install
 
 Options:
@@ -407,32 +411,21 @@ version_function() {
 # display munin-pihole-plugins environment variables and their current values
 # there were too many variables to list in the main help text
 variable_function() {
-    echo -e "Usage: export [VARIABLE]=\"value\"
+    some "Usage: export [VARIABLE]=\"value\"
 Example: export PLUGIN_LIST=\"blocked cache replies_by_type\"
 
 Variables:
    INSTALL_SCRIPT=\"$install_script\"
-
    INSTALL_WEBSERVER=\"$install_webserver\"
-
    MUNIN_DIR=\"$munin_dir\"
-
    MUNIN_CONFIG_DIR=\"$munin_config_dir\"
-
    MUNIN_PLUGIN_DIR=\"$munin_plugin_dir\"
-
    NODE_PLUGIN_DIR=\"$node_plugin_dir\"
-
    PLUGIN_CONFIG_DIR=\"$plugin_config_dir\"
-
    PLUGIN_LIST=\"$plugin_list\"
-
    PROXY_CONFIG_DIR=\"$proxy_config_dir\"
-
    SCRIPT_DIR=\"$script_dir\"
-
    SKIP_DEPENDENCY_CHECK=\"$skip_dependency_check\"
-
    VERBOSE_OUTPUT=\"$verbose_output\""
 }
 
