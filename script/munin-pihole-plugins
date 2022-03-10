@@ -5,7 +5,7 @@
 # saint@sainternet.xyz
 
 # munin-pihole-plugins script version
-SCRIPT_VERSION="2.6.1"
+SCRIPT_VERSION="2.6.2"
 
 # environment variables with overrides
 install_script="${INSTALL_SCRIPT:-true}"
@@ -128,7 +128,7 @@ install_script() {
             output " * \\e[33;1m[WARNING]\\e[0m The munin-pihole-plugins script directory
    $script_dir
    is not in your \$PATH variable try
-   export \$PATH=\"\$PATH:$script_dir\""
+   export PATH=\"\$PATH:$script_dir\""
         fi
     else
         echo -e " * \\e[31;1m[ERROR]\\e[0m No directory found at
