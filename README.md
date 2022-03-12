@@ -28,23 +28,15 @@ If everything went well, you should find [munin-pihole-plugins graphs](https://g
 ## Full Help Text
 * Full `munin-pihole-plugins` help text
 ```
-Usage: munin-pihole-plugins [option]
-Example: munin-pihole-plugins --install
+Usage: munin-pihole-plugins [OPTION]
 
-Options:
-   -h, --help           Display this help dialogue
-
-   -i, --install        Install and configure munin-pihole-plugins
-
-   -u, --update         Update munin-pihole-plugins
-
-   -v, --version        Display the current and latest munin-pihole-plugins
-                        script versions
-
-   -U, --uninstall      Uninstall munin-pihole-plugins
-
-   -V, --variables      Display a list of environment variables used by
-                        munin-pihole-plugins, and their current values
+Option          GNU long option         Meaning
+ -h             --help                  Display this help dialogue
+ -i             --install               Install munin-pihole-plugins
+ -u             --update                Update munin-pihole-plugins
+ -v             --version               Display the current and latest versions
+ -U             --uninstall             Uninstall munin-pihole-plugins
+ -V             --variables             Display environment variables
 ```
 
 ## Example Graph Gallery
@@ -84,33 +76,26 @@ Provided munin-node and Pi-hole® exist on the same host, the default configurat
 * Default `munin-pihole-plugins` environment variables
 ```
 Usage: export [VARIABLE]="value"
-Example: export PLUGIN_LIST="blocked cache replies_by_type"
 
-Variables:
-   INSTALL_SCRIPT="true"
-
-   INSTALL_WEBSERVER="true"
-
-   MUNIN_DIR="/etc/munin"
-
-   MUNIN_CONFIG_DIR="/etc/munin/munin-conf.d"
-
-   MUNIN_PLUGIN_DIR="/usr/share/munin/plugins"
-
-   NODE_PLUGIN_DIR="/etc/munin/plugins"
-
-   PLUGIN_CONFIG_DIR="/etc/munin/plugin-conf.d"
-
-   PLUGIN_LIST="blocked cache cache_by_type clients percent queries replies_by_type status unique_domains"
-
-   PROXY_CONFIG_DIR="/etc/lighttpd"
-
-   SCRIPT_DIR="/usr/local/bin"
-
-   SKIP_DEPENDENCY_CHECK="false"
-
-   VERBOSE_OUTPUT="true"
+Variable
+  DNS_SERVER="8.8.8.8"
+  INSTALL_SCRIPT="true"
+  INSTALL_WEBSERVER="true"
+  MUNIN_DIR="/etc/munin"
+  MUNIN_CONFIG_DIR="/etc/munin/munin-conf.d"
+  MUNIN_PLUGIN_DIR="/usr/share/munin/plugins"
+  NODE_PLUGIN_DIR="/etc/munin/plugins"
+  PLUGIN_CONFIG_DIR="/etc/munin/plugin-conf.d"
+  PLUGIN_LIST="blocked cache cache_by_type clients percent queries replies_by_type status unique_domains"
+  PROXY_CONFIG_DIR="/etc/lighttpd"
+  SCRIPT_DIR="/usr/local/bin"
+  SKIP_DEPENDENCY_CHECK="false"
+  VERBOSE_OUTPUT="true"
 ```
+
+* DNS_SERVER
+
+The DNS server `munin-pihole-plugins` will contact in order to retrieve version information.
 
 * INSTALL_SCRIPT
 
