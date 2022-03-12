@@ -5,7 +5,7 @@
 # saint@sainternet.xyz
 
 # munin-pihole-plugins version
-VERSION="2.9"
+VERSION="2.9.1"
 
 # environment variables with overrides
 dns_server="${DNS_SERVER:-8.8.8.8}"
@@ -59,13 +59,13 @@ output() {
 
 # manditory horrific ascii header
 obnoxious_header() {
-    if [[ "$terminal_height" -ge "8" ]] && [[ "$terminal_width" -ge "80" ]]; then
+    if [[ "$terminal_height" -ge "10" ]] && [[ "$terminal_width" -ge "80" ]]; then
         output "\\e[31;1m                  _             _ _        _            _           _   v$VERSION
 \\e[33;1m   _ __ _  _ _ _ (_)_ _ __ _ __(_) |_  ___| |___ _ _ __| |_  _ __ _(_)_ _  ___
 \\e[32;1m  | '  \\ || | ' \\| | ' \\__| '_ \\ | ' \\/ _ \\ / -_)_| '_ \\ | || / _\` | | ' \\(_-<
 \\e[34;1m  |_|_|_\\_,_|_||_|_|_||_| | .__/_|_||_\\___/_\\___| | .__/_|\\_,_\\__, |_|_||_/__/
 \\e[36;1m                          |_|                     |_|         |___/
-\\n\\e[35;1m Munin plugins and management script for monitoring various Pi-hole® statistics \\e[0m\\n"
+\\e[35;1m Munin plugins and management script for monitoring various Pi-hole® statistics \\e[0m"
     fi
 }
 
@@ -293,7 +293,7 @@ restart_services() {
 # currently only used for help and variable function output where
 # overflowing terminal height may be an inconvenience
 some() {
-    if [[ "$terminal_height" -lt "18" ]]; then
+    if [[ "$terminal_height" -lt "20" ]]; then
         if [[ -x "$(command -v less)" ]]; then
             echo -e "$@" | less
         else
