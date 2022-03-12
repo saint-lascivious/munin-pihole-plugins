@@ -1,6 +1,8 @@
 #!/bin/sh
 
-# A Munin plugin to monitor Pi-hole, part of munin-pihole-plugins
+# munin-pihole-plugins - cache_by_type
+# saint-lascivious (Hayden Pearce) 2022
+# saint@sainternet.xyz
 
 # Environment variables for this script
 #
@@ -23,42 +25,38 @@
 setupvars="/etc/pihole/setupVars.conf"
 get_webpassword="$(cat < "$setupvars" | grep WEBPASSWORD | sed s/WEBPASSWORD=//g)"
 
-envhost=${host:-127.0.0.1}
-envport=${port:-80}
-envapi=${api:-/admin/api.php}
-envcachesuffix=${cachesuffix:-?getCacheInfo&auth=}
-envwebpassword=${webpassword:-$get_webpassword}
+envhost="${host:-127.0.0.1}"
+envport="${port:-80}"
+envapi="${api:-/admin/api.php}"
+envcachesuffix="${cachesuffix:-?getCacheInfo&auth=}"
+envwebpassword="${webpassword:-$get_webpassword}"
 
-apicall=$(curl -s "$envhost:$envport$envapi$envcachesuffix$envwebpassword" 2>/dev/null)
-stats=$(echo "$apicall" | sed 's/[{}"]//g' | tr "," "\\n")
+apicall="$(curl -s "$envhost:$envport$envapi$envcachesuffix$envwebpassword" 2>/dev/null)"
+stats="$(echo "$apicall" | sed 's/[{}"]//g' | tr "," "\\n")"
 
 case $1 in
-  config)
-    echo "graph_title Pi-hole cache by type"
-    echo "graph_args --base 1000 -l 0"
-    echo "graph_vlabel cache packets"
-    echo "graph_scale no"
-    echo "graph_category dns"
-    echo "graph_info This graph shows statistics on Pi-hole's cache content by type."
-
-    for stat in $stats
-    do
-        uid=$(echo "$stat" | sed 's/:.*//')
-        if [ "$uid" = "ipv4" ] || [ "$uid" = "ipv6" ] || [ "$uid" = "srv" ] || [ "$uid" = "cname" ] || [ "$uid" = "ds" ] || [ "$uid" = "dnskey" ] || [ "$uid" = "other" ]; then
-            echo "$uid.label $(echo "$uid" | sed 's/ipv4/A/; s/ipv6/AAAA/; s/srv/SRV/; s/cname/CNAME/; s/ds/DS/; s/dnskey/DNSKEY/')"
-            echo "$uid.type GAUGE"
-            echo "$uid.min 0"
-        fi
-    done
-
-  exit 0;;
+    config)
+        echo "graph_title Pi-hole cache by type"
+        echo "graph_args --base 1000 -l 0"
+        echo "graph_vlabel cache packets"
+        echo "graph_scale no"
+        echo "graph_category dns"
+        echo "graph_info This graph shows statistics on Pi-hole's cache content by type."
+        for stat in $stats; do
+            uid="$(echo "$stat" | sed 's/:.*//')"
+            if [ "$uid" = "ipv4" ] || [ "$uid" = "ipv6" ] || [ "$uid" = "srv" ] || [ "$uid" = "cname" ] || [ "$uid" = "ds" ] || [ "$uid" = "dnskey" ] || [ "$uid" = "other" ]; then
+                echo "$uid.label $(echo "$uid" | sed 's/ipv4/A/; s/ipv6/AAAA/; s/srv/SRV/; s/cname/CNAME/; s/ds/DS/; s/dnskey/DNSKEY/')"
+                echo "$uid.type GAUGE"
+                echo "$uid.min 0"
+            fi
+        done
+    exit 0;;
 esac
 
-for stat in $stats
-do
+for stat in $stats; do
     uid=$(echo "$stat" | sed 's/:.*//')
     if [ "$uid" = "ipv4" ] || [ "$uid" = "ipv6" ] || [ "$uid" = "srv" ] || [ "$uid" = "cname" ] || [ "$uid" = "ds" ] || [ "$uid" = "dnskey" ] || [ "$uid" = "other" ]; then
-        value=$(echo "$stat" | sed 's/.*://')
+        value="$(echo "$stat" | sed 's/.*://')"
         echo "$uid.value $value"
     fi
 done
