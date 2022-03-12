@@ -113,39 +113,51 @@ Variables:
 ```
 
 * INSTALL_SCRIPT
+
 Disables installation of the `munin-pihole-plugins` script if set to any value other than `true`.
 
 * INSTALL_WEBSERVER
+
 Disables installation of the `munin` webserver and `lighttpd` proxy if set to any value other than `true`. Useful for additional Munin nodes in a multi-node, single-server environment.
 
 * MUNIN_DIR
+
 The directory in which `munin`'s munin.conf file should be located.
 
 * MUNIN_CONFIG_DIR
+
 The directory in which additional `munin` configuration files may be placed, `munin-pihole-plugins` will attempt to use this in favour of editing munin.conf directly.
 
 * MUNIN_PLUGIN_DIR
+
 The directory in which `munin` plugins should be located.
 
 * NODE_PLUGIN_DIR
+
 The directory in which `munin-node` symbolic links should be created.
 
 * PLUGIN_CONFIG_DIR
+
 The directory in which individual plugin configurations should be located.
 
 * PLUGIN_LIST
+
 A space separated list of `munin-pihole-plugins` plugin names which can be used to determine which plugins to install.
 
 * PROXY_CONFIG_DIR
+
 The directory in which `'lighttpd`'s external.conf should be located.
 
 * SCRIPT_DIR
+
 The directory in which `munin-pihole-plugins` should be located or installed to, `munin-pihole-plugins` will warn if this directory is not located in the host's `$PATH` variable and suggest how to correct this.
 
 * SKIP_DEPENDENCY_CHECK
+
 Disables `apt` and `dpkg-query` based dependency satisfaction if set to any value other than `false`.
 
 * VERBOSE_OUTPUT
+
 Disables non-critical `munin-pihole-plugins` script output if set to any value other than `true`, errors are always displayed.
 
 ## Help! My graphs aren't showing up!
