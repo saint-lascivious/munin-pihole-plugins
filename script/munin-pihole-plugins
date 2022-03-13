@@ -5,7 +5,7 @@
 # saint@sainternet.xyz
 
 # munin-pihole-plugins version
-VERSION="2.9.2"
+VERSION="2.9.3"
 
 # environment variables with overrides
 dns_server="${DNS_SERVER:-8.8.8.8}"
