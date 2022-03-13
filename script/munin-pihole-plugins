@@ -323,7 +323,7 @@ Option\\t\\tGNU long option\\t\\tMeaning
 
 # primary installation function, installation exceptions are handled here
 install_function() {
-    check_privilege
+    check_privilege "$@"
     obnoxious_header
     check_pihole
     if [[ "$skip_dependency_check" == "false" ]]; then
@@ -432,7 +432,7 @@ Type 'munin-pihole-plugins -h' for a list of available options"
 input_handler() {
     case "${1}" in
         "-h" | "--help"         ) help_function ;;
-        "-i" | "--install"      ) install_function ;;
+        "-i" | "--install"      ) install_function "$@" ;;
         "-u" | "--update"       ) update_function ;;
         "-v" | "--version"      ) version_function ;;
         "-U" | "--uninstall"    ) uninstall_function ;;
