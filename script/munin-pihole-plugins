@@ -5,7 +5,7 @@
 # saint@sainternet.xyz
 
 # munin-pihole-plugins version
-VERSION="2.9.1"
+VERSION="2.9.2"
 
 # environment variables with overrides
 dns_server="${DNS_SERVER:-8.8.8.8}"
@@ -323,7 +323,7 @@ Option\\t\\tGNU long option\\t\\tMeaning
 
 # primary installation function, installation exceptions are handled here
 install_function() {
-    privilege_check
+    check_privilege
     obnoxious_header
     check_pihole
     if [[ "$skip_dependency_check" == "false" ]]; then
@@ -352,7 +352,7 @@ install_function() {
 # uninstall munin-pihole-plugins
 # does not uninstall dependencies at this point
 uninstall_function() {
-    privilege_check
+    check_privilege
     obnoxious_header
     remove_existing
     if [[ -d "$proxy_config_dir" ]]; then
@@ -376,7 +376,7 @@ uninstall_function() {
 
 # update an existing munin-pihole-plugins installation
 update_function() {
-    privilege_check
+    check_privilege
     obnoxious_header
     remove_existing
     install_plugins
