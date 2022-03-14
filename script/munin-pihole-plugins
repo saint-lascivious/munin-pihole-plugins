@@ -5,7 +5,7 @@
 # saint@sainternet.xyz
 
 # munin-pihole-plugins version
-VERSION="2.9.3"
+VERSION="2.9.4"
 
 # environment variables with overrides
 dns_server="${DNS_SERVER:-8.8.8.8}"
@@ -352,7 +352,7 @@ install_function() {
 # uninstall munin-pihole-plugins
 # does not uninstall dependencies at this point
 uninstall_function() {
-    check_privilege
+    check_privilege "$@"
     obnoxious_header
     remove_existing
     if [[ -d "$proxy_config_dir" ]]; then
@@ -376,7 +376,7 @@ uninstall_function() {
 
 # update an existing munin-pihole-plugins installation
 update_function() {
-    check_privilege
+    check_privilege "$@"
     obnoxious_header
     remove_existing
     install_plugins
@@ -433,9 +433,9 @@ input_handler() {
     case "${1}" in
         "-h" | "--help"         ) help_function ;;
         "-i" | "--install"      ) install_function "$@" ;;
-        "-u" | "--update"       ) update_function ;;
+        "-u" | "--update"       ) update_function "$@" ;;
         "-v" | "--version"      ) version_function ;;
-        "-U" | "--uninstall"    ) uninstall_function ;;
+        "-U" | "--uninstall"    ) uninstall_function "$@";;
         "-V" | "--variables"    ) variable_function ;;
         *                       ) mini_help_function "$@" ;;
     esac
