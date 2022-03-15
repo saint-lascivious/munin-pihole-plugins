@@ -33,7 +33,6 @@ Usage: munin-pihole-plugins [OPTION]
 Option          GNU long option         Meaning
  -h             --help                  Display this help dialogue
  -i             --install               Install munin-pihole-plugins
- -u             --update                Update munin-pihole-plugins
  -v             --version               Display the current and latest versions
  -U             --uninstall             Uninstall munin-pihole-plugins
  -V             --variables             Display environment variables
@@ -79,7 +78,6 @@ Usage: export [VARIABLE]="value"
 
 Variable
   DNS_SERVER="208.67.222.222"
-  INSTALL_SCRIPT="true"
   INSTALL_WEBSERVER="true"
   MUNIN_DIR="/etc/munin"
   MUNIN_CONFIG_DIR="/etc/munin/munin-conf.d"
@@ -88,18 +86,13 @@ Variable
   PLUGIN_CONFIG_DIR="/etc/munin/plugin-conf.d"
   PLUGIN_LIST="blocked cache cache_by_type clients percent queries replies_by_type status unique_domains"
   PROXY_CONFIG_DIR="/etc/lighttpd"
-  SCRIPT_DIR="/usr/local/bin"
   SKIP_DEPENDENCY_CHECK="false"
-  VERBOSE_OUTPUT="true"
+  VERBOSE_OUTPUT="false"
 ```
 
 * DNS_SERVER
 
 The DNS server which `munin-pihole-plugins` will contact in order to retrieve its version information (from a `TXT` record at `munin-pihole-plugins.sainternet.xyz`). This should ideally be an IP rather than a hostname, and it should ideally be external, but I'm not your mother.
-
-* INSTALL_SCRIPT
-
-Disables installation of the `munin-pihole-plugins` script if set to any value other than `true`.
 
 * INSTALL_WEBSERVER
 
@@ -133,17 +126,13 @@ A space separated list of `munin-pihole-plugins` plugin names which can be used 
 
 The directory in which `'lighttpd`'s external.conf should be located.
 
-* SCRIPT_DIR
-
-The directory in which `munin-pihole-plugins` should be located or installed to, `munin-pihole-plugins` will warn if this directory is not located in the host's `$PATH` variable and suggest how to correct this.
-
 * SKIP_DEPENDENCY_CHECK
 
 Disables `apt` and `dpkg-query` based dependency satisfaction if set to any value other than `false`.
 
 * VERBOSE_OUTPUT
 
-Disables non-critical `munin-pihole-plugins` script output if set to any value other than `true`, errors are always displayed.
+Disables non-critical `munin-pihole-plugins` script output if set to any value other than `true`. Errors are always displayed, but a successful installation will be otherwise silent.
 
 ## Help! My graphs aren't showing up!
 
