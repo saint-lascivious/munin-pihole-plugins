@@ -5,7 +5,7 @@
 # saint@sainternet.xyz
 
 # munin-pihole-plugins version
-VERSION="3.0"
+VERSION="3.0.1"
 
 # environment variables with overrides
 dns_server="${DNS_SERVER:-208.67.222.222}"
@@ -85,6 +85,7 @@ install_dependencies() {
     if [[ -x "$(command -v dpkg-query)" ]]; then
         if [[ -x "$(command -v apt)" ]]; then
             for dependency_id in $dependency_list; do
+                output " * \\e[32;1m[INFO]\\e[0m Checking for $dependency_id"
                 package_query="$(dpkg-query -W --showformat='${Status}\n' "$dependency_id" | grep "install ok installed")"
                 if [[ -z "$package_query" ]]; then
                     apt install "$dependency_id"
@@ -129,6 +130,7 @@ configure_proxy() {
    $proxy_config.bak"
             fi
         fi
+        output " * \\e[32;1m[INFO]\\e[0m Installing Munin webserver proxy configuration"
         download "$proxy_repo/etc/lighttpd/external.conf" -O "$proxy_config"
     else
         echo -e " * \\e[31;1m[ERROR]\\e[0m No lighttpd configuration directory found at
@@ -147,6 +149,7 @@ configure_proxy() {
 configure_munin() {
     if [[ -d "$munin_config_dir" ]]; then
         if [[ ! -f "$munin_config_dir/99-graph-strategy.conf" ]]; then
+            output " * \\e[32;1m[INFO]\\e[0m Installing Munin server graph strategy configuration"
             download "$plugin_repo/etc/munin/munin-conf.d/99-graph-strategy.conf" -P "$munin_config_dir" || return
         fi
     else
@@ -191,16 +194,22 @@ remove_existing() {
                 rm "$plugin_link" 2> /dev/null
         done
     fi
-    if [[ -d "$munin_config_dir" ]]; then
-        if [[ -f "$munin_config_dir/99-graph-strategy.conf" ]]; then
-            rm "$munin_config_dir/99-graph-strategy.conf" || return
-        fi
-    fi
-    if [[ -d "$plugin_config_dir" ]]; then
-        if [[ -f  "$plugin_config_dir/pihole" ]]; then
-            rm "$plugin_config_dir/pihole" || return
-        fi
-    fi
+    # disable removal of 'existing 99-graph-strategy.conf' for now
+    #if [[ -d "$munin_config_dir" ]]; then
+    #    if [[ -f "$munin_config_dir/99-graph-strategy.conf" ]]; then
+    #        rm "$munin_config_dir/99-graph-strategy.conf" || return
+    #    fi
+    #fi
+    # disable removal of existing 'pihole' for now
+    #if [[ -d "$plugin_config_dir" ]]; then
+    #    if [[ -f  "$plugin_config_dir/pihole" ]]; then
+    #        rm "$plugin_config_dir/pihole" || return
+    #    fi
+    #fi
+    # these files are unlikely to change and unlikely to be from
+    # anywhere other than munin-pihole-plugins
+    # if or when they ever do change here upstream they can be
+    # enabled again as required
 }
 
 # installs munin-pihole-plugins plugins and symbolic links
@@ -209,6 +218,7 @@ install_plugins() {
     if [[ -d "$munin_plugin_dir" ]]; then
         if [[ -d "$node_plugin_dir" ]]; then
             for plugin_id in $plugin_list; do
+                output " * \\e[32;1m[INFO]\\e[0m Installing selected plugin pihole_$plugin_id"
                 download "$plugin_repo/usr/share/munin/plugins/pihole_$plugin_id" -P "$munin_plugin_dir" || return
                 chmod +x "$munin_plugin_dir/pihole_$plugin_id" || return
                 ln -s "$munin_plugin_dir/pihole_$plugin_id" "$node_plugin_dir/pihole_$plugin_id" || return
@@ -263,6 +273,7 @@ restart_services() {
     fi
     if [[ -x "$(command -v service)" ]]; then
         for service_id in $service_list; do
+            output " * \\e[32;1m[INFO]\\e[0m Restarting $service_id service"
             service "$service_id" restart
         done
     else

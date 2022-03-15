@@ -87,7 +87,7 @@ Variable
   PLUGIN_LIST="blocked cache cache_by_type clients percent queries replies_by_type status unique_domains"
   PROXY_CONFIG_DIR="/etc/lighttpd"
   SKIP_DEPENDENCY_CHECK="false"
-  VERBOSE_OUTPUT="false"
+  VERBOSE_OUTPUT="true"
 ```
 
 * DNS_SERVER
