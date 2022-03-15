@@ -78,7 +78,7 @@ Provided munin-node and Pi-hole® exist on the same host, the default configurat
 Usage: export [VARIABLE]="value"
 
 Variable
-  DNS_SERVER="8.8.8.8"
+  DNS_SERVER="208.67.222.222"
   INSTALL_SCRIPT="true"
   INSTALL_WEBSERVER="true"
   MUNIN_DIR="/etc/munin"
@@ -95,7 +95,7 @@ Variable
 
 * DNS_SERVER
 
-The DNS server `munin-pihole-plugins` will contact in order to retrieve version information.
+The DNS server which `munin-pihole-plugins` will contact in order to retrieve its version information (from a `TXT` record at `munin-pihole-plugins.sainternet.xyz`). This should ideally be an IP rather than a hostname, and it should ideally be external, but I'm not your mother.
 
 * INSTALL_SCRIPT
 

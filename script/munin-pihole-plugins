@@ -5,10 +5,10 @@
 # saint@sainternet.xyz
 
 # munin-pihole-plugins version
-VERSION="2.9.4"
+VERSION="2.9.5"
 
 # environment variables with overrides
-dns_server="${DNS_SERVER:-8.8.8.8}"
+dns_server="${DNS_SERVER:-208.67.222.222}"
 install_script="${INSTALL_SCRIPT:-true}"
 install_webserver="${INSTALL_WEBSERVER:-true}"
 munin_dir="${MUNIN_DIR:-/etc/munin}"
@@ -23,7 +23,7 @@ skip_dependency_check="${SKIP_DEPENDENCY_CHECK:-false}"
 verbose_output="${VERBOSE_OUTPUT:-true}"
 
 # environment variables without
-get_version="$(dig TXT +short munin-pihole-plugins.sainternet.xyz @"$dns_server" -p 53 | sed s'/[^0-9.]//g')"
+get_version="$(dig TXT +short +timeout=5 +tries=1 munin-pihole-plugins.sainternet.xyz @"$dns_server" -p 53 | sed s'/[^0-9.]//g')"
 plugin_dependencies="munin-node"
 plugin_repo="https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master"
 plugin_services="munin-node"
@@ -122,9 +122,13 @@ download() {
 install_script() {
     if [[ -d "$script_dir" ]]; then
         if [[ -f "$script_dir/munin-pihole-plugins" ]]; then
-            if [[ "$get_version" > "$VERSION" ]]; then
-                download "$plugin_repo/script/munin-pihole-plugins" -O "$script_dir/munin-pihole-plugins"
-                chmod +x "$script_dir/munin-pihole-plugins" || return
+            if [[ -n "$get_version" ]]; then
+                if [[ "$get_version" > "$VERSION" ]]; then
+                    download "$plugin_repo/script/munin-pihole-plugins" -O "$script_dir/munin-pihole-plugins"
+                    chmod +x "$script_dir/munin-pihole-plugins" || return
+                fi
+            else
+                output " * \\e[33;1m[WARNING]\\e[0m Unable to fetch remote version information"
             fi
         else
             download "$plugin_repo/script/munin-pihole-plugins" -P "$script_dir"
@@ -146,16 +150,20 @@ install_script() {
 }
 
 # installs a related project lighttpd-external-munin-proxy
-# backup any existing non-zero lighttpd external.conf, merging is out of scope
-# at this point
+# backup any existing non-zero lighttpd external.conf if no current backup exists
+# merging existing external.conf properties is annoying and is out of scope at
+# this point
 configure_proxy() {
+    proxy_config="$proxy_config_dir/external.conf"
     if [[ -d "$proxy_config_dir" ]]; then
-        if [[ -s "$proxy_config_dir/external.conf" ]]; then
-            mv "$proxy_config_dir/external.conf" "$proxy_config_dir/external.conf.bak" || return
-            output " * \\e[32;1m[INFO]\\e[0m Existing lighttpd external.conf backed up to
-   $proxy_config_dir/external.conf.bak"
+        if [[ -s "$proxy_config" ]]; then
+            if [[ ! -f "$proxy_config.bak" ]]; then
+                mv "$proxy_config" "$proxy_config.bak" || return
+                output " * \\e[32;1m[INFO]\\e[0m Existing lighttpd external.conf backed up to
+   $proxy_config.bak"
+            fi
         else
-            rm "$proxy_config_dir/external.conf" || return
+            rm "$proxy_config" || return
         fi
         download "$proxy_repo/etc/lighttpd/external.conf" -P "$proxy_config_dir"
     else
@@ -351,6 +359,8 @@ install_function() {
 
 # uninstall munin-pihole-plugins
 # does not uninstall dependencies at this point
+# places a blank external.conf file for lighttpd because apparently it
+# will pitch a fit if it doesn't exist
 uninstall_function() {
     check_privilege "$@"
     obnoxious_header
@@ -369,9 +379,9 @@ uninstall_function() {
     fi
     restart_services
     if [[ -f "$script_dir/munin-pihole-plugins" ]]; then
+        output " * \\e[32;1m[INFO]\\e[0m Removing installed munin-pihole-plugins script as final action"
         rm "$script_dir/munin-pihole-plugins" || return
     fi
-    output " * \\e[32;1m[INFO]\\e[0m Done"
 }
 
 # update an existing munin-pihole-plugins installation
