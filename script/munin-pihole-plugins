@@ -5,7 +5,7 @@
 # saint@sainternet.xyz
 
 # munin-pihole-plugins version
-VERSION="3.0.1"
+VERSION="3.1"
 
 # environment variables with overrides
 dns_server="${DNS_SERVER:-208.67.222.222}"
@@ -156,8 +156,8 @@ configure_munin() {
         output " * \\e[32;1m[INFO]\\e[0m Attempting fallback configuration editing munin.conf directly"
         if [[ -d "$munin_dir" ]]; then
             if [[ -f "$munin_dir/munin.conf" ]]; then
-                sed -i "s/#html_strategy cron/html_strategy cgi/g" "$munin_dir/munin.conf"
-                sed -i "s/#graph_strategy cron/graph_strategy cgi/g" "$munin_dir/munin.conf"
+                sed -i "s/^#html_strategy cron/html_strategy cgi/g" "$munin_dir/munin.conf" || return
+                sed -i "s/^#graph_strategy cron/graph_strategy cgi/g" "$munin_dir/munin.conf" || return
             else
                 echo -e " * \\e[31;1m[ERROR]\\e[0m No munin.conf file found at
    $munin_dir/munin.conf"
@@ -194,22 +194,6 @@ remove_existing() {
                 rm "$plugin_link" 2> /dev/null
         done
     fi
-    # disable removal of 'existing 99-graph-strategy.conf' for now
-    #if [[ -d "$munin_config_dir" ]]; then
-    #    if [[ -f "$munin_config_dir/99-graph-strategy.conf" ]]; then
-    #        rm "$munin_config_dir/99-graph-strategy.conf" || return
-    #    fi
-    #fi
-    # disable removal of existing 'pihole' for now
-    #if [[ -d "$plugin_config_dir" ]]; then
-    #    if [[ -f  "$plugin_config_dir/pihole" ]]; then
-    #        rm "$plugin_config_dir/pihole" || return
-    #    fi
-    #fi
-    # these files are unlikely to change and unlikely to be from
-    # anywhere other than munin-pihole-plugins
-    # if or when they ever do change here upstream they can be
-    # enabled again as required
 }
 
 # installs munin-pihole-plugins plugins and symbolic links
@@ -337,26 +321,59 @@ install_function() {
 }
 
 # uninstall munin-pihole-plugins
-# does not uninstall dependencies at this point
-# places a blank external.conf file for lighttpd because apparently it
-# will pitch a fit if it doesn't exist
+# removes all munin plugins and related configuration placed by
+# munin-pihole-plugins and then prompts to remove any dependencies that may
+# have been installed by munin-pihole-plugins (since we don't track what we
+# did install if anything)
+# places a blank external.conf file for lighttpd if we can't restore a backup
+# because apparently it will pitch a fit if external.conf doesn't exist
 uninstall_function() {
     check_privilege "$@"
     obnoxious_header
-    remove_existing
     if [[ -d "$proxy_config_dir" ]]; then
         if [[ -f "$proxy_config_dir/external.conf.bak" ]]; then
             mv "$proxy_config_dir/external.conf.bak" "$proxy_config_dir/external.conf" || return
-            output " * \\e[32;1m[INFO]\\e[0m Original lighttpd external.conf restored from
-   $proxy_config_dir/external.conf.bak"
+            output " * \\e[32;1m[INFO]\\e[0m Original lighttpd external.conf restored from backup"
         else
             if [[ -f "$proxy_config_dir/external.conf" ]]; then
                 rm "$proxy_config_dir/external.conf" || return
-                touch "$proxy_config_dir/external.conf"
+                touch "$proxy_config_dir/external.conf" || return
             fi
         fi
     fi
-    restart_services
+    if [[ -d "$munin_config_dir" ]]; then
+        if [[ -f "$munin_config_dir/99-graph-strategy.conf" ]]; then
+            rm "$munin_config_dir/99-graph-strategy.conf" || return
+        fi
+    else
+        if [[ -d "$munin_dir" ]]; then
+            if [[ -f "$munin_dir/munin.conf" ]]; then
+                sed -i "s/^html_strategy cli/#html_strategy cron/g" "$munin_dir/munin.conf" || return
+                sed -i "s/^graph_strategy cli/#graph_strategy cron/g" "$munin_dir/munin.conf" || return
+            fi
+        fi
+    fi
+    remove_existing
+    if [[ -d "$plugin_config_dir" ]]; then
+        if [[ -f  "$plugin_config_dir/pihole" ]]; then
+            rm "$plugin_config_dir/pihole" || return
+        fi
+    fi
+    if [[ "$skip_dependency_check" == "false" ]]; then
+        dependency_list="$plugin_dependencies $script_dependencies $webserver_dependencies"
+        if [[ -x "$(command -v dpkg-query)" ]]; then
+            if [[ -x "$(command -v apt)" ]]; then
+                for dependency_id in $dependency_list; do
+                    package_query="$(dpkg-query -W --showformat='${Status}\n' "$dependency_id" | grep "install ok installed")"
+                    if [[ -n "$package_query" ]]; then
+                        output " * \\e[33;1m[WARNING]\\e[0m $dependency_id may have been installed by munin-pihole-plugins
+   Would you like to uninstall $dependency_id now?"
+                        apt remove "$dependency_id"
+                    fi
+                done
+            fi
+        fi
+    fi
     output " * \\e[32;1m[INFO]\\e[0m Done"
 }
 
