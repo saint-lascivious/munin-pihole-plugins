@@ -87,6 +87,7 @@ Variable
   PLUGIN_LIST="blocked cache cache_by_type clients percent queries replies_by_type status unique_domains"
   PROXY_CONFIG_DIR="/etc/lighttpd"
   SKIP_DEPENDENCY_CHECK="false"
+  UPDATE_SELF="true"
   VERBOSE_OUTPUT="true"
 ```
 
@@ -129,6 +130,10 @@ The directory in which `'lighttpd`'s external.conf should be located.
 * SKIP_DEPENDENCY_CHECK
 
 Disables `apt` and `dpkg-query` based dependency satisfaction if set to any value other than `false`.
+
+* UPDATE_SELF
+
+Disables self update of `munin-pihole-plugins` script if set to any value other than `true`.
 
 * VERBOSE_OUTPUT
 
