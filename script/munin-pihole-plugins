@@ -5,7 +5,7 @@
 # saint@sainternet.xyz
 
 # munin-pihole-plugins version
-VERSION="3.1"
+VERSION="3.1.1"
 
 # environment variables with overrides
 dns_server="${DNS_SERVER:-208.67.222.222}"
@@ -241,8 +241,8 @@ configure_plugins() {
         exit 1
     fi
     if [[ "$pihole_on_host" == "no" ]]; then
-        output " * \\e[33;1m[WARNING]\\e[0m The Pi-hole® command 'pihole' was not found
-   If this is not a mistake, edit
+        output " * \\e[33;1m[WARNING]\\e[0m The Pi-hole® command 'pihole' was not found on this host
+   If this was intentional you will need to edit
    $plugin_config_dir/pihole
    and replace the host and setupvars values with those of your Pi-hole® host"
     fi
@@ -381,10 +381,6 @@ uninstall_function() {
 version_function() {
     if [[ "$get_version" > "$VERSION" ]]; then
         echo "An update for munin-pihole-plugins is available"
-    else
-        if [[ "$get_version" < "$VERSION" ]]; then
-            output "Thank you for using munin-pihole-plugins, Professor Hawking"
-        fi
     fi
     echo "munin-pihole-plugins version is v$VERSION (Latest: v$get_version)"
 }
@@ -408,7 +404,7 @@ Variable
   VERBOSE_OUTPUT=\"$verbose_output\""
 }
 
-# hand invalid input by prompting on how to find valid input
+# handle invalid input by prompting on how to find valid input
 mini_help_function() {
     echo "munin-pihole-plugins: unrecognized option '$1'
 Type 'munin-pihole-plugins -h' for a list of available options"
