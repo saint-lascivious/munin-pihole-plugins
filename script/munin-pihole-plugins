@@ -5,7 +5,7 @@
 # saint@sainternet.xyz
 
 # munin-pihole-plugins version
-VERSION="3.2.2"
+VERSION="3.2.3"
 
 # environment variables with overrides
 dns_server="${DNS_SERVER:-208.67.222.222}"
@@ -299,10 +299,10 @@ restart_services() {
 }
 
 # opportunistic pagination wrapper using less or more
-# currently only used for help and variable function output where
+# currently only used for variable function output where
 # overflowing terminal height may be an inconvenience
 some() {
-    if [[ "$terminal_height" -lt "16" ]]; then
+    if [[ "$terminal_height" -le "16" ]]; then
         if [[ -x "$(command -v less)" ]]; then
             echo -e "$@" | less
         else
@@ -319,7 +319,7 @@ some() {
 
 # display munin-pihole-plugins script help text
 help_function() {
-    some "Usage: munin-pihole-plugins [OPTION]
+    echo -e "Usage: munin-pihole-plugins [OPTION]
 
 Option\\t\\tGNU long option\\t\\tMeaning
  -h\\t\\t--help\\t\\t\\tDisplay this help dialogue
