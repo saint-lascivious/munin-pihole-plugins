@@ -5,7 +5,7 @@
 # saint@sainternet.xyz
 
 # munin-pihole-plugins version
-VERSION="3.2"
+VERSION="3.2.1"
 
 # environment variables with overrides
 dns_server="${DNS_SERVER:-208.67.222.222}"
@@ -60,16 +60,21 @@ update_script() {
 # saint@sainternet.xyz
 
 update_now() {
-    wget -q --show-progress munin-pihole-plugins.sainternet.xyz -O "$current_directory/munin-pihole-plugins"
+    if [[ -x "$(command -v wget)" ]]; then
+        wget -q --show-progress munin-pihole-plugins.sainternet.xyz -O "$current_directory/munin-pihole-plugins"
+    else
+        echo -e " * \\e[31;1m[ERROR]\\e[0m The required command 'wget' was not found"
+        exit 1
+    fi
     chmod +x "$current_directory/munin-pihole-plugins" || return
-    " * \\e[32;1m[INFO]\\e[0m Restarting after update"
+    echo -e " * \\e[32;1m[INFO]\\e[0m Restarting after update"
     exec env UPDATE_SELF=false /bin/bash "$0" "$@"
 }
 
 update_now
 EOF
     chmod +x "$TEMP/.munin-pihole-plugins"
-    " * \\e[32;1m[INFO]\\e[0m Updating munin-pihole-plugins"
+    echo -e " * \\e[32;1m[INFO]\\e[0m Updating munin-pihole-plugins"
     exec /bin/bash "$TEMP/.munin-pihole-plugins"
 }
 
