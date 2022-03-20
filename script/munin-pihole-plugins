@@ -5,7 +5,7 @@
 # saint@sainternet.xyz
 
 # munin-pihole-plugins version
-VERSION="3.2.3"
+VERSION="3.2.4"
 
 # environment variables with overrides
 dns_server="${DNS_SERVER:-208.67.222.222}"
@@ -68,7 +68,7 @@ update_now() {
     fi
     chmod +x "$current_directory/munin-pihole-plugins" || return
     echo -e " * \\e[32;1m[INFO]\\e[0m Restarting after update"
-    exec env UPDATE_SELF=false /bin/bash "$0" "$@"
+    exec env UPDATE_SELF="false" /bin/bash "$0" "$@"
 }
 
 update_now
@@ -212,7 +212,8 @@ configure_munin() {
     fi
 }
 
-# remove any existing munin-pihole-plugins plugins and symbolic links
+# remove existing munin-pihole-plugins plugins and symbolic links
+# uses $plugin_list
 remove_existing() {
     if [[ -d "$munin_plugin_dir" ]]; then
         for plugin_id in $plugin_list; do
@@ -222,8 +223,10 @@ remove_existing() {
         done
     fi
     if [[ -d "$node_plugin_dir" ]]; then
-        for plugin_link in "$node_plugin_dir"/pihole_*; do
-                rm "$plugin_link" 2> /dev/null
+        for plugin_id in $plugin_list; do
+            if [[ -f "$node_plugin_dir/pihole_$plugin_id" ]]; then
+                rm "$node_plugin_dir/pihole_$plugin_id" || return
+            fi
         done
     fi
 }
@@ -342,7 +345,6 @@ install_function() {
         fi
     fi
     obnoxious_header
-    check_pihole
     remove_existing
     if [[ "$skip_dependency_check" == "false" ]]; then
         install_dependencies
@@ -356,6 +358,7 @@ install_function() {
         output " * \\e[32;1m[INFO]\\e[0m Skipping webserver installation"
     fi
     install_plugins
+    check_pihole
     configure_plugins
     restart_services
     output " * \\e[32;1m[INFO]\\e[0m Done"
