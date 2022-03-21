@@ -5,7 +5,7 @@
 # saint@sainternet.xyz
 
 # munin-pihole-plugins version
-VERSION="3.2.4"
+VERSION="3.2.5"
 
 # environment variables with overrides
 dns_server="${DNS_SERVER:-208.67.222.222}"
@@ -22,7 +22,7 @@ update_self="${UPDATE_SELF:-true}"
 verbose_output="${VERBOSE_OUTPUT:-true}"
 
 # environment variables without
-current_directory="$(pwd)"
+current_directory="$(dirname "$(readlink -f "$0")")"
 get_version="$(dig TXT +short +timeout=5 +tries=1 munin-pihole-plugins.sainternet.xyz @"$dns_server" -p 53 | sed s'/[^0-9.]//g')"
 plugin_dependencies="munin-node"
 plugin_repo="https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master"
@@ -149,9 +149,9 @@ download() {
 }
 
 # installs a related project lighttpd-external-munin-proxy
-# backup any existing non-zero lighttpd external.conf if no current backup exists
-# merging existing external.conf properties is annoying and is out of scope at
-# this point
+# backup any existing non-zero lighttpd external.conf if no backup exists
+# safely merging any existing external.conf properties without conflict
+# would be tedious and annoying, and is out of scope at this point
 configure_proxy() {
     proxy_config="$proxy_config_dir/external.conf"
     if [[ -d "$proxy_config_dir" ]]; then
