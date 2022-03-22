@@ -13,7 +13,7 @@ curl -sSL munin-pihole-plugins.sainternet.xyz -o munin-pihole-plugins && chmod +
 ```
 ./munin-pihole-plugins --install
 ```
-Dependencies are checked and met using `dpkg-query` and `apt` respectively, you will be prompted before any unmet dependencies are installed. A copy of the munin-pihole-plugins script will also be installed on the host in /usr/local/bin by default. The munin-pihole-plugins script directory can be configured, or munin-pihole-plugins script installation may be disabled entirely.
+Dependencies are checked and met using `dpkg-query` and `apt` respectively, you will be prompted before any unmet dependencies are installed. A copy of the munin-pihole-plugins script will be installed on the host in `/usr/local/bin` by default. The munin-pihole-plugins script directory can be configured, or munin-pihole-plugins script installation may be disabled entirely.
 
 ## Step Three: Wait
 * Wait, around five minutes
@@ -78,6 +78,8 @@ Usage: export [VARIABLE]="value"
 
 Variable
   DNS_SERVER="208.67.222.222"
+  INSTALL_PLUGINS="true"
+  INSTALL_SCRIPT="true"
   INSTALL_WEBSERVER="true"
   MUNIN_DIR="/etc/munin"
   MUNIN_CONFIG_DIR="/etc/munin/munin-conf.d"
@@ -86,6 +88,7 @@ Variable
   PLUGIN_CONFIG_DIR="/etc/munin/plugin-conf.d"
   PLUGIN_LIST="blocked cache cache_by_type clients percent queries replies_by_type status unique_domains"
   PROXY_CONFIG_DIR="/etc/lighttpd"
+  SCRIPT_DIR="{SCRIPT_DIR:-/usr/local/bin}"
   SKIP_DEPENDENCY_CHECK="false"
   UPDATE_SELF="true"
   VERBOSE_OUTPUT="true"
@@ -94,6 +97,14 @@ Variable
 * DNS_SERVER
 
 The DNS server which `munin-pihole-plugins` will contact in order to retrieve its version information (from a `TXT` record at `munin-pihole-plugins.sainternet.xyz`). This should ideally be an IP rather than a hostname, and it should ideally be external, but I'm not your mother.
+
+* INSTALL_PLUGINS
+
+Disables installation of `munin-node` and `munin-pihole-plugins` plugins if set to any value other than `true`.
+
+* INSTALL_SCRIPT
+
+Disables installation of the `munin-pihole-plugins` script if set to any value other than `true`.
 
 * INSTALL_WEBSERVER
 
@@ -105,7 +116,7 @@ The directory in which `munin`'s munin.conf file should be located.
 
 * MUNIN_CONFIG_DIR
 
-The directory in which additional `munin` configuration files may be placed, `munin-pihole-plugins` will attempt to use this in favour of editing munin.conf directly.
+The directory in which additional `munin` configuration files may be placed, the `munin-pihole-plugins` script will attempt to use this in favour of editing munin.conf directly.
 
 * MUNIN_PLUGIN_DIR
 
@@ -117,15 +128,19 @@ The directory in which `munin-node` symbolic links should be created.
 
 * PLUGIN_CONFIG_DIR
 
-The directory in which individual plugin configurations should be located.
+The directory in which individual `munin-node` plugin configurations should be located.
 
 * PLUGIN_LIST
 
-A space separated list of `munin-pihole-plugins` plugin names which can be used to determine which plugins to install.
+A space separated list of `munin-pihole-plugins` plugin names, used to determine which plugins will be install.
 
 * PROXY_CONFIG_DIR
 
 The directory in which `'lighttpd`'s external.conf should be located.
+
+* SCRIPT_DIR
+
+The directory in which the `munin-pihole-plugins` script should be located when installed, munin-pihole-plugins will warn if this directory is not located in the host's $PATH variable and suggest how to correct this.
 
 * SKIP_DEPENDENCY_CHECK
 
@@ -133,7 +148,7 @@ Disables `apt` and `dpkg-query` based dependency satisfaction if set to any valu
 
 * UPDATE_SELF
 
-Disables self update of `munin-pihole-plugins` script if set to any value other than `true`.
+Disables self update of the `munin-pihole-plugins` script if set to any value other than `true`.
 
 * VERBOSE_OUTPUT
 
