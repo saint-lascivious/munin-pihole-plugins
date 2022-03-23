@@ -5,7 +5,7 @@
 # saint@sainternet.xyz
 
 # munin-pihole-plugins version
-VERSION="4.0.1"
+VERSION="4.1"
 
 # environment variables with overrides
 dns_server="${DNS_SERVER:-208.67.222.222}"
@@ -220,7 +220,7 @@ configure_munin() {
 
 # remove all existing munin-pihole-plugins plugins and symbolic links
 # munin will reap abandoned plugin .rrd files itself
-remove_existing() {
+uninstall_plugins() {
     all_plugins="blocked cache cache_by_type clients percent queries replies_by_type status unique_domains"
     if [[ -d "$munin_plugin_dir" ]]; then
         for plugin_id in $all_plugins; do
@@ -336,6 +336,28 @@ install_script() {
     fi
 }
 
+# spawns a child script to uninstall a locally installed munin-pihole-plugins
+# script if present
+uninstall_script() {
+            cat > "$TEMP/.munin-pihole-plugins_uninstall" << EOF
+#!/usr/bin/env bash
+
+# .munin-pihole-plugins_uninstall
+# saint-lascivious (Hayden Pearce) 2022
+# saint@sainternet.xyz
+
+# uninstalls a locally installed copy of the munin-pihole-plugins script
+uninstall_now() {
+    rm "$script_dir/munin-pihole-plugins" || return
+    echo -e " * \\e[32;1m[INFO]\\e[0m Done"
+}
+
+uninstall_now
+EOF
+    chmod +x "$TEMP/.munin-pihole-plugins_uninstall"
+    exec /bin/bash "$TEMP/.munin-pihole-plugins_uninstall"
+}
+
 # an opportunistic pagination wrapper, more or less
 some() {
     if [[ "$terminal_height" -lt "$height" ]]; then
@@ -393,7 +415,7 @@ install_function() {
     fi
     if [[ "$install_plugins" == "true" ]]; then
         if [[ -n "$plugin_list" ]]; then
-            remove_existing
+            uninstall_plugins
             install_plugins
             check_pihole
             configure_plugins
@@ -427,7 +449,6 @@ install_function() {
 # did install if anything)
 # places a blank external.conf file for lighttpd if we can't restore a backup
 # because apparently it will pitch a fit if external.conf doesn't exist
-# spawns a child script to uninstall a locally install script if present
 uninstall_function() {
     check_privilege "$@"
     obnoxious_header
@@ -454,7 +475,7 @@ uninstall_function() {
             fi
         fi
     fi
-    remove_existing
+    uninstall_plugins
     if [[ -d "$plugin_config_dir" ]]; then
         if [[ -f  "$plugin_config_dir/pihole" ]]; then
             rm "$plugin_config_dir/pihole" || return
@@ -480,26 +501,10 @@ uninstall_function() {
     fi
     if [[ -d "$script_dir" ]]; then
         if [[ -f "$script_dir/munin-pihole-plugins" ]]; then
-            cat > "$TEMP/.munin-pihole-plugins_uninstall" << EOF
-#!/usr/bin/env bash
-
-# .munin-pihole-plugins_uninstall
-# saint-lascivious (Hayden Pearce) 2022
-# saint@sainternet.xyz
-
-# uninstalls a locally installed copy of the munin-pihole-plugins script
-uninstall_script() {
-    rm "$script_dir/munin-pihole-plugins" || return
-    echo -e " * \\e[32;1m[INFO]\\e[0m Done"
-}
-
-uninstall_script
-EOF
-            chmod +x "$TEMP/.munin-pihole-plugins_uninstall"
-            exec /bin/bash "$TEMP/.munin-pihole-plugins_uninstall"
+            uninstall_script
+        else
+            output " * \\e[32;1m[INFO]\\e[0m Done"
         fi
-    else
-        output " * \\e[32;1m[INFO]\\e[0m Done"
     fi
 }
 
