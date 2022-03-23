@@ -5,7 +5,7 @@
 # saint@sainternet.xyz
 
 # munin-pihole-plugins version
-VERSION="4.0"
+VERSION="4.0.1"
 
 # environment variables with overrides
 dns_server="${DNS_SERVER:-208.67.222.222}"
@@ -31,7 +31,7 @@ plugin_dependencies="munin-node "
 plugin_repo="https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master"
 plugin_services="munin-node "
 proxy_repo="https://raw.githubusercontent.com/saint-lascivious/lighttpd-external-munin-proxy/master"
-script_dependencies="init-system-helpers wget "
+script_dependencies="dnsutils init-system-helpers wget "
 terminal_height="$(stty size | cut -d " " -f1)"
 terminal_width="$(stty size | cut -d " " -f2)"
 webserver_dependencies="lighttpd munin "
@@ -218,18 +218,19 @@ configure_munin() {
     fi
 }
 
-# remove existing munin-pihole-plugins plugins and symbolic links
-# uses $plugin_list
+# remove all existing munin-pihole-plugins plugins and symbolic links
+# munin will reap abandoned plugin .rrd files itself
 remove_existing() {
+    all_plugins="blocked cache cache_by_type clients percent queries replies_by_type status unique_domains"
     if [[ -d "$munin_plugin_dir" ]]; then
-        for plugin_id in $plugin_list; do
+        for plugin_id in $all_plugins; do
             if [[ -f "$munin_plugin_dir/pihole_$plugin_id" ]]; then
                 rm "$munin_plugin_dir/pihole_$plugin_id" || return
             fi
         done
     fi
     if [[ -d "$node_plugin_dir" ]]; then
-        for plugin_id in $plugin_list; do
+        for plugin_id in $all_plugins; do
             if [[ -f "$node_plugin_dir/pihole_$plugin_id" ]]; then
                 rm "$node_plugin_dir/pihole_$plugin_id" || return
             fi

@@ -13,7 +13,7 @@ curl -sSL munin-pihole-plugins.sainternet.xyz -o munin-pihole-plugins && chmod +
 ```
 ./munin-pihole-plugins --install
 ```
-Dependencies are checked and met using `dpkg-query` and `apt` respectively, you will be prompted before any unmet dependencies are installed. A copy of the munin-pihole-plugins script will be installed on the host in `/usr/local/bin` by default. The munin-pihole-plugins script directory can be configured, or munin-pihole-plugins script installation may be disabled entirely.
+Dependencies are checked and met using `dpkg-query` and `apt` respectively, you will be prompted before any unmet dependencies are installed. A copy of the `munin-pihole-plugins` script will be installed on the host in `/usr/local/bin` by default. The munin-pihole-plugins script directory can be configured, or the `munin-pihole-plugins` script installation may be disabled entirely.
 
 ## Step Three: Wait
 * Wait, around five minutes
@@ -72,7 +72,7 @@ Option          GNU long option         Meaning
 Provided munin-node and Pi-hole® exist on the same host, the default configuration should Just Work. If you have a non-standard configuration or Pi-hole® is running on a seperate host, you will need to edit the plugin configuration. The `env.webpassword` value can be obtained from the Pihole host's `/etc/pihole/setupVars.conf` file. The plugins attempt to obtain this value themselves.
 
 ## Script Configuration
-* Default `munin-pihole-plugins` environment variables
+* Default `munin-pihole-plugins` script environment variables
 ```
 Usage: export [VARIABLE]="value"
 
@@ -96,7 +96,7 @@ Variable
 
 * DNS_SERVER
 
-The DNS server which `munin-pihole-plugins` will contact in order to retrieve its version information (from a `TXT` record at `munin-pihole-plugins.sainternet.xyz`). This should ideally be an IP rather than a hostname, and it should ideally be external, but I'm not your mother.
+The DNS server which the `munin-pihole-plugins` script will contact in order to retrieve its version information (from a `TXT` record at `munin-pihole-plugins.sainternet.xyz`). This should ideally be an IP rather than a hostname, and it should ideally be external, but I'm not your mother.
 
 * INSTALL_PLUGINS
 
@@ -112,7 +112,7 @@ Disables installation of the `munin` webserver and `lighttpd` proxy if set to an
 
 * MUNIN_DIR
 
-The directory in which `munin`'s munin.conf file should be located.
+The directory in which the `munin` munin.conf file should be located.
 
 * MUNIN_CONFIG_DIR
 
@@ -132,7 +132,7 @@ The directory in which individual `munin-node` plugin configurations should be l
 
 * PLUGIN_LIST
 
-A space separated list of `munin-pihole-plugins` plugin names, used to determine which plugins will be install.
+A space separated list of `munin-pihole-plugins` plugin names used to determine which plugins will be installed.
 
 * PROXY_CONFIG_DIR
 
@@ -140,7 +140,7 @@ The directory in which `'lighttpd`'s external.conf should be located.
 
 * SCRIPT_DIR
 
-The directory in which the `munin-pihole-plugins` script should be located when installed, munin-pihole-plugins will warn if this directory is not located in the host's $PATH variable and suggest how to correct this.
+The directory in which the `munin-pihole-plugins` script should be located when installed, the `munin-pihole-plugins` script will warn if this directory is not located in the host's $PATH variable and suggest how to correct this.
 
 * SKIP_DEPENDENCY_CHECK
 
