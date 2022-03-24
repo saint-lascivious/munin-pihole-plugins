@@ -5,7 +5,7 @@
 # saint@sainternet.xyz
 
 # munin-pihole-plugins version
-VERSION="4.1"
+VERSION="4.2"
 
 # environment variables with overrides
 dns_server="${DNS_SERVER:-208.67.222.222}"
@@ -379,15 +379,72 @@ some() {
 # height is the minimal terminal height required to display the full output
 # in an 80 character wide terminal
 help_function() {
-    height="9"
-    some "Usage: munin-pihole-plugins [OPTION]
+    case "${2}" in
+        "-h" | "--help" | "help"            ) height="7"
+            some "Example: munin-pihole-plugins --help
+
+Option\\t\\tGNU long option\\t\\tMeaning
+ -h\\t\\t--help\\t\\t\\tDisplay this help dialogue
+
+Display munin-pihole-plugins help information." ;;
+        "-i" | "--install" | "install"      ) height="18"
+            some "Example: munin-pihole-plugins --install
+
+Option\\t\\tGNU long option\\t\\tMeaning
+ -i\\t\\t--install\\t\\tInstall munin-pihole-plugins
+
+Install and configure Munin monitoring server software (default: true), client
+software (default: true), selected munin-pihole-plugins plugins (default: all),
+and install a copy of the munin-pihole-plugins script (default: true) to a
+selected directory (default: /usr/local/bin).
+
+The munin-pihole-plugins script will self update (default: true) before
+installation if a newer version of the munin-pihole-plugins script is
+available.
+
+You can run the installation again at any time to update munin-pihole-plugins
+plugins, optionally selecting which plugins to install using the PLUGIN_LIST
+variable." ;;
+        "-v" | "--version" | "version"      ) height="11"
+            some "Example: munin-pihole-plugins --version
+
+Option\\t\\tGNU long option\\t\\tMeaning
+ -v\\t\\t--version\\t\\tDisplay the current and latest versions
+
+Display the current munin-pihole-plugins script version, and compare it to
+the latest munin-pihole-plugins script version.
+
+An additional notification will be displayed if an update to the
+munin-pihole-plugins script is available." ;;
+        "-U" | "--uninstall" | "uninstall"  ) height="8"
+            some "Example: munin-pihole-plugins --uninstall
+
+Option\\t\\tGNU long option\\t\\tMeaning
+ -U\\t\\t--uninstall\\t\\tUninstall munin-pihole-plugins
+
+Completely uninstall munin-pihole-plugins, you will be asked if you want to
+uninstall any dependencies that munin-pihole-plugins may have installed." ;;
+        "-V" | "--variables" | "variables"  ) height="9"
+            some "Example: munin-pihole-plugins --variables
+
+Option\\t\\tGNU long option\\t\\tMeaning
+ -V\\t\\t--variables\\t\\tDisplay environment variables
+
+Display a full list of environment variables used by the munin-pihole-plugins
+script, and their current values. The veriables can be used to customize
+various aspects of the munin-pihole-plugins script's operation." ;;
+        *                                   ) height="9"
+            some "Usage: munin-pihole-plugins [OPTION]
 
 Option\\t\\tGNU long option\\t\\tMeaning
  -h\\t\\t--help\\t\\t\\tDisplay this help dialogue
  -i\\t\\t--install\\t\\tInstall munin-pihole-plugins
  -v\\t\\t--version\\t\\tDisplay the current and latest versions
  -U\\t\\t--uninstall\\t\\tUninstall munin-pihole-plugins
- -V\\t\\t--variables\\t\\tDisplay environment variables"
+ -V\\t\\t--variables\\t\\tDisplay environment variables
+
+Use '--help [OPTION]' for detailed help output" ;;
+    esac
 }
 
 # primary installation function, installation exceptions are handled here
@@ -554,12 +611,12 @@ Type 'munin-pihole-plugins -h' for a list of available options"
 # simple input handler
 input_handler() {
     case "${1}" in
-        "-h" | "--help"         ) help_function ;;
-        "-i" | "--install"      ) install_function "$@" ;;
-        "-v" | "--version"      ) version_function ;;
-        "-U" | "--uninstall"    ) uninstall_function "$@";;
-        "-V" | "--variables"    ) variable_function ;;
-        *                       ) mini_help_function "$@" ;;
+        "-h" | "--help" | "help"            ) help_function "$@" ;;
+        "-i" | "--install" | "install"      ) install_function "$@" ;;
+        "-v" | "--version" | "version"      ) version_function ;;
+        "-U" | "--uninstall" | "uninstall"  ) uninstall_function "$@" ;;
+        "-V" | "--variables" | "variables"  ) variable_function ;;
+        *                                   ) mini_help_function "$@" ;;
     esac
 }
 
