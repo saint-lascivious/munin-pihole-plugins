@@ -5,9 +5,10 @@
 # saint@sainternet.xyz
 
 # munin-pihole-plugins version
-VERSION="4.2.1"
+VERSION="4.3"
 
 # environment variables with overrides
+dns_port="${DNS_PORT:-53}"
 dns_server="${DNS_SERVER:-208.67.222.222}"
 install_plugins="${INSTALL_PLUGINS:-true}"
 install_script="${INSTALL_SCRIPT:-true}"
@@ -26,7 +27,7 @@ verbose_output="${VERBOSE_OUTPUT:-true}"
 
 # environment variables without
 current_directory="$(dirname "$(readlink -f "$0")")"
-get_version="$(dig TXT +short +timeout=5 +tries=1 munin-pihole-plugins.sainternet.xyz @"$dns_server" -p 53 | sed s'/[^0-9.]//g')"
+get_version="$(dig TXT +short +timeout=5 +tries=2 munin-pihole-plugins.sainternet.xyz @"$dns_server" -p "$dns_port" | sed s'/[^0-9.]//g')"
 plugin_dependencies="munin-node "
 plugin_repo="https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master"
 plugin_services="munin-node "
@@ -93,7 +94,7 @@ output() {
 
 # manditory horrific ascii header
 obnoxious_header() {
-    if [[ "$terminal_height" -ge "10" ]] && [[ "$terminal_width" -ge "80" ]]; then
+    if [[ "$terminal_height" -ge "6" ]] && [[ "$terminal_width" -ge "80" ]]; then
         output "\\e[31;1m                  _             _ _        _            _           _   v$VERSION
 \\e[33;1m   _ __ _  _ _ _ (_)_ _ __ _ __(_) |_  ___| |___ _ _ __| |_  _ __ _(_)_ _  ___
 \\e[32;1m  | '  \\ || | ' \\| | ' \\__| '_ \\ | ' \\/ _ \\ / -_)_| '_ \\ | || / _\` | | ' \\(_-<
@@ -563,9 +564,10 @@ version_function() {
 # height is the minimal terminal height required to display the full output
 # in an 80 character wide terminal
 variable_function() {
-    height="20"
+    height="21"
     some "Usage: export [VARIABLE]=\"value\"
 \\nVariable
+  DNS_PORT=\"$dns_port\"
   DNS_SERVER=\"$dns_server\"
   INSTALL_PLUGINS=\"$install_plugins\"
   INSTALL_SCRIPT=\"$install_script\"

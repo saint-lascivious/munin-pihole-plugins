@@ -77,6 +77,7 @@ Provided munin-node and Pi-hole® exist on the same host, the default configurat
 Usage: export [VARIABLE]="value"
 
 Variable
+  DNS_PORT="53"
   DNS_SERVER="208.67.222.222"
   INSTALL_PLUGINS="true"
   INSTALL_SCRIPT="true"
@@ -94,63 +95,67 @@ Variable
   VERBOSE_OUTPUT="true"
 ```
 
-* DNS_SERVER
+* `DNS_PORT`
+
+The port which the `munin-pihole-plugins` script will contact in order to contact `DNS_SERVER`.
+
+* `DNS_SERVER`
 
 The DNS server which the `munin-pihole-plugins` script will contact in order to retrieve its version information (from a `TXT` record at `munin-pihole-plugins.sainternet.xyz`). This should ideally be an IP rather than a hostname, and it should ideally be external, but I'm not your mother.
 
-* INSTALL_PLUGINS
+* `INSTALL_PLUGINS`
 
 Disables installation of `munin-node` and `munin-pihole-plugins` plugins if set to any value other than `true`.
 
-* INSTALL_SCRIPT
+* `INSTALL_SCRIPT`
 
 Disables installation of the `munin-pihole-plugins` script if set to any value other than `true`.
 
-* INSTALL_WEBSERVER
+* `INSTALL_WEBSERVER`
 
 Disables installation of the `munin` webserver and `lighttpd` proxy if set to any value other than `true`. Useful for additional Munin nodes in a multi-node, single-server environment.
 
-* MUNIN_DIR
+* `MUNIN_DIR`
 
 The directory in which the `munin` munin.conf file should be located.
 
-* MUNIN_CONFIG_DIR
+* `MUNIN_CONFIG_DIR`
 
 The directory in which additional `munin` configuration files may be placed, the `munin-pihole-plugins` script will attempt to use this in favour of editing munin.conf directly.
 
-* MUNIN_PLUGIN_DIR
+* `MUNIN_PLUGIN_DIR`
 
 The directory in which `munin` plugins should be located.
 
-* NODE_PLUGIN_DIR
+* `NODE_PLUGIN_DIR`
 
 The directory in which `munin-node` symbolic links should be created.
 
-* PLUGIN_CONFIG_DIR
+* `PLUGIN_CONFIG_DIR`
 
 The directory in which individual `munin-node` plugin configurations should be located.
 
-* PLUGIN_LIST
+* `PLUGIN_LIST`
 
 A space separated list of `munin-pihole-plugins` plugin names used to determine which plugins will be installed.
 
-* PROXY_CONFIG_DIR
+* `PROXY_CONFIG_DIR`
 
 The directory in which `'lighttpd`'s external.conf should be located.
 
-* SCRIPT_DIR
+* `SCRIPT_DIR`
 
 The directory in which the `munin-pihole-plugins` script should be located when installed, the `munin-pihole-plugins` script will warn if this directory is not located in the host's $PATH variable and suggest how to correct this.
 
-* SKIP_DEPENDENCY_CHECK
+* `SKIP_DEPENDENCY_CHECK`
 
 Disables `apt` and `dpkg-query` based dependency satisfaction if set to any value other than `false`.
 
-* UPDATE_SELF
+* `UPDATE_SELF`
 
 Disables self update of the `munin-pihole-plugins` script if set to any value other than `true`.
 
-* VERBOSE_OUTPUT
+* `VERBOSE_OUTPUT`
 
 Disables non-critical `munin-pihole-plugins` script output if set to any value other than `true`. Errors are always displayed, but a successful installation will be otherwise silent.
 
