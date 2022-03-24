@@ -5,7 +5,7 @@
 # saint@sainternet.xyz
 
 # munin-pihole-plugins version
-VERSION="4.2"
+VERSION="4.2.1"
 
 # environment variables with overrides
 dns_server="${DNS_SERVER:-208.67.222.222}"
@@ -382,68 +382,53 @@ help_function() {
     case "${2}" in
         "-h" | "--help" | "help"            ) height="7"
             some "Example: munin-pihole-plugins --help
-
-Option\\t\\tGNU long option\\t\\tMeaning
+\\nOption\\t\\tGNU long option\\t\\tMeaning
  -h\\t\\t--help\\t\\t\\tDisplay this help dialogue
-
-Display munin-pihole-plugins help information." ;;
+\\nDisplay munin-pihole-plugins help information." ;;
         "-i" | "--install" | "install"      ) height="18"
             some "Example: munin-pihole-plugins --install
-
-Option\\t\\tGNU long option\\t\\tMeaning
+\\nOption\\t\\tGNU long option\\t\\tMeaning
  -i\\t\\t--install\\t\\tInstall munin-pihole-plugins
-
-Install and configure Munin monitoring server software (default: true), client
+\\nInstall and configure Munin monitoring server software (default: true), client
 software (default: true), selected munin-pihole-plugins plugins (default: all),
 and install a copy of the munin-pihole-plugins script (default: true) to a
 selected directory (default: /usr/local/bin).
-
-The munin-pihole-plugins script will self update (default: true) before
+\\nThe munin-pihole-plugins script will self update (default: true) before
 installation if a newer version of the munin-pihole-plugins script is
 available.
-
-You can run the installation again at any time to update munin-pihole-plugins
+\\nYou can run the installation again at any time to update munin-pihole-plugins
 plugins, optionally selecting which plugins to install using the PLUGIN_LIST
 variable." ;;
         "-v" | "--version" | "version"      ) height="11"
             some "Example: munin-pihole-plugins --version
-
-Option\\t\\tGNU long option\\t\\tMeaning
+\\nOption\\t\\tGNU long option\\t\\tMeaning
  -v\\t\\t--version\\t\\tDisplay the current and latest versions
-
-Display the current munin-pihole-plugins script version, and compare it to
+\\nDisplay the current munin-pihole-plugins script version, and compare it to
 the latest munin-pihole-plugins script version.
-
-An additional notification will be displayed if an update to the
+\\nAn additional notification will be displayed if an update to the
 munin-pihole-plugins script is available." ;;
         "-U" | "--uninstall" | "uninstall"  ) height="8"
             some "Example: munin-pihole-plugins --uninstall
-
-Option\\t\\tGNU long option\\t\\tMeaning
+\\nOption\\t\\tGNU long option\\t\\tMeaning
  -U\\t\\t--uninstall\\t\\tUninstall munin-pihole-plugins
-
-Completely uninstall munin-pihole-plugins, you will be asked if you want to
+\\nCompletely uninstall munin-pihole-plugins, you will be asked if you want to
 uninstall any dependencies that munin-pihole-plugins may have installed." ;;
         "-V" | "--variables" | "variables"  ) height="9"
             some "Example: munin-pihole-plugins --variables
-
-Option\\t\\tGNU long option\\t\\tMeaning
+\\nOption\\t\\tGNU long option\\t\\tMeaning
  -V\\t\\t--variables\\t\\tDisplay environment variables
-
-Display a full list of environment variables used by the munin-pihole-plugins
+\\nDisplay a full list of environment variables used by the munin-pihole-plugins
 script, and their current values. The veriables can be used to customize
 various aspects of the munin-pihole-plugins script's operation." ;;
         *                                   ) height="9"
             some "Usage: munin-pihole-plugins [OPTION]
-
-Option\\t\\tGNU long option\\t\\tMeaning
+\\nOption\\t\\tGNU long option\\t\\tMeaning
  -h\\t\\t--help\\t\\t\\tDisplay this help dialogue
  -i\\t\\t--install\\t\\tInstall munin-pihole-plugins
  -v\\t\\t--version\\t\\tDisplay the current and latest versions
  -U\\t\\t--uninstall\\t\\tUninstall munin-pihole-plugins
  -V\\t\\t--variables\\t\\tDisplay environment variables
-
-Use '--help [OPTION]' for detailed help output" ;;
+\\nUse '--help [OPTION]' for a more detailed explanation of each command" ;;
     esac
 }
 
@@ -580,8 +565,7 @@ version_function() {
 variable_function() {
     height="20"
     some "Usage: export [VARIABLE]=\"value\"
-
-Variable
+\\nVariable
   DNS_SERVER=\"$dns_server\"
   INSTALL_PLUGINS=\"$install_plugins\"
   INSTALL_SCRIPT=\"$install_script\"
