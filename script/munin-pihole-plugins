@@ -5,7 +5,7 @@
 # saint@sainternet.xyz
 
 # munin-pihole-plugins version
-VERSION="4.3"
+VERSION="4.4"
 
 # environment variables with overrides
 dns_port="${DNS_PORT:-53}"
@@ -594,12 +594,29 @@ mini_help_function() {
 Type 'munin-pihole-plugins -h' for a list of available options"
 }
 
-# simple input handler
+# not so simple input handler
+# i hate having to do this but i realised i kinda fucked myself and dig ended
+# up quietly being a hard dependency without my noticing it this weird
+# guarding  of install and version is temporary, hopefully
 input_handler() {
     case "${1}" in
         "-h" | "--help" | "help"            ) help_function "$@" ;;
-        "-i" | "--install" | "install"      ) install_function "$@" ;;
-        "-v" | "--version" | "version"      ) version_function ;;
+        "-i" | "--install" | "install"      ) 
+            if [[ "$(command -v dig)" ]]; then
+                install_function "$@"
+            else
+                echo -e " * \\e[31;1m[ERROR]\\e[0m The required command 'dig' was not found
+   Install dnsutils before running the munin-pihole-plugins script again"
+                exit 1
+            fi ;;
+        "-v" | "--version" | "version"      )
+            if [[ "$(command -v dig)" ]]; then
+                version_function "$@"
+            else
+                echo -e " * \\e[31;1m[ERROR]\\e[0m The required command 'dig' was not found
+   Install dnsutils before running the munin-pihole-plugins script again"
+                exit 1
+            fi ;;
         "-U" | "--uninstall" | "uninstall"  ) uninstall_function "$@" ;;
         "-V" | "--variables" | "variables"  ) variable_function ;;
         *                                   ) mini_help_function "$@" ;;
