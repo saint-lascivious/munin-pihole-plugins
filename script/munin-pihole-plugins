@@ -5,7 +5,8 @@
 # saint@sainternet.xyz
 
 # munin-pihole-plugins version
-VERSION="4.4"
+# must follow 5 character major.minor.micro scheme
+VERSION="4.5"
 
 # environment variables with overrides
 dns_port="${DNS_PORT:-53}"
@@ -27,12 +28,11 @@ verbose_output="${VERBOSE_OUTPUT:-true}"
 
 # environment variables without
 current_directory="$(dirname "$(readlink -f "$0")")"
-get_version="$(dig TXT +short +timeout=5 +tries=2 munin-pihole-plugins.sainternet.xyz @"$dns_server" -p "$dns_port" | sed s'/[^0-9.]//g')"
 plugin_dependencies="munin-node "
 plugin_repo="https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master"
 plugin_services="munin-node "
 proxy_repo="https://raw.githubusercontent.com/saint-lascivious/lighttpd-external-munin-proxy/master"
-script_dependencies="dnsutils init-system-helpers wget "
+script_dependencies="init-system-helpers wget "
 terminal_height="$(stty size | cut -d " " -f1)"
 terminal_width="$(stty size | cut -d " " -f2)"
 webserver_dependencies="lighttpd munin "
@@ -95,7 +95,7 @@ output() {
 # manditory horrific ascii header
 obnoxious_header() {
     if [[ "$terminal_height" -ge "6" ]] && [[ "$terminal_width" -ge "80" ]]; then
-        output "\\e[31;1m                  _             _ _        _            _           _   v$VERSION
+        output "\\e[31;1m                  _             _ _        _            _           _    v$VERSION 
 \\e[33;1m   _ __ _  _ _ _ (_)_ _ __ _ __(_) |_  ___| |___ _ _ __| |_  _ __ _(_)_ _  ___
 \\e[32;1m  | '  \\ || | ' \\| | ' \\__| '_ \\ | ' \\/ _ \\ / -_)_| '_ \\ | || / _\` | | ' \\(_-<
 \\e[34;1m  |_|_|_\\_,_|_||_|_|_||_| | .__/_|_||_\\___/_\\___| | .__/_|\\_,_\\__, |_|_||_/__/
@@ -361,7 +361,7 @@ EOF
 
 # an opportunistic pagination wrapper, more or less
 some() {
-    if [[ "$terminal_height" -lt "$height" ]]; then
+    if [[ "$terminal_height" -lt "$min_height" ]]; then
         if [[ -x "$(command -v less)" ]]; then
             echo -e "$@" | less
         else
@@ -376,17 +376,37 @@ some() {
     fi
 }
 
+# check the version reported by munin-pihole-plugins.sainternet.xyz
+# nslookup, as far as i am aware, has no analogue to dig's +short, so it
+# requires a bunch of additional bullshit to strip the version from the txt
+# record
+check_version() {
+    version_domain="munin-pihole-plugins.sainternet.xyz"
+    if [[ -x "$(command -v dig)" ]]; then
+        version_query="$(dig txt +short +timeout=5 +tries=2 "$version_domain" @"$dns_server" -p "$dns_port" | sed s'/[^0-9.]//g')"
+    else
+        if [[ -x "$(command -v nslookup)" ]]; then
+            version_query="$(nslookup -port="$dns_port" -retry=2 -timeout=5 -type=txt "$version_domain" "$dns_server" | grep '"version: [0-9].[0-9].[0-9]"' | sed s'/[^0-9.]//g' | tail -c 6)"
+        fi
+    fi
+    if [[ -n "$version_query" ]]; then
+        remote_version="$version_query"
+    fi
+}
+
 # display munin-pihole-plugins script help text
 # height is the minimal terminal height required to display the full output
 # in an 80 character wide terminal
 help_function() {
     case "${2}" in
-        "-h" | "--help" | "help"            ) height="7"
+        "-h" | "--help" | "help"            )
+            min_height="7"
             some "Example: munin-pihole-plugins --help
 \\nOption\\t\\tGNU long option\\t\\tMeaning
  -h\\t\\t--help\\t\\t\\tDisplay this help dialogue
 \\nDisplay munin-pihole-plugins help information." ;;
-        "-i" | "--install" | "install"      ) height="18"
+        "-i" | "--install" | "install"      )
+            min_height="18"
             some "Example: munin-pihole-plugins --install
 \\nOption\\t\\tGNU long option\\t\\tMeaning
  -i\\t\\t--install\\t\\tInstall munin-pihole-plugins
@@ -400,7 +420,8 @@ available.
 \\nYou can run the installation again at any time to update munin-pihole-plugins
 plugins, optionally selecting which plugins to install using the PLUGIN_LIST
 variable." ;;
-        "-v" | "--version" | "version"      ) height="11"
+        "-v" | "--version" | "version"      )
+            min_height="11"
             some "Example: munin-pihole-plugins --version
 \\nOption\\t\\tGNU long option\\t\\tMeaning
  -v\\t\\t--version\\t\\tDisplay the current and latest versions
@@ -408,20 +429,23 @@ variable." ;;
 the latest munin-pihole-plugins script version.
 \\nAn additional notification will be displayed if an update to the
 munin-pihole-plugins script is available." ;;
-        "-U" | "--uninstall" | "uninstall"  ) height="8"
+        "-U" | "--uninstall" | "uninstall"  )
+            min_height="8"
             some "Example: munin-pihole-plugins --uninstall
 \\nOption\\t\\tGNU long option\\t\\tMeaning
  -U\\t\\t--uninstall\\t\\tUninstall munin-pihole-plugins
 \\nCompletely uninstall munin-pihole-plugins, you will be asked if you want to
 uninstall any dependencies that munin-pihole-plugins may have installed." ;;
-        "-V" | "--variables" | "variables"  ) height="9"
+        "-V" | "--variables" | "variables"  )
+            min_height="9"
             some "Example: munin-pihole-plugins --variables
 \\nOption\\t\\tGNU long option\\t\\tMeaning
  -V\\t\\t--variables\\t\\tDisplay environment variables
 \\nDisplay a full list of environment variables used by the munin-pihole-plugins
 script, and their current values. The veriables can be used to customize
 various aspects of the munin-pihole-plugins script's operation." ;;
-        *                                   ) height="9"
+        *                                   )
+            min_height="9"
             some "Usage: munin-pihole-plugins [OPTION]
 \\nOption\\t\\tGNU long option\\t\\tMeaning
  -h\\t\\t--help\\t\\t\\tDisplay this help dialogue
@@ -442,11 +466,12 @@ install_function() {
         exit 1
     fi
     check_privilege "$@"
+    check_version
     if [[ "$update_self" == "true" ]]; then
         if [[ -f "$TEMP/.munin-pihole-plugins" ]]; then
             rm "$TEMP/.munin-pihole-plugins" || return
         fi
-        if [[ "$get_version" > "$VERSION" ]]; then
+        if [[ "$remote_version" > "$VERSION" ]]; then
             update_script "$@"
         fi
     fi
@@ -553,10 +578,22 @@ uninstall_function() {
 
 # display the current and latest munin-pihole-plugins script versions
 version_function() {
-    if [[ "$get_version" > "$VERSION" ]]; then
-        echo "An update for munin-pihole-plugins is available"
+    check_version
+    if [[ -n "$remote_version" ]]; then
+        if [[ "$remote_version" > "$VERSION" ]]; then
+            min_height="3"
+            some " * \\e[32;1m[INFO]\\e[0m An update for munin-pihole-plugins is available
+munin-pihole-plugins version is v$VERSION (Latest: v$remote_version)"
+        else
+            some "munin-pihole-plugins version is v$VERSION (Latest: v$remote_version)"
+        fi
+    else
+        min_height="4"
+        some " * \\e[33;1m[WARNING]\\e[0m Unable to locate a TXT record for
+   $version_domain
+   using the nameserver $dns_server on port $dns_port
+munin-pihole-plugins version is v$VERSION (Latest: unknown)"
     fi
-    echo "munin-pihole-plugins version is v$VERSION (Latest: v$get_version)"
 }
 
 # display munin-pihole-plugins environment variables and their current values
@@ -564,7 +601,7 @@ version_function() {
 # height is the minimal terminal height required to display the full output
 # in an 80 character wide terminal
 variable_function() {
-    height="21"
+    min_height="21"
     some "Usage: export [VARIABLE]=\"value\"
 \\nVariable
   DNS_PORT=\"$dns_port\"
@@ -589,7 +626,7 @@ variable_function() {
 # height is the minimal terminal height required to display the full output
 # in an 80 character wide terminal
 mini_help_function() {
-    height="3"
+    min_height="3"
     some "munin-pihole-plugins: unrecognized option '$1'
 Type 'munin-pihole-plugins -h' for a list of available options"
 }
@@ -601,22 +638,8 @@ Type 'munin-pihole-plugins -h' for a list of available options"
 input_handler() {
     case "${1}" in
         "-h" | "--help" | "help"            ) help_function "$@" ;;
-        "-i" | "--install" | "install"      ) 
-            if [[ "$(command -v dig)" ]]; then
-                install_function "$@"
-            else
-                echo -e " * \\e[31;1m[ERROR]\\e[0m The required command 'dig' was not found
-   Install dnsutils before running the munin-pihole-plugins script again"
-                exit 1
-            fi ;;
-        "-v" | "--version" | "version"      )
-            if [[ "$(command -v dig)" ]]; then
-                version_function "$@"
-            else
-                echo -e " * \\e[31;1m[ERROR]\\e[0m The required command 'dig' was not found
-   Install dnsutils before running the munin-pihole-plugins script again"
-                exit 1
-            fi ;;
+        "-i" | "--install" | "install"      ) install_function "$@" ;;
+        "-v" | "--version" | "version"      ) version_function "$@" ;;
         "-U" | "--uninstall" | "uninstall"  ) uninstall_function "$@" ;;
         "-V" | "--variables" | "variables"  ) variable_function ;;
         *                                   ) mini_help_function "$@" ;;
