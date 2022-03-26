@@ -6,7 +6,7 @@
 
 # munin-pihole-plugins version
 # must follow 5 character major.minor.micro scheme
-VERSION="4.5"
+VERSION="4.5.1"
 
 # environment variables with overrides
 dns_port="${DNS_PORT:-53}"
@@ -380,6 +380,7 @@ some() {
 # nslookup, as far as i am aware, has no analogue to dig's +short, so it
 # requires a bunch of additional bullshit to strip the version from the txt
 # record
+# why tail 6, when we want 5 characters? fun fact: echo appends a newline
 check_version() {
     version_domain="munin-pihole-plugins.sainternet.xyz"
     if [[ -x "$(command -v dig)" ]]; then
@@ -453,7 +454,7 @@ various aspects of the munin-pihole-plugins script's operation." ;;
  -v\\t\\t--version\\t\\tDisplay the current and latest versions
  -U\\t\\t--uninstall\\t\\tUninstall munin-pihole-plugins
  -V\\t\\t--variables\\t\\tDisplay environment variables
-\\nUse '--help [OPTION]' for a more detailed explanation of each command" ;;
+\\nUse '--help [OPTION]' for more detailed explanations of each command" ;;
     esac
 }
 
