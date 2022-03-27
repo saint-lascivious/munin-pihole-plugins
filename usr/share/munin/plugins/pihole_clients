@@ -22,7 +22,7 @@ envhost="${host:-127.0.0.1}"
 envport="${port:-80}"
 envapi="${api:-/admin/api.php}"
 
-apicall="$(curl -s "$envhost:$envport$envapi" 2>/dev/null)"
+apicall="$(curl -sL "$envhost:$envport$envapi" 2>/dev/null)"
 stats="$(echo "$apicall" | sed 's/[{}"]//g' | tr "," "\\n")"
 
 case $1 in
