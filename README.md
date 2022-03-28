@@ -59,7 +59,7 @@ Option          GNU long option         Meaning
 ![pihole_unique_domains-day.png](https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/gallery/pihole_unique_domains-day.png)
 
 ## Plugin Configuration
-* Default `/etc/munin/plugin-conf.d/pihole` plugin configuration
+* Default `/etc/munin/plugin-conf.d/pihole.conf` plugin configuration
 ```
 [pihole_*]
     user root

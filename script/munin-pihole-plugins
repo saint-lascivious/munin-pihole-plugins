@@ -6,7 +6,7 @@
 
 # munin-pihole-plugins version
 # must follow 5 character major.minor.micro scheme
-VERSION="4.5.1"
+VERSION="04.05.02"
 
 # environment variables with overrides
 dns_port="${DNS_PORT:-53}"
@@ -28,7 +28,7 @@ verbose_output="${VERBOSE_OUTPUT:-true}"
 
 # environment variables without
 current_directory="$(dirname "$(readlink -f "$0")")"
-plugin_dependencies="munin-node "
+plugin_dependencies="curl munin-node "
 plugin_repo="https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master"
 plugin_services="munin-node "
 proxy_repo="https://raw.githubusercontent.com/saint-lascivious/lighttpd-external-munin-proxy/master"
@@ -271,8 +271,8 @@ install_plugins() {
 # if it already exists
 configure_plugins() {
     if [[ -d "$plugin_config_dir" ]]; then
-        if [[ ! -f  "$plugin_config_dir/pihole" ]]; then
-            download "$plugin_repo/etc/munin/plugin-conf.d/pihole" -P "$plugin_config_dir"
+        if [[ ! -f  "$plugin_config_dir/pihole.conf" ]]; then
+            download "$plugin_repo/etc/munin/plugin-conf.d/pihole.conf" -P "$plugin_config_dir"
             output " * \\e[32;1m[INFO]\\e[0m Default plugin configuration saved to
    $plugin_config_dir/pihole"
         fi
@@ -380,14 +380,14 @@ some() {
 # nslookup, as far as i am aware, has no analogue to dig's +short, so it
 # requires a bunch of additional bullshit to strip the version from the txt
 # record
-# why tail 6, when we want 5 characters? fun fact: echo appends a newline
+# why tail 9, when we want 8 characters? fun fact: echo appends a newline
 check_version() {
     version_domain="munin-pihole-plugins.sainternet.xyz"
     if [[ -x "$(command -v dig)" ]]; then
         version_query="$(dig txt +short +timeout=5 +tries=2 "$version_domain" @"$dns_server" -p "$dns_port" | sed s'/[^0-9.]//g')"
     else
         if [[ -x "$(command -v nslookup)" ]]; then
-            version_query="$(nslookup -port="$dns_port" -retry=2 -timeout=5 -type=txt "$version_domain" "$dns_server" | grep '"version: [0-9].[0-9].[0-9]"' | sed s'/[^0-9.]//g' | tail -c 6)"
+            version_query="$(nslookup -port="$dns_port" -retry=2 -timeout=5 -type=txt "$version_domain" "$dns_server" | grep '"version: [0-9].[0-9].[0-9]"' | sed s'/[^0-9.]//g' | tail -c 9)"
         fi
     fi
     if [[ -n "$version_query" ]]; then

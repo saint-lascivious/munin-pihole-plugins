@@ -31,7 +31,7 @@ envapi="${api:-/admin/api.php}"
 envcachesuffix="${cachesuffix:-?getCacheInfo&auth=}"
 envwebpassword="${webpassword:-$get_webpassword}"
 
-apicall="$(curl -s "$envhost:$envport$envapi$envcachesuffix$envwebpassword" 2>/dev/null)"
+apicall="$(curl -sL "$envhost:$envport$envapi$envcachesuffix$envwebpassword" 2>/dev/null)"
 stats="$(echo "$apicall" | sed 's/[{}"]//g' | tr "," "\\n")"
 
 case $1 in
