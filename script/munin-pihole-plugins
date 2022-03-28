@@ -6,7 +6,7 @@
 
 # munin-pihole-plugins version
 # must follow 5 character major.minor.micro scheme
-VERSION="04.05.03"
+VERSION="04.05.04"
 
 # environment variables with overrides
 dns_port="${DNS_PORT:-53}"
@@ -407,7 +407,7 @@ help_function() {
  -h\\t\\t--help\\t\\t\\tDisplay this help dialogue
 \\nDisplay munin-pihole-plugins help information." ;;
         "-i" | "--install" | "install"      )
-            min_height="18"
+            min_height="17"
             some "Example: munin-pihole-plugins --install
 \\nOption\\t\\tGNU long option\\t\\tMeaning
  -i\\t\\t--install\\t\\tInstall munin-pihole-plugins
@@ -415,21 +415,19 @@ help_function() {
 software (default: true), selected munin-pihole-plugins plugins (default: all),
 and install a copy of the munin-pihole-plugins script (default: true) to a
 selected directory (default: /usr/local/bin).
-\\nThe munin-pihole-plugins script will self update (default: true) before
-installation if a newer version of the munin-pihole-plugins script is
-available.
-\\nYou can run the installation again at any time to update munin-pihole-plugins
-plugins, optionally selecting which plugins to install using the PLUGIN_LIST
-variable." ;;
+\\nThe munin-pihole-plugins script will self update (default: true) before install
+if a newer version of the munin-pihole-plugins script is available.
+\\nYou can run the installation again at any time afterwards to update the
+munin-pihole-plugins script and plugins, optionally selecting which plugins to
+install using the PLUGIN_LIST variable." ;;
         "-v" | "--version" | "version"      )
-            min_height="11"
+            min_height="10"
             some "Example: munin-pihole-plugins --version
 \\nOption\\t\\tGNU long option\\t\\tMeaning
  -v\\t\\t--version\\t\\tDisplay the current and latest versions
 \\nDisplay the current munin-pihole-plugins script version, and compare it to
 the latest munin-pihole-plugins script version.
-\\nAn additional notification will be displayed if an update to the
-munin-pihole-plugins script is available." ;;
+\\nAn additional notification will be displayed if an update is available." ;;
         "-U" | "--uninstall" | "uninstall"  )
             min_height="8"
             some "Example: munin-pihole-plugins --uninstall
@@ -450,7 +448,7 @@ various aspects of the munin-pihole-plugins script's operation." ;;
             some "Usage: munin-pihole-plugins [OPTION]
 \\nOption\\t\\tGNU long option\\t\\tMeaning
  -h\\t\\t--help\\t\\t\\tDisplay this help dialogue
- -i\\t\\t--install\\t\\tInstall munin-pihole-plugins
+ -i\\t\\t--install\\t\\tInstall/update munin-pihole-plugins
  -v\\t\\t--version\\t\\tDisplay the current and latest versions
  -U\\t\\t--uninstall\\t\\tUninstall munin-pihole-plugins
  -V\\t\\t--variables\\t\\tDisplay environment variables

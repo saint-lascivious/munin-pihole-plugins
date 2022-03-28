@@ -32,10 +32,12 @@ Usage: munin-pihole-plugins [OPTION]
 
 Option          GNU long option         Meaning
  -h             --help                  Display this help dialogue
- -i             --install               Install munin-pihole-plugins
+ -i             --install               Install/update munin-pihole-plugins
  -v             --version               Display the current and latest versions
  -U             --uninstall             Uninstall munin-pihole-plugins
  -V             --variables             Display environment variables
+
+Use '--help [OPTION]' for more detailed explanations of each command
 ```
 
 ## Example Graph Gallery
