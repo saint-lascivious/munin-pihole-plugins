@@ -6,7 +6,7 @@
 
 # munin-pihole-plugins version
 # must follow 5 character major.minor.micro scheme
-VERSION="04.05.05"
+VERSION="04.06.00"
 
 # environment variables with overrides
 dns_port="${DNS_PORT:-53}"
@@ -114,9 +114,11 @@ check_pihole() {
 # basic dependency handling with dpkg-query and apt
 # can be disabled with SKIP_DEPENDENCY_CHECK set to any value other than false
 install_dependencies() {
-    dependency_list+="$script_dependencies"
     if [[ "$install_plugins" == "true" ]]; then
         dependency_list+="$plugin_dependencies"
+    fi
+    if [[ "$install_script" == "true" ]]; then
+        dependency_list+="$script_dependencies"
     fi
     if [[ "$install_webserver" == "true" ]]; then
         dependency_list+="$webserver_dependencies"
@@ -274,7 +276,7 @@ configure_plugins() {
         if [[ ! -f  "$plugin_config_dir/pihole.conf" ]]; then
             download "$plugin_repo/etc/munin/plugin-conf.d/pihole.conf" -P "$plugin_config_dir"
             output " * \\e[32;1m[INFO]\\e[0m Default plugin configuration saved to
-   $plugin_config_dir/pihole"
+   $plugin_config_dir/pihole.conf"
         fi
     else
         echo -e " * \\e[31;1m[ERROR]\\e[0m No Munin plugin configuration directory found at
@@ -286,7 +288,7 @@ configure_plugins() {
     if [[ "$pihole_on_host" == "no" ]]; then
         output " * \\e[33;1m[WARNING]\\e[0m The Pi-hole® command 'pihole' was not found on this host
    If this was intentional you will need to edit
-   $plugin_config_dir/pihole
+   $plugin_config_dir/pihole.conf
    and replace the host and setupvars values with those of your Pi-hole® host"
     fi
 }
@@ -402,111 +404,144 @@ help_function() {
     case "${2}" in
         "-h" | "--help" | "help"            )
             min_height="7"
-            some "Example: munin-pihole-plugins --help
+            some "Usage: munin-pihole-plugins $2
 \\nOption\\t\\tGNU long option\\t\\tMeaning
  -h\\t\\t--help\\t\\t\\tDisplay this help dialogue
 \\nDisplay munin-pihole-plugins help information." ;;
         "-i" | "--install" | "install"      )
-            min_height="17"
-            some "Example: munin-pihole-plugins --install
+            min_height="29"
+            some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
 \\nOption\\t\\tGNU long option\\t\\tMeaning
  -i\\t\\t--install\\t\\tInstall munin-pihole-plugins
 \\nInstall and configure Munin monitoring server software (default: true), client
-software (default: true), selected munin-pihole-plugins plugins (default: all),
+software (default: true), selected munin-pihole-plugins plugins (default: all)
 and install a copy of the munin-pihole-plugins script (default: true) to a
 selected directory (default: /usr/local/bin).
 \\nThe munin-pihole-plugins script will self update (default: true) before install
 if a newer version of the munin-pihole-plugins script is available.
 \\nYou can run the installation again at any time afterwards to update the
 munin-pihole-plugins script and plugins, optionally selecting which plugins to
-install using the PLUGIN_LIST variable." ;;
+install using the PLUGIN_LIST variable.
+\\nTakes an optional parameter 'plugins', 'script', or 'webserver' to install
+only that component respectively.
+\\nParameter\\t\\t\\t\\tFunction
+ plugins\\t\\t\\t\\tInstall and configure munin-node, and
+\\t\\t\\t\\t\\tmunin-pihole-plugins plugins
+ script\\t\\t\\t\\t\\tInstall the munin-pihole-plugins script
+ webserver\\t\\t\\t\\tInstall and configure munin, lighttpd
+\\t\\t\\t\\t\\tand lighttpd-external-munin-proxy
+\\nExample: 'munin-pihole-plugins $2 plugins'" ;;
         "-v" | "--version" | "version"      )
             min_height="10"
-            some "Example: munin-pihole-plugins --version
+            some "Usage: munin-pihole-plugins {$2}
 \\nOption\\t\\tGNU long option\\t\\tMeaning
  -v\\t\\t--version\\t\\tDisplay the current and latest versions
 \\nDisplay the current munin-pihole-plugins script version, and compare it to
 the latest munin-pihole-plugins script version.
 \\nAn additional notification will be displayed if an update is available." ;;
         "-U" | "--uninstall" | "uninstall"  )
-            min_height="8"
-            some "Example: munin-pihole-plugins --uninstall
+            min_height="21"
+            some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
 \\nOption\\t\\tGNU long option\\t\\tMeaning
  -U\\t\\t--uninstall\\t\\tUninstall munin-pihole-plugins
 \\nCompletely uninstall munin-pihole-plugins, you will be asked if you want to
-uninstall any dependencies that munin-pihole-plugins may have installed." ;;
+uninstall any dependencies that munin-pihole-plugins may have installed.
+\\nTakes an optional parameter 'plugins', 'script', or 'webserver' to uninstall
+only that component respectively.
+\\nParameter\\t\\t\\t\\tFunction
+ plugins\\t\\t\\t\\tUninstall munin-node, and
+\\t\\t\\t\\t\\tmunin-pihole-plugins plugins
+ script\\t\\t\\t\\t\\tUninstall the munin-pihole-plugins
+\\t\\t\\t\\t\\tscript
+ webserver\\t\\t\\t\\tUninstall munin, lighttpd, and
+\\t\\t\\t\\t\\tlighttpd-external-munin-proxy
+\\nExample: 'munin-pihole-plugins $2 script'" ;;
         "-V" | "--variables" | "variables"  )
             min_height="9"
-            some "Example: munin-pihole-plugins --variables
+            some "Usage: munin-pihole-plugins {$2}
 \\nOption\\t\\tGNU long option\\t\\tMeaning
  -V\\t\\t--variables\\t\\tDisplay environment variables
 \\nDisplay a full list of environment variables used by the munin-pihole-plugins
 script, and their current values. The veriables can be used to customize
 various aspects of the munin-pihole-plugins script's operation." ;;
         *                                   )
-            min_height="9"
-            some "Usage: munin-pihole-plugins [OPTION]
+            min_height="11"
+            some "Usage: munin-pihole-plugins {OPTION [PARAMETER]}
 \\nOption\\t\\tGNU long option\\t\\tMeaning
  -h\\t\\t--help\\t\\t\\tDisplay this help dialogue
- -i\\t\\t--install\\t\\tInstall/update munin-pihole-plugins
+ -i\\t\\t--install\\t\\tInstall munin-pihole-plugins
  -v\\t\\t--version\\t\\tDisplay the current and latest versions
  -U\\t\\t--uninstall\\t\\tUninstall munin-pihole-plugins
  -V\\t\\t--variables\\t\\tDisplay environment variables
-\\nUse '--help [OPTION]' for more detailed explanations of each command" ;;
+\\nUse '$1 {OPTION}' for more detailed explanations of each command" ;;
     esac
 }
 
 # primary installation function, installation exceptions are handled here
-# seems like a lot going on here, but there really isn't
 install_function() {
-    if [[ ! "$install_plugins" == "true" ]] && [[ ! "$install_script" == "true" ]] && [[ ! "$install_webserver" == "true" ]]; then
-        echo -e " * \\e[31;1m[ERROR]\\e[0m No action(s) to perform
+    case "${2}" in
+        "plugins"                           )
+             exec env INSTALL_SCRIPT="false" INSTALL_WEBSERVER="false" /bin/bash "$0" "$1" ;;
+        "plugins-only"                      )
+             exec env INSTALL_SCRIPT="false" INSTALL_WEBSERVER="false" SKIP_DEPENDENCY_CHECK="true" /bin/bash "$0" "$1" ;;
+        "script"                            )
+             exec env INSTALL_PLUGINS="false" INSTALL_WEBSERVER="false" /bin/bash "$0" "$1" ;;
+        "script-only"                       )
+             exec env INSTALL_PLUGINS="false" INSTALL_WEBSERVER="false" SKIP_DEPENDENCY_CHECK="true" /bin/bash "$0" "$1" ;;
+        "webserver"                         )
+             exec env INSTALL_PLUGINS="false" INSTALL_SCRIPT="false" /bin/bash "$0" "$1" ;;
+        "webserver-only"                    )
+             exec env INSTALL_PLUGINS="false" INSTALL_SCRIPT="false" SKIP_DEPENDENCY_CHECK="true" /bin/bash "$0" "$1" ;;
+        *                                   )
+            if [[ ! "$install_plugins" == "true" ]] && [[ ! "$install_script" == "true" ]] && [[ ! "$install_webserver" == "true" ]]; then
+                echo -e " * \\e[31;1m[ERROR]\\e[0m No action(s) to perform
    At least one INSTALL_* variable must be \"true\""
-        exit 1
-    fi
-    check_privilege "$@"
-    check_version
-    if [[ "$update_self" == "true" ]]; then
-        if [[ -f "$TEMP/.munin-pihole-plugins" ]]; then
-            rm "$TEMP/.munin-pihole-plugins" || return
-        fi
-        if [[ "$remote_version" > "$VERSION" ]]; then
-            update_script "$@"
-        fi
-    fi
-    obnoxious_header
-    if [[ "$skip_dependency_check" == "false" ]]; then
-        install_dependencies
-    else
-        output " * \\e[32;1m[INFO]\\e[0m Skipping dependency checks"
-    fi
-    if [[ "$install_plugins" == "true" ]]; then
-        if [[ -n "$plugin_list" ]]; then
-            uninstall_plugins
-            install_plugins
-            check_pihole
-            configure_plugins
-        else
-            echo -e " * \\e[31;1m[ERROR]\\e[0m No action(s) to perform
+                exit 1
+            fi
+            check_privilege "$@"
+            check_version
+            if [[ "$update_self" == "true" ]]; then
+                if [[ -f "$TEMP/.munin-pihole-plugins" ]]; then
+                    rm "$TEMP/.munin-pihole-plugins" || return
+                fi
+                if [[ "$remote_version" > "$VERSION" ]]; then
+                    update_script "$@"
+                fi
+            fi
+            obnoxious_header
+            if [[ "$skip_dependency_check" == "false" ]]; then
+                install_dependencies
+            else
+                output " * \\e[32;1m[INFO]\\e[0m Skipping dependency checks"
+            fi
+            if [[ "$install_plugins" == "true" ]]; then
+                if [[ -n "$plugin_list" ]]; then
+                    uninstall_plugins
+                    install_plugins
+                    check_pihole
+                    configure_plugins
+                else
+                    echo -e " * \\e[31;1m[ERROR]\\e[0m No action(s) to perform
    No plugins in PLUGIN_LIST"
-            exit 1
-        fi
-    else
-        output " * \\e[32;1m[INFO]\\e[0m Skipping plugin installation"
-    fi
-    if [[ "$install_webserver" == "true" ]]; then
-        configure_proxy
-        configure_munin
-    else
-        output " * \\e[32;1m[INFO]\\e[0m Skipping webserver installation"
-    fi
-    restart_services
-    if [[ "$install_script" == "true" ]]; then
-        install_script
-    else
-        output " * \\e[32;1m[INFO]\\e[0m Skipping script installation"
-    fi
-    output " * \\e[32;1m[INFO]\\e[0m Done"
+                    exit 1
+                fi
+            else
+                output " * \\e[32;1m[INFO]\\e[0m Skipping plugin installation"
+            fi
+            if [[ "$install_webserver" == "true" ]]; then
+                configure_proxy
+                configure_munin
+            else
+                output " * \\e[32;1m[INFO]\\e[0m Skipping webserver installation"
+            fi
+            restart_services
+            if [[ "$install_script" == "true" ]]; then
+                install_script
+            else
+                output " * \\e[32;1m[INFO]\\e[0m Skipping script installation"
+            fi
+            output " * \\e[32;1m[INFO]\\e[0m Done" ;;
+    esac
 }
 
 # uninstall munin-pihole-plugins
@@ -517,62 +552,91 @@ install_function() {
 # places a blank external.conf file for lighttpd if we can't restore a backup
 # because apparently it will pitch a fit if external.conf doesn't exist
 uninstall_function() {
-    check_privilege "$@"
-    obnoxious_header
-    if [[ -d "$proxy_config_dir" ]]; then
-        if [[ -f "$proxy_config_dir/external.conf.orig" ]]; then
-            mv "$proxy_config_dir/external.conf.orig" "$proxy_config_dir/external.conf" || return
-            output " * \\e[32;1m[INFO]\\e[0m Original lighttpd external.conf restored from backup"
-        else
-            if [[ -f "$proxy_config_dir/external.conf" ]]; then
-                rm "$proxy_config_dir/external.conf" || return
-                touch "$proxy_config_dir/external.conf" || return
+    case "${2}" in
+        "plugins"                           )
+             exec env INSTALL_SCRIPT="false" INSTALL_WEBSERVER="false" /bin/bash "$0" "$1" ;;
+        "plugins-only"                      )
+             exec env INSTALL_SCRIPT="false" INSTALL_WEBSERVER="false" SKIP_DEPENDENCY_CHECK="true" /bin/bash "$0" "$1" ;;
+        "script"                            )
+             exec env INSTALL_PLUGINS="false" INSTALL_WEBSERVER="false" /bin/bash "$0" "$1" ;;
+        "script-only"                       )
+             exec env INSTALL_PLUGINS="false" INSTALL_WEBSERVER="false" SKIP_DEPENDENCY_CHECK="true" /bin/bash "$0" "$1" ;;
+        "webserver"                         )
+             exec env INSTALL_PLUGINS="false" INSTALL_SCRIPT="false" /bin/bash "$0" "$1" ;;
+        "webserver-only"                    )
+             exec env INSTALL_PLUGINS="false" INSTALL_SCRIPT="false" SKIP_DEPENDENCY_CHECK="true" /bin/bash "$0" "$1" ;;
+        *                                   )
+            if [[ ! "$install_plugins" == "true" ]] && [[ ! "$install_script" == "true" ]] && [[ ! "$install_webserver" == "true" ]]; then
+                echo -e " * \\e[31;1m[ERROR]\\e[0m No action(s) to perform
+   At least one INSTALL_* variable must be \"true\""
+                exit 1
             fi
-        fi
-    fi
-    if [[ -d "$munin_config_dir" ]]; then
-        if [[ -f "$munin_config_dir/99-graph-strategy.conf" ]]; then
-            rm "$munin_config_dir/99-graph-strategy.conf" || return
-        fi
-    else
-        if [[ -d "$munin_dir" ]]; then
-            if [[ -f "$munin_dir/munin.conf" ]]; then
-                sed -i "s/^html_strategy cli/#html_strategy cron/g" "$munin_dir/munin.conf" || return
-                sed -i "s/^graph_strategy cli/#graph_strategy cron/g" "$munin_dir/munin.conf" || return
-            fi
-        fi
-    fi
-    uninstall_plugins
-    if [[ -d "$plugin_config_dir" ]]; then
-        if [[ -f  "$plugin_config_dir/pihole" ]]; then
-            rm "$plugin_config_dir/pihole" || return
-        fi
-    fi
-    if [[ "$skip_dependency_check" == "false" ]]; then
-        all_dependencies="$plugin_dependencies $script_dependencies $webserver_dependencies"
-        if [[ -x "$(command -v dpkg-query)" ]]; then
-            if [[ -x "$(command -v apt)" ]]; then
-                for dependency_id in $all_dependencies; do
-                    package_query="$(dpkg-query -W --showformat='${Status}\n' "$dependency_id" | grep "install ok installed")"
-                    if [[ -n "$package_query" ]]; then
-                        output " * \\e[33;1m[WARNING]\\e[0m $dependency_id may have been installed by munin-pihole-plugins
-   Would you like to uninstall $dependency_id now?"
-                        if [[ "$dependency_id" == "init-system-helpers" ]] || [[ "$dependency_id" == "wget" ]]; then
-                            output " * \\e[32;1m[INFO]\\e[0m It probably wasn't, and you probably wouldn't"
-                        fi
-                        apt remove "$dependency_id"
+            check_privilege "$@"
+            obnoxious_header
+            if [[ "$install_plugins" == "true" ]]; then
+                dependency_list+="$plugin_dependencies"
+                if [[ -d "$plugin_config_dir" ]]; then
+                    if [[ -f  "$plugin_config_dir/pihole.conf" ]]; then
+                        rm "$plugin_config_dir/pihole.conf" || return
                     fi
-                done
+                fi
+                uninstall_plugins
             fi
-        fi
-    fi
-    if [[ -d "$script_dir" ]]; then
-        if [[ -f "$script_dir/munin-pihole-plugins" ]]; then
-            uninstall_script
-        else
-            output " * \\e[32;1m[INFO]\\e[0m Done"
-        fi
-    fi
+            if [[ "$install_webserver" == "true" ]]; then
+                dependency_list+="$webserver_dependencies"
+                if [[ -d "$proxy_config_dir" ]]; then
+                    if [[ -f "$proxy_config_dir/external.conf.orig" ]]; then
+                        mv "$proxy_config_dir/external.conf.orig" "$proxy_config_dir/external.conf" || return
+                        output " * \\e[32;1m[INFO]\\e[0m Original lighttpd external.conf restored from backup"
+                    else
+                        if [[ -f "$proxy_config_dir/external.conf" ]]; then
+                            rm "$proxy_config_dir/external.conf" || return
+                            touch "$proxy_config_dir/external.conf" || return
+                        fi
+                    fi
+                fi
+                if [[ -d "$munin_config_dir" ]]; then
+                    if [[ -f "$munin_config_dir/99-graph-strategy.conf" ]]; then
+                        rm "$munin_config_dir/99-graph-strategy.conf" || return
+                    fi
+                else
+                    if [[ -d "$munin_dir" ]]; then
+                        if [[ -f "$munin_dir/munin.conf" ]]; then
+                            sed -i "s/^html_strategy cli/#html_strategy cron/g" "$munin_dir/munin.conf" || return
+                            sed -i "s/^graph_strategy cli/#graph_strategy cron/g" "$munin_dir/munin.conf" || return
+                        fi
+                    fi
+                fi
+
+            fi
+            if [[ "$skip_dependency_check" == "false" ]]; then
+                if [[ -x "$(command -v dpkg-query)" ]]; then
+                    if [[ -x "$(command -v apt)" ]]; then
+                        for dependency_id in $dependency_list; do
+                            package_query="$(dpkg-query -W --showformat='${Status}\n' "$dependency_id" | grep "install ok installed")"
+                            if [[ -n "$package_query" ]]; then
+                                output " * \\e[33;1m[WARNING]\\e[0m $dependency_id may have been installed by munin-pihole-plugins
+   Would you like to uninstall $dependency_id now?"
+                                if [[ "$dependency_id" == "init-system-helpers" ]] || [[ "$dependency_id" == "wget" ]]; then
+                                    output " * \\e[32;1m[INFO]\\e[0m It probably wasn't, and you probably wouldn't"
+                                fi
+                                apt remove "$dependency_id"
+                            fi
+                        done
+                    fi
+                fi
+            fi
+            if [[ "$install_script" == "true" ]]; then
+                dependency_list+="$script_dependencies"
+                if [[ -d "$script_dir" ]]; then
+                    if [[ -f "$script_dir/munin-pihole-plugins" ]]; then
+                        uninstall_script
+                    fi
+                fi
+            else
+                output " * \\e[32;1m[INFO]\\e[0m Done"
+            fi ;;
+    esac
 }
 
 # display the current and latest munin-pihole-plugins script versions
@@ -636,12 +700,18 @@ Type 'munin-pihole-plugins -h' for a list of available options"
 # guarding  of install and version is temporary, hopefully
 input_handler() {
     case "${1}" in
-        "-h" | "--help" | "help"            ) help_function "$@" ;;
-        "-i" | "--install" | "install"      ) install_function "$@" ;;
-        "-v" | "--version" | "version"      ) version_function "$@" ;;
-        "-U" | "--uninstall" | "uninstall"  ) uninstall_function "$@" ;;
-        "-V" | "--variables" | "variables"  ) variable_function ;;
-        *                                   ) mini_help_function "$@" ;;
+        "-h" | "--help" | "help"            )
+            help_function "$@" ;;
+        "-i" | "--install" | "install"      )
+            install_function "$@" ;;
+        "-v" | "--version" | "version"      )
+            version_function "$@" ;;
+        "-U" | "--uninstall" | "uninstall"  )
+            uninstall_function "$@" ;;
+        "-V" | "--variables" | "variables"  )
+            variable_function ;;
+        *                                   )
+            mini_help_function "$@" ;;
     esac
 }
 
