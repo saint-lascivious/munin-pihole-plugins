@@ -439,7 +439,7 @@ only that component respectively.
  -s, script, --script\\t\\t\\tInstall the munin-pihole-plugins script
  -w, webserver, --webserver\\t\\tInstall and configure munin, lighttpd
 \\t\\t\\t\\t\\tand lighttpd-external-munin-proxy
-\\nExample: 'munin-pihole-plugins $2 plugins'" ;;
+\\nExample: 'munin-pihole-plugins $2 --plugins'" ;;
         "-v" | "--version" | "version"              )
             min_height="10"
             some "Usage: munin-pihole-plugins {$2}
@@ -464,7 +464,7 @@ only that component respectively.
 \\t\\t\\t\\t\\tscript
  -w, webserver, --webserver\\t\\tUninstall munin, lighttpd, and
 \\t\\t\\t\\t\\tlighttpd-external-munin-proxy
-\\nExample: 'munin-pihole-plugins $2 script'" ;;
+\\nExample: 'munin-pihole-plugins $2 --script'" ;;
         "-V" | "--variables" | "variables"          )
             min_height="9"
             some "Usage: munin-pihole-plugins {$2}
@@ -483,24 +483,24 @@ various aspects of the munin-pihole-plugins script's operation." ;;
  -U\\t\\t--uninstall\\t\\tUninstall munin-pihole-plugins
  -V\\t\\t--variables\\t\\tDisplay environment variables
 \\nUse '$1 {OPTION}' for more detailed explanations of each command
-Example: 'munin-pihole-plugins $1 install'" ;;
+Example: 'munin-pihole-plugins $1 --install'" ;;
     esac
 }
 
 # primary installation function, installation exceptions are handled here
 install_function() {
     case "${2}" in
-        "-p" | "--plugins" | "plugins"              )
+        "-p" | "plugins" | "--plugins"              )
              exec env INSTALL_SCRIPT="false" INSTALL_WEBSERVER="false" /bin/bash "$0" "$1" ;;
-        "-P" | "--plugins-only" | "plugins-only"    )
+        "-P" | "plugins-only" | "--plugins-only"    )
              exec env INSTALL_SCRIPT="false" INSTALL_WEBSERVER="false" SKIP_DEPENDENCY_CHECK="true" /bin/bash "$0" "$1" ;;
-        "-s" | "--script" | "script"                )
+        "-s" | "script" | "--script"                )
              exec env INSTALL_PLUGINS="false" INSTALL_WEBSERVER="false" /bin/bash "$0" "$1" ;;
-        "-S" | "--script-only" | "script-only"      )
+        "-S" | "script-only" | "--script-only"      )
              exec env INSTALL_PLUGINS="false" INSTALL_WEBSERVER="false" SKIP_DEPENDENCY_CHECK="true" /bin/bash "$0" "$1" ;;
-        "-w" | "--webserver" | "webserver"          )
+        "-w" | "webserver" | "--webserver"          )
              exec env INSTALL_PLUGINS="false" INSTALL_SCRIPT="false" /bin/bash "$0" "$1" ;;
-        "-W" | "--webserver-only" | "webserver-only")
+        "-W" | "webserver-only" | "--webserver-only")
              exec env INSTALL_PLUGINS="false" INSTALL_SCRIPT="false" SKIP_DEPENDENCY_CHECK="true" /bin/bash "$0" "$1" ;;
         *                                           )
             if [[ ! "$install_plugins" == "true" ]] && [[ ! "$install_script" == "true" ]] && [[ ! "$install_webserver" == "true" ]]; then
@@ -563,17 +563,17 @@ install_function() {
 # because apparently it will pitch a fit if external.conf doesn't exist
 uninstall_function() {
     case "${2}" in
-        "-p" | "--plugins" | "plugins"              )
+        "-p" | "plugins" | "--plugins"              )
              exec env INSTALL_SCRIPT="false" INSTALL_WEBSERVER="false" /bin/bash "$0" "$1" ;;
-        "-P" | "--plugins-only" | "plugins-only"    )
+        "-P" | "plugins-only" | "--plugins-only"    )
              exec env INSTALL_SCRIPT="false" INSTALL_WEBSERVER="false" SKIP_DEPENDENCY_CHECK="true" /bin/bash "$0" "$1" ;;
-        "-s" | "--script" | "script"                )
+        "-s" | "script" | "--script"                )
              exec env INSTALL_PLUGINS="false" INSTALL_WEBSERVER="false" /bin/bash "$0" "$1" ;;
-        "-S" | "--script-only" | "script-only"      )
+        "-S" | "script-only" | "--script-only"      )
              exec env INSTALL_PLUGINS="false" INSTALL_WEBSERVER="false" SKIP_DEPENDENCY_CHECK="true" /bin/bash "$0" "$1" ;;
-        "-w" | "--webserver" | "webserver"          )
+        "-w" | "webserver" | "--webserver"          )
              exec env INSTALL_PLUGINS="false" INSTALL_SCRIPT="false" /bin/bash "$0" "$1" ;;
-        "-W" | "--webserver-only" | "webserver-only")
+        "-W" | "webserver-only" | "--webserver-only")
              exec env INSTALL_PLUGINS="false" INSTALL_SCRIPT="false" SKIP_DEPENDENCY_CHECK="true" /bin/bash "$0" "$1" ;;
         *                                           )
             if [[ ! "$install_plugins" == "true" ]] && [[ ! "$install_script" == "true" ]] && [[ ! "$install_webserver" == "true" ]]; then

@@ -38,7 +38,7 @@ Option          GNU long option         Meaning
  -V             --variables             Display environment variables
 
 Use '--help {OPTION}' for more detailed explanations of each command
-Example: 'munin-pihole-plugins -h install'
+Example: 'munin-pihole-plugins --help --install'
 ```
 
 ## Example Graph Gallery
