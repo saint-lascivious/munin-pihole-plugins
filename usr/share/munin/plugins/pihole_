@@ -20,15 +20,16 @@
 #     env.port 80
 #     env.api /admin/api.php
 #     env.cachesuffix ?getCacheInfo&auth=
+#     env.setupvars /etc/pihole/setupVars.conf
 #     env.webpassword PIHOLE_SETUPVARS_WEBPASSWORD_HERE
 
-setupvars="/etc/pihole/setupVars.conf"
-get_webpassword="$(cat < "$setupvars" | grep WEBPASSWORD | sed s/WEBPASSWORD=//g)"
+get_webpassword="$(echo "$setupvars" | grep WEBPASSWORD | sed s/WEBPASSWORD=//g)"
 
 envhost="${host:-127.0.0.1}"
 envport="${port:-80}"
 envapi="${api:-/admin/api.php}"
 envcachesuffix="${cachesuffix:-?getCacheInfo&auth=}"
+envsetupvars="${setupvars:-/etc/pihole/setupVars.conf}"
 envwebpassword="${webpassword:-$get_webpassword}"
 
 # which plugin is this?
