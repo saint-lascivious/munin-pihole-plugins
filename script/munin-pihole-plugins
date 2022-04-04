@@ -125,10 +125,12 @@ install_dependencies() {
     fi
     if [[ -x "$(command -v dpkg-query)" ]]; then
         if [[ -x "$(command -v apt)" ]]; then
+            output " * \\e[32;1m[INFO]\\e[0m Checking dependencies"
             for dependency_id in $dependency_list; do
-                output " * \\e[32;1m[INFO]\\e[0m Checking for $dependency_id"
                 package_query="$(dpkg-query -W --showformat='${Status}\n' "$dependency_id" | grep "install ok installed")"
-                if [[ -z "$package_query" ]]; then
+                if [[ -n "$package_query" ]]; then
+                    output "   $dependency_id found"
+                else
                     apt install "$dependency_id"
                 fi
             done
