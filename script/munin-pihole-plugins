@@ -6,7 +6,7 @@
 
 # munin-pihole-plugins version
 # must follow 5 character major.minor.micro scheme
-VERSION="04.06.00"
+VERSION="05.00.00"
 
 # environment variables with overrides
 dns_port="${DNS_PORT:-53}"
@@ -29,7 +29,7 @@ verbose_output="${VERBOSE_OUTPUT:-true}"
 # environment variables without
 current_directory="$(dirname "$(readlink -f "$0")")"
 plugin_dependencies="curl munin-node "
-plugin_repo="https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master"
+plugin_repo="https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/development"
 plugin_services="munin-node "
 proxy_repo="https://raw.githubusercontent.com/saint-lascivious/lighttpd-external-munin-proxy/master"
 script_dependencies="init-system-helpers wget "
@@ -223,9 +223,14 @@ configure_munin() {
 
 # remove all existing munin-pihole-plugins plugins and symbolic links
 # munin will reap abandoned plugin .rrd files itself
+# retain removal of legacy plugins instead of abandoning them while
+# switching from individual plugins to the monolithic plugin
 uninstall_plugins() {
     all_plugins="blocked cache cache_by_type clients percent queries replies_by_type status unique_domains"
     if [[ -d "$munin_plugin_dir" ]]; then
+        if [[ -f "munin_plugin_dir/pihole_" ]]; then
+            rm "munin_plugin_dir/pihole_" || return
+        fi
         for plugin_id in $all_plugins; do
             if [[ -f "$munin_plugin_dir/pihole_$plugin_id" ]]; then
                 rm "$munin_plugin_dir/pihole_$plugin_id" || return
@@ -246,11 +251,13 @@ uninstall_plugins() {
 install_plugins() {
     if [[ -d "$munin_plugin_dir" ]]; then
         if [[ -d "$node_plugin_dir" ]]; then
+            output " * \\e[32;1m[INFO]\\e[0m Installing plugin"
+            download "$plugin_repo/usr/share/munin/plugins/pihole_" -P "$munin_plugin_dir" || return
+            chmod +x "$munin_plugin_dir/pihole_" || return
+            output " * \\e[32;1m[INFO]\\e[0m Creating selected plugin links"
             for plugin_id in $plugin_list; do
-                output " * \\e[32;1m[INFO]\\e[0m Installing selected plugin pihole_$plugin_id"
-                download "$plugin_repo/usr/share/munin/plugins/pihole_$plugin_id" -P "$munin_plugin_dir" || return
-                chmod +x "$munin_plugin_dir/pihole_$plugin_id" || return
-                ln -s "$munin_plugin_dir/pihole_$plugin_id" "$node_plugin_dir/pihole_$plugin_id" || return
+                ln -s "$munin_plugin_dir/pihole_" "$node_plugin_dir/pihole_$plugin_id" || return
+                output "   $plugin_id"
             done
         else
             echo -e " * \\e[31;1m[ERROR]\\e[0m No Munin node plugin directory found at
@@ -402,13 +409,13 @@ check_version() {
 # in an 80 character wide terminal
 help_function() {
     case "${2}" in
-        "-h" | "--help" | "help"            )
+        "-h" | "--help" | "help"                    )
             min_height="7"
             some "Usage: munin-pihole-plugins $2
 \\nOption\\t\\tGNU long option\\t\\tMeaning
  -h\\t\\t--help\\t\\t\\tDisplay this help dialogue
 \\nDisplay munin-pihole-plugins help information." ;;
-        "-i" | "--install" | "install"      )
+        "-i" | "--install" | "install"              )
             min_height="29"
             some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
 \\nOption\\t\\tGNU long option\\t\\tMeaning
@@ -431,7 +438,7 @@ only that component respectively.
  webserver\\t\\t\\t\\tInstall and configure munin, lighttpd
 \\t\\t\\t\\t\\tand lighttpd-external-munin-proxy
 \\nExample: 'munin-pihole-plugins $2 plugins'" ;;
-        "-v" | "--version" | "version"      )
+        "-v" | "--version" | "version"              )
             min_height="10"
             some "Usage: munin-pihole-plugins {$2}
 \\nOption\\t\\tGNU long option\\t\\tMeaning
@@ -439,7 +446,7 @@ only that component respectively.
 \\nDisplay the current munin-pihole-plugins script version, and compare it to
 the latest munin-pihole-plugins script version.
 \\nAn additional notification will be displayed if an update is available." ;;
-        "-U" | "--uninstall" | "uninstall"  )
+        "-U" | "--uninstall" | "uninstall"          )
             min_height="21"
             some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
 \\nOption\\t\\tGNU long option\\t\\tMeaning
@@ -456,16 +463,16 @@ only that component respectively.
  webserver\\t\\t\\t\\tUninstall munin, lighttpd, and
 \\t\\t\\t\\t\\tlighttpd-external-munin-proxy
 \\nExample: 'munin-pihole-plugins $2 script'" ;;
-        "-V" | "--variables" | "variables"  )
+        "-V" | "--variables" | "variables"          )
             min_height="9"
             some "Usage: munin-pihole-plugins {$2}
 \\nOption\\t\\tGNU long option\\t\\tMeaning
  -V\\t\\t--variables\\t\\tDisplay environment variables
 \\nDisplay a full list of environment variables used by the munin-pihole-plugins
-script, and their current values. The veriables can be used to customize
+script, and their current values. The variables can be used to customize
 various aspects of the munin-pihole-plugins script's operation." ;;
-        *                                   )
-            min_height="11"
+        *                                           )
+            min_height="12"
             some "Usage: munin-pihole-plugins {OPTION [PARAMETER]}
 \\nOption\\t\\tGNU long option\\t\\tMeaning
  -h\\t\\t--help\\t\\t\\tDisplay this help dialogue
@@ -473,26 +480,27 @@ various aspects of the munin-pihole-plugins script's operation." ;;
  -v\\t\\t--version\\t\\tDisplay the current and latest versions
  -U\\t\\t--uninstall\\t\\tUninstall munin-pihole-plugins
  -V\\t\\t--variables\\t\\tDisplay environment variables
-\\nUse '$1 {OPTION}' for more detailed explanations of each command" ;;
+\\nUse '$1 {OPTION}' for more detailed explanations of each command
+Example: 'munin-pihole-plugins $1 install'" ;;
     esac
 }
 
 # primary installation function, installation exceptions are handled here
 install_function() {
     case "${2}" in
-        "plugins"                           )
+        "-p" | "--plugins" | "plugins"              )
              exec env INSTALL_SCRIPT="false" INSTALL_WEBSERVER="false" /bin/bash "$0" "$1" ;;
-        "plugins-only"                      )
+        "-P" | "--plugins-only" | "plugins-only"    )
              exec env INSTALL_SCRIPT="false" INSTALL_WEBSERVER="false" SKIP_DEPENDENCY_CHECK="true" /bin/bash "$0" "$1" ;;
-        "script"                            )
+        "-s" | "--script" | "script"                )
              exec env INSTALL_PLUGINS="false" INSTALL_WEBSERVER="false" /bin/bash "$0" "$1" ;;
-        "script-only"                       )
+        "-S" | "--script-only" | "script-only"      )
              exec env INSTALL_PLUGINS="false" INSTALL_WEBSERVER="false" SKIP_DEPENDENCY_CHECK="true" /bin/bash "$0" "$1" ;;
-        "webserver"                         )
+        "-w" | "--webserver" | "webserver"          )
              exec env INSTALL_PLUGINS="false" INSTALL_SCRIPT="false" /bin/bash "$0" "$1" ;;
-        "webserver-only"                    )
+        "-W" | "--webserver-only" | "webserver-only")
              exec env INSTALL_PLUGINS="false" INSTALL_SCRIPT="false" SKIP_DEPENDENCY_CHECK="true" /bin/bash "$0" "$1" ;;
-        *                                   )
+        *                                           )
             if [[ ! "$install_plugins" == "true" ]] && [[ ! "$install_script" == "true" ]] && [[ ! "$install_webserver" == "true" ]]; then
                 echo -e " * \\e[31;1m[ERROR]\\e[0m No action(s) to perform
    At least one INSTALL_* variable must be \"true\""
@@ -553,19 +561,19 @@ install_function() {
 # because apparently it will pitch a fit if external.conf doesn't exist
 uninstall_function() {
     case "${2}" in
-        "plugins"                           )
+        "-p" | "--plugins" | "plugins"              )
              exec env INSTALL_SCRIPT="false" INSTALL_WEBSERVER="false" /bin/bash "$0" "$1" ;;
-        "plugins-only"                      )
+        "-P" | "--plugins-only" | "plugins-only"    )
              exec env INSTALL_SCRIPT="false" INSTALL_WEBSERVER="false" SKIP_DEPENDENCY_CHECK="true" /bin/bash "$0" "$1" ;;
-        "script"                            )
+        "-s" | "--script" | "script"                )
              exec env INSTALL_PLUGINS="false" INSTALL_WEBSERVER="false" /bin/bash "$0" "$1" ;;
-        "script-only"                       )
+        "-S" | "--script-only" | "script-only"      )
              exec env INSTALL_PLUGINS="false" INSTALL_WEBSERVER="false" SKIP_DEPENDENCY_CHECK="true" /bin/bash "$0" "$1" ;;
-        "webserver"                         )
+        "-w" | "--webserver" | "webserver"          )
              exec env INSTALL_PLUGINS="false" INSTALL_SCRIPT="false" /bin/bash "$0" "$1" ;;
-        "webserver-only"                    )
+        "-W" | "--webserver-only" | "webserver-only")
              exec env INSTALL_PLUGINS="false" INSTALL_SCRIPT="false" SKIP_DEPENDENCY_CHECK="true" /bin/bash "$0" "$1" ;;
-        *                                   )
+        *                                           )
             if [[ ! "$install_plugins" == "true" ]] && [[ ! "$install_script" == "true" ]] && [[ ! "$install_webserver" == "true" ]]; then
                 echo -e " * \\e[31;1m[ERROR]\\e[0m No action(s) to perform
    At least one INSTALL_* variable must be \"true\""
@@ -700,17 +708,17 @@ Type 'munin-pihole-plugins -h' for a list of available options"
 # guarding  of install and version is temporary, hopefully
 input_handler() {
     case "${1}" in
-        "-h" | "--help" | "help"            )
+        "-h" | "--help" | "help"                    )
             help_function "$@" ;;
-        "-i" | "--install" | "install"      )
+        "-i" | "--install" | "install"              )
             install_function "$@" ;;
-        "-v" | "--version" | "version"      )
+        "-v" | "--version" | "version"              )
             version_function "$@" ;;
-        "-U" | "--uninstall" | "uninstall"  )
+        "-U" | "--uninstall" | "uninstall"          )
             uninstall_function "$@" ;;
-        "-V" | "--variables" | "variables"  )
+        "-V" | "--variables" | "variables"          )
             variable_function ;;
-        *                                   )
+        *                                           )
             mini_help_function "$@" ;;
     esac
 }
