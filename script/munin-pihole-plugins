@@ -434,10 +434,10 @@ install using the PLUGIN_LIST variable.
 \\nTakes an optional parameter 'plugins', 'script', or 'webserver' to install
 only that component respectively.
 \\nParameter\\t\\t\\t\\tFunction
- plugins\\t\\t\\t\\tInstall and configure munin-node, and
+ -p, plugins, --plugins\\t\\t\\tInstall and configure munin-node, and
 \\t\\t\\t\\t\\tmunin-pihole-plugins plugins
- script\\t\\t\\t\\t\\tInstall the munin-pihole-plugins script
- webserver\\t\\t\\t\\tInstall and configure munin, lighttpd
+ -s, script, --script\\t\\t\\tInstall the munin-pihole-plugins script
+ -w, webserver, --webserver\\t\\tInstall and configure munin, lighttpd
 \\t\\t\\t\\t\\tand lighttpd-external-munin-proxy
 \\nExample: 'munin-pihole-plugins $2 plugins'" ;;
         "-v" | "--version" | "version"              )
@@ -458,11 +458,11 @@ uninstall any dependencies that munin-pihole-plugins may have installed.
 \\nTakes an optional parameter 'plugins', 'script', or 'webserver' to uninstall
 only that component respectively.
 \\nParameter\\t\\t\\t\\tFunction
- plugins\\t\\t\\t\\tUninstall munin-node, and
+ -p, plugins, --plugins\\t\\t\\tUninstall munin-node, and
 \\t\\t\\t\\t\\tmunin-pihole-plugins plugins
- script\\t\\t\\t\\t\\tUninstall the munin-pihole-plugins
+ -s, script, --script\\t\\t\\tUninstall the munin-pihole-plugins
 \\t\\t\\t\\t\\tscript
- webserver\\t\\t\\t\\tUninstall munin, lighttpd, and
+ -w, webserver, --webserver\\t\\tUninstall munin, lighttpd, and
 \\t\\t\\t\\t\\tlighttpd-external-munin-proxy
 \\nExample: 'munin-pihole-plugins $2 script'" ;;
         "-V" | "--variables" | "variables"          )
