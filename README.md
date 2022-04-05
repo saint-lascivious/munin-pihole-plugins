@@ -1,9 +1,9 @@
 # munin-pihole-plugins
 
-[Munin](https://munin-monitoring.org) [plugins](https://gallery.munin-monitoring.org) and management script for monitoring various [Pi-hole®](https://github.com/pi-hole/pi-hole) statistics. Transforms a server into a powerful monitoring platform, as simple as [one](https://github.com/saint-lascivious/munin-pihole-plugins#step-one-download), [two](https://github.com/saint-lascivious/munin-pihole-plugins#step-two-install), [three](https://github.com/saint-lascivious/munin-pihole-plugins#step-three-wait), ...[four](https://github.com/saint-lascivious/munin-pihole-plugins#step-four-monitor).
+[Munin](https://munin-monitoring.org) [plugins](https://gallery.munin-monitoring.org) and management script for monitoring various [Pi-hole®](https://github.com/pi-hole/pi-hole) statistics. Transforms a server into a powerful monitoring platform, as simple as [one](https://github.com/saint-lascivious/munin-pihole-plugins#step-one-download), [two](https://github.com/saint-lascivious/munin-pihole-plugins#step-two-install), [three](https://github.com/saint-lascivious/munin-pihole-plugins#step-three-wait), …[four](https://github.com/saint-lascivious/munin-pihole-plugins#step-four-monitor).
 
 ## Step One: Download
-* Download munin-pihole-plugins
+* Download munin-pihole-plugins `development` branch
 ```
 curl -sSL munin-pihole-plugins-dev.sainternet.xyz -o munin-pihole-plugins && chmod +x munin-pihole-plugins
 ```
@@ -95,7 +95,7 @@ Variable
   SCRIPT_DIR="{SCRIPT_DIR:-/usr/local/bin}"
   SKIP_DEPENDENCY_CHECK="false"
   UPDATE_SELF="true"
-  VERBOSE_OUTPUT="true"
+  VERBOSITY_LEVEL="3"
 ```
 
 * `DNS_PORT`
@@ -158,9 +158,9 @@ Disables `apt` and `dpkg-query` based dependency satisfaction if set to any valu
 
 Disables self update of the `munin-pihole-plugins` script if set to any value other than `true`.
 
-* `VERBOSE_OUTPUT`
+* `VERBOSITY_LEVEL`
 
-Disables non-critical `munin-pihole-plugins` script output if set to any value other than `true`. Errors are always displayed, but a successful installation will be otherwise silent.
+Sets the munin-pihole-plugins script verbosity level on a scale from `0` to `3`, with `0` being total silence and `3` being the highest level of verbosity.
 
 ## Help! My graphs aren't showing up!
 

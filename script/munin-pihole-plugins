@@ -24,7 +24,7 @@ proxy_config_dir="${PROXY_CONFIG_DIR:-/etc/lighttpd}"
 script_dir="${SCRIPT_DIR:-/usr/local/bin}"
 skip_dependency_check="${SKIP_DEPENDENCY_CHECK:-false}"
 update_self="${UPDATE_SELF:-true}"
-verbose_output="${VERBOSE_OUTPUT:-true}"
+verbosity_level="${VERBOSITY_LEVEL:-3}"
 
 # environment variables without
 current_directory="$(dirname "$(readlink -f "$0")")"
@@ -45,8 +45,9 @@ check_privilege() {
             exec sudo -E bash "$0" "$@"
             exit "$?"
         else
-            echo -e " * \\e[31;1m[ERROR]\\e[0m Insufficient privileges
+            reverberate "error" "Insufficient privileges
    Install sudo or run munin-pihole-plugins as root"
+        reverberate "exit"
         exit 1
         fi
     fi
@@ -66,36 +67,70 @@ update_script() {
 # a simple you self update function for the munin-pihole-plugins script
 update_now() {
     if [[ -x "$(command -v wget)" ]]; then
-        wget -q --show-progress munin-pihole-plugins.sainternet.xyz -O "$current_directory/munin-pihole-plugins"
+        wget -q --show-progress munin-pihole-plugins-dev.sainternet.xyz -O "$current_directory/munin-pihole-plugins"
     else
-        echo -e " * \\e[31;1m[ERROR]\\e[0m The required command 'wget' was not found"
+        echo -e "[\\e[31;1m!\\e[0m] The required command 'wget' was not found"
+        echo -e "[\\e[31;1m!\\e[0m] Exiting $0"
         exit 1
     fi
     chmod +x "$current_directory/munin-pihole-plugins" || return
-    echo -e " * \\e[32;1m[INFO]\\e[0m Restarting after update"
+    echo -e "[\\e[32;1mℹ\\e[0m] Restarting after update"
     exec env UPDATE_SELF="false" /bin/bash "$0" "$@"
 }
 
 update_now
 EOF
     chmod +x "$TEMP/.munin-pihole-plugins_update"
-    echo -e " * \\e[32;1m[INFO]\\e[0m Updating munin-pihole-plugins"
+    reverberate "info" "Updating munin-pihole-plugins"
     exec /bin/bash "$TEMP/.munin-pihole-plugins_update"
 }
 
-# echo wrapper to handle verbosity
-# if verbose_output is set to any value other than true only error messages
-# are shown
-output() {
-    if [ "$verbose_output" == "true" ]; then
-      echo -e "$@"
-    fi
+# echo wrapper handling verbosity levels and common output
+reverberate() {
+    case "$1" in
+        "error"                                     )
+            if [[ "$verbosity_level" -ge "1" ]]; then
+                echo -e "[\\e[31;1m!\\e[0m] $2"
+            fi ;;
+        "exit"                                      )
+            if [[ "$verbosity_level" -ge "1" ]]; then
+                echo -e "[\\e[31;1m!\\e[0m] Exiting $0"
+            fi ;;
+        "failure"                                   )
+            if [[ "$verbosity_level" -ge "3" ]]; then
+                echo -e "[\\e[31;1m✗\\e[0m] $2"
+            fi ;;
+        "footer"                                    )
+            if [[ "$verbosity_level" -ge "1" ]]; then
+                echo -e "[\\e[32;1mℹ\\e[0m] Done"
+            fi ;;
+        "header"                                    )
+            if [[ "$verbosity_level" -ge "1" ]]; then
+                echo -e "$1"
+            fi ;;
+        "info"                                      )
+            if [[ "$verbosity_level" -ge "3" ]]; then
+                echo -e "[\\e[32;1mℹ\\e[0m] $2"
+            fi ;;
+        "success"                                   )
+            if [[ "$verbosity_level" -ge "3" ]]; then
+                echo -e "[\\e[32;1m✓\\e[0m] $2"
+            fi ;;
+        "warning"                                   )
+            if [[ "$verbosity_level" -ge "2" ]]; then
+                echo -e "[\\e[33;1m⚠\\e[0m] $2"
+            fi ;;
+        *                                           )
+            if [[ "$verbosity_level" -ge "3" ]]; then
+                echo -e "$1"
+            fi ;;
+    esac
 }
 
 # manditory horrific ascii header
 obnoxious_header() {
     if [[ "$terminal_height" -ge "6" ]] && [[ "$terminal_width" -ge "80" ]]; then
-        output "\\e[31;1m                  _             _ _        _            _           _ v$VERSION
+        reverberate "header" "\\e[31;1m                  _             _ _        _            _           _ v$VERSION
 \\e[33;1m   _ __ _  _ _ _ (_)_ _ __ _ __(_) |_  ___| |___ _ _ __| |_  _ __ _(_)_ _  ___
 \\e[32;1m  | '  \\ || | ' \\| | ' \\__| '_ \\ | ' \\/ _ \\ / -_)_| '_ \\ | || / _\` | | ' \\(_-<
 \\e[34;1m  |_|_|_\\_,_|_||_|_|_||_| | .__/_|_||_\\___/_\\___| | .__/_|\\_,_\\__, |_|_||_/__/
@@ -125,36 +160,39 @@ install_dependencies() {
     fi
     if [[ -x "$(command -v dpkg-query)" ]]; then
         if [[ -x "$(command -v apt)" ]]; then
-            output " * \\e[32;1m[INFO]\\e[0m Checking dependencies"
+            reverberate "info" "Checking dependencies"
             for dependency_id in $dependency_list; do
                 package_query="$(dpkg-query -W --showformat='${Status}\n' "$dependency_id" | grep "install ok installed")"
                 if [[ -n "$package_query" ]]; then
-                    output "   $dependency_id found"
+                    reverberate success "$dependency_id"
                 else
+                    reverberate failure "$dependency_id"
                     apt install "$dependency_id"
                 fi
             done
         else
-            echo -e " * \\e[31;1m[ERROR]\\e[0m The required command 'apt' was not found"
+            reverberate "error" "The required command 'apt' was not found"
+            reverberate "exit"
             exit 1
         fi
     else
-        echo -e " * \\e[31;1m[ERROR]\\e[0m The required command 'dpkg-query' was not found"
+        reverberate "error" "The required command 'dpkg-query' was not found"
+        reverberate "exit"
         exit 1
     fi
 }
 
-# creatively named wget wrapper
-# wget output hinges on verbose_output being set to 'true' (default)
+# simple wget wrapper
 download() {
     if [[ -x "$(command -v wget)" ]]; then
-        if [[ "$verbose_output" == "true" ]]; then
+        if [[ "$verbosity_level" -ge "3" ]]; then
             wget -q --show-progress "$@"
         else
             wget -q "$@"
         fi
     else
-        echo -e " * \\e[31;1m[ERROR]\\e[0m The required command 'wget' was not found"
+        reverberate "error" "The required command 'wget' was not found"
+        reverberate "exit"
         exit 1
     fi
 }
@@ -169,17 +207,18 @@ configure_proxy() {
         if [[ -s "$proxy_config" ]]; then
             if [[ ! -f "$proxy_config.orig" ]]; then
                 mv "$proxy_config" "$proxy_config.orig" || return
-                output " * \\e[32;1m[INFO]\\e[0m Existing lighttpd external.conf backed up to
+                reverberate "info" "Existing lighttpd external.conf backed up to
    $proxy_config.orig"
             fi
         fi
-        output " * \\e[32;1m[INFO]\\e[0m Installing Munin webserver proxy configuration"
+        reverberate "info" "Installing Munin webserver proxy configuration"
         download "$proxy_repo/etc/lighttpd/external.conf" -O "$proxy_config"
     else
-        echo -e " * \\e[31;1m[ERROR]\\e[0m No lighttpd configuration directory found at
+        reverberate "error" "No lighttpd configuration directory found at
    $proxy_config_dir"
-        output " * \\e[32;1m[INFO]\\e[0m If this directory is located at a different path try
+        reverberate "info" "If this directory is located at a different path try
    export PROXY_CONFIG_DIR=\"/path/to/directory\""
+        reverberate "exit"
         exit 1
     fi
 }
@@ -192,33 +231,36 @@ configure_proxy() {
 configure_munin() {
     if [[ -d "$munin_config_dir" ]]; then
         if [[ ! -f "$munin_config_dir/99-graph-strategy.conf" ]]; then
-            output " * \\e[32;1m[INFO]\\e[0m Installing Munin server graph strategy configuration"
+            reverberate "info" "Installing Munin server graph strategy configuration"
             download "$plugin_repo/etc/munin/munin-conf.d/99-graph-strategy.conf" -P "$munin_config_dir" || return
         fi
     else
-        output " * \\e[32;1m[INFO]\\e[0m Attempting fallback configuration editing munin.conf directly"
+        reverberate "info" "Attempting fallback configuration editing munin.conf directly"
         if [[ -d "$munin_dir" ]]; then
             if [[ -f "$munin_dir/munin.conf" ]]; then
                 sed -i "s/^#html_strategy cron/html_strategy cgi/g" "$munin_dir/munin.conf" || return
                 sed -i "s/^#graph_strategy cron/graph_strategy cgi/g" "$munin_dir/munin.conf" || return
             else
-                echo -e " * \\e[31;1m[ERROR]\\e[0m No munin.conf file found at
+                reverberate "error" "No munin.conf file found at
    $munin_dir/munin.conf"
-                output " * \\e[32;1m[INFO]\\e[0m If this file is located at a different path try
+                reverberate "info" "If this file is located at a different path try
    export MUNIN_DIR=\"/path/to/directory\""
+                reverberate "exit"
                 exit 1
             fi
         else
-            echo -e " * \\e[31;1m[ERROR]\\e[0m No Munin directory found at
+            reverberate "error" "No Munin directory found at
    $munin_dir"
-            output " * \\e[32;1m[INFO]\\e[0m If this directory is located at a different path try
+            reverberate "info" "If this directory is located at a different path try
    export MUNIN_DIR=\"/path/to/directory\""
+            reverberate "exit"
             exit 1
         fi
-        echo -e " * \\e[31;1m[ERROR]\\e[0m No Munin configuration directory found at
+        reverberate "error" "No Munin configuration directory found at
    $munin_config_dir"
-        output " * \\e[32;1m[INFO]\\e[0m If this directory is located at a different path try
+        reverberate "info" "If this directory is located at a different path try
    export MUNIN_CONFIG_DIR=\"/path/to/directory\""
+        reverberate "exit"
         exit 1
     fi
 }
@@ -253,26 +295,28 @@ uninstall_plugins() {
 install_plugins() {
     if [[ -d "$munin_plugin_dir" ]]; then
         if [[ -d "$node_plugin_dir" ]]; then
-            output " * \\e[32;1m[INFO]\\e[0m Installing plugin"
+            reverberate "info" "Installing plugin"
             download "$plugin_repo/usr/share/munin/plugins/pihole_" -P "$munin_plugin_dir" || return
             chmod +x "$munin_plugin_dir/pihole_" || return
-            output " * \\e[32;1m[INFO]\\e[0m Creating selected plugin links"
+            reverberate "info" "Creating selected plugin links"
             for plugin_id in $plugin_list; do
                 ln -s "$munin_plugin_dir/pihole_" "$node_plugin_dir/pihole_$plugin_id" || return
-                output "   $plugin_id"
+                reverberate "success" "$plugin_id"
             done
         else
-            echo -e " * \\e[31;1m[ERROR]\\e[0m No Munin node plugin directory found at
+            reverberate "error" "No Munin node plugin directory found at
    $node_plugin_dir"
-            output " * \\e[32;1m[INFO]\\e[0m If this directory is located at a different path try
+            reverberate "info" "If this directory is located at a different path try
    export NODE_PLUGIN_DIR=\"/path/to/directory\""
+            reverberate "exit"
             exit 1
         fi
     else
-        echo -e " * \\e[31;1m[ERROR]\\e[0m No Munin plugin directory found at
+        reverberate "error" "No Munin plugin directory found at
    $munin_plugin_dir"
-        output " * \\e[32;1m[INFO]\\e[0m If this directory is located at a different path try
+        reverberate "info" "If this directory is located at a different path try
    export MUNIN_PLUGIN_DIR=\"/path/to/directory\""
+        reverberate "exit"
         exit 1
     fi
 }
@@ -284,18 +328,19 @@ configure_plugins() {
     if [[ -d "$plugin_config_dir" ]]; then
         if [[ ! -f  "$plugin_config_dir/pihole.conf" ]]; then
             download "$plugin_repo/etc/munin/plugin-conf.d/pihole.conf" -P "$plugin_config_dir"
-            output " * \\e[32;1m[INFO]\\e[0m Default plugin configuration saved to
+            reverberate "info" "Default plugin configuration saved to
    $plugin_config_dir/pihole.conf"
         fi
     else
-        echo -e " * \\e[31;1m[ERROR]\\e[0m No Munin plugin configuration directory found at
+        reverberate "error" "No Munin plugin configuration directory found at
    $plugin_config_dir"
-        output " * \\e[32;1m[INFO]\\e[0m If this directory is located at a different path try
+        reverberate "info" "If this directory is located at a different path try
    export PLUGIN_CONFIG_DIR=\"/path/to/directory\""
+        reverberate "exit"
         exit 1
     fi
     if [[ "$pihole_on_host" == "no" ]]; then
-        output " * \\e[33;1m[WARNING]\\e[0m The Pi-hole® command 'pihole' was not found on this host
+        reverberate "warning" "The Pi-hole® command 'pihole' was not found on this host
    If this was intentional you will need to edit
    $plugin_config_dir/pihole.conf
    and replace the host and setupvars values with those of your Pi-hole® host"
@@ -312,12 +357,14 @@ restart_services() {
     fi
     if [[ -n "$service_list" ]]; then
         if [[ -x "$(command -v service)" ]]; then
+            reverberate "info" "Restarting services"
             for service_id in $service_list; do
-                output " * \\e[32;1m[INFO]\\e[0m Restarting $service_id service"
                 service "$service_id" restart
+                reverberate "success" "$service_id"
             done
         else
-            echo -e " * \\e[31;1m[ERROR]\\e[0m The required command 'service' was not found"
+            reverberate "error" "The required command 'service' was not found"
+            reverberate "exit"
             exit 1
         fi
     fi
@@ -330,20 +377,21 @@ install_script() {
         if [[ ! -f "$script_dir/munin-pihole-plugins" ]]; then
             download "$plugin_repo/script/munin-pihole-plugins" -P "$script_dir"
             chmod +x "$script_dir/munin-pihole-plugins" || return
-            output " * \\e[32;1m[INFO]\\e[0m A copy of the munin-pihole-plugins script was installed to
+            reverberate "info" "A copy of the munin-pihole-plugins script was installed to
    $script_dir/munin-pihole-plugins"
         fi
         if [[ ":$PATH:" != *":$script_dir:"* ]]; then
-            output " * \\e[33;1m[WARNING]\\e[0m The munin-pihole-plugins script directory
+            reverberate "warning" "The munin-pihole-plugins script directory
    $script_dir
    is not in your \$PATH variable try
    export PATH=\"\$PATH:$script_dir\""
         fi
     else
-        echo -e " * \\e[31;1m[ERROR]\\e[0m No directory found at
+        reverberate "error" "No directory found at
    $script_dir"
-        output " * \\e[32;1m[INFO]\\e[0m If this directory is located at a different path try
+        reverberate "info" "If this directory is located at a different path try
    export SCRIPT_DIR=\"/path/to/directory\""
+        reverberate "exit"
         exit 1
     fi
 }
@@ -361,12 +409,13 @@ uninstall_script() {
 # uninstalls a locally installed copy of the munin-pihole-plugins script
 uninstall_now() {
     rm "$script_dir/munin-pihole-plugins" || return
-    echo -e " * \\e[32;1m[INFO]\\e[0m Done"
+    echo -e "[\\e[32;1mℹ\\e[0m] Done"
 }
 
 uninstall_now
 EOF
     chmod +x "$TEMP/.munin-pihole-plugins_uninstall"
+    reverberate "info" "Uninstalling munin-pihole-plugins"
     exec /bin/bash "$TEMP/.munin-pihole-plugins_uninstall"
 }
 
@@ -431,8 +480,8 @@ if a newer version of the munin-pihole-plugins script is available.
 \\nYou can run the installation again at any time afterwards to update the
 munin-pihole-plugins script and plugins, optionally selecting which plugins to
 install using the PLUGIN_LIST variable.
-\\nTakes an optional parameter 'plugins', 'script', or 'webserver' to install
-only that component respectively.
+\\nTakes an optional parameter '-p, plugins, --plugins', '-s, script, --script'
+or '-w, webserver, --webserver' to install just that component.
 \\nParameter\\t\\t\\t\\tFunction
  -p, plugins, --plugins\\t\\t\\tInstall and configure munin-node, and
 \\t\\t\\t\\t\\tmunin-pihole-plugins plugins
@@ -455,8 +504,8 @@ the latest munin-pihole-plugins script version.
  -U\\t\\t--uninstall\\t\\tUninstall munin-pihole-plugins
 \\nCompletely uninstall munin-pihole-plugins, you will be asked if you want to
 uninstall any dependencies that munin-pihole-plugins may have installed.
-\\nTakes an optional parameter 'plugins', 'script', or 'webserver' to uninstall
-only that component respectively.
+\\nTakes an optional parameter '-p, plugins, --plugins', '-s, script, --script'
+or '-w, webserver, --webserver' to install just that component.
 \\nParameter\\t\\t\\t\\tFunction
  -p, plugins, --plugins\\t\\t\\tUninstall munin-node, and
 \\t\\t\\t\\t\\tmunin-pihole-plugins plugins
@@ -504,8 +553,9 @@ install_function() {
              exec env INSTALL_PLUGINS="false" INSTALL_SCRIPT="false" SKIP_DEPENDENCY_CHECK="true" /bin/bash "$0" "$1" ;;
         *                                           )
             if [[ ! "$install_plugins" == "true" ]] && [[ ! "$install_script" == "true" ]] && [[ ! "$install_webserver" == "true" ]]; then
-                echo -e " * \\e[31;1m[ERROR]\\e[0m No action(s) to perform
+                reverberate "error" "No action(s) to perform
    At least one INSTALL_* variable must be \"true\""
+                reverberate "exit"
                 exit 1
             fi
             check_privilege "$@"
@@ -522,7 +572,7 @@ install_function() {
             if [[ "$skip_dependency_check" == "false" ]]; then
                 install_dependencies
             else
-                output " * \\e[32;1m[INFO]\\e[0m Skipping dependency checks"
+                reverberate "info" "Skipping dependency checks"
             fi
             if [[ "$install_plugins" == "true" ]]; then
                 if [[ -n "$plugin_list" ]]; then
@@ -531,26 +581,27 @@ install_function() {
                     check_pihole
                     configure_plugins
                 else
-                    echo -e " * \\e[31;1m[ERROR]\\e[0m No action(s) to perform
+                    reverberate "error" "No action(s) to perform
    No plugins in PLUGIN_LIST"
+                    reverberate "exit"
                     exit 1
                 fi
             else
-                output " * \\e[32;1m[INFO]\\e[0m Skipping plugin installation"
+                reverberate "info" "Skipping plugin installation"
             fi
             if [[ "$install_webserver" == "true" ]]; then
                 configure_proxy
                 configure_munin
             else
-                output " * \\e[32;1m[INFO]\\e[0m Skipping webserver installation"
+                reverberate "info" "Skipping webserver installation"
             fi
             restart_services
             if [[ "$install_script" == "true" ]]; then
                 install_script
             else
-                output " * \\e[32;1m[INFO]\\e[0m Skipping script installation"
+                reverberate "info" "Skipping script installation"
             fi
-            output " * \\e[32;1m[INFO]\\e[0m Done" ;;
+            reverberate "footer" ;;
     esac
 }
 
@@ -577,8 +628,9 @@ uninstall_function() {
              exec env INSTALL_PLUGINS="false" INSTALL_SCRIPT="false" SKIP_DEPENDENCY_CHECK="true" /bin/bash "$0" "$1" ;;
         *                                           )
             if [[ ! "$install_plugins" == "true" ]] && [[ ! "$install_script" == "true" ]] && [[ ! "$install_webserver" == "true" ]]; then
-                echo -e " * \\e[31;1m[ERROR]\\e[0m No action(s) to perform
+                reverberate "error" "No action(s) to perform
    At least one INSTALL_* variable must be \"true\""
+                reverberate "exit"
                 exit 1
             fi
             check_privilege "$@"
@@ -597,7 +649,7 @@ uninstall_function() {
                 if [[ -d "$proxy_config_dir" ]]; then
                     if [[ -f "$proxy_config_dir/external.conf.orig" ]]; then
                         mv "$proxy_config_dir/external.conf.orig" "$proxy_config_dir/external.conf" || return
-                        output " * \\e[32;1m[INFO]\\e[0m Original lighttpd external.conf restored from backup"
+                        reverberate "info" "Original lighttpd external.conf restored from backup"
                     else
                         if [[ -f "$proxy_config_dir/external.conf" ]]; then
                             rm "$proxy_config_dir/external.conf" || return
@@ -625,10 +677,10 @@ uninstall_function() {
                         for dependency_id in $dependency_list; do
                             package_query="$(dpkg-query -W --showformat='${Status}\n' "$dependency_id" | grep "install ok installed")"
                             if [[ -n "$package_query" ]]; then
-                                output " * \\e[33;1m[WARNING]\\e[0m $dependency_id may have been installed by munin-pihole-plugins
+                                reverberate "warning" "$dependency_id may have been installed by munin-pihole-plugins
    Would you like to uninstall $dependency_id now?"
                                 if [[ "$dependency_id" == "init-system-helpers" ]] || [[ "$dependency_id" == "wget" ]]; then
-                                    output " * \\e[32;1m[INFO]\\e[0m It probably wasn't, and you probably wouldn't"
+                                    reverberate "info" "It probably wasn't, and you probably wouldn't"
                                 fi
                                 apt remove "$dependency_id"
                             fi
@@ -644,7 +696,7 @@ uninstall_function() {
                     fi
                 fi
             else
-                output " * \\e[32;1m[INFO]\\e[0m Done"
+                reverberate "footer"
             fi ;;
     esac
 }
@@ -655,10 +707,10 @@ version_function() {
     if [[ -n "$remote_version" ]]; then
         if [[ "$remote_version" > "$VERSION" ]]; then
             min_height="3"
-            some " * \\e[32;1m[INFO]\\e[0m An update for munin-pihole-plugins is available
+            some "[\\e[32;1mℹ\\e[0m] An update for munin-pihole-plugins is available
 munin-pihole-plugins version is v$VERSION (Latest: v$remote_version)"
         else
-            some "munin-pihole-plugins version is v$VERSION (Latest: v$remote_version)"
+            some "[\\e[32;1mℹ\\e[0m] munin-pihole-plugins version is v$VERSION (Latest: v$remote_version)"
         fi
     else
         min_height="4"
@@ -692,7 +744,7 @@ variable_function() {
   SCRIPT_DIR=\"$script_dir\"
   SKIP_DEPENDENCY_CHECK=\"$skip_dependency_check\"
   UPDATE_SELF=\"$update_self\"
-  VERBOSE_OUTPUT=\"$verbose_output\""
+  VERBOSITY_LEVEL=\"$verbosity_level\""
 }
 
 # handle invalid input by prompting on how to find valid input
