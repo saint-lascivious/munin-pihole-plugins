@@ -465,8 +465,6 @@ check_version() {
 }
 
 # display munin-pihole-plugins script help text
-# height is the minimal terminal height required to display the full output
-# in an 80 character wide terminal
 help_function() {
     case "${2}" in
         "-h" | "--help" | "help"                            )
@@ -497,7 +495,7 @@ or '-w, webserver, --webserver' to install just that component.
  -s, script, --script\\t\\t\\tInstall the munin-pihole-plugins script
  -w, webserver, --webserver\\t\\tInstall and configure munin, lighttpd
 \\t\\t\\t\\t\\tand lighttpd-external-munin-proxy
-\\nExample: 'munin-pihole-plugins $2 --plugins'" ;;
+\\nExample: 'munin-pihole-plugins $2 plugins'" ;;
         "-v" | "--version" | "version"                      )
             min_height="10"
             some "Usage: munin-pihole-plugins {$2}
@@ -522,7 +520,7 @@ or '-w, webserver, --webserver' to install just that component.
 \\t\\t\\t\\t\\tscript
  -w, webserver, --webserver\\t\\tUninstall munin, lighttpd, and
 \\t\\t\\t\\t\\tlighttpd-external-munin-proxy
-\\nExample: 'munin-pihole-plugins $2 --script'" ;;
+\\nExample: 'munin-pihole-plugins $2 script'" ;;
         "-V" | "--variables" | "variables"                  )
             min_height="14"
             some "Usage: munin-pihole-plugins {$2 [VARIABLE]}
@@ -534,17 +532,21 @@ various aspects of the munin-pihole-plugins script's operation.
 \\nTakes an optional parameter in the form of a munin-pihole-plugins environment
 variable to list the value of that variable alone.
 \\nExample: 'munin-pihole-plugins $2 INSTALL_PLUGINS'" ;;
-        *                                                   )
-            min_height="12"
+        ""                                                  )
+            min_height="13"
             some "Usage: munin-pihole-plugins {OPTION [PARAMETER]}
 \\nOption\\t\\tGNU long option\\t\\tMeaning
- -h\\t\\t--help\\t\\t\\tDisplay this help dialogue
- -i\\t\\t--install\\t\\tInstall munin-pihole-plugins
- -v\\t\\t--version\\t\\tDisplay the current and latest versions
- -U\\t\\t--uninstall\\t\\tUninstall munin-pihole-plugins
- -V\\t\\t--variables\\t\\tDisplay environment variables
-\\nUse '$1 {OPTION}' for more detailed explanations of each command
-Example: 'munin-pihole-plugins $1 --install'" ;;
+ -h, help\\t--help\\t\\t\\tDisplay this help dialogue
+ -i, install\\t--install\\t\\tInstall munin-pihole-plugins
+ -v, version\\t--version\\t\\tDisplay the current and latest versions
+ -U, uninstall\\t--uninstall\\t\\tUninstall munin-pihole-plugins
+ -V, variables\\t--variables\\t\\tDisplay environment variables
+\\nType '$1 {OPTION}' for more detailed explanations of each command
+\\nExample: 'munin-pihole-plugins $1 install'" ;;
+        *                                                   )
+        min_height="3"
+    some "munin-pihole-plugins: unrecognized option '$2'
+Type 'munin-pihole-plugins --help' for a list of available options" ;;
     esac
 }
 
@@ -735,8 +737,6 @@ munin-pihole-plugins version is v$VERSION (Latest: unknown)"
 
 # display munin-pihole-plugins environment variables and their current values
 # there were too many variables to list in the main help text
-# height is the minimal terminal height required to display the full output
-# in an 80 character wide terminal
 variable_function() {
     min_height="3"
     case "$2" in
@@ -772,7 +772,7 @@ variable_function() {
             some "UPDATE_SELF: $update_self" ;;
         "verbosity_level" | "VERBOSITY_LEVEL"               )
             some "VERBOSITY_LEVEL: $verbosity_level" ;;
-        *                                                   )
+        ""                                                  )
             min_height="21"
             some "Usage: export [VARIABLE]=\"value\"
 \\nVariable
@@ -792,16 +792,11 @@ variable_function() {
  SKIP_DEPENDENCY_CHECK=\"$skip_dependency_check\"
  UPDATE_SELF=\"$update_self\"
  VERBOSITY_LEVEL=\"$verbosity_level\"" ;;
+        *                                                   )
+min_height="3"
+    some "munin-pihole-plugins: unrecognized variable '$2'
+Type 'munin-pihole-plugins --variables' for a list of available options"
     esac
-}
-
-# handle invalid input by prompting on how to find valid input
-# height is the minimal terminal height required to display the full output
-# in an 80 character wide terminal
-mini_help_function() {
-    min_height="3"
-    some "munin-pihole-plugins: unrecognized option '$1'
-Type 'munin-pihole-plugins --help' for a list of available options"
 }
 
 # not so simple input handler
@@ -820,8 +815,14 @@ function_handler() {
             uninstall_function "$@" ;;
         "-V" | "--variables" | "variables"                  )
             variable_function "$@" ;;
+        ""                                                  )
+            min_height="3"
+    some "munin-pihole-plugins: no option selected
+Type 'munin-pihole-plugins --help' for a list of available options" ;;
         *                                                   )
-            mini_help_function "$@" ;;
+            min_height="3"
+    some "munin-pihole-plugins: unrecognized option '$1'
+Type 'munin-pihole-plugins --help' for a list of available options" ;;
     esac
 }
 

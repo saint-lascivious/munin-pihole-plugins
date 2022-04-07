@@ -31,14 +31,15 @@ If everything went well, you should find [munin-pihole-plugins graphs](https://g
 Usage: munin-pihole-plugins {OPTION [PARAMETER]}
 
 Option          GNU long option         Meaning
- -h             --help                  Display this help dialogue
- -i             --install               Install munin-pihole-plugins
- -v             --version               Display the current and latest versions
- -U             --uninstall             Uninstall munin-pihole-plugins
- -V             --variables             Display environment variables
+ -h, help       --help                  Display this help dialogue
+ -i, install    --install               Install munin-pihole-plugins
+ -v, version    --version               Display the current and latest versions
+ -U, uninstall  --uninstall             Uninstall munin-pihole-plugins
+ -V, variables  --variables             Display environment variables
 
-Use '--help {OPTION}' for more detailed explanations of each command
-Example: 'munin-pihole-plugins --help --install'
+Type '--help {OPTION}' for more detailed explanations of each command
+
+Example: 'munin-pihole-plugins --help install'
 ```
 
 ## Example Graph Gallery
