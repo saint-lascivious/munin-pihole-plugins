@@ -170,7 +170,7 @@ install_dependencies() {
                 if [[ -n "$package_query" ]]; then
                     reverberate success "$dependency_id was found"
                 else
-                    reverberate failure "$dependency_id was not fount"
+                    reverberate failure "$dependency_id was not found"
                     apt install "$dependency_id"
                 fi
             done
@@ -524,13 +524,16 @@ or '-w, webserver, --webserver' to install just that component.
 \\t\\t\\t\\t\\tlighttpd-external-munin-proxy
 \\nExample: 'munin-pihole-plugins $2 --script'" ;;
         "-V" | "--variables" | "variables"          )
-            min_height="9"
-            some "Usage: munin-pihole-plugins {$2}
+            min_height="14"
+            some "Usage: munin-pihole-plugins {$2 [VARIABLE]}
 \\nOption\\t\\tGNU long option\\t\\tMeaning
  -V\\t\\t--variables\\t\\tDisplay environment variables
 \\nDisplay a full list of environment variables used by the munin-pihole-plugins
 script, and their current values. The variables can be used to customize
-various aspects of the munin-pihole-plugins script's operation." ;;
+various aspects of the munin-pihole-plugins script's operation.
+\\nTakes an optional parameter in the form of a munin-pihole-plugins environment
+variable to list the value of that variable alone.
+\\nExample: 'munin-pihole-plugins $2 INSTALL_PLUGINS'" ;;
         *                                           )
             min_height="12"
             some "Usage: munin-pihole-plugins {OPTION [PARAMETER]}
@@ -735,8 +738,43 @@ munin-pihole-plugins version is v$VERSION (Latest: unknown)"
 # height is the minimal terminal height required to display the full output
 # in an 80 character wide terminal
 variable_function() {
-    min_height="21"
-    some "Usage: export [VARIABLE]=\"value\"
+    min_height="3"
+    case "$2" in
+        "DNS_PORT"                                  )
+            some "DNS_PORT: $dns_port" ;;
+        "DNS_SERVER"                                )
+            some "DNS_SERVER: $dns_server" ;;
+        "INSTALL_PLUGINS"                           )
+            some "INSTALL_PLUGINS: $install_plugins" ;;
+        "INSTALL_SCRIPT"                            )
+            some "INSTALL_SCRIPT: $install_script" ;;
+        "INSTALL_WEBSERVER"                         )
+            some "INSTALL_WEBSERVER: $install_webserver" ;;
+        "MUNIN_DIR"                                 )
+            some "MUNIN_DIR: $munin_dir" ;;
+        "MUNIN_CONFIG_DIR"                          )
+            some "MUNIN_CONFIG_DIR: $munin_config_dir" ;;
+        "MUNIN_PLUGIN_DIR"                          )
+            some "MUNIN_PLUGIN_DIR: $munin_plugin_dir" ;;
+        "NODE_PLUGIN_DIR"                           )
+            some "NODE_PLUGIN_DIR: $node_plugin_dir" ;;
+        "PLUGIN_CONFIG_DIR"                         )
+            some "PLUGIN_CONFIG_DIR: $plugin_config_dir" ;;
+        "PLUGIN_LIST"                               )
+            some "PLUGIN_LIST: $plugin_list" ;;
+        "PROXY_CONFIG_DIR"                          )
+            some "PROXY_CONFIG_DIR: $proxy_config_dir" ;;
+        "SCRIPT_DIR"                                )
+            some "SCRIPT_DIR: $script_dir" ;;
+        "SKIP_DEPENDENCY_CHECK"                     )
+            some "SKIP_DEPENDENCY_CHECK: $skip_dependency_check" ;;
+        "UPDATE_SELF"                               )
+            some "UPDATE_SELF: $update_self" ;;
+        "VERBOSITY_LEVEL"                           )
+            some "VERBOSITY_LEVEL: $verbosity_level" ;;
+        *                                           )
+            min_height="21"
+            some "Usage: export [VARIABLE]=\"value\"
 \\nVariable
   DNS_PORT=\"$dns_port\"
   DNS_SERVER=\"$dns_server\"
@@ -753,7 +791,8 @@ variable_function() {
   SCRIPT_DIR=\"$script_dir\"
   SKIP_DEPENDENCY_CHECK=\"$skip_dependency_check\"
   UPDATE_SELF=\"$update_self\"
-  VERBOSITY_LEVEL=\"$verbosity_level\""
+  VERBOSITY_LEVEL=\"$verbosity_level\"" ;;
+    esac
 }
 
 # handle invalid input by prompting on how to find valid input
@@ -780,7 +819,7 @@ function_handler() {
         "-U" | "--uninstall" | "uninstall"          )
             uninstall_function "$@" ;;
         "-V" | "--variables" | "variables"          )
-            variable_function ;;
+            variable_function "$@" ;;
         *                                           )
             mini_help_function "$@" ;;
     esac
