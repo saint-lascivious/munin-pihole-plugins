@@ -106,7 +106,7 @@ reverberate() {
             fi ;;
         "header"                                    )
             if [[ "$verbosity_level" -ge "1" ]]; then
-                echo -e "$1"
+                echo -e "$2"
             fi ;;
         "info"                                      )
             if [[ "$verbosity_level" -ge "3" ]]; then
@@ -141,7 +141,11 @@ obnoxious_header() {
 
 # is this a pihole host?
 check_pihole() {
-    if [[ ! -x "$(command -v pihole)" ]]; then
+    reverberate "info" "Checking if this is a Pi-hole® host"
+    if [[ -x "$(command -v pihole)" ]]; then
+        reverberate "success" "The pihole command was found"
+    else
+        reverberate "failure" "The pihole command was not found"
         pihole_on_host="no"
     fi
 }
@@ -160,13 +164,13 @@ install_dependencies() {
     fi
     if [[ -x "$(command -v dpkg-query)" ]]; then
         if [[ -x "$(command -v apt)" ]]; then
-            reverberate "info" "Checking dependencies"
+            reverberate "info" "Checking for required dependencies"
             for dependency_id in $dependency_list; do
                 package_query="$(dpkg-query -W --showformat='${Status}\n' "$dependency_id" | grep "install ok installed")"
                 if [[ -n "$package_query" ]]; then
-                    reverberate success "$dependency_id"
+                    reverberate success "$dependency_id was found"
                 else
-                    reverberate failure "$dependency_id"
+                    reverberate failure "$dependency_id was not fount"
                     apt install "$dependency_id"
                 fi
             done
@@ -272,19 +276,24 @@ configure_munin() {
 uninstall_plugins() {
     all_plugins="blocked cache cache_by_type clients percent queries replies_by_type status unique_domains"
     if [[ -d "$munin_plugin_dir" ]]; then
+        reverberate "info" "Removing any existing munin-pihole-plugins plugin(s)"
         if [[ -f "munin_plugin_dir/pihole_" ]]; then
             rm "munin_plugin_dir/pihole_" || return
+            reverberate "success" "pihole_"
         fi
         for plugin_id in $all_plugins; do
             if [[ -f "$munin_plugin_dir/pihole_$plugin_id" ]]; then
                 rm "$munin_plugin_dir/pihole_$plugin_id" || return
+                reverberate "success" "$plugin_id"
             fi
         done
     fi
     if [[ -d "$node_plugin_dir" ]]; then
+        reverberate "info" "Removing any existing munin-pihole-plugins symbolic links"
         for plugin_id in $all_plugins; do
             if [[ -h "$node_plugin_dir/pihole_$plugin_id" ]]; then
                 rm "$node_plugin_dir/pihole_$plugin_id" || return
+                reverberate "success" "$plugin_id"
             fi
         done
     fi
@@ -295,10 +304,10 @@ uninstall_plugins() {
 install_plugins() {
     if [[ -d "$munin_plugin_dir" ]]; then
         if [[ -d "$node_plugin_dir" ]]; then
-            reverberate "info" "Installing plugin"
+            reverberate "info" "Installing munin-pihole-plugins plugin"
             download "$plugin_repo/usr/share/munin/plugins/pihole_" -P "$munin_plugin_dir" || return
             chmod +x "$munin_plugin_dir/pihole_" || return
-            reverberate "info" "Creating selected plugin links"
+            reverberate "info" "Creating selected munin-pihole-plugins symbolic links"
             for plugin_id in $plugin_list; do
                 ln -s "$munin_plugin_dir/pihole_" "$node_plugin_dir/pihole_$plugin_id" || return
                 reverberate "success" "$plugin_id"
@@ -753,14 +762,14 @@ variable_function() {
 mini_help_function() {
     min_height="3"
     some "munin-pihole-plugins: unrecognized option '$1'
-Type 'munin-pihole-plugins -h' for a list of available options"
+Type 'munin-pihole-plugins --help' for a list of available options"
 }
 
 # not so simple input handler
 # i hate having to do this but i realised i kinda fucked myself and dig ended
 # up quietly being a hard dependency without my noticing it this weird
 # guarding  of install and version is temporary, hopefully
-input_handler() {
+function_handler() {
     case "${1}" in
         "-h" | "--help" | "help"                    )
             help_function "$@" ;;
@@ -777,4 +786,4 @@ input_handler() {
     esac
 }
 
-input_handler "$@"
+function_handler "$@"
