@@ -46,7 +46,7 @@ check_privilege() {
             exit "$?"
         else
             reverberate "error" "Insufficient privileges
-   Install sudo or run munin-pihole-plugins as root"
+Install sudo or run munin-pihole-plugins as root"
         reverberate "exit"
         exit 1
         fi
@@ -246,24 +246,24 @@ configure_munin() {
                 sed -i "s/^#graph_strategy cron/graph_strategy cgi/g" "$munin_dir/munin.conf" || return
             else
                 reverberate "error" "No munin.conf file found at
-   $munin_dir/munin.conf"
+$munin_dir/munin.conf"
                 reverberate "info" "If this file is located at a different path try
-   export MUNIN_DIR=\"/path/to/directory\""
+export MUNIN_DIR=\"/path/to/directory\""
                 reverberate "exit"
                 exit 1
             fi
         else
             reverberate "error" "No Munin directory found at
-   $munin_dir"
+$munin_dir"
             reverberate "info" "If this directory is located at a different path try
-   export MUNIN_DIR=\"/path/to/directory\""
+export MUNIN_DIR=\"/path/to/directory\""
             reverberate "exit"
             exit 1
         fi
         reverberate "error" "No Munin configuration directory found at
-   $munin_config_dir"
+$munin_config_dir"
         reverberate "info" "If this directory is located at a different path try
-   export MUNIN_CONFIG_DIR=\"/path/to/directory\""
+export MUNIN_CONFIG_DIR=\"/path/to/directory\""
         reverberate "exit"
         exit 1
     fi
@@ -314,17 +314,17 @@ install_plugins() {
             done
         else
             reverberate "error" "No Munin node plugin directory found at
-   $node_plugin_dir"
+$node_plugin_dir"
             reverberate "info" "If this directory is located at a different path try
-   export NODE_PLUGIN_DIR=\"/path/to/directory\""
+export NODE_PLUGIN_DIR=\"/path/to/directory\""
             reverberate "exit"
             exit 1
         fi
     else
         reverberate "error" "No Munin plugin directory found at
-   $munin_plugin_dir"
+$munin_plugin_dir"
         reverberate "info" "If this directory is located at a different path try
-   export MUNIN_PLUGIN_DIR=\"/path/to/directory\""
+export MUNIN_PLUGIN_DIR=\"/path/to/directory\""
         reverberate "exit"
         exit 1
     fi
@@ -338,21 +338,21 @@ configure_plugins() {
         if [[ ! -f  "$plugin_config_dir/pihole.conf" ]]; then
             download "$plugin_repo/etc/munin/plugin-conf.d/pihole.conf" -P "$plugin_config_dir"
             reverberate "info" "Default plugin configuration saved to
-   $plugin_config_dir/pihole.conf"
+$plugin_config_dir/pihole.conf"
         fi
     else
         reverberate "error" "No Munin plugin configuration directory found at
-   $plugin_config_dir"
+$plugin_config_dir"
         reverberate "info" "If this directory is located at a different path try
-   export PLUGIN_CONFIG_DIR=\"/path/to/directory\""
+export PLUGIN_CONFIG_DIR=\"/path/to/directory\""
         reverberate "exit"
         exit 1
     fi
     if [[ "$pihole_on_host" == "no" ]]; then
         reverberate "warning" "The Pi-hole® command 'pihole' was not found on this host
-   If this was intentional you will need to edit
-   $plugin_config_dir/pihole.conf
-   and replace the host and setupvars values with those of your Pi-hole® host"
+If this was intentional you will need to edit
+$plugin_config_dir/pihole.conf
+and replace the host and setupvars values with those of your Pi-hole® host"
     fi
 }
 
@@ -387,13 +387,13 @@ install_script() {
             download "$plugin_repo/script/munin-pihole-plugins" -P "$script_dir"
             chmod +x "$script_dir/munin-pihole-plugins" || return
             reverberate "info" "A copy of the munin-pihole-plugins script was installed to
-   $script_dir/munin-pihole-plugins"
+$script_dir/munin-pihole-plugins"
         fi
         if [[ ":$PATH:" != *":$script_dir:"* ]]; then
             reverberate "warning" "The munin-pihole-plugins script directory
-   $script_dir
-   is not in your \$PATH variable try
-   export PATH=\"\$PATH:$script_dir\""
+$script_dir
+is not in your \$PATH variable try
+export PATH=\"\$PATH:$script_dir\""
         fi
     else
         reverberate "error" "No directory found at
@@ -566,7 +566,7 @@ install_function() {
         *                                           )
             if [[ ! "$install_plugins" == "true" ]] && [[ ! "$install_script" == "true" ]] && [[ ! "$install_webserver" == "true" ]]; then
                 reverberate "error" "No action(s) to perform
-   At least one INSTALL_* variable must be \"true\""
+At least one INSTALL_* variable must be \"true\""
                 reverberate "exit"
                 exit 1
             fi
@@ -594,7 +594,7 @@ install_function() {
                     configure_plugins
                 else
                     reverberate "error" "No action(s) to perform
-   No plugins in PLUGIN_LIST"
+No plugins in PLUGIN_LIST"
                     reverberate "exit"
                     exit 1
                 fi
@@ -641,7 +641,7 @@ uninstall_function() {
         *                                           )
             if [[ ! "$install_plugins" == "true" ]] && [[ ! "$install_script" == "true" ]] && [[ ! "$install_webserver" == "true" ]]; then
                 reverberate "error" "No action(s) to perform
-   At least one INSTALL_* variable must be \"true\""
+At least one INSTALL_* variable must be \"true\""
                 reverberate "exit"
                 exit 1
             fi
@@ -690,7 +690,7 @@ uninstall_function() {
                             package_query="$(dpkg-query -W --showformat='${Status}\n' "$dependency_id" | grep "install ok installed")"
                             if [[ -n "$package_query" ]]; then
                                 reverberate "warning" "$dependency_id may have been installed by munin-pihole-plugins
-   Would you like to uninstall $dependency_id now?"
+Would you like to uninstall $dependency_id now?"
                                 if [[ "$dependency_id" == "init-system-helpers" ]] || [[ "$dependency_id" == "wget" ]]; then
                                     reverberate "info" "It probably wasn't, and you probably wouldn't"
                                 fi
@@ -727,8 +727,8 @@ munin-pihole-plugins version is v$VERSION (Latest: v$remote_version)"
     else
         min_height="4"
         some " * \\e[33;1m[WARNING]\\e[0m Unable to locate a TXT record for
-   $version_domain
-   using the nameserver $dns_server on port $dns_port
+$version_domain
+using the nameserver $dns_server on port $dns_port
 munin-pihole-plugins version is v$VERSION (Latest: unknown)"
     fi
 }
@@ -776,22 +776,22 @@ variable_function() {
             min_height="21"
             some "Usage: export [VARIABLE]=\"value\"
 \\nVariable
-  DNS_PORT=\"$dns_port\"
-  DNS_SERVER=\"$dns_server\"
-  INSTALL_PLUGINS=\"$install_plugins\"
-  INSTALL_SCRIPT=\"$install_script\"
-  INSTALL_WEBSERVER=\"$install_webserver\"
-  MUNIN_DIR=\"$munin_dir\"
-  MUNIN_CONFIG_DIR=\"$munin_config_dir\"
-  MUNIN_PLUGIN_DIR=\"$munin_plugin_dir\"
-  NODE_PLUGIN_DIR=\"$node_plugin_dir\"
-  PLUGIN_CONFIG_DIR=\"$plugin_config_dir\"
-  PLUGIN_LIST=\"$plugin_list\"
-  PROXY_CONFIG_DIR=\"$proxy_config_dir\"
-  SCRIPT_DIR=\"$script_dir\"
-  SKIP_DEPENDENCY_CHECK=\"$skip_dependency_check\"
-  UPDATE_SELF=\"$update_self\"
-  VERBOSITY_LEVEL=\"$verbosity_level\"" ;;
+ DNS_PORT=\"$dns_port\"
+ DNS_SERVER=\"$dns_server\"
+ INSTALL_PLUGINS=\"$install_plugins\"
+ INSTALL_SCRIPT=\"$install_script\"
+ INSTALL_WEBSERVER=\"$install_webserver\"
+ MUNIN_DIR=\"$munin_dir\"
+ MUNIN_CONFIG_DIR=\"$munin_config_dir\"
+ MUNIN_PLUGIN_DIR=\"$munin_plugin_dir\"
+ NODE_PLUGIN_DIR=\"$node_plugin_dir\"
+ PLUGIN_CONFIG_DIR=\"$plugin_config_dir\"
+ PLUGIN_LIST=\"$plugin_list\"
+ PROXY_CONFIG_DIR=\"$proxy_config_dir\"
+ SCRIPT_DIR=\"$script_dir\"
+ SKIP_DEPENDENCY_CHECK=\"$skip_dependency_check\"
+ UPDATE_SELF=\"$update_self\"
+ VERBOSITY_LEVEL=\"$verbosity_level\"" ;;
     esac
 }
 
