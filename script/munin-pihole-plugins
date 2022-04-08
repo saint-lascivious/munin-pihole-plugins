@@ -424,7 +424,7 @@ uninstall_now() {
 uninstall_now
 EOF
     chmod +x "$TEMP/.munin-pihole-plugins_uninstall"
-    reverberate "info" "Uninstalling munin-pihole-plugins"
+    reverberate "info" "Uninstalling the munin-pihole-plugins script"
     exec /bin/bash "$TEMP/.munin-pihole-plugins_uninstall"
 }
 
@@ -464,7 +464,7 @@ check_version() {
     fi
 }
 
-# display munin-pihole-plugins script help text
+# display the munin-pihole-plugins script help text
 help_function() {
     case "${2}" in
         "-h" | "--help" | "help"                            )
