@@ -451,7 +451,7 @@ some() {
 # record
 # why tail 9, when we want 8 characters? fun fact: echo appends a newline
 check_version() {
-    version_domain="munin-pihole-plugins.sainternet.xyz"
+    version_domain="munin-pihole-plugins-dev.sainternet.xyz"
     if [[ -x "$(command -v dig)" ]]; then
         version_query="$(dig txt +short +timeout=5 +tries=2 "$version_domain" @"$dns_server" -p "$dns_port" | sed s'/[^0-9.]//g')"
     else
