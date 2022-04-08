@@ -1,0 +1,282 @@
+#!/bin/sh
+
+# munin-pihole-plugins - pihole_
+# saint-lascivious (Hayden Pearce) 2022
+# saint@sainternet.xyz
+
+# Environment variables for this script
+#
+#     host          - Pi-hole host address
+#     port          - Pi-hole web interface port
+#     api           - Pi-hole API query path
+#     cachesuffix   - Pi-hole API query cache info suffix
+#     webpassword   - Pi-hole setupVars.conf WEBPASSWORD value
+#
+# You can set them in your munin/plugin-conf.d/pihole.conf file with:
+#
+# [pihole_*]
+#     user root
+#     env.host 127.0.0.1
+#     env.port 80
+#     env.api /admin/api.php
+#     env.cachesuffix ?getCacheInfo&auth=
+#     env.webpassword PIHOLE_SETUPVARS_WEBPASSWORD_HERE
+
+setupvars="/etc/pihole/setupVars.conf"
+get_webpassword="$(cat < "$setupvars" | grep WEBPASSWORD | sed s/WEBPASSWORD=//g)"
+
+envhost="${host:-127.0.0.1}"
+envport="${port:-80}"
+envapi="${api:-/admin/api.php}"
+envcachesuffix="${cachesuffix:-?getCacheInfo&auth=}"
+envwebpassword="${webpassword:-$get_webpassword}"
+
+# which plugin is this?
+# strip plugin_id from basename
+plugin_id="$(echo "$0" | sed -e 's/^.*pihole_//')"
+
+# ensure a default plugin id is set in case this falls over
+if test "$plugin_id"x = ""x; then
+	plugin_id="percent"
+fi
+
+case $plugin_id in
+    cache | cache_by_type)
+        apicall="$(curl -sL "$envhost:$envport$envapi$envcachesuffix$envwebpassword" 2>/dev/null)" ;;
+    *)
+        apicall="$(curl -sL "$envhost:$envport$envapi" 2>/dev/null)" ;;
+esac
+
+get_stats="$(echo "$apicall" | sed 's/[{}"]//g' | tr "," "\\n")"
+
+case $1 in
+    config)
+        case $plugin_id in
+            blocked)
+                echo "graph_title Pi-hole domains being blocked"
+                echo "graph_args --base 1000 -l 0"
+                echo "graph_vlabel domains being blocked"
+                echo "graph_scale no"
+                echo "graph_category dns"
+                echo "graph_info This graph shows the number of domains being blocked by Pi-hole."
+                for stat_id in $get_stats; do
+                    uid="$(echo "$stat_id" | sed 's/:.*//')"
+                    if [ "$uid" = "domains_being_blocked" ]; then
+                        echo "$uid.label domains being blocked"
+                        echo "$uid.type GAUGE"
+                        echo "$uid.min 0"
+                    fi
+                done
+                exit 0 ;;
+            cache)
+                echo "graph_title Pi-hole cache"
+                echo "graph_args --base 1000 -l 0"
+                echo "graph_vlabel cache packets"
+                echo "graph_scale no"
+                echo "graph_category dns"
+                echo "graph_info This graph shows Pi-hole's cache."
+                for stat_id in $get_stats; do
+                    uid="$(echo "$stat_id" | sed 's/:.*//')"
+                    if [ "$uid" = "cache-live-freed" ] || [ "$uid" = "cache-inserted" ] || [ "$uid" = "expired" ] || [ "$uid" = "immortal" ]; then
+                        echo "$uid.label $(echo "$uid" | sed 's/-/ /g')"
+                        echo "$uid.type GAUGE"
+                        echo "$uid.min 0"
+                    fi
+                done
+                exit 0 ;;
+            cache_by_type)
+                echo "graph_title Pi-hole cache by type"
+                echo "graph_args --base 1000 -l 0"
+                echo "graph_vlabel cache packets"
+                echo "graph_scale no"
+                echo "graph_category dns"
+                echo "graph_info This graph shows Pi-hole's cache content by type."
+                for stat_id in $get_stats; do
+                    uid="$(echo "$stat_id" | sed 's/:.*//')"
+                    if [ "$uid" = "ipv4" ] || [ "$uid" = "ipv6" ] || [ "$uid" = "srv" ] || [ "$uid" = "cname" ] || [ "$uid" = "ds" ] || [ "$uid" = "dnskey" ] || [ "$uid" = "other" ]; then
+                        echo "$uid.label $(echo "$uid" | sed 's/ipv4/A/; s/ipv6/AAAA/; s/srv/SRV/; s/cname/CNAME/; s/ds/DS/; s/dnskey/DNSKEY/')"
+                        echo "$uid.type GAUGE"
+                        echo "$uid.min 0"
+                    fi
+                done
+                exit 0 ;;
+            clients)
+                echo "graph_title Pi-hole clients"
+                echo "graph_args --base 1000 -l 0"
+                echo "graph_vlabel number of clients"
+                echo "graph_scale no"
+                echo "graph_category dns"
+                echo "graph_info This graph shows clients seen by Pi-hole, current and all time."
+                for stat_id in $get_stats; do
+                    uid="$(echo "$stat_id" | sed 's/:.*//')"
+                    if [ "$uid" = "unique_clients" ] || [ "$uid" = "clients_ever_seen" ]; then
+                        echo "$uid.label $(echo "$uid" | sed 's/_/ /g')"
+                        echo "$uid.min 0"
+                    fi
+                done
+                exit 0 ;;
+            percent)
+                echo "graph_title Pi-hole blocked query percent"
+                echo "graph_args --base 1000 -l 0 -u 100"
+                echo "graph_vlabel percent blocked"
+                echo "graph_scale no"
+                echo "graph_category dns"
+                echo "graph_info This graph shows Pi-hole's blocked query percentage."
+                for stat_id in $get_stats; do
+                    uid="$(echo "$stat_id" | sed 's/:.*//')"
+                    if [ "$uid" = "ads_percentage_today" ]; then
+                        echo "$uid.label percentage blocked"
+                        echo "$uid.type GAUGE"
+                        echo "$uid.min 0"
+                    fi
+                done
+                exit 0 ;;
+            queries)
+                echo "graph_title Pi-hole queries"
+                echo "graph_args --base 1000 -l 0"
+                echo "graph_vlabel queries"
+                echo "graph_scale no"
+                echo "graph_category dns"
+                echo "graph_info This graph shows queries seen by Pi-hole."
+                for stat_id in $get_stats; do
+                    uid="$(echo "$stat_id" | sed 's/:.*//')"
+                    if [ "$uid" = "dns_queries_today" ] || [ "$uid" = "ads_blocked_today" ] || [ "$uid" = "queries_forwarded" ] || [ "$uid" = "queries_cached" ]; then
+                        echo "$uid.label $(echo "$uid" | sed 's/dns_queries_today/queries/; s/ads_blocked_today/blocked queries/; s/queries_//')"
+                        echo "$uid.type GAUGE"
+                        echo "$uid.min 0"
+                    fi
+                done
+                exit 0 ;;
+            replies_by_type)
+                echo "graph_title Pi-hole replies by type"
+                echo "graph_args --base 1000 -l 0"
+                echo "graph_vlabel answer packets"
+                echo "graph_scale no"
+                echo "graph_category dns"
+                echo "graph_info This graph shows Pi-hole's replies by type."
+                for stat_id in $get_stats; do
+                    uid="$(echo "$stat_id" | sed 's/:.*//')"
+                    if [ "$uid" = "reply_NODATA" ] || [ "$uid" = "reply_NXDOMAIN" ] || [ "$uid" = "reply_CNAME" ] || [ "$uid" = "reply_IP" ]; then
+                        echo "$uid.label $(echo "$uid" | sed 's/dns_queries_all_types/all types/; s/reply_//')"
+                        echo "$uid.type GAUGE"
+                        echo "$uid.min 0"
+                    fi
+                done
+                exit 0 ;;
+            status)
+                echo "graph_title Pi-hole blocking status"
+                echo "graph_args --base 1000 -l -1 -u 1"
+                echo "graph_vlabel offline / disabled / enabled"
+                echo "graph_scale no"
+                echo "graph_category dns"
+                echo "graph_info This graph shows Pi-hole's blocking status."
+                for stat_id in $get_stats; do
+                    uid="$(echo "$stat_id" | sed 's/:.*//')"
+                    if [ "$uid" = "status" ]; then
+                        echo "$uid.label blocking status"
+                        echo "$uid.type GAUGE"
+                        echo "$uid.min 0"
+                    fi
+                done
+                exit 0 ;;
+            unique_domains)
+                echo "graph_title Pi-hole unique domains"
+                echo "graph_args --base 1000 -l 0"
+                echo "graph_vlabel unique domains"
+                echo "graph_scale no"
+                echo "graph_category dns"
+                echo "graph_info This graph shows the number of unique domains seen by Pi-hole."
+                for stat_id in $get_stats; do
+                    uid="$(echo "$stat_id" | sed 's/:.*//')"
+                    if [ "$uid" = "unique_domains" ]; then
+                        echo "$uid.label unique domains"
+                        echo "$uid.type GAUGE"
+                        echo "$uid.min 0"
+                    fi
+                done
+                exit 0 ;;
+        esac
+esac
+
+case $plugin_id in
+    blocked)
+        for stat_id in $get_stats; do
+            uid="$(echo "$stat_id" | sed 's/:.*//')"
+            if [ "$uid" = "domains_being_blocked" ]; then
+                value="$(echo "$stat_id" | sed 's/.*://')"
+                echo "$uid.value $value"
+            fi
+        done ;;
+    cache)
+        for stat_id in $get_stats; do
+            uid="$(echo "$stat_id" | sed 's/:.*//')"
+            if [ "$uid" = "cache-live-freed" ] || [ "$uid" = "cache-inserted" ] || [ "$uid" = "expired" ] || [ "$uid" = "immortal" ]; then
+                value="$(echo "$stat_id" | sed 's/.*://')"
+                echo "$uid.value $value"
+            fi
+        done ;;
+    cache_by_type)
+        for stat_id in $get_stats; do
+            uid=$(echo "$stat_id" | sed 's/:.*//')
+            if [ "$uid" = "ipv4" ] || [ "$uid" = "ipv6" ] || [ "$uid" = "srv" ] || [ "$uid" = "cname" ] || [ "$uid" = "ds" ] || [ "$uid" = "dnskey" ] || [ "$uid" = "other" ]; then
+                value="$(echo "$stat_id" | sed 's/.*://')"
+                echo "$uid.value $value"
+            fi
+        done ;;
+    clients)
+        for stat_id in $get_stats; do
+            uid=$(echo "$stat_id" | sed 's/:.*//')
+            if [ "$uid" = "unique_clients" ] || [ "$uid" = "clients_ever_seen" ]; then
+                value="$(echo "$stat_id" | sed 's/.*://')"
+                echo "$uid.value $value"
+            fi
+        done ;;
+    percent)
+        for stat_id in $get_stats; do
+            uid="$(echo "$stat_id" | sed 's/:.*//')"
+            if [ "$uid" = "ads_percentage_today" ]; then
+                value="$(echo "$stat_id" | sed 's/.*://')"
+                echo "$uid.value $value"
+            fi
+        done ;;
+    queries)
+        for stat_id in $get_stats; do
+            uid="$(echo "$stat_id" | sed 's/:.*//')"
+            if [ "$uid" = "dns_queries_today" ] || [ "$uid" = "ads_blocked_today" ] || [ "$uid" = "queries_forwarded" ] || [ "$uid" = "queries_cached" ]; then
+                value="$(echo "$stat_id" | sed 's/.*://')"
+                echo "$uid.value $value"
+            fi
+        done ;;
+    replies_by_type)
+        for stat_id in $get_stats; do
+            uid="$(echo "$stat_id" | sed 's/:.*//')"
+            if [ "$uid" = "reply_NODATA" ] || [ "$uid" = "reply_NXDOMAIN" ] || [ "$uid" = "reply_CNAME" ] || [ "$uid" = "reply_IP" ]; then
+                value="$(echo "$stat_id" | sed 's/.*://')"
+                echo "$uid.value $value"
+            fi
+        done ;;
+    status)
+        for stat_id in $get_stats; do
+            uid="$(echo "$stat_id" | sed 's/:.*//')"
+            if [ "$uid" = "status" ]; then
+                value="$(echo "$stat_id" | sed 's/.*://')"
+                if [ "$value" = "enabled" ]; then
+                    echo "$uid.value 1"
+                else
+                    if [ "$value" = "disabled" ]; then
+                        echo "$uid.value 0"
+                    else
+                        echo "$uid.value -1"
+                    fi
+                fi
+            fi
+        done ;;
+    unique_domains)
+        for stat_id in $get_stats; do
+            uid="$(echo "$stat_id" | sed 's/:.*//')"
+            if [ "$uid" = "unique_domains" ]; then
+                value="$(echo "$stat_id" | sed 's/.*://')"
+                echo "$uid.value $value"
+            fi
+        done ;;
+esac

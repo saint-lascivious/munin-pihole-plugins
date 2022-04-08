@@ -1,9 +1,9 @@
 # munin-pihole-plugins
 
-[Munin](https://munin-monitoring.org) [plugins](https://gallery.munin-monitoring.org) and management script for monitoring various [Pi-hole®](https://github.com/pi-hole/pi-hole) statistics. Transforms a server into a powerful monitoring platform, as simple as [one](https://github.com/saint-lascivious/munin-pihole-plugins#step-one-download), [two](https://github.com/saint-lascivious/munin-pihole-plugins#step-two-install), [three](https://github.com/saint-lascivious/munin-pihole-plugins#step-three-wait), ...[four](https://github.com/saint-lascivious/munin-pihole-plugins#step-four-monitor).
+[Munin](https://munin-monitoring.org) [plugins](https://gallery.munin-monitoring.org) and management script for monitoring various [Pi-hole®](https://github.com/pi-hole/pi-hole) statistics. Transforms a server into a powerful monitoring platform, as simple as [one](https://github.com/saint-lascivious/munin-pihole-plugins#step-one-download), [two](https://github.com/saint-lascivious/munin-pihole-plugins#step-two-install), [three](https://github.com/saint-lascivious/munin-pihole-plugins#step-three-wait), …[four](https://github.com/saint-lascivious/munin-pihole-plugins#step-four-monitor).
 
 ## Step One: Download
-* Download munin-pihole-plugins
+* Download munin-pihole-plugins `master` branch
 ```
 curl -sSL munin-pihole-plugins.sainternet.xyz -o munin-pihole-plugins && chmod +x munin-pihole-plugins
 ```
@@ -31,13 +31,15 @@ If everything went well, you should find [munin-pihole-plugins graphs](https://g
 Usage: munin-pihole-plugins {OPTION [PARAMETER]}
 
 Option          GNU long option         Meaning
- -h             --help                  Display this help dialogue
- -i             --install               Install munin-pihole-plugins
- -v             --version               Display the current and latest versions
- -U             --uninstall             Uninstall munin-pihole-plugins
- -V             --variables             Display environment variables
+ -h, help       --help                  Display this help dialogue
+ -i, install    --install               Install munin-pihole-plugins
+ -v, version    --version               Display the current and latest versions
+ -U, uninstall  --uninstall             Uninstall munin-pihole-plugins
+ -V, variables  --variables             Display environment variables
 
-Use '--help {OPTION}' for more detailed explanations of each command
+Type '--help {OPTION}' for more detailed explanations of each command
+
+Example: 'munin-pihole-plugins --help install'
 ```
 
 ## Example Graph Gallery
@@ -94,7 +96,7 @@ Variable
   SCRIPT_DIR="{SCRIPT_DIR:-/usr/local/bin}"
   SKIP_DEPENDENCY_CHECK="false"
   UPDATE_SELF="true"
-  VERBOSE_OUTPUT="true"
+  VERBOSITY_LEVEL="3"
 ```
 
 * `DNS_PORT`
@@ -157,10 +159,17 @@ Disables `apt` and `dpkg-query` based dependency satisfaction if set to any valu
 
 Disables self update of the `munin-pihole-plugins` script if set to any value other than `true`.
 
-* `VERBOSE_OUTPUT`
+* `VERBOSITY_LEVEL`
 
-Disables non-critical `munin-pihole-plugins` script output if set to any value other than `true`. Errors are always displayed, but a successful installation will be otherwise silent.
+Sets the munin-pihole-plugins script verbosity level on a scale from `0` to `4`, with `0` being total silence and `4` being the highest level of verbosity.
 
+```
+0 - silent
+1 - +errors
+2 - +warnings
+3 - +info
+4 - +downloads
+```
 ## Help! My graphs aren't showing up!
 
 * Be patient
