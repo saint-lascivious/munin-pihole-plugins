@@ -189,7 +189,7 @@ install_dependencies() {
 # simple wget wrapper
 download() {
     if [[ -x "$(command -v wget)" ]]; then
-        if [[ "$verbosity_level" -ge "3" ]]; then
+        if [[ "$verbosity_level" -ge "4" ]]; then
             wget -q --show-progress "$@"
         else
             wget -q "$@"

@@ -161,8 +161,15 @@ Disables self update of the `munin-pihole-plugins` script if set to any value ot
 
 * `VERBOSITY_LEVEL`
 
-Sets the munin-pihole-plugins script verbosity level on a scale from `0` to `3`, with `0` being total silence and `3` being the highest level of verbosity.
+Sets the munin-pihole-plugins script verbosity level on a scale from `0` to `4`, with `0` being total silence and `4` being the highest level of verbosity.
 
+```
+0 - silent
+1 - +errors
+2 - +warnings
+3 - +info
+4 - +downloads
+```
 ## Help! My graphs aren't showing up!
 
 * Be patient
