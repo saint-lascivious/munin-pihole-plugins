@@ -171,7 +171,7 @@ install_dependencies() {
                     reverberate success "$dependency_id was found"
                 else
                     reverberate failure "$dependency_id was not found"
-                    apt install "$dependency_id"
+                    apt install -qq "$dependency_id"
                 fi
             done
         else
@@ -658,6 +658,9 @@ At least one INSTALL_* variable must be \"true\""
                 fi
                 uninstall_plugins
             fi
+            if [[ "$install_script" == "true" ]]; then
+                dependency_list+="$script_dependencies"
+            fi
             if [[ "$install_webserver" == "true" ]]; then
                 dependency_list+="$webserver_dependencies"
                 if [[ -d "$proxy_config_dir" ]]; then
@@ -696,14 +699,13 @@ Would you like to uninstall $dependency_id now?"
                                 if [[ "$dependency_id" == "init-system-helpers" ]] || [[ "$dependency_id" == "wget" ]]; then
                                     reverberate "info" "It probably wasn't, and you probably wouldn't"
                                 fi
-                                apt remove "$dependency_id"
+                                apt remove -qq "$dependency_id"
                             fi
                         done
                     fi
                 fi
             fi
             if [[ "$install_script" == "true" ]]; then
-                dependency_list+="$script_dependencies"
                 if [[ -d "$script_dir" ]]; then
                     if [[ -f "$script_dir/munin-pihole-plugins" ]]; then
                         uninstall_script
