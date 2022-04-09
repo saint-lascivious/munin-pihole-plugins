@@ -6,7 +6,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="05.00.00"
+VERSION="05.02.00"
 
 # environment variables with overrides
 dns_port="${DNS_PORT:-53}"
@@ -389,6 +389,12 @@ install_script() {
             reverberate "info" "A copy of the munin-pihole-plugins script was installed to
 $script_dir/munin-pihole-plugins"
         fi
+        if [[ -d "/etc/bash_completion.d" ]]; then
+            if [[ -f "/etc/bash_completion.d/munin-pihole-plugins" ]]; then
+                rm "/etc/bash_completion.d/munin-pihole-plugins" || return
+            fi
+            download "$plugin_repo/etc/bash_completion.d/munin-pihole-plugins" -P "/etc/bash_completion.d"
+        fi
         if [[ ":$PATH:" != *":$script_dir:"* ]]; then
             reverberate "warning" "The munin-pihole-plugins script directory
 $script_dir
@@ -417,6 +423,9 @@ uninstall_script() {
 
 # uninstalls a locally installed copy of the munin-pihole-plugins script
 uninstall_now() {
+    if [[ -f "/etc/bash_completion.d/munin-pihole-plugins" ]]; then
+        rm "/etc/bash_completion.d/munin-pihole-plugins" || return
+    fi
     rm "$script_dir/munin-pihole-plugins" || return
     echo -e "[\\e[32;1mℹ\\e[0m] Done"
 }
@@ -471,13 +480,13 @@ help_function() {
             min_height="7"
             some "Usage: munin-pihole-plugins $2
 \\nOption\\t\\tGNU long option\\t\\tMeaning
- -h\\t\\t--help\\t\\t\\tDisplay this help dialogue
+ -h, help\\t --help\\t\\t\\t Display this help dialogue
 \\nDisplay munin-pihole-plugins help information." ;;
         "-i" | "--install" | "install"                      )
-            min_height="29"
+            min_height="32"
             some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
-\\nOption\\t\\tGNU long option\\t\\tMeaning
- -i\\t\\t--install\\t\\tInstall munin-pihole-plugins
+\\nOption\\t\\t    GNU long option\\tMeaning
+ -i, install\\t     --install\\t\\t Install munin-pihole-plugins
 \\nInstall and configure Munin monitoring server software (default: true), client
 software (default: true), selected munin-pihole-plugins plugins (default: all)
 and install a copy of the munin-pihole-plugins script (default: true) to a
@@ -487,45 +496,50 @@ if a newer version of the munin-pihole-plugins script is available.
 \\nYou can run the installation again at any time afterwards to update the
 munin-pihole-plugins script and plugins, optionally selecting which plugins to
 install using the PLUGIN_LIST variable.
-\\nTakes an optional parameter '-p, plugins, --plugins', '-s, script, --script'
-or '-w, webserver, --webserver' to install just that component.
+\\nTakes an optional parameter to install just that component.
 \\nParameter\\t\\t\\t\\tFunction
- -p, plugins, --plugins\\t\\t\\tInstall and configure munin-node, and
-\\t\\t\\t\\t\\tmunin-pihole-plugins plugins
- -s, script, --script\\t\\t\\tInstall the munin-pihole-plugins script
- -w, webserver, --webserver\\t\\tInstall and configure munin, lighttpd
-\\t\\t\\t\\t\\tand lighttpd-external-munin-proxy
+ -p, plugins\\t    --plugins\\t\\t Install and configure munin-node, and
+\\t\\t\\t\\t\\t munin-pihole-plugins plugins
+ -P, plugins-only   --plugins-only\\t As above, skipping dependencies
+ -s, script\\t    --script\\t\\t Install the munin-pihole-plugins
+\\t\\t\\t\\t\\t script
+ -S, script-only    --script-only\\t As above, skipping dependencies
+ -w, webserver\\t    --webserver\\t\\t Install and configure munin, lighttpd
+\\t\\t\\t\\t\\t and lighttpd-external-munin-proxy
+ -W, webserver-only --webserver-only\\t As above, skipping dependencies
 \\nExample: 'munin-pihole-plugins $2 plugins'" ;;
         "-v" | "--version" | "version"                      )
             min_height="10"
             some "Usage: munin-pihole-plugins {$2}
 \\nOption\\t\\tGNU long option\\t\\tMeaning
- -v\\t\\t--version\\t\\tDisplay the current and latest versions
+ -v, version\\t --version\\t\\t Display current and latest versions
 \\nDisplay the current munin-pihole-plugins script version, and compare it to
 the latest munin-pihole-plugins script version.
 \\nAn additional notification will be displayed if an update is available." ;;
         "-U" | "--uninstall" | "uninstall"                  )
-            min_height="21"
+            min_height="23"
             some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
-\\nOption\\t\\tGNU long option\\t\\tMeaning
- -U\\t\\t--uninstall\\t\\tUninstall munin-pihole-plugins
+\\nOption\\t\\t    GNU long option\\tMeaning
+ -U, uninstall\\t     --uninstall\\t Uninstall munin-pihole-plugins
 \\nCompletely uninstall munin-pihole-plugins, you will be asked if you want to
 uninstall any dependencies that munin-pihole-plugins may have installed.
-\\nTakes an optional parameter '-p, plugins, --plugins', '-s, script, --script'
-or '-w, webserver, --webserver' to install just that component.
+\\nTakes an optional parameter to uninstall just that component.
 \\nParameter\\t\\t\\t\\tFunction
- -p, plugins, --plugins\\t\\t\\tUninstall munin-node, and
-\\t\\t\\t\\t\\tmunin-pihole-plugins plugins
- -s, script, --script\\t\\t\\tUninstall the munin-pihole-plugins
-\\t\\t\\t\\t\\tscript
- -w, webserver, --webserver\\t\\tUninstall munin, lighttpd, and
-\\t\\t\\t\\t\\tlighttpd-external-munin-proxy
-\\nExample: 'munin-pihole-plugins $2 script'" ;;
+ -p, plugins\\t    --plugins\\t\\t Uninstall munin-node, and
+\\t\\t\\t\\t\\t munin-pihole-plugins plugins
+ -P, plugins-only   --plugins-only\\t As above, skipping dependencies
+ -s, script\\t    --script\\t\\t Uninstall the munin-pihole-plugins
+\\t\\t\\t\\t\\t script
+ -S, script-only    --script-only\\t As above, skipping dependencies
+ -w, webserver\\t    --webserver\\t\\t Uninstall munin, lighttpd, and
+\\t\\t\\t\\t\\t lighttpd-external-munin-proxy
+ -W, webserver-only --webserver-only\\t As above, skipping dependencies
+\\nExample: 'munin-pihole-plugins $2 script-only'" ;;
         "-V" | "--variables" | "variables"                  )
             min_height="14"
             some "Usage: munin-pihole-plugins {$2 [VARIABLE]}
 \\nOption\\t\\tGNU long option\\t\\tMeaning
- -V\\t\\t--variables\\t\\tDisplay environment variables
+ -V, variables\\t --variables\\t\\t Display environment variables
 \\nDisplay a full list of environment variables used by the munin-pihole-plugins
 script, and their current values. The variables can be used to customize
 various aspects of the munin-pihole-plugins script's operation.
@@ -536,11 +550,11 @@ variable to list the value of that variable alone.
             min_height="13"
             some "Usage: munin-pihole-plugins {OPTION [PARAMETER]}
 \\nOption\\t\\tGNU long option\\t\\tMeaning
- -h, help\\t--help\\t\\t\\tDisplay this help dialogue
- -i, install\\t--install\\t\\tInstall munin-pihole-plugins
- -v, version\\t--version\\t\\tDisplay the current and latest versions
- -U, uninstall\\t--uninstall\\t\\tUninstall munin-pihole-plugins
- -V, variables\\t--variables\\t\\tDisplay environment variables
+ -h, help\\t --help\\t\\t\\t Display this help dialogue
+ -i, install\\t --install\\t\\t Install munin-pihole-plugins
+ -v, version\\t --version\\t\\t Display current and latest versions
+ -U, uninstall\\t --uninstall\\t\\t Uninstall munin-pihole-plugins
+ -V, variables\\t --variables\\t\\t Display environment variables
 \\nType '$1 {OPTION}' for more detailed explanations of each command
 \\nExample: 'munin-pihole-plugins $1 install'" ;;
         *                                                   )
