@@ -6,7 +6,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="05.02.00"
+VERSION="05.03.00"
 
 # environment variables with overrides
 dns_port="${DNS_PORT:-53}"
@@ -64,17 +64,25 @@ update_script() {
 # saint-lascivious (Hayden Pearce) 2022
 # saint@sainternet.xyz
 
+verbosity="$verbosity_level"
+
 # a simple you self update function for the munin-pihole-plugins script
 update_now() {
     if [[ -x "$(command -v wget)" ]]; then
-        wget -q --show-progress munin-pihole-plugins-dev.sainternet.xyz -O "$current_directory/munin-pihole-plugins"
+        if [[ "$verbosity" -ge "4" ]]; then
+            wget -q --show-progress munin-pihole-plugins-dev.sainternet.xyz -O "$current_directory/munin-pihole-plugins"
+        fi
     else
-        echo -e "[\\e[31;1m!\\e[0m] The required command 'wget' was not found"
-        echo -e "[\\e[31;1m!\\e[0m] Exiting $0"
+        if [[ "$verbosity" -gt "0" ]]; then
+            echo -e "[\\e[31;1m!\\e[0m] The required command 'wget' was not found"
+            echo -e "[\\e[31;1m!\\e[0m] Exiting $0"
+        fi
         exit 1
     fi
     chmod +x "$current_directory/munin-pihole-plugins" || return
-    echo -e "[\\e[32;1mℹ\\e[0m] Restarting after update"
+    if [[ "$verbosity" -ge "3" ]]; then
+        echo -e "[\\e[32;1mℹ\\e[0m] Restarting after update"
+    fi
     exec env UPDATE_SELF="false" /bin/bash "$0" "$@"
 }
 
@@ -421,13 +429,17 @@ uninstall_script() {
 # saint-lascivious (Hayden Pearce) 2022
 # saint@sainternet.xyz
 
+verbosity="$verbosity_level"
+
 # uninstalls a locally installed copy of the munin-pihole-plugins script
 uninstall_now() {
     if [[ -f "/etc/bash_completion.d/munin-pihole-plugins" ]]; then
         rm "/etc/bash_completion.d/munin-pihole-plugins" || return
     fi
     rm "$script_dir/munin-pihole-plugins" || return
-    echo -e "[\\e[32;1mℹ\\e[0m] Done"
+    if [[ "$verbosity" -ge "3" ]]; then
+        echo -e "[\\e[32;1mℹ\\e[0m] Done"
+    fi
 }
 
 uninstall_now
