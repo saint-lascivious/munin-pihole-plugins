@@ -1,5 +1,5 @@
 _munin-pihole-plugins() {
-    local cur longopts longopts_help longopts_installuninstall opts opts_help opts_install opts_uninstall opts_variables opts_version prev prev2
+    local cur longopts longopts_help longopts_installuninstall opts opts_help opts_installuninstall opts_variables prev prev2
     COMPREPLY=()
     cur="${COMP_WORDS[COMP_CWORD]}"
     prev="${COMP_WORDS[COMP_CWORD-1]}"
