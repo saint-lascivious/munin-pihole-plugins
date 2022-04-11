@@ -165,10 +165,10 @@ Sets the munin-pihole-plugins script verbosity level on a scale from `0` to `4`,
 
 ```
 0 - silent
-1 - +errors
-2 - +warnings
-3 - +info
-4 - +downloads
+1 - + errors
+2 - ++ warnings
+3 - +++ information
+4 - ++++ additional information
 ```
 ## Help! My graphs aren't showing up!
 

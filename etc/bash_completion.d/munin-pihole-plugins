@@ -15,12 +15,16 @@ _munin-pihole-plugins() {
             fi
         ;;
         "help")
-            opts_help="install uninstall variables version"
-            COMPREPLY=( $(compgen -W "${opts_help}" -- ${cur}) )
+            opts_help="help install uninstall variables version"
+            if [[ "$prev2" != *help ]]; then
+                COMPREPLY=( $(compgen -W "${opts_help}" -- ${cur}) )
+            fi
         ;;
         "--help")
-            longopts_help="--install --uninstall --variables --version"
-            COMPREPLY=( $(compgen -W "${longopts_help}" -- ${cur}) )
+            longopts_help="--help --install --uninstall --variables --version"
+            if [[ "$prev2" != *help ]]; then
+                COMPREPLY=( $(compgen -W "${longopts_help}" -- ${cur}) )
+            fi
         ;;
         "install"|"uninstall")
             opts_installuninstall="plugins plugins-only script script-only webserver webserver-only"

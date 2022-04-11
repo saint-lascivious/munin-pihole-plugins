@@ -6,7 +6,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="05.04.00"
+VERSION="05.04.01"
 
 # environment variables with overrides
 dns_port="${DNS_PORT:-53}"
@@ -97,6 +97,11 @@ EOF
 }
 
 # echo wrapper handling verbosity levels and common output
+# 0 - silent
+# 1 - + errors
+# 2 - ++ warnings
+# 3 - +++ informatioon
+# 4 - ++++ additional information
 reverberate() {
     case "$1" in
         "error"                                             )
@@ -124,7 +129,7 @@ reverberate() {
                 echo -e "[\\e[32;1mℹ\\e[0m] $2"
             fi ;;
         "success"                                           )
-            if [[ "$verbosity_level" -ge "3" ]]; then
+            if [[ "$verbosity_level" -ge "4" ]]; then
                 echo -e "[\\e[32;1m✓\\e[0m] $2"
             fi ;;
         "warning"                                           )
@@ -154,9 +159,9 @@ obnoxious_header() {
 check_pihole() {
     reverberate "info" "Checking if this is a Pi-hole® host"
     if [[ -x "$(command -v pihole)" ]]; then
-        reverberate "success" "The pihole command was found"
+        reverberate "success" "The 'pihole' command was found"
     else
-        reverberate "failure" "The pihole command was not found"
+        reverberate "failure" "The 'pihole' command was not found"
         pihole_on_host="no"
     fi
 }
@@ -679,7 +684,7 @@ At least one INSTALL_* variable must be \"true\""
             check_privilege "$@"
             obnoxious_header
             if [[ "$install_plugins" == "true" ]]; then
-                dependency_list+="$plugin_dependencies"
+                dependency_list+="munin-node "
                 if [[ -d "$plugin_config_dir" ]]; then
                     if [[ -f  "$plugin_config_dir/pihole.conf" ]]; then
                         rm "$plugin_config_dir/pihole.conf" || return
@@ -688,7 +693,7 @@ At least one INSTALL_* variable must be \"true\""
                 uninstall_plugins
             fi
             if [[ "$install_script" == "true" ]]; then
-                dependency_list+="$script_dependencies"
+                dependency_list+="wget "
             fi
             if [[ "$install_webserver" == "true" ]]; then
                 dependency_list+="$webserver_dependencies"
