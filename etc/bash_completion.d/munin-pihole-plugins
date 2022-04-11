@@ -1,24 +1,44 @@
 _munin-pihole-plugins() {
-    local cur prev opts opts_help opts_install opts_uninstall opts_variables opts_version
+    local cur longopts longopts_help longopts_installuninstall opts opts_help opts_install opts_uninstall opts_variables opts_version prev prev2
     COMPREPLY=()
     cur="${COMP_WORDS[COMP_CWORD]}"
     prev="${COMP_WORDS[COMP_CWORD-1]}"
+    prev2="${COMP_WORDS[COMP_CWORD-2]}"
     case "${prev}" in
         "munin-pihole-plugins")
-            opts="help install uninstall variables version"
-            COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+            opts="help --help install --install uninstall --uninstall variables --variables version --version"
+            longopts="--help --install --uninstall --variables --version"
+            if [[ $cur == -* ]]; then
+                COMPREPLY=( $(compgen -W "${longopts}" -- ${cur}) )
+            else
+                COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+            fi
         ;;
         "help")
             opts_help="install uninstall variables version"
             COMPREPLY=( $(compgen -W "${opts_help}" -- ${cur}) )
         ;;
+        "--help")
+            longopts_help="--install --uninstall --variables --version"
+            COMPREPLY=( $(compgen -W "${longopts_help}" -- ${cur}) )
+        ;;
         "install"|"uninstall")
             opts_installuninstall="plugins plugins-only script script-only webserver webserver-only"
-            COMPREPLY=( $(compgen -W "${opts_installuninstall}" -- ${cur}) )
+            if [[ "$prev2" != *help ]]; then
+                COMPREPLY=( $(compgen -W "${opts_installuninstall}" -- ${cur}) )
+            fi
         ;;
-        "variables")
+        "--install"|"--uninstall")
+            longopts_installuninstall="--plugins --plugins-only --script --script-only --webserver --webserver-only"
+            if [[ "$prev2" != *help ]]; then
+                COMPREPLY=( $(compgen -W "${longopts_installuninstall}" -- ${cur}) )
+            fi
+        ;;
+        "variables"|"--variables")
             opts_variables="DNS_PORT DNS_SERVER INSTALL_PLUGINS INSTALL_SCRIPT INSTALL_WEBSERVER MUNIN_DIR MUNIN_CONFIG_DIR MUNIN_PLUGIN_DIR NODE_PLUGIN_DIR PLUGIN_CONFIG_DIR PLUGIN_LIST PROXY_CONFIG_DIR SCRIPT_DIR SKIP_DEPENDENCY_CHECK UPDATE_SELF VERBOSITY_LEVEL"
-            COMPREPLY=( $(compgen -W "${opts_variables}" -- ${cur}) )
+            if [[ "$prev2" != *help ]]; then
+                COMPREPLY=( $(compgen -W "${opts_variables}" -- ${cur}) )
+            fi
         ;;
         *)
         return 1
