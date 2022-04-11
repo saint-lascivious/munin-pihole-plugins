@@ -6,7 +6,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="05.03.00"
+VERSION="05.04.00"
 
 # environment variables with overrides
 dns_port="${DNS_PORT:-53}"
@@ -725,8 +725,8 @@ At least one INSTALL_* variable must be \"true\""
                             if [[ -n "$package_query" ]]; then
                                 reverberate "warning" "$dependency_id may have been installed by munin-pihole-plugins
 Would you like to uninstall $dependency_id now?"
-                                if [[ "$dependency_id" == "init-system-helpers" ]] || [[ "$dependency_id" == "wget" ]]; then
-                                    reverberate "info" "It probably wasn't, and you probably wouldn't"
+                                if [[ "$dependency_id" == "curl" ]] ||  [[ "$dependency_id" == "init-system-helpers" ]] || [[ "$dependency_id" == "wget" ]]; then
+                                    reverberate "warning" "It probably wasn't, and you probably wouldn't"
                                 fi
                                 apt remove -qq "$dependency_id"
                             fi
