@@ -6,7 +6,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="04.07.00"
+VERSION="04.08.00"
 
 # environment variables with overrides
 dns_port="${DNS_PORT:-53}"
@@ -27,7 +27,7 @@ update_self="${UPDATE_SELF:-true}"
 verbosity_level="${VERBOSITY_LEVEL:-3}"
 
 # environment variables without
-current_directory="$(dirname "$(readlink -f "$0")")"
+current_dir="$(dirname "$(readlink -f "$0")")"
 plugin_dependencies="curl munin-node "
 plugin_repo="https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master"
 plugin_services="munin-node "
@@ -64,17 +64,44 @@ update_script() {
 # saint-lascivious (Hayden Pearce) 2022
 # saint@sainternet.xyz
 
+verbosity_level="$verbosity_level"
+
 # a simple you self update function for the munin-pihole-plugins script
 update_now() {
     if [[ -x "$(command -v wget)" ]]; then
-        wget -q --show-progress munin-pihole-plugins.sainternet.xyz -O "$current_directory/munin-pihole-plugins"
+        if [[ "$verbosity_level" -ge "4" ]]; then
+            wget -q --show-progress munin-pihole-plugins.sainternet.xyz -O "$current_dir/munin-pihole-plugins"
+        else
+            wget -q munin-pihole-plugins.sainternet.xyz -O "$current_dir/munin-pihole-plugins"
+        fi
     else
-        echo -e "[\\e[31;1m!\\e[0m] The required command 'wget' was not found"
-        echo -e "[\\e[31;1m!\\e[0m] Exiting $0"
+        if [[ "$verbosity_level" -gt "0" ]]; then
+            echo -e "[\\e[31;1m!\\e[0m] The required command 'wget' was not found"
+            echo -e "[\\e[31;1m!\\e[0m] Exiting $0"
+        fi
         exit 1
     fi
-    chmod +x "$current_directory/munin-pihole-plugins" || return
-    echo -e "[\\e[32;1mℹ\\e[0m] Restarting after update"
+    chmod +x "$current_dir/munin-pihole-plugins" || return
+    if [[ "$current_dir" == "$script_dir" ]]; then
+        if [[ -d "/etc/bash_completion.d" ]]; then
+            if [[ "$verbosity_level" -ge "4" ]]; then
+                if [[ -f "/etc/bash_completion.d/munin-pihole-plugins" ]]; then
+                    wget -q --show-progress "$plugin_repo/etc/bash_completion.d/munin-pihole-plugins" -O "/etc/bash_completion.d/munin-pihole-plugins"
+                else
+                    wget -q --show-progress "$plugin_repo/etc/bash_completion.d/munin-pihole-plugins" -P "/etc/bash_completion.d"
+                fi
+            else
+                if [[ -f "/etc/bash_completion.d/munin-pihole-plugins" ]]; then
+                    wget -q "$plugin_repo/etc/bash_completion.d/munin-pihole-plugins" -O "/etc/bash_completion.d/munin-pihole-plugins"
+                else
+                    wget -q "$plugin_repo/etc/bash_completion.d/munin-pihole-plugins" -P "/etc/bash_completion.d"
+                fi
+            fi
+        fi
+    fi
+    if [[ "$verbosity_level" -ge "3" ]]; then
+        echo -e "[\\e[32;1mℹ\\e[0m] Restarting after update"
+    fi
     exec env UPDATE_SELF="false" /bin/bash "$0" "$@"
 }
 
@@ -86,6 +113,11 @@ EOF
 }
 
 # echo wrapper handling verbosity levels and common output
+# 0 - silent
+# 1 - + errors
+# 2 - ++ warnings
+# 3 - +++ informatioon
+# 4 - ++++ additional information
 reverberate() {
     case "$1" in
         "error"                                             )
@@ -113,7 +145,7 @@ reverberate() {
                 echo -e "[\\e[32;1mℹ\\e[0m] $2"
             fi ;;
         "success"                                           )
-            if [[ "$verbosity_level" -ge "3" ]]; then
+            if [[ "$verbosity_level" -ge "4" ]]; then
                 echo -e "[\\e[32;1m✓\\e[0m] $2"
             fi ;;
         "warning"                                           )
@@ -143,9 +175,9 @@ obnoxious_header() {
 check_pihole() {
     reverberate "info" "Checking if this is a Pi-hole® host"
     if [[ -x "$(command -v pihole)" ]]; then
-        reverberate "success" "The pihole command was found"
+        reverberate "success" "The 'pihole' command was found"
     else
-        reverberate "failure" "The pihole command was not found"
+        reverberate "failure" "The 'pihole' command was not found"
         pihole_on_host="no"
     fi
 }
@@ -383,11 +415,20 @@ restart_services() {
 # warn the user if script_dir is not in their path and suggest how to add it
 install_script() {
     if [[ -d "$script_dir" ]]; then
-        if [[ ! -f "$script_dir/munin-pihole-plugins" ]]; then
+        if [[ -f "$script_dir/munin-pihole-plugins" ]]; then
+            download "$plugin_repo/script/munin-pihole-plugins" -O "$script_dir/munin-pihole-plugins"
+        else
             download "$plugin_repo/script/munin-pihole-plugins" -P "$script_dir"
-            chmod +x "$script_dir/munin-pihole-plugins" || return
-            reverberate "info" "A copy of the munin-pihole-plugins script was installed to
+        fi
+        chmod +x "$script_dir/munin-pihole-plugins" || return
+        reverberate "info" "A copy of the munin-pihole-plugins script was installed to
 $script_dir/munin-pihole-plugins"
+        if [[ -d "/etc/bash_completion.d" ]]; then
+            if [[ -f "/etc/bash_completion.d/munin-pihole-plugins" ]]; then
+                download "$plugin_repo/etc/bash_completion.d/munin-pihole-plugins" -O "/etc/bash_completion.d/munin-pihole-plugins"
+            else
+                download "$plugin_repo/etc/bash_completion.d/munin-pihole-plugins" -P "/etc/bash_completion.d"
+            fi
         fi
         if [[ ":$PATH:" != *":$script_dir:"* ]]; then
             reverberate "warning" "The munin-pihole-plugins script directory
@@ -415,10 +456,17 @@ uninstall_script() {
 # saint-lascivious (Hayden Pearce) 2022
 # saint@sainternet.xyz
 
+verbosity_level="$verbosity_level"
+
 # uninstalls a locally installed copy of the munin-pihole-plugins script
 uninstall_now() {
+    if [[ -f "/etc/bash_completion.d/munin-pihole-plugins" ]]; then
+        rm "/etc/bash_completion.d/munin-pihole-plugins" || return
+    fi
     rm "$script_dir/munin-pihole-plugins" || return
-    echo -e "[\\e[32;1mℹ\\e[0m] Done"
+    if [[ "$verbosity_level" -ge "3" ]]; then
+        echo -e "[\\e[32;1mℹ\\e[0m] Done"
+    fi
 }
 
 uninstall_now
@@ -471,13 +519,13 @@ help_function() {
             min_height="7"
             some "Usage: munin-pihole-plugins $2
 \\nOption\\t\\tGNU long option\\t\\tMeaning
- -h\\t\\t--help\\t\\t\\tDisplay this help dialogue
+ -h, help\\t --help\\t\\t\\t Display this help dialogue
 \\nDisplay munin-pihole-plugins help information." ;;
         "-i" | "--install" | "install"                      )
-            min_height="29"
+            min_height="32"
             some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
-\\nOption\\t\\tGNU long option\\t\\tMeaning
- -i\\t\\t--install\\t\\tInstall munin-pihole-plugins
+\\nOption\\t\\t    GNU long option\\tMeaning
+ -i, install\\t     --install\\t\\t Install munin-pihole-plugins
 \\nInstall and configure Munin monitoring server software (default: true), client
 software (default: true), selected munin-pihole-plugins plugins (default: all)
 and install a copy of the munin-pihole-plugins script (default: true) to a
@@ -487,45 +535,50 @@ if a newer version of the munin-pihole-plugins script is available.
 \\nYou can run the installation again at any time afterwards to update the
 munin-pihole-plugins script and plugins, optionally selecting which plugins to
 install using the PLUGIN_LIST variable.
-\\nTakes an optional parameter '-p, plugins, --plugins', '-s, script, --script'
-or '-w, webserver, --webserver' to install just that component.
+\\nTakes an optional parameter to install just that component.
 \\nParameter\\t\\t\\t\\tFunction
- -p, plugins, --plugins\\t\\t\\tInstall and configure munin-node, and
-\\t\\t\\t\\t\\tmunin-pihole-plugins plugins
- -s, script, --script\\t\\t\\tInstall the munin-pihole-plugins script
- -w, webserver, --webserver\\t\\tInstall and configure munin, lighttpd
-\\t\\t\\t\\t\\tand lighttpd-external-munin-proxy
+ -p, plugins\\t    --plugins\\t\\t Install and configure munin-node, and
+\\t\\t\\t\\t\\t munin-pihole-plugins plugins
+ -P, plugins-only   --plugins-only\\t As above, skipping dependencies
+ -s, script\\t    --script\\t\\t Install the munin-pihole-plugins
+\\t\\t\\t\\t\\t script
+ -S, script-only    --script-only\\t As above, skipping dependencies
+ -w, webserver\\t    --webserver\\t\\t Install and configure munin, lighttpd
+\\t\\t\\t\\t\\t and lighttpd-external-munin-proxy
+ -W, webserver-only --webserver-only\\t As above, skipping dependencies
 \\nExample: 'munin-pihole-plugins $2 plugins'" ;;
         "-v" | "--version" | "version"                      )
             min_height="10"
             some "Usage: munin-pihole-plugins {$2}
 \\nOption\\t\\tGNU long option\\t\\tMeaning
- -v\\t\\t--version\\t\\tDisplay the current and latest versions
+ -v, version\\t --version\\t\\t Display current and latest versions
 \\nDisplay the current munin-pihole-plugins script version, and compare it to
 the latest munin-pihole-plugins script version.
 \\nAn additional notification will be displayed if an update is available." ;;
         "-U" | "--uninstall" | "uninstall"                  )
-            min_height="21"
+            min_height="23"
             some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
-\\nOption\\t\\tGNU long option\\t\\tMeaning
- -U\\t\\t--uninstall\\t\\tUninstall munin-pihole-plugins
+\\nOption\\t\\t    GNU long option\\tMeaning
+ -U, uninstall\\t     --uninstall\\t Uninstall munin-pihole-plugins
 \\nCompletely uninstall munin-pihole-plugins, you will be asked if you want to
 uninstall any dependencies that munin-pihole-plugins may have installed.
-\\nTakes an optional parameter '-p, plugins, --plugins', '-s, script, --script'
-or '-w, webserver, --webserver' to install just that component.
+\\nTakes an optional parameter to uninstall just that component.
 \\nParameter\\t\\t\\t\\tFunction
- -p, plugins, --plugins\\t\\t\\tUninstall munin-node, and
-\\t\\t\\t\\t\\tmunin-pihole-plugins plugins
- -s, script, --script\\t\\t\\tUninstall the munin-pihole-plugins
-\\t\\t\\t\\t\\tscript
- -w, webserver, --webserver\\t\\tUninstall munin, lighttpd, and
-\\t\\t\\t\\t\\tlighttpd-external-munin-proxy
-\\nExample: 'munin-pihole-plugins $2 script'" ;;
+ -p, plugins\\t    --plugins\\t\\t Uninstall munin-node, and
+\\t\\t\\t\\t\\t munin-pihole-plugins plugins
+ -P, plugins-only   --plugins-only\\t As above, skipping dependencies
+ -s, script\\t    --script\\t\\t Uninstall the munin-pihole-plugins
+\\t\\t\\t\\t\\t script
+ -S, script-only    --script-only\\t As above, skipping dependencies
+ -w, webserver\\t    --webserver\\t\\t Uninstall munin, lighttpd, and
+\\t\\t\\t\\t\\t lighttpd-external-munin-proxy
+ -W, webserver-only --webserver-only\\t As above, skipping dependencies
+\\nExample: 'munin-pihole-plugins $2 script-only'" ;;
         "-V" | "--variables" | "variables"                  )
             min_height="14"
             some "Usage: munin-pihole-plugins {$2 [VARIABLE]}
 \\nOption\\t\\tGNU long option\\t\\tMeaning
- -V\\t\\t--variables\\t\\tDisplay environment variables
+ -V, variables\\t --variables\\t\\t Display environment variables
 \\nDisplay a full list of environment variables used by the munin-pihole-plugins
 script, and their current values. The variables can be used to customize
 various aspects of the munin-pihole-plugins script's operation.
@@ -536,11 +589,11 @@ variable to list the value of that variable alone.
             min_height="13"
             some "Usage: munin-pihole-plugins {OPTION [PARAMETER]}
 \\nOption\\t\\tGNU long option\\t\\tMeaning
- -h, help\\t--help\\t\\t\\tDisplay this help dialogue
- -i, install\\t--install\\t\\tInstall munin-pihole-plugins
- -v, version\\t--version\\t\\tDisplay the current and latest versions
- -U, uninstall\\t--uninstall\\t\\tUninstall munin-pihole-plugins
- -V, variables\\t--variables\\t\\tDisplay environment variables
+ -h, help\\t --help\\t\\t\\t Display this help dialogue
+ -i, install\\t --install\\t\\t Install munin-pihole-plugins
+ -v, version\\t --version\\t\\t Display current and latest versions
+ -U, uninstall\\t --uninstall\\t\\t Uninstall munin-pihole-plugins
+ -V, variables\\t --variables\\t\\t Display environment variables
 \\nType '$1 {OPTION}' for more detailed explanations of each command
 \\nExample: 'munin-pihole-plugins $1 install'" ;;
         *                                                   )
@@ -650,7 +703,7 @@ At least one INSTALL_* variable must be \"true\""
             check_privilege "$@"
             obnoxious_header
             if [[ "$install_plugins" == "true" ]]; then
-                dependency_list+="$plugin_dependencies"
+                dependency_list+="munin-node "
                 if [[ -d "$plugin_config_dir" ]]; then
                     if [[ -f  "$plugin_config_dir/pihole.conf" ]]; then
                         rm "$plugin_config_dir/pihole.conf" || return
@@ -659,7 +712,7 @@ At least one INSTALL_* variable must be \"true\""
                 uninstall_plugins
             fi
             if [[ "$install_script" == "true" ]]; then
-                dependency_list+="$script_dependencies"
+                dependency_list+="wget "
             fi
             if [[ "$install_webserver" == "true" ]]; then
                 dependency_list+="$webserver_dependencies"
@@ -696,8 +749,8 @@ At least one INSTALL_* variable must be \"true\""
                             if [[ -n "$package_query" ]]; then
                                 reverberate "warning" "$dependency_id may have been installed by munin-pihole-plugins
 Would you like to uninstall $dependency_id now?"
-                                if [[ "$dependency_id" == "init-system-helpers" ]] || [[ "$dependency_id" == "wget" ]]; then
-                                    reverberate "info" "It probably wasn't, and you probably wouldn't"
+                                if [[ "$dependency_id" == "curl" ]] ||  [[ "$dependency_id" == "init-system-helpers" ]] || [[ "$dependency_id" == "wget" ]]; then
+                                    reverberate "warning" "It probably wasn't, and you probably wouldn't"
                                 fi
                                 apt remove -qq "$dependency_id"
                             fi

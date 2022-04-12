@@ -31,11 +31,11 @@ If everything went well, you should find [munin-pihole-plugins graphs](https://g
 Usage: munin-pihole-plugins {OPTION [PARAMETER]}
 
 Option          GNU long option         Meaning
- -h, help       --help                  Display this help dialogue
- -i, install    --install               Install munin-pihole-plugins
- -v, version    --version               Display the current and latest versions
- -U, uninstall  --uninstall             Uninstall munin-pihole-plugins
- -V, variables  --variables             Display environment variables
+ -h, help        --help                  Display this help dialogue
+ -i, install     --install               Install munin-pihole-plugins
+ -v, version     --version               Display current and latest versions
+ -U, uninstall   --uninstall             Uninstall munin-pihole-plugins
+ -V, variables   --variables             Display environment variables
 
 Type '--help {OPTION}' for more detailed explanations of each command
 
@@ -165,10 +165,10 @@ Sets the munin-pihole-plugins script verbosity level on a scale from `0` to `4`,
 
 ```
 0 - silent
-1 - +errors
-2 - +warnings
-3 - +info
-4 - +downloads
+1 - + errors
+2 - ++ warnings
+3 - +++ information
+4 - ++++ additional information
 ```
 ## Help! My graphs aren't showing up!
 
