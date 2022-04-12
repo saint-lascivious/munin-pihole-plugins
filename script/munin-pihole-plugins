@@ -6,7 +6,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="05.04.01"
+VERSION="05.04.02"
 
 # environment variables with overrides
 dns_port="${DNS_PORT:-53}"
@@ -27,7 +27,7 @@ update_self="${UPDATE_SELF:-true}"
 verbosity_level="${VERBOSITY_LEVEL:-3}"
 
 # environment variables without
-current_directory="$(dirname "$(readlink -f "$0")")"
+current_dir="$(dirname "$(readlink -f "$0")")"
 plugin_dependencies="curl munin-node "
 plugin_repo="https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/development"
 plugin_services="munin-node "
@@ -70,11 +70,10 @@ verbosity_level="$verbosity_level"
 update_now() {
     if [[ -x "$(command -v wget)" ]]; then
         if [[ "$verbosity_level" -ge "4" ]]; then
-            wget -q --show-progress munin-pihole-plugins-dev.sainternet.xyz -O "$current_directory/munin-pihole-plugins"
+            wget -q --show-progress munin-pihole-plugins-dev.sainternet.xyz -O "$current_dir/munin-pihole-plugins"
         else
-            wget -q munin-pihole-plugins-dev.sainternet.xyz -O "$current_directory/munin-pihole-plugins"
+            wget -q munin-pihole-plugins-dev.sainternet.xyz -O "$current_dir/munin-pihole-plugins"
         fi
-
     else
         if [[ "$verbosity_level" -gt "0" ]]; then
             echo -e "[\\e[31;1m!\\e[0m] The required command 'wget' was not found"
@@ -82,7 +81,24 @@ update_now() {
         fi
         exit 1
     fi
-    chmod +x "$current_directory/munin-pihole-plugins" || return
+    chmod +x "$current_dir/munin-pihole-plugins" || return
+    if [[ "$current_dir" == "$script_dir" ]]; then
+        if [[ -d "/etc/bash_completion.d" ]]; then
+            if [[ "$verbosity_level" -ge "4" ]]; then
+                if [[ -f "/etc/bash_completion.d/munin-pihole-plugins" ]]; then
+                    wget -q --show-progress "$plugin_repo/etc/bash_completion.d/munin-pihole-plugins" -O "/etc/bash_completion.d/munin-pihole-plugins"
+                else
+                    wget -q --show-progress "$plugin_repo/etc/bash_completion.d/munin-pihole-plugins" -P "/etc/bash_completion.d"
+                fi
+            else
+                if [[ -f "/etc/bash_completion.d/munin-pihole-plugins" ]]; then
+                    wget -q "$plugin_repo/etc/bash_completion.d/munin-pihole-plugins" -O "/etc/bash_completion.d/munin-pihole-plugins"
+                else
+                    wget -q "$plugin_repo/etc/bash_completion.d/munin-pihole-plugins" -P "/etc/bash_completion.d"
+                fi
+            fi
+        fi
+    fi
     if [[ "$verbosity_level" -ge "3" ]]; then
         echo -e "[\\e[32;1mℹ\\e[0m] Restarting after update"
     fi
@@ -399,17 +415,20 @@ restart_services() {
 # warn the user if script_dir is not in their path and suggest how to add it
 install_script() {
     if [[ -d "$script_dir" ]]; then
-        if [[ ! -f "$script_dir/munin-pihole-plugins" ]]; then
+        if [[ -f "$script_dir/munin-pihole-plugins" ]]; then
+            download "$plugin_repo/script/munin-pihole-plugins" -O "$script_dir/munin-pihole-plugins"
+        else
             download "$plugin_repo/script/munin-pihole-plugins" -P "$script_dir"
-            chmod +x "$script_dir/munin-pihole-plugins" || return
-            reverberate "info" "A copy of the munin-pihole-plugins script was installed to
-$script_dir/munin-pihole-plugins"
         fi
+        chmod +x "$script_dir/munin-pihole-plugins" || return
+        reverberate "info" "A copy of the munin-pihole-plugins script was installed to
+$script_dir/munin-pihole-plugins"
         if [[ -d "/etc/bash_completion.d" ]]; then
             if [[ -f "/etc/bash_completion.d/munin-pihole-plugins" ]]; then
-                rm "/etc/bash_completion.d/munin-pihole-plugins" || return
+                download "$plugin_repo/etc/bash_completion.d/munin-pihole-plugins" -O "/etc/bash_completion.d/munin-pihole-plugins"
+            else
+                download "$plugin_repo/etc/bash_completion.d/munin-pihole-plugins" -P "/etc/bash_completion.d"
             fi
-            download "$plugin_repo/etc/bash_completion.d/munin-pihole-plugins" -P "/etc/bash_completion.d"
         fi
         if [[ ":$PATH:" != *":$script_dir:"* ]]; then
             reverberate "warning" "The munin-pihole-plugins script directory

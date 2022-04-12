@@ -1,3 +1,7 @@
+# munin-pihole-plugins
+# saint-lascivious (Hayden Pearce) 2022
+# saint@sainternet.xyz
+
 _munin-pihole-plugins() {
     local cur longopts longopts_help longopts_installuninstall opts opts_help opts_installuninstall opts_variables prev prev2
     COMPREPLY=()
@@ -8,7 +12,7 @@ _munin-pihole-plugins() {
         "munin-pihole-plugins")
             opts="help --help install --install uninstall --uninstall variables --variables version --version"
             longopts="--help --install --uninstall --variables --version"
-            if [[ $cur == -* ]]; then
+            if [[ "$cur" == -* ]]; then
                 COMPREPLY=( $(compgen -W "${longopts}" -- ${cur}) )
             else
                 COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
