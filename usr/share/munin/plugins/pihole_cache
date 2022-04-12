@@ -1,5 +1,11 @@
 #!/bin/sh
 
+######THIS PLUGIN IS DEPRECATED!######
+#                                    #
+# Use the monolithic plugin, pihole_ #
+#                                    #
+######################################
+
 # munin-pihole-plugins - cache
 # saint-lascivious (Hayden Pearce) 2022
 # saint@sainternet.xyz
