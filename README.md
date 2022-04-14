@@ -141,7 +141,11 @@ The directory in which individual `munin-node` plugin configurations should be l
 
 * `PLUGIN_LIST`
 
-A space separated list of `munin-pihole-plugins` plugin names used to determine which plugins will be installed.
+A space separated list of `munin-pihole-plugins` plugin IDs used to determine which plugins will be installed.
+
+```
+"blocked cache cache_by_type clients percent queries replies_by_type status unique_domains"
+```
 
 * `PROXY_CONFIG_DIR`
 
@@ -153,7 +157,7 @@ The directory in which the `munin-pihole-plugins` script should be located when 
 
 * `SKIP_DEPENDENCY_CHECK`
 
-Disables `apt` and `dpkg-query` based dependency satisfaction if set to any value other than `false`.
+Disables `apt` and `dpkg-query` based dependency management if set to any value other than `false`.
 
 * `UPDATE_SELF`
 
@@ -170,6 +174,7 @@ Sets the munin-pihole-plugins script verbosity level on a scale from `0` to `4`,
 3 - +++ information
 4 - ++++ additional information
 ```
+
 ## Help! My graphs aren't showing up!
 
 * Be patient

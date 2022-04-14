@@ -42,9 +42,11 @@ fi
 
 case $plugin_id in
     cache | cache_by_type)
-        apicall="$(curl -sL "$envhost:$envport$envapi$envcachesuffix$envwebpassword" 2>/dev/null)" ;;
+        apicall="$(curl -sL "$envhost:$envport$envapi$envcachesuffix$envwebpassword" 2>/dev/null)"
+    ;;
     *)
-        apicall="$(curl -sL "$envhost:$envport$envapi" 2>/dev/null)" ;;
+        apicall="$(curl -sL "$envhost:$envport$envapi" 2>/dev/null)"
+    ;;
 esac
 
 get_stats="$(echo "$apicall" | sed 's/[{}"]//g' | tr "," "\\n")"
@@ -67,7 +69,8 @@ case $1 in
                         echo "$uid.min 0"
                     fi
                 done
-                exit 0 ;;
+                exit 0
+            ;;
             cache)
                 echo "graph_title Pi-hole cache"
                 echo "graph_args --base 1000 -l 0"
@@ -83,7 +86,8 @@ case $1 in
                         echo "$uid.min 0"
                     fi
                 done
-                exit 0 ;;
+                exit 0
+            ;;
             cache_by_type)
                 echo "graph_title Pi-hole cache by type"
                 echo "graph_args --base 1000 -l 0"
@@ -99,7 +103,8 @@ case $1 in
                         echo "$uid.min 0"
                     fi
                 done
-                exit 0 ;;
+                exit 0
+            ;;
             clients)
                 echo "graph_title Pi-hole clients"
                 echo "graph_args --base 1000 -l 0"
@@ -114,7 +119,8 @@ case $1 in
                         echo "$uid.min 0"
                     fi
                 done
-                exit 0 ;;
+                exit 0
+            ;;
             percent)
                 echo "graph_title Pi-hole blocked query percent"
                 echo "graph_args --base 1000 -l 0 -u 100"
@@ -130,7 +136,8 @@ case $1 in
                         echo "$uid.min 0"
                     fi
                 done
-                exit 0 ;;
+                exit 0
+            ;;
             queries)
                 echo "graph_title Pi-hole queries"
                 echo "graph_args --base 1000 -l 0"
@@ -146,7 +153,8 @@ case $1 in
                         echo "$uid.min 0"
                     fi
                 done
-                exit 0 ;;
+                exit 0
+            ;;
             replies_by_type)
                 echo "graph_title Pi-hole replies by type"
                 echo "graph_args --base 1000 -l 0"
@@ -162,7 +170,8 @@ case $1 in
                         echo "$uid.min 0"
                     fi
                 done
-                exit 0 ;;
+                exit 0
+            ;;
             status)
                 echo "graph_title Pi-hole blocking status"
                 echo "graph_args --base 1000 -l -1 -u 1"
@@ -178,7 +187,8 @@ case $1 in
                         echo "$uid.min 0"
                     fi
                 done
-                exit 0 ;;
+                exit 0
+            ;;
             unique_domains)
                 echo "graph_title Pi-hole unique domains"
                 echo "graph_args --base 1000 -l 0"
@@ -194,7 +204,8 @@ case $1 in
                         echo "$uid.min 0"
                     fi
                 done
-                exit 0 ;;
+                exit 0
+            ;;
         esac
 esac
 
@@ -206,7 +217,8 @@ case $plugin_id in
                 value="$(echo "$stat_id" | sed 's/.*://')"
                 echo "$uid.value $value"
             fi
-        done ;;
+        done
+    ;;
     cache)
         for stat_id in $get_stats; do
             uid="$(echo "$stat_id" | sed 's/:.*//')"
@@ -214,7 +226,8 @@ case $plugin_id in
                 value="$(echo "$stat_id" | sed 's/.*://')"
                 echo "$uid.value $value"
             fi
-        done ;;
+        done
+    ;;
     cache_by_type)
         for stat_id in $get_stats; do
             uid=$(echo "$stat_id" | sed 's/:.*//')
@@ -222,7 +235,8 @@ case $plugin_id in
                 value="$(echo "$stat_id" | sed 's/.*://')"
                 echo "$uid.value $value"
             fi
-        done ;;
+        done
+    ;;
     clients)
         for stat_id in $get_stats; do
             uid=$(echo "$stat_id" | sed 's/:.*//')
@@ -230,7 +244,8 @@ case $plugin_id in
                 value="$(echo "$stat_id" | sed 's/.*://')"
                 echo "$uid.value $value"
             fi
-        done ;;
+        done
+    ;;
     percent)
         for stat_id in $get_stats; do
             uid="$(echo "$stat_id" | sed 's/:.*//')"
@@ -238,7 +253,8 @@ case $plugin_id in
                 value="$(echo "$stat_id" | sed 's/.*://')"
                 echo "$uid.value $value"
             fi
-        done ;;
+        done
+    ;;
     queries)
         for stat_id in $get_stats; do
             uid="$(echo "$stat_id" | sed 's/:.*//')"
@@ -246,7 +262,8 @@ case $plugin_id in
                 value="$(echo "$stat_id" | sed 's/.*://')"
                 echo "$uid.value $value"
             fi
-        done ;;
+        done
+    ;;
     replies_by_type)
         for stat_id in $get_stats; do
             uid="$(echo "$stat_id" | sed 's/:.*//')"
@@ -254,7 +271,8 @@ case $plugin_id in
                 value="$(echo "$stat_id" | sed 's/.*://')"
                 echo "$uid.value $value"
             fi
-        done ;;
+        done
+    ;;
     status)
         for stat_id in $get_stats; do
             uid="$(echo "$stat_id" | sed 's/:.*//')"
@@ -270,7 +288,8 @@ case $plugin_id in
                     fi
                 fi
             fi
-        done ;;
+        done
+    ;;
     unique_domains)
         for stat_id in $get_stats; do
             uid="$(echo "$stat_id" | sed 's/:.*//')"
@@ -278,5 +297,6 @@ case $plugin_id in
                 value="$(echo "$stat_id" | sed 's/.*://')"
                 echo "$uid.value $value"
             fi
-        done ;;
+        done
+    ;;
 esac
