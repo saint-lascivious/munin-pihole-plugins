@@ -3,19 +3,31 @@
 # saint@sainternet.xyz
 
 _munin-pihole-plugins() {
-    local cur longopts longopts_help longopts_installuninstall opts opts_help opts_installuninstall opts_variables prev prev2
+    local cur allopts lolopts_help longopts longopts_help longopts_installuninstall opts_help opts_installuninstall opts_variables prev prev2 shortopts shortopts_help shortopts_installuninstall
     COMPREPLY=()
     cur="${COMP_WORDS[COMP_CWORD]}"
     prev="${COMP_WORDS[COMP_CWORD-1]}"
     prev2="${COMP_WORDS[COMP_CWORD-2]}"
     case "${prev}" in
         "munin-pihole-plugins")
-            opts="help --help install --install uninstall --uninstall variables --variables version --version"
+            allopts="-h help --help -i install --install -U uninstall --uninstall -V variables --variables -v version --version"
             longopts="--help --install --uninstall --variables --version"
-            if [[ "$cur" == -* ]]; then
-                COMPREPLY=( $(compgen -W "${longopts}" -- ${cur}) )
-            else
-                COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+            shortopts="-h -i -U -v -V"
+            case "$cur" in
+                --*)
+                    COMPREPLY=( $(compgen -W "${longopts}" -- ${cur}) )
+                ;;
+                -*)
+                    COMPREPLY=( $(compgen -W "${shortopts}" -- ${cur}) )
+                ;;
+                *)
+                    COMPREPLY=( $(compgen -W "${allopts}" -- ${cur}) )
+            esac
+        ;;
+       "-h")
+            shortopts_help="-h -i -U -V -v"
+            if [[ "$prev2" != *h ]]; then
+                COMPREPLY=( $(compgen -W "${shortopts_help}" -- ${cur}) )
             fi
         ;;
         "help")
@@ -25,9 +37,18 @@ _munin-pihole-plugins() {
             fi
         ;;
         "--help")
+            lolopts_help="--I\\'ve-fallen-and-I-can\\'t-get-up"
             longopts_help="--help --install --uninstall --variables --version"
             if [[ "$prev2" != *help ]]; then
                 COMPREPLY=( $(compgen -W "${longopts_help}" -- ${cur}) )
+            else
+                COMPREPLY=( $(compgen -W "${lolopts_help}" -- ${cur}) )
+            fi
+        ;;
+        "-i"|"-U")
+            shortopts_installuninstall="-p -P -s -S -w -W"
+            if [[ "$prev2" != *h ]]; then
+                COMPREPLY=( $(compgen -W "${shortopts_installuninstall}" -- ${cur}) )
             fi
         ;;
         "install"|"uninstall")
@@ -42,9 +63,9 @@ _munin-pihole-plugins() {
                 COMPREPLY=( $(compgen -W "${longopts_installuninstall}" -- ${cur}) )
             fi
         ;;
-        "variables"|"--variables")
+        "-V"|"variables"|"--variables")
             opts_variables="DNS_PORT DNS_SERVER INSTALL_PLUGINS INSTALL_SCRIPT INSTALL_WEBSERVER MUNIN_DIR MUNIN_CONFIG_DIR MUNIN_PLUGIN_DIR NODE_PLUGIN_DIR PLUGIN_CONFIG_DIR PLUGIN_LIST PROXY_CONFIG_DIR SCRIPT_DIR SKIP_DEPENDENCY_CHECK UPDATE_SELF VERBOSITY_LEVEL"
-            if [[ "$prev2" != *help ]]; then
+            if [[ "$prev2" != *h ]]; then
                 COMPREPLY=( $(compgen -W "${opts_variables}" -- ${cur}) )
             fi
         ;;
