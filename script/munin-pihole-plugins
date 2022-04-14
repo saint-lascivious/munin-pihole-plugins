@@ -303,10 +303,11 @@ export MUNIN_CONFIG_DIR=\"/path/to/directory\""
 
 # remove all existing munin-pihole-plugins plugins and symbolic links
 # munin will reap abandoned plugin .rrd files itself
-# retain removal of legacy plugins instead of abandoning them while
-# switching from individual plugins to the monolithic plugin
+# legacy plugins names are retained so we don't leave any orphaned plugins
+# behind from ancient versions of munin-pihole-plugins, and/or switching from
+# the individual plugins to the monolithic plugin
 uninstall_plugins() {
-    all_plugins="blocked cache cache_by_type clients percent queries replies_by_type status unique_domains"
+    all_plugins="blocked blockrate cache cacheinfo cacherate cache_by_type cache_info clients hits percent queries reply replies_by_type status unique unique_domains"
     if [[ -d "$munin_plugin_dir" ]]; then
         reverberate "info" "Removing any existing munin-pihole-plugins plugin(s)"
         if [[ -f "$munin_plugin_dir/pihole_" ]]; then
