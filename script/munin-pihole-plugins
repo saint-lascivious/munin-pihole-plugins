@@ -6,7 +6,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="05.04.04"
+VERSION="05.04.05"
 
 # environment variables with overrides
 dns_port="${DNS_PORT:-53}"
