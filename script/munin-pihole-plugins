@@ -6,7 +6,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="05.04.02"
+VERSION="05.04.03"
 
 # environment variables with overrides
 dns_port="${DNS_PORT:-53}"
@@ -145,7 +145,7 @@ reverberate() {
                 echo -e "[\\e[32;1mℹ\\e[0m] $2"
             fi ;;
         "success"                                           )
-            if [[ "$verbosity_level" -ge "4" ]]; then
+            if [[ "$verbosity_level" -ge "3" ]]; then
                 echo -e "[\\e[32;1m✓\\e[0m] $2"
             fi ;;
         "warning"                                           )
