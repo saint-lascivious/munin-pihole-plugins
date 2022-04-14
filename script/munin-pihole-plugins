@@ -6,7 +6,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="05.04.03"
+VERSION="05.04.04"
 
 # environment variables with overrides
 dns_port="${DNS_PORT:-53}"
@@ -123,39 +123,48 @@ reverberate() {
         "error"                                             )
             if [[ "$verbosity_level" -ge "1" ]]; then
                 echo -e "[\\e[31;1m!\\e[0m] $2"
-            fi ;;
+            fi
+        ;;
         "exit"                                              )
             if [[ "$verbosity_level" -ge "1" ]]; then
                 echo -e "[\\e[31;1m!\\e[0m] Exiting $0"
-            fi ;;
+            fi
+        ;;
         "failure"                                           )
             if [[ "$verbosity_level" -ge "3" ]]; then
                 echo -e "[\\e[31;1m✗\\e[0m] $2"
-            fi ;;
+            fi
+        ;;
         "footer"                                            )
             if [[ "$verbosity_level" -ge "1" ]]; then
                 echo -e "[\\e[32;1mℹ\\e[0m] Done"
-            fi ;;
+            fi
+        ;;
         "header"                                            )
             if [[ "$verbosity_level" -ge "1" ]]; then
                 echo -e "$2"
-            fi ;;
+            fi
+        ;;
         "info"                                              )
             if [[ "$verbosity_level" -ge "3" ]]; then
                 echo -e "[\\e[32;1mℹ\\e[0m] $2"
-            fi ;;
+            fi
+        ;;
         "success"                                           )
             if [[ "$verbosity_level" -ge "3" ]]; then
                 echo -e "[\\e[32;1m✓\\e[0m] $2"
-            fi ;;
+            fi
+        ;;
         "warning"                                           )
             if [[ "$verbosity_level" -ge "2" ]]; then
                 echo -e "[\\e[33;1m⚠\\e[0m] $2"
-            fi ;;
+            fi
+        ;;
         *                                                   )
             if [[ "$verbosity_level" -ge "3" ]]; then
                 echo -e "$1"
-            fi ;;
+            fi
+        ;;
     esac
 }
 
@@ -521,7 +530,8 @@ help_function() {
             some "Usage: munin-pihole-plugins $2
 \\nOption\\t\\tGNU long option\\t\\tMeaning
  -h, help\\t --help\\t\\t\\t Display this help dialogue
-\\nDisplay munin-pihole-plugins help information." ;;
+\\nDisplay munin-pihole-plugins help information."
+        ;;
         "-i" | "--install" | "install"                      )
             min_height="32"
             some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
@@ -540,14 +550,15 @@ install using the PLUGIN_LIST variable.
 \\nParameter\\t\\t\\t\\tFunction
  -p, plugins\\t    --plugins\\t\\t Install and configure munin-node, and
 \\t\\t\\t\\t\\t munin-pihole-plugins plugins
- -P, plugins-only   --plugins-only\\t As above, skipping dependencies
+ -P, plugins-only   --plugins-only\\t As above, skipping dependency check
  -s, script\\t    --script\\t\\t Install the munin-pihole-plugins
 \\t\\t\\t\\t\\t script
- -S, script-only    --script-only\\t As above, skipping dependencies
+ -S, script-only    --script-only\\t As above, skipping dependency check
  -w, webserver\\t    --webserver\\t\\t Install and configure munin, lighttpd
 \\t\\t\\t\\t\\t and lighttpd-external-munin-proxy
- -W, webserver-only --webserver-only\\t As above, skipping dependencies
-\\nExample: 'munin-pihole-plugins $2 plugins'" ;;
+ -W, webserver-only --webserver-only\\t As above, skipping dependency check
+\\nExample: 'munin-pihole-plugins $2 plugins'"
+        ;;
         "-v" | "--version" | "version"                      )
             min_height="10"
             some "Usage: munin-pihole-plugins {$2}
@@ -555,7 +566,8 @@ install using the PLUGIN_LIST variable.
  -v, version\\t --version\\t\\t Display current and latest versions
 \\nDisplay the current munin-pihole-plugins script version, and compare it to
 the latest munin-pihole-plugins script version.
-\\nAn additional notification will be displayed if an update is available." ;;
+\\nAn additional notification will be displayed if an update is available."
+        ;;
         "-U" | "--uninstall" | "uninstall"                  )
             min_height="23"
             some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
@@ -567,14 +579,15 @@ uninstall any dependencies that munin-pihole-plugins may have installed.
 \\nParameter\\t\\t\\t\\tFunction
  -p, plugins\\t    --plugins\\t\\t Uninstall munin-node, and
 \\t\\t\\t\\t\\t munin-pihole-plugins plugins
- -P, plugins-only   --plugins-only\\t As above, skipping dependencies
+ -P, plugins-only   --plugins-only\\t As above, skipping dependency removal
  -s, script\\t    --script\\t\\t Uninstall the munin-pihole-plugins
 \\t\\t\\t\\t\\t script
- -S, script-only    --script-only\\t As above, skipping dependencies
+ -S, script-only    --script-only\\t As above, skipping dependency removal
  -w, webserver\\t    --webserver\\t\\t Uninstall munin, lighttpd, and
 \\t\\t\\t\\t\\t lighttpd-external-munin-proxy
- -W, webserver-only --webserver-only\\t As above, skipping dependencies
-\\nExample: 'munin-pihole-plugins $2 script-only'" ;;
+ -W, webserver-only --webserver-only\\t As above, skipping dependency removal
+\\nExample: 'munin-pihole-plugins $2 script-only'"
+        ;;
         "-V" | "--variables" | "variables"                  )
             min_height="14"
             some "Usage: munin-pihole-plugins {$2 [VARIABLE]}
@@ -585,7 +598,8 @@ script, and their current values. The variables can be used to customize
 various aspects of the munin-pihole-plugins script's operation.
 \\nTakes an optional parameter in the form of a munin-pihole-plugins environment
 variable to list the value of that variable alone.
-\\nExample: 'munin-pihole-plugins $2 INSTALL_PLUGINS'" ;;
+\\nExample: 'munin-pihole-plugins $2 INSTALL_PLUGINS'"
+        ;;
         ""                                                  )
             min_height="13"
             some "Usage: munin-pihole-plugins {OPTION [PARAMETER]}
@@ -596,11 +610,13 @@ variable to list the value of that variable alone.
  -U, uninstall\\t --uninstall\\t\\t Uninstall munin-pihole-plugins
  -V, variables\\t --variables\\t\\t Display environment variables
 \\nType '$1 {OPTION}' for more detailed explanations of each command
-\\nExample: 'munin-pihole-plugins $1 install'" ;;
+\\nExample: 'munin-pihole-plugins $1 install'"
+        ;;
         *                                                   )
         min_height="3"
     some "munin-pihole-plugins: unrecognized option '$2'
-Type 'munin-pihole-plugins --help' for a list of available options" ;;
+Type 'munin-pihole-plugins --help' for a list of available options"
+        ;;
     esac
 }
 
@@ -608,17 +624,23 @@ Type 'munin-pihole-plugins --help' for a list of available options" ;;
 install_function() {
     case "${2}" in
         "-p" | "plugins" | "--plugins"                      )
-             exec env INSTALL_SCRIPT="false" INSTALL_WEBSERVER="false" /bin/bash "$0" "$1" ;;
+             exec env INSTALL_SCRIPT="false" INSTALL_WEBSERVER="false" /bin/bash "$0" "$1"
+        ;;
         "-P" | "plugins-only" | "--plugins-only"            )
-             exec env INSTALL_SCRIPT="false" INSTALL_WEBSERVER="false" SKIP_DEPENDENCY_CHECK="true" /bin/bash "$0" "$1" ;;
+             exec env INSTALL_SCRIPT="false" INSTALL_WEBSERVER="false" SKIP_DEPENDENCY_CHECK="true" /bin/bash "$0" "$1"
+        ;;
         "-s" | "script" | "--script"                        )
-             exec env INSTALL_PLUGINS="false" INSTALL_WEBSERVER="false" /bin/bash "$0" "$1" ;;
+             exec env INSTALL_PLUGINS="false" INSTALL_WEBSERVER="false" /bin/bash "$0" "$1"
+        ;;
         "-S" | "script-only" | "--script-only"              )
-             exec env INSTALL_PLUGINS="false" INSTALL_WEBSERVER="false" SKIP_DEPENDENCY_CHECK="true" /bin/bash "$0" "$1" ;;
+             exec env INSTALL_PLUGINS="false" INSTALL_WEBSERVER="false" SKIP_DEPENDENCY_CHECK="true" /bin/bash "$0" "$1"
+        ;;
         "-w" | "webserver" | "--webserver"                  )
-             exec env INSTALL_PLUGINS="false" INSTALL_SCRIPT="false" /bin/bash "$0" "$1" ;;
+             exec env INSTALL_PLUGINS="false" INSTALL_SCRIPT="false" /bin/bash "$0" "$1"
+        ;;
         "-W" | "webserver-only" | "--webserver-only"        )
-             exec env INSTALL_PLUGINS="false" INSTALL_SCRIPT="false" SKIP_DEPENDENCY_CHECK="true" /bin/bash "$0" "$1" ;;
+             exec env INSTALL_PLUGINS="false" INSTALL_SCRIPT="false" SKIP_DEPENDENCY_CHECK="true" /bin/bash "$0" "$1"
+        ;;
         *                                                   )
             if [[ ! "$install_plugins" == "true" ]] && [[ ! "$install_script" == "true" ]] && [[ ! "$install_webserver" == "true" ]]; then
                 reverberate "error" "No action(s) to perform
@@ -669,7 +691,8 @@ No plugins in PLUGIN_LIST"
             else
                 reverberate "info" "Skipping script installation"
             fi
-            reverberate "footer" ;;
+            reverberate "footer"
+        ;;
     esac
 }
 
@@ -683,17 +706,23 @@ No plugins in PLUGIN_LIST"
 uninstall_function() {
     case "${2}" in
         "-p" | "plugins" | "--plugins"                      )
-             exec env INSTALL_SCRIPT="false" INSTALL_WEBSERVER="false" /bin/bash "$0" "$1" ;;
+             exec env INSTALL_SCRIPT="false" INSTALL_WEBSERVER="false" /bin/bash "$0" "$1"
+        ;;
         "-P" | "plugins-only" | "--plugins-only"            )
-             exec env INSTALL_SCRIPT="false" INSTALL_WEBSERVER="false" SKIP_DEPENDENCY_CHECK="true" /bin/bash "$0" "$1" ;;
+             exec env INSTALL_SCRIPT="false" INSTALL_WEBSERVER="false" SKIP_DEPENDENCY_CHECK="true" /bin/bash "$0" "$1"
+        ;;
         "-s" | "script" | "--script"                        )
-             exec env INSTALL_PLUGINS="false" INSTALL_WEBSERVER="false" /bin/bash "$0" "$1" ;;
+             exec env INSTALL_PLUGINS="false" INSTALL_WEBSERVER="false" /bin/bash "$0" "$1"
+        ;;
         "-S" | "script-only" | "--script-only"              )
-             exec env INSTALL_PLUGINS="false" INSTALL_WEBSERVER="false" SKIP_DEPENDENCY_CHECK="true" /bin/bash "$0" "$1" ;;
+             exec env INSTALL_PLUGINS="false" INSTALL_WEBSERVER="false" SKIP_DEPENDENCY_CHECK="true" /bin/bash "$0" "$1"
+        ;;
         "-w" | "webserver" | "--webserver"                  )
-             exec env INSTALL_PLUGINS="false" INSTALL_SCRIPT="false" /bin/bash "$0" "$1" ;;
+             exec env INSTALL_PLUGINS="false" INSTALL_SCRIPT="false" /bin/bash "$0" "$1"
+        ;;
         "-W" | "webserver-only" | "--webserver-only"        )
-             exec env INSTALL_PLUGINS="false" INSTALL_SCRIPT="false" SKIP_DEPENDENCY_CHECK="true" /bin/bash "$0" "$1" ;;
+             exec env INSTALL_PLUGINS="false" INSTALL_SCRIPT="false" SKIP_DEPENDENCY_CHECK="true" /bin/bash "$0" "$1"
+        ;;
         *                                                   )
             if [[ ! "$install_plugins" == "true" ]] && [[ ! "$install_script" == "true" ]] && [[ ! "$install_webserver" == "true" ]]; then
                 reverberate "error" "No action(s) to perform
@@ -767,7 +796,8 @@ Would you like to uninstall $dependency_id now?"
                 fi
             else
                 reverberate "footer"
-            fi ;;
+            fi
+        ;;
     esac
 }
 
@@ -797,37 +827,53 @@ variable_function() {
     min_height="3"
     case "$2" in
         "dns_port" | "DNS_PORT"                             )
-            some "DNS_PORT: $dns_port" ;;
+            some "DNS_PORT: $dns_port"
+        ;;
         "dns_server" | "DNS_SERVER"                         )
-            some "DNS_SERVER: $dns_server" ;;
+            some "DNS_SERVER: $dns_server"
+        ;;
         "install_plugins" | "INSTALL_PLUGINS"               )
-            some "INSTALL_PLUGINS: $install_plugins" ;;
+            some "INSTALL_PLUGINS: $install_plugins"
+        ;;
         "install_script" | "INSTALL_SCRIPT"                 )
-            some "INSTALL_SCRIPT: $install_script" ;;
+            some "INSTALL_SCRIPT: $install_script"
+        ;;
         "install_webserver" | "INSTALL_WEBSERVER"           )
-            some "INSTALL_WEBSERVER: $install_webserver" ;;
+            some "INSTALL_WEBSERVER: $install_webserver"
+        ;;
         "munin_dir" | "MUNIN_DIR"                           )
-            some "MUNIN_DIR: $munin_dir" ;;
+            some "MUNIN_DIR: $munin_dir"
+        ;;
         "munin_config_dir" | "MUNIN_CONFIG_DIR"             )
-            some "MUNIN_CONFIG_DIR: $munin_config_dir" ;;
+            some "MUNIN_CONFIG_DIR: $munin_config_dir"
+        ;;
         "munin_plugin_dir" | "MUNIN_PLUGIN_DIR"             )
-            some "MUNIN_PLUGIN_DIR: $munin_plugin_dir" ;;
+            some "MUNIN_PLUGIN_DIR: $munin_plugin_dir"
+        ;;
         "node_plugin_dir" | "NODE_PLUGIN_DIR"               )
-            some "NODE_PLUGIN_DIR: $node_plugin_dir" ;;
+            some "NODE_PLUGIN_DIR: $node_plugin_dir"
+        ;;
         "plugin_config_dir" | "PLUGIN_CONFIG_DIR"           )
-            some "PLUGIN_CONFIG_DIR: $plugin_config_dir" ;;
+            some "PLUGIN_CONFIG_DIR: $plugin_config_dir"
+        ;;
         "plugin_list" | "PLUGIN_LIST"                       )
-            some "PLUGIN_LIST: $plugin_list" ;;
+            some "PLUGIN_LIST: $plugin_list"
+        ;;
         "proxy_config_dir" | "PROXY_CONFIG_DIR"             )
-            some "PROXY_CONFIG_DIR: $proxy_config_dir" ;;
+            some "PROXY_CONFIG_DIR: $proxy_config_dir"
+        ;;
         "script_dir" | "SCRIPT_DIR"                         )
-            some "SCRIPT_DIR: $script_dir" ;;
+            some "SCRIPT_DIR: $script_dir"
+        ;;
         "skip_dependency_check" | "SKIP_DEPENDENCY_CHECK"   )
-            some "SKIP_DEPENDENCY_CHECK: $skip_dependency_check" ;;
+            some "SKIP_DEPENDENCY_CHECK: $skip_dependency_check"
+        ;;
         "update_self" | "UPDATE_SELF"                       )
-            some "UPDATE_SELF: $update_self" ;;
+            some "UPDATE_SELF: $update_self"
+        ;;
         "verbosity_level" | "VERBOSITY_LEVEL"               )
-            some "VERBOSITY_LEVEL: $verbosity_level" ;;
+            some "VERBOSITY_LEVEL: $verbosity_level"
+        ;;
         ""                                                  )
             min_height="21"
             some "Usage: export [VARIABLE]=\"value\"
@@ -847,7 +893,8 @@ variable_function() {
  SCRIPT_DIR=\"$script_dir\"
  SKIP_DEPENDENCY_CHECK=\"$skip_dependency_check\"
  UPDATE_SELF=\"$update_self\"
- VERBOSITY_LEVEL=\"$verbosity_level\"" ;;
+ VERBOSITY_LEVEL=\"$verbosity_level\""
+        ;;
         *                                                   )
 min_height="3"
     some "munin-pihole-plugins: unrecognized variable '$2'
@@ -862,23 +909,30 @@ Type 'munin-pihole-plugins --variables' for a list of available options"
 function_handler() {
     case "${1}" in
         "-h" | "--help" | "help"                            )
-            help_function "$@" ;;
+            help_function "$@"
+        ;;
         "-i" | "--install" | "install"                      )
-            install_function "$@" ;;
+            install_function "$@"
+        ;;
         "-v" | "--version" | "version"                      )
-            version_function "$@" ;;
+            version_function "$@"
+        ;;
         "-U" | "--uninstall" | "uninstall"                  )
-            uninstall_function "$@" ;;
+            uninstall_function "$@"
+        ;;
         "-V" | "--variables" | "variables"                  )
-            variable_function "$@" ;;
+            variable_function "$@"
+        ;;
         ""                                                  )
             min_height="3"
     some "munin-pihole-plugins: no option selected
-Type 'munin-pihole-plugins --help' for a list of available options" ;;
+Type 'munin-pihole-plugins --help' for a list of available options"
+        ;;
         *                                                   )
             min_height="3"
     some "munin-pihole-plugins: unrecognized option '$1'
-Type 'munin-pihole-plugins --help' for a list of available options" ;;
+Type 'munin-pihole-plugins --help' for a list of available options"
+        ;;
     esac
 }
 
