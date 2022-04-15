@@ -97,9 +97,9 @@ Variable
  SKIP_DEPENDENCY_CHECK="false"
  UPDATE_SELF="true"
  VERBOSITY_LEVEL="3"
-
-Example: 'export VERBOSITY_LEVEL="4"'
 ```
+Example: `export VERBOSITY_LEVEL="4"`
+
 
 * `DNS_PORT`
 
@@ -148,19 +148,21 @@ A space separated list of `munin-pihole-plugins` plugin IDs used to determine wh
 ```
 "blocked cache cache_by_type clients percent queries replies_by_type status unique_domains"
 
-Plugin ID               Description
- blocked                 This graph shows domains blocked by Pi-hole®.
- cache                   This graph shows Pi-hole® cache.
- cache_by_type           This graph shows Pi-hole® cache by type.
- clients                 This graph shows clients seen by Pi-hole®.
- percent                 This graph shows Pi-hole® blocked query percentage.
- queries                 This graph shows queries seen by Pi-hole®.
- replies_by_type         This graph shows Pi-hole® replies by type.
- status                  This graph shows Pi-hole® blocking status.
- unique_domains          This graph shows unique domains seen by Pi-hole®.
+Plugin                  Description
+ blocked                 This plugin shows domains blocked by Pi-hole®.
+ cache                   This plugin shows Pi-hole® cache.
+ cache_by_type           This plugin shows Pi-hole® cache by type.
+ clients                 This plugin shows clients seen by Pi-hole®.
+ percent                 This plugin shows Pi-hole® blocked query percentage.
+ queries                 This plugin shows queries seen by Pi-hole®.
+ replies_by_type         This plugin shows Pi-hole® replies by type.
+ status                  This plugin shows Pi-hole® blocking status.
+ unique_domains          This plugin shows unique domains seen by Pi-hole®.
 
-Example: 'export PLUGIN_LIST="blocked percent unique_domains"'
 ```
+Example: `export PLUGIN_LIST="blocked percent unique_domains"`
+
+
 * `PROXY_CONFIG_DIR`
 
 The directory in which `lighttpd`'s external.conf should be located.

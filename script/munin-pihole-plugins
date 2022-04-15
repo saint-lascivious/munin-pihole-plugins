@@ -6,7 +6,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="05.05.00"
+VERSION="05.05.01"
 
 # environment variables with overrides
 dns_port="${DNS_PORT:-53}"
@@ -913,7 +913,18 @@ variable_function() {
             some "PLUGIN_CONFIG_DIR: $plugin_config_dir"
         ;;
         "plugin_list" | "PLUGIN_LIST"                       )
-            some "PLUGIN_LIST: $plugin_list"
+            min_height="14"
+            some "PLUGIN_LIST: $plugin_list
+\\nPlugin\\t\\t\\tDescription
+ blocked\\t\\t This plugin shows domains blocked by Pi-hole®.
+ cache\\t\\t\\t This plugin shows Pi-hole® cache.
+ cache_by_type\\t\\t This plugin shows Pi-hole® cache by type.
+ clients\\t\\t This plugin shows clients seen by Pi-hole®.
+ percent\\t\\t This plugin shows Pi-hole® blocked query percentage.
+ queries\\t\\t This plugin shows queries seen by Pi-hole®.
+ replies_by_type\\t This plugin shows Pi-hole® replies by type.
+ status\\t\\t\\t This plugin shows Pi-hole® blocking status.
+ unique_domains\\t\\t This plugin shows unique domains seen by Pi-hole®."
         ;;
         "proxy_config_dir" | "PROXY_CONFIG_DIR"             )
             some "PROXY_CONFIG_DIR: $proxy_config_dir"
