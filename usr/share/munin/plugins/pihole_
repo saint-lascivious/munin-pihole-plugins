@@ -6,11 +6,11 @@
 
 # Environment variables for this script
 #
-#     host          - Pi-hole host address
-#     port          - Pi-hole web interface port
-#     api           - Pi-hole API query path
-#     cachesuffix   - Pi-hole API query cache info suffix
-#     webpassword   - Pi-hole setupVars.conf WEBPASSWORD value
+#     host          - Pi-hole® host address
+#     port          - Pi-hole® web interface port
+#     api           - Pi-hole® API query path
+#     cachesuffix   - Pi-hole® API query cache info suffix
+#     webpassword   - Pi-hole® setupVars.conf WEBPASSWORD value
 #
 # You can set them in your munin/plugin-conf.d/pihole.conf file with:
 #
@@ -55,12 +55,12 @@ case $1 in
     config)
         case $plugin_id in
             blocked)
-                echo "graph_title Pi-hole domains being blocked"
+                echo "graph_title Pi-hole® domains being blocked"
                 echo "graph_args --base 1000 -l 0"
                 echo "graph_vlabel domains being blocked"
                 echo "graph_scale no"
                 echo "graph_category dns"
-                echo "graph_info This graph shows the number of domains being blocked by Pi-hole."
+                echo "graph_info This graph shows domains blocked by Pi-hole®."
                 for stat_id in $get_stats; do
                     uid="$(echo "$stat_id" | sed 's/:.*//')"
                     if [ "$uid" = "domains_being_blocked" ]; then
@@ -72,12 +72,12 @@ case $1 in
                 exit 0
             ;;
             cache)
-                echo "graph_title Pi-hole cache"
+                echo "graph_title Pi-hole® cache"
                 echo "graph_args --base 1000 -l 0"
                 echo "graph_vlabel cache packets"
                 echo "graph_scale no"
                 echo "graph_category dns"
-                echo "graph_info This graph shows Pi-hole's cache."
+                echo "graph_info This graph shows Pi-hole® cache."
                 for stat_id in $get_stats; do
                     uid="$(echo "$stat_id" | sed 's/:.*//')"
                     if [ "$uid" = "cache-live-freed" ] || [ "$uid" = "cache-inserted" ] || [ "$uid" = "expired" ] || [ "$uid" = "immortal" ]; then
@@ -94,7 +94,7 @@ case $1 in
                 echo "graph_vlabel cache packets"
                 echo "graph_scale no"
                 echo "graph_category dns"
-                echo "graph_info This graph shows Pi-hole's cache content by type."
+                echo "graph_info This graph shows Pi-hole® cache by type."
                 for stat_id in $get_stats; do
                     uid="$(echo "$stat_id" | sed 's/:.*//')"
                     if [ "$uid" = "ipv4" ] || [ "$uid" = "ipv6" ] || [ "$uid" = "srv" ] || [ "$uid" = "cname" ] || [ "$uid" = "ds" ] || [ "$uid" = "dnskey" ] || [ "$uid" = "other" ]; then
@@ -106,12 +106,12 @@ case $1 in
                 exit 0
             ;;
             clients)
-                echo "graph_title Pi-hole clients"
+                echo "graph_title Pi-hole® clients"
                 echo "graph_args --base 1000 -l 0"
                 echo "graph_vlabel number of clients"
                 echo "graph_scale no"
                 echo "graph_category dns"
-                echo "graph_info This graph shows clients seen by Pi-hole, current and all time."
+                echo "graph_info This graph shows clients seen by Pi-hole®."
                 for stat_id in $get_stats; do
                     uid="$(echo "$stat_id" | sed 's/:.*//')"
                     if [ "$uid" = "unique_clients" ] || [ "$uid" = "clients_ever_seen" ]; then
@@ -122,12 +122,12 @@ case $1 in
                 exit 0
             ;;
             percent)
-                echo "graph_title Pi-hole blocked query percent"
+                echo "graph_title Pi-hole® blocked query percent"
                 echo "graph_args --base 1000 -l 0 -u 100"
                 echo "graph_vlabel percent blocked"
                 echo "graph_scale no"
                 echo "graph_category dns"
-                echo "graph_info This graph shows Pi-hole's blocked query percentage."
+                echo "graph_info This graph shows Pi-hole® blocked query percentage."
                 for stat_id in $get_stats; do
                     uid="$(echo "$stat_id" | sed 's/:.*//')"
                     if [ "$uid" = "ads_percentage_today" ]; then
@@ -139,12 +139,12 @@ case $1 in
                 exit 0
             ;;
             queries)
-                echo "graph_title Pi-hole queries"
+                echo "graph_title Pi-hole® queries"
                 echo "graph_args --base 1000 -l 0"
                 echo "graph_vlabel queries"
                 echo "graph_scale no"
                 echo "graph_category dns"
-                echo "graph_info This graph shows queries seen by Pi-hole."
+                echo "graph_info This graph shows queries seen by Pi-hole®."
                 for stat_id in $get_stats; do
                     uid="$(echo "$stat_id" | sed 's/:.*//')"
                     if [ "$uid" = "dns_queries_today" ] || [ "$uid" = "ads_blocked_today" ] || [ "$uid" = "queries_forwarded" ] || [ "$uid" = "queries_cached" ]; then
@@ -156,12 +156,12 @@ case $1 in
                 exit 0
             ;;
             replies_by_type)
-                echo "graph_title Pi-hole replies by type"
+                echo "graph_title Pi-hole® replies by type"
                 echo "graph_args --base 1000 -l 0"
                 echo "graph_vlabel answer packets"
                 echo "graph_scale no"
                 echo "graph_category dns"
-                echo "graph_info This graph shows Pi-hole's replies by type."
+                echo "graph_info This graph shows Pi-hole® replies by type."
                 for stat_id in $get_stats; do
                     uid="$(echo "$stat_id" | sed 's/:.*//')"
                     if [ "$uid" = "reply_NODATA" ] || [ "$uid" = "reply_NXDOMAIN" ] || [ "$uid" = "reply_CNAME" ] || [ "$uid" = "reply_IP" ]; then
@@ -173,12 +173,12 @@ case $1 in
                 exit 0
             ;;
             status)
-                echo "graph_title Pi-hole blocking status"
+                echo "graph_title Pi-hole® blocking status"
                 echo "graph_args --base 1000 -l -1 -u 1"
                 echo "graph_vlabel offline / disabled / enabled"
                 echo "graph_scale no"
                 echo "graph_category dns"
-                echo "graph_info This graph shows Pi-hole's blocking status."
+                echo "graph_info This graph shows Pi-hole® blocking status."
                 for stat_id in $get_stats; do
                     uid="$(echo "$stat_id" | sed 's/:.*//')"
                     if [ "$uid" = "status" ]; then
@@ -190,12 +190,12 @@ case $1 in
                 exit 0
             ;;
             unique_domains)
-                echo "graph_title Pi-hole unique domains"
+                echo "graph_title Pi-hole® unique domains"
                 echo "graph_args --base 1000 -l 0"
                 echo "graph_vlabel unique domains"
                 echo "graph_scale no"
                 echo "graph_category dns"
-                echo "graph_info This graph shows the number of unique domains seen by Pi-hole."
+                echo "graph_info This graph shows the unique domains seen by Pi-hole®."
                 for stat_id in $get_stats; do
                     uid="$(echo "$stat_id" | sed 's/:.*//')"
                     if [ "$uid" = "unique_domains" ]; then
