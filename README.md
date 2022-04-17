@@ -100,6 +100,9 @@ Variable
 ```
 Example: `export VERBOSITY_LEVEL="4"`
 
+* `BRANCH`
+
+The branch used when checking the `munin-pihole-plugins` version or installing `munin-pihole-plugins`. Valid options are `development` and `master`, of which the default is `development`. Invalid options will be rejected.
 
 * `DNS_PORT`
 

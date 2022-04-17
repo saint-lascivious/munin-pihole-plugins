@@ -6,9 +6,10 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="05.06.00"
+VERSION="05.07.00"
 
 # environment variables with overrides
+branch="${BRANCH:-development}"
 dns_port="${DNS_PORT:-53}"
 dns_server="${DNS_SERVER:-208.67.222.222}"
 install_plugins="${INSTALL_PLUGINS:-true}"
@@ -29,7 +30,6 @@ verbosity_level="${VERBOSITY_LEVEL:-3}"
 # environment variables without
 current_dir="$(dirname "$(readlink -f "$0")")"
 plugin_dependencies="curl munin-node "
-plugin_repo="https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/development"
 plugin_services="munin-node "
 proxy_repo="https://raw.githubusercontent.com/saint-lascivious/lighttpd-external-munin-proxy/master"
 script_dependencies="init-system-helpers wget "
@@ -93,9 +93,9 @@ verbosity_level="$verbosity_level"
 update_now() {
     if [[ -x "$(command -v wget)" ]]; then
         if [[ "$verbosity_level" -ge "4" ]]; then
-            wget -q --show-progress munin-pihole-plugins-dev.sainternet.xyz -O "$current_dir/munin-pihole-plugins"
+            wget -q --show-progress "$plugin_domain" -O "$current_dir/munin-pihole-plugins"
         else
-            wget -q munin-pihole-plugins-dev.sainternet.xyz -O "$current_dir/munin-pihole-plugins"
+            wget -q "$plugin_domain" -O "$current_dir/munin-pihole-plugins"
         fi
     else
         if [[ "$verbosity_level" -gt "0" ]]; then
@@ -533,12 +533,28 @@ some() {
 # record
 # why tail 9, when we want 8 characters? fun fact: echo appends a newline
 check_version() {
-    version_domain="munin-pihole-plugins-dev.sainternet.xyz"
+    if [[ "$branch" == "master" ]]; then
+        plugin_domain="munin-pihole-plugins.sainternet.xyz"
+        plugin_repo="https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master"
+    else
+        if [[ "$branch" == "development" ]]; then
+            plugin_domain="munin-pihole-plugins-dev.sainternet.xyz"
+            plugin_repo="https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/development"
+        else
+            reverberate "error" "Invalid munin-pihole-plugins branch
+$branch"
+            reverberate "info" "Valid munin-pihole-plugins branches are
+development
+master"
+            reverberate "exit"
+            exit 1
+        fi
+    fi
     if [[ -x "$(command -v dig)" ]]; then
-        version_query="$(dig txt +short +timeout=5 +tries=2 "$version_domain" @"$dns_server" -p "$dns_port" | sed s'/[^0-9.]//g')"
+        version_query="$(dig txt +short +timeout=5 +tries=2 "$plugin_domain" @"$dns_server" -p "$dns_port" | sed s'/[^0-9.]//g')"
     else
         if [[ -x "$(command -v nslookup)" ]]; then
-            version_query="$(nslookup -port="$dns_port" -retry=2 -timeout=5 -type=txt "$version_domain" "$dns_server" | grep '"version: [0-9].[0-9].[0-9]"' | sed s'/[^0-9.]//g' | tail -c 9)"
+            version_query="$(nslookup -port="$dns_port" -retry=2 -timeout=5 -type=txt "$plugin_domain" "$dns_server" | grep '"version: [0-9].[0-9].[0-9]"' | sed s'/[^0-9.]//g' | tail -c 9)"
         fi
     fi
     if [[ -n "$version_query" ]]; then
@@ -895,7 +911,7 @@ munin-pihole-plugins version is v$VERSION (Latest: v$remote_version)"
     else
         min_height="4"
         some "[${YELLOW}⚠${RESET}] Unable to locate a TXT record for
-$version_domain
+$plugin_domain
 using the nameserver $dns_server on port $dns_port
 munin-pihole-plugins version is v$VERSION (Latest: unknown)"
     fi
@@ -906,6 +922,9 @@ munin-pihole-plugins version is v$VERSION (Latest: unknown)"
 variable_function() {
     min_height="3"
     case "$2" in
+        "branch" | "BRANCH"                                 )
+            some "BRANCH: $branch"
+        ;;
         "dns_port" | "DNS_PORT"                             )
             some "DNS_PORT: $dns_port"
         ;;
@@ -966,9 +985,10 @@ variable_function() {
             some "VERBOSITY_LEVEL: $verbosity_level"
         ;;
         ""                                                  )
-            min_height="21"
+            min_height="22"
             some "Usage: export [VARIABLE]=\"value\"
 \\nVariable
+ BRANCH=\"$branch\"
  DNS_PORT=\"$dns_port\"
  DNS_SERVER=\"$dns_server\"
  INSTALL_PLUGINS=\"$install_plugins\"
