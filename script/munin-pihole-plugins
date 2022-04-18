@@ -6,7 +6,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="05.07.01"
+VERSION="05.07.02"
 
 # environment variables with overrides
 branch="${BRANCH:-development}"
