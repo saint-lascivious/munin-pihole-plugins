@@ -6,7 +6,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="05.07.00"
+VERSION="05.07.01"
 
 # environment variables with overrides
 branch="${BRANCH:-development}"
@@ -200,7 +200,7 @@ ${YELLOW}  | '  \\ || | ' \\| | ' \\__| '_ \\ | ' \\/ _ \\ / -_)_| '_ \\ | || / 
 ${GREEN}  |_|_|_\\_,_|_||_|_|_||_| | .__/_|_||_\\___/_\\___| | .__/_|\\_,_\\__, |_|_||_/__/
 ${BLUE}                          |_|                     |_|         |___/
 \\n${INDIGO} Munin plugins and management script for monitoring various Pi-hole® statistics
-\\n${VIOLET} $(date)\\n"
+\\n${VIOLET} $(date)${RESET}\\n"
     fi
 }
 
@@ -899,6 +899,7 @@ Would you like to uninstall $dependency_id now?"
 
 # display the current and latest munin-pihole-plugins script versions
 version_function() {
+    obnoxious_header
     check_version
     if [[ -n "$remote_version" ]]; then
         if [[ "$remote_version" > "$VERSION" ]]; then
