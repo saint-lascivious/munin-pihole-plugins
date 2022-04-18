@@ -899,7 +899,6 @@ Would you like to uninstall $dependency_id now?"
 
 # display the current and latest munin-pihole-plugins script versions
 version_function() {
-    obnoxious_header
     check_version
     if [[ -n "$remote_version" ]]; then
         if [[ "$remote_version" > "$VERSION" ]]; then
