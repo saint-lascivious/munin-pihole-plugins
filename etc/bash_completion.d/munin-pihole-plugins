@@ -47,24 +47,18 @@ _munin-pihole-plugins() {
         ;;
         "-i"|"-U")
             shortopts_installuninstall="-p -P -s -S -w -W"
-            if [[ "$prev2" != *h ]]; then
-                COMPREPLY=( $(compgen -W "${shortopts_installuninstall}" -- ${cur}) )
-            fi
+            COMPREPLY=( $(compgen -W "${shortopts_installuninstall}" -- ${cur}) )
         ;;
         "install"|"uninstall")
             opts_installuninstall="plugins plugins-only script script-only webserver webserver-only"
-            if [[ "$prev2" != *help ]]; then
-                COMPREPLY=( $(compgen -W "${opts_installuninstall}" -- ${cur}) )
-            fi
+            COMPREPLY=( $(compgen -W "${opts_installuninstall}" -- ${cur}) )
         ;;
         "--install"|"--uninstall")
             longopts_installuninstall="--plugins --plugins-only --script --script-only --webserver --webserver-only"
-            if [[ "$prev2" != *help ]]; then
-                COMPREPLY=( $(compgen -W "${longopts_installuninstall}" -- ${cur}) )
-            fi
+            COMPREPLY=( $(compgen -W "${longopts_installuninstall}" -- ${cur}) )
         ;;
         "-V"|"variables"|"--variables")
-            opts_variables="DNS_PORT DNS_SERVER INSTALL_PLUGINS INSTALL_SCRIPT INSTALL_WEBSERVER MUNIN_DIR MUNIN_CONFIG_DIR MUNIN_PLUGIN_DIR NODE_PLUGIN_DIR PLUGIN_CONFIG_DIR PLUGIN_LIST PROXY_CONFIG_DIR SCRIPT_DIR SKIP_DEPENDENCY_CHECK UPDATE_SELF VERBOSITY_LEVEL"
+            opts_variables="BRANCH DNS_PORT DNS_SERVER INSTALL_PLUGINS INSTALL_SCRIPT INSTALL_WEBSERVER MUNIN_DIR MUNIN_CONFIG_DIR MUNIN_PLUGIN_DIR NODE_PLUGIN_DIR PLUGIN_CONFIG_DIR PLUGIN_LIST PROXY_CONFIG_DIR SCRIPT_DIR SKIP_DEPENDENCY_CHECK UPDATE_SELF VERBOSITY_LEVEL"
             if [[ "$prev2" != *h ]]; then
                 COMPREPLY=( $(compgen -W "${opts_variables}" -- ${cur}) )
             fi

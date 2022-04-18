@@ -6,9 +6,10 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="04.09.00"
+VERSION="04.10.00"
 
 # environment variables with overrides
+branch="${BRANCH:-master}"
 dns_port="${DNS_PORT:-53}"
 dns_server="${DNS_SERVER:-208.67.222.222}"
 install_plugins="${INSTALL_PLUGINS:-true}"
@@ -29,7 +30,6 @@ verbosity_level="${VERBOSITY_LEVEL:-3}"
 # environment variables without
 current_dir="$(dirname "$(readlink -f "$0")")"
 plugin_dependencies="curl munin-node "
-plugin_repo="https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master"
 plugin_services="munin-node "
 proxy_repo="https://raw.githubusercontent.com/saint-lascivious/lighttpd-external-munin-proxy/master"
 script_dependencies="init-system-helpers wget "
@@ -37,6 +37,29 @@ terminal_height="$(stty size | cut -d " " -f1)"
 terminal_width="$(stty size | cut -d " " -f2)"
 webserver_dependencies="lighttpd munin "
 webserver_services="lighttpd munin "
+
+# define colours for later use, if supported
+if [[ -t "1" ]] && [[ $(tput colors) -ge "8" ]]; then
+    WHITE="\\e[1;37m"
+    RED="\\e[91m"
+    ORANGE="\\e[0;33m"
+    YELLOW="\\e[1;33m"
+    GREEN="\\e[0;32m"
+    BLUE="\\e[1;34m"
+    INDIGO="\\e[0;34m"
+    VIOLET="\\e[0;35m"
+    RESET="\\e[0m"
+else
+    WHITE=""
+    RED=""
+    ORANGE=""
+    YELLOW=""
+    GREEN=""
+    BLUE=""
+    INDIGO=""
+    VIOLET=""
+    RESET=""
+fi
 
 # simple privilege check
 check_privilege() {
@@ -70,14 +93,14 @@ verbosity_level="$verbosity_level"
 update_now() {
     if [[ -x "$(command -v wget)" ]]; then
         if [[ "$verbosity_level" -ge "4" ]]; then
-            wget -q --show-progress munin-pihole-plugins.sainternet.xyz -O "$current_dir/munin-pihole-plugins"
+            wget -q --show-progress "$plugin_domain" -O "$current_dir/munin-pihole-plugins"
         else
-            wget -q munin-pihole-plugins.sainternet.xyz -O "$current_dir/munin-pihole-plugins"
+            wget -q "$plugin_domain" -O "$current_dir/munin-pihole-plugins"
         fi
     else
         if [[ "$verbosity_level" -gt "0" ]]; then
-            echo -e "[\\e[31;1m!\\e[0m] The required command 'wget' was not found"
-            echo -e "[\\e[31;1m!\\e[0m] Exiting $0"
+            echo -e "[${RED}!${RESET}] The required command 'wget' was not found"
+            echo -e "[${RED}!${RESET}] Exiting $0"
         fi
         exit 1
     fi
@@ -100,7 +123,7 @@ update_now() {
         fi
     fi
     if [[ "$verbosity_level" -ge "3" ]]; then
-        echo -e "[\\e[32;1mℹ\\e[0m] Restarting after update"
+        echo -e "[${WHITE}ℹ${RESET}] Restarting after update"
     fi
     exec env UPDATE_SELF="false" /bin/bash "$0" "$@"
 }
@@ -122,22 +145,22 @@ reverberate() {
     case "$1" in
         "error"                                             )
             if [[ "$verbosity_level" -ge "1" ]]; then
-                echo -e "[\\e[31;1m!\\e[0m] $2"
+                echo -e "[${RED}!${RESET}] $2"
             fi
         ;;
         "exit"                                              )
             if [[ "$verbosity_level" -ge "1" ]]; then
-                echo -e "[\\e[31;1m!\\e[0m] Exiting $0"
+                echo -e "[${RED}!${RESET}] Exiting $0"
             fi
         ;;
         "failure"                                           )
             if [[ "$verbosity_level" -ge "3" ]]; then
-                echo -e "[\\e[31;1m✗\\e[0m] $2"
+                echo -e "[${RED}✗${RESET}] $2"
             fi
         ;;
         "footer"                                            )
             if [[ "$verbosity_level" -ge "1" ]]; then
-                echo -e "[\\e[32;1mℹ\\e[0m] Done"
+                echo -e "[${WHITE}ℹ${RESET}] Done"
             fi
         ;;
         "header"                                            )
@@ -147,17 +170,17 @@ reverberate() {
         ;;
         "info"                                              )
             if [[ "$verbosity_level" -ge "3" ]]; then
-                echo -e "[\\e[32;1mℹ\\e[0m] $2"
+                echo -e "[$WHITEℹ${RESET}] $2"
             fi
         ;;
         "success"                                           )
             if [[ "$verbosity_level" -ge "3" ]]; then
-                echo -e "[\\e[32;1m✓\\e[0m] $2"
+                echo -e "[${GREEN}✓${RESET}] $2"
             fi
         ;;
         "warning"                                           )
             if [[ "$verbosity_level" -ge "2" ]]; then
-                echo -e "[\\e[33;1m⚠\\e[0m] $2"
+                echo -e "[${YELLOW}⚠${RESET}] $2"
             fi
         ;;
         *                                                   )
@@ -171,12 +194,13 @@ reverberate() {
 # manditory horrific ascii header
 obnoxious_header() {
     if [[ "$terminal_height" -ge "10" ]] && [[ "$terminal_width" -ge "80" ]]; then
-        reverberate "header" "\\e[31;1m                  _             _ _        _            _           _ v$VERSION
-\\e[33;1m   _ __ _  _ _ _ (_)_ _ __ _ __(_) |_  ___| |___ _ _ __| |_  _ __ _(_)_ _  ___
-\\e[32;1m  | '  \\ || | ' \\| | ' \\__| '_ \\ | ' \\/ _ \\ / -_)_| '_ \\ | || / _\` | | ' \\(_-<
-\\e[34;1m  |_|_|_\\_,_|_||_|_|_||_| | .__/_|_||_\\___/_\\___| | .__/_|\\_,_\\__, |_|_||_/__/
-\\e[36;1m                          |_|                     |_|         |___/
-\\n\\e[35;1m Munin plugins and management script for monitoring various Pi-hole® statistics\\e[0m\\n"
+        reverberate "header" "${RED}                  _             _ _        _            _           _ v$VERSION
+${ORANGE}   _ __ _  _ _ _ (_)_ _ __ _ __(_) |_  ___| |___ _ _ __| |_  _ __ _(_)_ _  ___
+${YELLOW}  | '  \\ || | ' \\| | ' \\__| '_ \\ | ' \\/ _ \\ / -_)_| '_ \\ | || / _\` | | ' \\(_-<
+${GREEN}  |_|_|_\\_,_|_||_|_|_||_| | .__/_|_||_\\___/_\\___| | .__/_|\\_,_\\__, |_|_||_/__/
+${BLUE}                          |_|                     |_|         |___/
+\\n${INDIGO} Munin plugins and management script for monitoring various Pi-hole® statistics
+\\n${VIOLET} $(date)${RESET}\\n"
     fi
 }
 
@@ -475,7 +499,7 @@ uninstall_now() {
     fi
     rm "$script_dir/munin-pihole-plugins" || return
     if [[ "$verbosity_level" -ge "3" ]]; then
-        echo -e "[\\e[32;1mℹ\\e[0m] Done"
+        echo -e "[${WHITE}ℹ${RESET}] Done"
     fi
 }
 
@@ -509,12 +533,28 @@ some() {
 # record
 # why tail 9, when we want 8 characters? fun fact: echo appends a newline
 check_version() {
-    version_domain="munin-pihole-plugins.sainternet.xyz"
+    if [[ "$branch" == "master" ]]; then
+        plugin_domain="munin-pihole-plugins.sainternet.xyz"
+        plugin_repo="https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master"
+    else
+        if [[ "$branch" == "development" ]]; then
+            plugin_domain="munin-pihole-plugins-dev.sainternet.xyz"
+            plugin_repo="https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/development"
+        else
+            reverberate "error" "Invalid munin-pihole-plugins branch
+$branch"
+            reverberate "info" "Valid munin-pihole-plugins branches are
+development
+master"
+            reverberate "exit"
+            exit 1
+        fi
+    fi
     if [[ -x "$(command -v dig)" ]]; then
-        version_query="$(dig txt +short +timeout=5 +tries=2 "$version_domain" @"$dns_server" -p "$dns_port" | sed s'/[^0-9.]//g')"
+        version_query="$(dig txt +short +timeout=5 +tries=2 "$plugin_domain" @"$dns_server" -p "$dns_port" | sed s'/[^0-9.]//g')"
     else
         if [[ -x "$(command -v nslookup)" ]]; then
-            version_query="$(nslookup -port="$dns_port" -retry=2 -timeout=5 -type=txt "$version_domain" "$dns_server" | grep '"version: [0-9].[0-9].[0-9]"' | sed s'/[^0-9.]//g' | tail -c 9)"
+            version_query="$(nslookup -port="$dns_port" -retry=2 -timeout=5 -type=txt "$plugin_domain" "$dns_server" | grep '"version: [0-9].[0-9].[0-9]"' | sed s'/[^0-9.]//g' | tail -c 9)"
         fi
     fi
     if [[ -n "$version_query" ]]; then
@@ -523,6 +563,8 @@ check_version() {
 }
 
 # display the munin-pihole-plugins script help text
+# its sprawling nature is actually a good thing i guess
+# interactive help is always better than a giant wall of text
 help_function() {
     case "${2}" in
         "-h" | "--help" | "help"                            )
@@ -533,8 +575,33 @@ help_function() {
 \\nDisplay munin-pihole-plugins help information."
         ;;
         "-i" | "--install" | "install"                      )
-            min_height="32"
-            some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
+            case "${3}" in
+                "-p" | "-s" | "-w" | "plugins" | "script" | "webserver" | "--plugins" | "--script" | "--webserver"                                      )
+                    min_height="12"
+                    some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
+\\nParameter\\t\\t\\t\\tFunction
+ -p, plugins\\t    --plugins\\t\\t Install and configure munin-node, and
+\\t\\t\\t\\t\\t munin-pihole-plugins plugins
+ -s, script\\t    --script\\t\\t Install the munin-pihole-plugins
+\\t\\t\\t\\t\\t script
+ -w, webserver\\t    --webserver\\t\\t Install and configure munin, lighttpd
+\\t\\t\\t\\t\\t and lighttpd-external-munin-proxy
+\\nExample: 'munin-pihole-plugins $2 $3'"
+                ;;
+                "-P" | "-S" | "-W" | "plugins-only" | "script-only" | "webserver-only" | "--plugins-only" | "--script-only" | "--webserver-only"        )
+                    min_height="11"
+                    some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
+\\nParameter\\t\\t\\t\\tFunction
+ -P, plugins-only   --plugins-only\\t Install munin-pihole-plugins
+\\t\\t\\t\\t\\t plugins
+ -S, script-only    --script-only\\t Install the munin-pihole-plugins
+\\t\\t\\t\\t\\t script
+ -W, webserver-only --webserver-only\\t Install lighttpd-external-munin-proxy
+\\nExample: 'munin-pihole-plugins $2 $3'"
+                ;;
+                *                                                                       )
+                    min_height="32"
+                    some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
 \\nOption\\t\\t    GNU long option\\tMeaning
  -i, install\\t     --install\\t\\t Install munin-pihole-plugins
 \\nInstall and configure Munin monitoring server software (default: true), client
@@ -558,6 +625,8 @@ install using the PLUGIN_LIST variable.
 \\t\\t\\t\\t\\t and lighttpd-external-munin-proxy
  -W, webserver-only --webserver-only\\t As above, skipping dependency check
 \\nExample: 'munin-pihole-plugins $2 plugins'"
+                ;;
+            esac
         ;;
         "-v" | "--version" | "version"                      )
             min_height="10"
@@ -569,8 +638,33 @@ the latest munin-pihole-plugins script version.
 \\nAn additional notification will be displayed if an update is available."
         ;;
         "-U" | "--uninstall" | "uninstall"                  )
-            min_height="23"
-            some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
+            case "${3}" in
+                "-p" | "-s" | "-w" | "plugins" | "script" | "webserver" | "--plugins" | "--script" | "--webserver"                                      )
+                    min_height="12"
+                    some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
+\\nParameter\\t\\t\\t\\tFunction
+ -p, plugins\\t    --plugins\\t\\t Uninstall muninin-pihole-plugins
+\\t\\t\\t\\t\\t plugins
+ -s, script\\t    --script\\t\\t Uninstall the munin-pihole-plugins
+\\t\\t\\t\\t\\t script
+ -w, webserver\\t    --webserver\\t\\t Uninstall munin, lighttpd, and
+\\t\\t\\t\\t\\t lighttpd-external-munin-proxy
+\\nExample: 'munin-pihole-plugins $2 $3'"
+                ;;
+                "-P" | "-S" | "-W" | "plugins-only" | "script-only" | "webserver-only" | "--plugins-only" | "--script-only" | "--webserver-only"        )
+                    min_height="11"
+                    some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
+\\nParameter\\t\\t\\t\\tFunction
+ -P, plugins-only   --plugins-only\\t Uninstall munin-pihole-plugins
+\\t\\t\\t\\t\\t plugins
+ -S, script-only    --script-only\\t Uninstall the munin-pihole-plugins
+\\t\\t\\t\\t\\t script
+ -W, webserver-only --webserver-only\\t Uninstall lighttpd-external-munin-proxy
+\\nExample: 'munin-pihole-plugins $2 $3'"
+                ;;
+                *                                                                       )
+                    min_height="23"
+                    some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
 \\nOption\\t\\t    GNU long option\\tMeaning
  -U, uninstall\\t     --uninstall\\t Uninstall munin-pihole-plugins
 \\nCompletely uninstall munin-pihole-plugins, you will be asked if you want to
@@ -587,6 +681,8 @@ uninstall any dependencies that munin-pihole-plugins may have installed.
 \\t\\t\\t\\t\\t lighttpd-external-munin-proxy
  -W, webserver-only --webserver-only\\t As above, skipping dependency removal
 \\nExample: 'munin-pihole-plugins $2 script-only'"
+                ;;
+            esac
         ;;
         "-V" | "--variables" | "variables"                  )
             min_height="14"
@@ -807,15 +903,15 @@ version_function() {
     if [[ -n "$remote_version" ]]; then
         if [[ "$remote_version" > "$VERSION" ]]; then
             min_height="3"
-            some "[\\e[32;1mℹ\\e[0m] An update for munin-pihole-plugins is available
+            some "[${WHITE}ℹ${RESET}] An update for munin-pihole-plugins is available
 munin-pihole-plugins version is v$VERSION (Latest: v$remote_version)"
         else
-            some "[\\e[32;1mℹ\\e[0m] munin-pihole-plugins version is v$VERSION (Latest: v$remote_version)"
+            some "[${WHITE}ℹ${RESET}] munin-pihole-plugins version is v$VERSION (Latest: v$remote_version)"
         fi
     else
         min_height="4"
-        some " * \\e[33;1m[WARNING]\\e[0m Unable to locate a TXT record for
-$version_domain
+        some "[${YELLOW}⚠${RESET}] Unable to locate a TXT record for
+$plugin_domain
 using the nameserver $dns_server on port $dns_port
 munin-pihole-plugins version is v$VERSION (Latest: unknown)"
     fi
@@ -826,6 +922,9 @@ munin-pihole-plugins version is v$VERSION (Latest: unknown)"
 variable_function() {
     min_height="3"
     case "$2" in
+        "branch" | "BRANCH"                                 )
+            some "BRANCH: $branch"
+        ;;
         "dns_port" | "DNS_PORT"                             )
             some "DNS_PORT: $dns_port"
         ;;
@@ -857,7 +956,18 @@ variable_function() {
             some "PLUGIN_CONFIG_DIR: $plugin_config_dir"
         ;;
         "plugin_list" | "PLUGIN_LIST"                       )
-            some "PLUGIN_LIST: $plugin_list"
+            min_height="14"
+            some "PLUGIN_LIST: $plugin_list
+\\nPlugin\\t\\t\\tDescription
+ blocked\\t\\t This plugin shows domains blocked by Pi-hole®.
+ cache\\t\\t\\t This plugin shows Pi-hole® cache.
+ cache_by_type\\t\\t This plugin shows Pi-hole® cache by type.
+ clients\\t\\t This plugin shows clients seen by Pi-hole®.
+ percent\\t\\t This plugin shows Pi-hole® blocked query percentage.
+ queries\\t\\t This plugin shows queries seen by Pi-hole®.
+ replies_by_type\\t This plugin shows Pi-hole® replies by type.
+ status\\t\\t\\t This plugin shows Pi-hole® blocking status.
+ unique_domains\\t\\t This plugin shows unique domains seen by Pi-hole®."
         ;;
         "proxy_config_dir" | "PROXY_CONFIG_DIR"             )
             some "PROXY_CONFIG_DIR: $proxy_config_dir"
@@ -875,9 +985,10 @@ variable_function() {
             some "VERBOSITY_LEVEL: $verbosity_level"
         ;;
         ""                                                  )
-            min_height="21"
+            min_height="22"
             some "Usage: export [VARIABLE]=\"value\"
 \\nVariable
+ BRANCH=\"$branch\"
  DNS_PORT=\"$dns_port\"
  DNS_SERVER=\"$dns_server\"
  INSTALL_PLUGINS=\"$install_plugins\"

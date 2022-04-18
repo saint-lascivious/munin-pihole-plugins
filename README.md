@@ -81,23 +81,29 @@ Provided munin-node and Pi-hole® exist on the same host, the default configurat
 Usage: export [VARIABLE]="value"
 
 Variable
-  DNS_PORT="53"
-  DNS_SERVER="208.67.222.222"
-  INSTALL_PLUGINS="true"
-  INSTALL_SCRIPT="true"
-  INSTALL_WEBSERVER="true"
-  MUNIN_DIR="/etc/munin"
-  MUNIN_CONFIG_DIR="/etc/munin/munin-conf.d"
-  MUNIN_PLUGIN_DIR="/usr/share/munin/plugins"
-  NODE_PLUGIN_DIR="/etc/munin/plugins"
-  PLUGIN_CONFIG_DIR="/etc/munin/plugin-conf.d"
-  PLUGIN_LIST="blocked cache cache_by_type clients percent queries replies_by_type status unique_domains"
-  PROXY_CONFIG_DIR="/etc/lighttpd"
-  SCRIPT_DIR="{SCRIPT_DIR:-/usr/local/bin}"
-  SKIP_DEPENDENCY_CHECK="false"
-  UPDATE_SELF="true"
-  VERBOSITY_LEVEL="3"
+ BRANCH="master"
+ DNS_PORT="53"
+ DNS_SERVER="208.67.222.222"
+ INSTALL_PLUGINS="true"
+ INSTALL_SCRIPT="true"
+ INSTALL_WEBSERVER="true"
+ MUNIN_DIR="/etc/munin"
+ MUNIN_CONFIG_DIR="/etc/munin/munin-conf.d"
+ MUNIN_PLUGIN_DIR="/usr/share/munin/plugins"
+ NODE_PLUGIN_DIR="/etc/munin/plugins"
+ PLUGIN_CONFIG_DIR="/etc/munin/plugin-conf.d"
+ PLUGIN_LIST="blocked cache cache_by_type clients percent queries replies_by_type status unique_domains"
+ PROXY_CONFIG_DIR="/etc/lighttpd"
+ SCRIPT_DIR="/usr/local/bin"
+ SKIP_DEPENDENCY_CHECK="false"
+ UPDATE_SELF="true"
+ VERBOSITY_LEVEL="3"
 ```
+Example: `export VERBOSITY_LEVEL="4"`
+
+* `BRANCH`
+
+The branch used when checking the `munin-pihole-plugins` version or installing `munin-pihole-plugins`. Valid options are `development` and `master`, of which the default is `master`. Invalid options will be rejected.
 
 * `DNS_PORT`
 
@@ -145,11 +151,25 @@ A space separated list of `munin-pihole-plugins` plugin IDs used to determine wh
 
 ```
 "blocked cache cache_by_type clients percent queries replies_by_type status unique_domains"
+
+Plugin                  Description
+ blocked                 This plugin shows domains blocked by Pi-hole®.
+ cache                   This plugin shows Pi-hole® cache.
+ cache_by_type           This plugin shows Pi-hole® cache by type.
+ clients                 This plugin shows clients seen by Pi-hole®.
+ percent                 This plugin shows Pi-hole® blocked query percentage.
+ queries                 This plugin shows queries seen by Pi-hole®.
+ replies_by_type         This plugin shows Pi-hole® replies by type.
+ status                  This plugin shows Pi-hole® blocking status.
+ unique_domains          This plugin shows unique domains seen by Pi-hole®.
+
 ```
+Example: `export PLUGIN_LIST="blocked percent unique_domains"`
+
 
 * `PROXY_CONFIG_DIR`
 
-The directory in which `'lighttpd`'s external.conf should be located.
+The directory in which `lighttpd`'s external.conf should be located.
 
 * `SCRIPT_DIR`
 
