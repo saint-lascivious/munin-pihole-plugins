@@ -81,6 +81,7 @@ Provided munin-node and Pi-hole® exist on the same host, the default configurat
 Usage: export [VARIABLE]="value"
 
 Variable
+ BRANCH="development"
  DNS_PORT="53"
  DNS_SERVER="208.67.222.222"
  INSTALL_PLUGINS="true"
@@ -93,7 +94,7 @@ Variable
  PLUGIN_CONFIG_DIR="/etc/munin/plugin-conf.d"
  PLUGIN_LIST="blocked cache cache_by_type clients percent queries replies_by_type status unique_domains"
  PROXY_CONFIG_DIR="/etc/lighttpd"
- SCRIPT_DIR="{SCRIPT_DIR:-/usr/local/bin}"
+ SCRIPT_DIR="/usr/local/bin"
  SKIP_DEPENDENCY_CHECK="false"
  UPDATE_SELF="true"
  VERBOSITY_LEVEL="3"
