@@ -6,7 +6,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="05.09.00"
+VERSION="05.10.00"
 
 # environment variables with overrides
 branch="${BRANCH:-development}"
@@ -16,10 +16,10 @@ install_plugins="${INSTALL_PLUGINS:-true}"
 install_script="${INSTALL_SCRIPT:-true}"
 install_webserver="${INSTALL_WEBSERVER:-true}"
 munin_dir="${MUNIN_DIR:-/etc/munin}"
-munin_config_dir="${MUNIN_CONFIG_DIR:-$munin_dir/munin-conf.d}"
+munin_config_dir="${MUNIN_CONFIG_DIR:-${munin_dir}/munin-conf.d}"
 munin_plugin_dir="${MUNIN_PLUGIN_DIR:-/usr/share/munin/plugins}"
-node_plugin_dir="${NODE_PLUGIN_DIR:-$munin_dir/plugins}"
-plugin_config_dir="${PLUGIN_CONFIG_DIR:-$munin_dir/plugin-conf.d}"
+node_plugin_dir="${NODE_PLUGIN_DIR:-${munin_dir}/plugins}"
+plugin_config_dir="${PLUGIN_CONFIG_DIR:-${munin_dir}/plugin-conf.d}"
 plugin_list="${PLUGIN_LIST:-blocked cache cache_by_type clients percent queries replies_by_type status unique_domains}"
 proxy_config_dir="${PROXY_CONFIG_DIR:-/etc/lighttpd}"
 script_dir="${SCRIPT_DIR:-/usr/local/bin}"
@@ -66,7 +66,7 @@ fi
 
 # simple privilege check
 check_privilege() {
-    if [[ ! "$EUID" -eq "0" ]];then
+    if [[ ! "${EUID}" -eq "0" ]];then
         if [[ -x "$(command -v sudo)" ]]; then
             exec sudo -E bash "$0" "$@"
             exit "$?"
@@ -83,49 +83,49 @@ Install sudo or run munin-pihole-plugins as root"
 # but they all suck, and/or are extremely convoluted
 # this approach is a tradeoff
 update_script() {
-    cat > "$temp_dir/.munin-pihole-plugins_update" << EOF
+    cat > "${temp_dir}/.munin-pihole-plugins_update" << EOF
 #!/usr/bin/env bash
 
 # .munin-pihole-plugins_update
 # saint-lascivious (Hayden Pearce) 2022
 # saint@sainternet.xyz
 
-verbosity_level="$verbosity_level"
+verbosity_level="${verbosity_level}"
 
 # a simple you self update function for the munin-pihole-plugins script
 update_now() {
     if [[ -x "$(command -v wget)" ]]; then
-        if [[ "$verbosity_level" -ge "4" ]]; then
-            wget -q --show-progress "$plugin_domain" -O "$current_dir/munin-pihole-plugins"
+        if [[ "${verbosity_level}" -ge "4" ]]; then
+            wget -q --show-progress "${plugin_domain}" -O "${current_dir}/munin-pihole-plugins"
         else
-            wget -q "$plugin_domain" -O "$current_dir/munin-pihole-plugins"
+            wget -q "${plugin_domain}" -O "${current_dir}/munin-pihole-plugins"
         fi
     else
-        if [[ "$verbosity_level" -gt "0" ]]; then
+        if [[ "${verbosity_level}" -gt "0" ]]; then
             echo -e "[${RED}!${RESET}] The required command 'wget' was not found"
             echo -e "[${RED}!${RESET}] ${RED}Exiting $0${RESET}"
         fi
         exit 1
     fi
-    chmod +x "$current_dir/munin-pihole-plugins" || return
-    if [[ "$current_dir" == "$script_dir" ]]; then
+    chmod +x "${current_dir}/munin-pihole-plugins" || return
+    if [[ "${current_dir}" == "${script_dir}" ]]; then
         if [[ -d "/etc/bash_completion.d" ]]; then
-            if [[ "$verbosity_level" -ge "4" ]]; then
+            if [[ "${verbosity_level}" -ge "4" ]]; then
                 if [[ -f "/etc/bash_completion.d/munin-pihole-plugins" ]]; then
-                    wget -q --show-progress "$plugin_repo/etc/bash_completion.d/munin-pihole-plugins" -O "/etc/bash_completion.d/munin-pihole-plugins"
+                    wget -q --show-progress "${plugin_repo}/etc/bash_completion.d/munin-pihole-plugins" -O "/etc/bash_completion.d/munin-pihole-plugins"
                 else
-                    wget -q --show-progress "$plugin_repo/etc/bash_completion.d/munin-pihole-plugins" -P "/etc/bash_completion.d"
+                    wget -q --show-progress "${plugin_repo}/etc/bash_completion.d/munin-pihole-plugins" -P "/etc/bash_completion.d"
                 fi
             else
                 if [[ -f "/etc/bash_completion.d/munin-pihole-plugins" ]]; then
-                    wget -q "$plugin_repo/etc/bash_completion.d/munin-pihole-plugins" -O "/etc/bash_completion.d/munin-pihole-plugins"
+                    wget -q "${plugin_repo}/etc/bash_completion.d/munin-pihole-plugins" -O "/etc/bash_completion.d/munin-pihole-plugins"
                 else
-                    wget -q "$plugin_repo/etc/bash_completion.d/munin-pihole-plugins" -P "/etc/bash_completion.d"
+                    wget -q "${plugin_repo}/etc/bash_completion.d/munin-pihole-plugins" -P "/etc/bash_completion.d"
                 fi
             fi
         fi
     fi
-    if [[ "$verbosity_level" -ge "3" ]]; then
+    if [[ "${verbosity_level}" -ge "3" ]]; then
         echo -e "[${WHITE}ℹ${RESET}] ${GREEN}Restarting munin-pihole-plugins after update${RESET}"
     fi
     exec env UPDATE_SELF="false" /bin/bash "$0" "$@"
@@ -133,9 +133,9 @@ update_now() {
 
 update_now
 EOF
-    chmod +x "$temp_dir/.munin-pihole-plugins_update"
+    chmod +x "${temp_dir}/.munin-pihole-plugins_update"
     reverberate "info" "Updating munin-pihole-plugins"
-    exec /bin/bash "$temp_dir/.munin-pihole-plugins_update"
+    exec /bin/bash "${temp_dir}/.munin-pihole-plugins_update"
 }
 
 # echo wrapper handling verbosity levels and common output
@@ -147,52 +147,52 @@ EOF
 reverberate() {
     case "$1" in
         "error"                                             )
-            if [[ "$verbosity_level" -ge "1" ]]; then
+            if [[ "${verbosity_level}" -ge "1" ]]; then
                 echo -e "[${RED}!${RESET}] $2"
             fi
         ;;
         "exit"                                              )
-            if [[ "$verbosity_level" -ge "1" ]]; then
+            if [[ "${verbosity_level}" -ge "1" ]]; then
                 echo -e "[${RED}!${RESET}] ${RED}Exiting $0${RESET}"
             fi
         ;;
         "failure"                                           )
-            if [[ "$verbosity_level" -ge "3" ]]; then
+            if [[ "${verbosity_level}" -ge "3" ]]; then
                 echo -e "[${RED}✗${RESET}] $2"
             fi
         ;;
         "footer"                                            )
-            if [[ "$verbosity_level" -ge "1" ]]; then
+            if [[ "${verbosity_level}" -ge "1" ]]; then
                 echo -e "[${WHITE}ℹ${RESET}] ${GREEN}Done${RESET}"
             fi
         ;;
         "header"                                            )
-            if [[ "$verbosity_level" -ge "1" ]]; then
+            if [[ "${verbosity_level}" -ge "1" ]]; then
                 echo -e "$2"
             fi
         ;;
         "info"                                              )
-            if [[ "$verbosity_level" -ge "3" ]]; then
-                echo -e "[$WHITEℹ${RESET}] ${GREEN}$2${RESET}"
+            if [[ "${verbosity_level}" -ge "3" ]]; then
+                echo -e "[${WHITE}ℹ${RESET}] ${GREEN}$2${RESET}"
             fi
         ;;
         "question"                                           )
-            if [[ "$verbosity_level" -ge "3" ]]; then
+            if [[ "${verbosity_level}" -ge "3" ]]; then
                 echo -e "[${BLUE}?${BLUE}] ${GREEN}$2{RESET}"
             fi
         ;;
         "success"                                           )
-            if [[ "$verbosity_level" -ge "3" ]]; then
+            if [[ "${verbosity_level}" -ge "3" ]]; then
                 echo -e "[${GREEN}✓${RESET}] $2"
             fi
         ;;
         "warning"                                           )
-            if [[ "$verbosity_level" -ge "2" ]]; then
+            if [[ "${verbosity_level}" -ge "2" ]]; then
                 echo -e "[${YELLOW}⚠${RESET}] $2"
             fi
         ;;
         *                                                   )
-            if [[ "$verbosity_level" -ge "4" ]]; then
+            if [[ "${verbosity_level}" -ge "4" ]]; then
                 echo -e "$1"
             fi
         ;;
@@ -201,8 +201,8 @@ reverberate() {
 
 # manditory horrific ascii header
 obnoxious_header() {
-    if [[ "$terminal_height" -ge "12" ]] && [[ "$terminal_width" -ge "80" ]]; then
-        reverberate "header" "\\n${RED}                  _             _ _        _            _           _ v$VERSION
+    if [[ "${terminal_height}" -ge "12" ]] && [[ "${terminal_width}" -ge "80" ]]; then
+        reverberate "header" "\\n${RED}                  _             _ _        _            _           _ v${VERSION}
 ${ORANGE}   _ __ _  _ _ _ (_)_ _ __ _ __(_) |_  ___| |___ _ _ __| |_  _ __ _(_)_ _  ___
 ${YELLOW}  | '  \\ || | ' \\| | ' \\__| '_ \\ | ' \\/ _ \\ / -_)_| '_ \\ | || / _\` | | ' \\(_-<
 ${GREEN}  |_|_|_\\_,_|_||_|_|_||_| | .__/_|_||_\\___/_\\___| | .__/_|\\_,_\\__, |_|_||_/__/
@@ -226,25 +226,25 @@ check_pihole() {
 # basic dependency handling with dpkg-query and apt
 # can be disabled with SKIP_DEPENDENCY_CHECK set to any value other than false
 install_dependencies() {
-    if [[ "$install_plugins" == "true" ]]; then
-        dependency_list+="$plugin_dependencies"
+    if [[ "${install_plugins}" == "true" ]]; then
+        dependency_list+="${plugin_dependencies}"
     fi
-    if [[ "$install_script" == "true" ]]; then
-        dependency_list+="$script_dependencies"
+    if [[ "${install_script}" == "true" ]]; then
+        dependency_list+="${script_dependencies}"
     fi
-    if [[ "$install_webserver" == "true" ]]; then
-        dependency_list+="$webserver_dependencies"
+    if [[ "${install_webserver}" == "true" ]]; then
+        dependency_list+="${webserver_dependencies}"
     fi
     if [[ -x "$(command -v dpkg-query)" ]]; then
         if [[ -x "$(command -v apt)" ]]; then
             reverberate "info" "Checking for required dependencies"
-            for dependency_id in $dependency_list; do
-                package_query="$(dpkg-query -W --showformat='${Status}\n' "$dependency_id" | grep "install ok installed")"
-                if [[ -n "$package_query" ]]; then
-                    reverberate success "$dependency_id was found"
+            for dependency_id in ${dependency_list}; do
+                package_query="$(dpkg-query -W --showformat='${Status}\n' "${dependency_id}" | grep "install ok installed")"
+                if [[ -n "${package_query}" ]]; then
+                    reverberate success "${dependency_id} was found"
                 else
-                    reverberate failure "$dependency_id was not found"
-                    apt install -qq "$dependency_id"
+                    reverberate failure "${dependency_id} was not found"
+                    apt install -qq "${dependency_id}"
                 fi
             done
         else
@@ -262,7 +262,7 @@ install_dependencies() {
 # simple wget wrapper
 download() {
     if [[ -x "$(command -v wget)" ]]; then
-        if [[ "$verbosity_level" -ge "4" ]]; then
+        if [[ "${verbosity_level}" -ge "4" ]]; then
             wget -q --show-progress "$@"
         else
             wget -q "$@"
@@ -279,20 +279,20 @@ download() {
 # safely merging any existing external.conf properties without conflict
 # would be tedious and annoying, and is out of scope at this point
 configure_proxy() {
-    proxy_config="$proxy_config_dir/external.conf"
-    if [[ -d "$proxy_config_dir" ]]; then
-        if [[ -s "$proxy_config" ]]; then
-            if [[ ! -f "$proxy_config.orig" ]]; then
-                mv "$proxy_config" "$proxy_config.orig" || return
+    proxy_config="${proxy_config_dir}/external.conf"
+    if [[ -d "${proxy_config_dir}" ]]; then
+        if [[ -s "${proxy_config}" ]]; then
+            if [[ ! -f "${proxy_config}.orig" ]]; then
+                mv "${proxy_config}" "${proxy_config}.orig" || return
                 reverberate "info" "Existing lighttpd external.conf backed up to
-   $proxy_config.orig"
+   ${proxy_config}.orig"
             fi
         fi
         reverberate "info" "Installing Munin webserver proxy configuration"
-        download "$proxy_repo/etc/lighttpd/external.conf" -O "$proxy_config"
+        download "${proxy_repo}/etc/lighttpd/external.conf" -O "${proxy_config}"
     else
         reverberate "error" "No lighttpd configuration directory found at
-   $proxy_config_dir"
+   ${proxy_config_dir}"
         reverberate "info" "If this directory is located at a different path try
    export PROXY_CONFIG_DIR=\"/path/to/directory\""
         reverberate "exit"
@@ -306,20 +306,20 @@ configure_proxy() {
 # if it is not found munin-pihole-plugins aill attempt to edit the munin.conf
 # file directly
 configure_munin() {
-    if [[ -d "$munin_config_dir" ]]; then
-        if [[ ! -f "$munin_config_dir/99-graph-strategy.conf" ]]; then
+    if [[ -d "${munin_config_dir}" ]]; then
+        if [[ ! -f "${munin_config_dir}/99-graph-strategy.conf" ]]; then
             reverberate "info" "Installing Munin server graph strategy configuration"
-            download "$plugin_repo/etc/munin/munin-conf.d/99-graph-strategy.conf" -P "$munin_config_dir" || return
+            download "${plugin_repo}/etc/munin/munin-conf.d/99-graph-strategy.conf" -P "${munin_config_dir}" || return
         fi
     else
         reverberate "info" "Attempting fallback configuration editing munin.conf directly"
-        if [[ -d "$munin_dir" ]]; then
-            if [[ -f "$munin_dir/munin.conf" ]]; then
-                sed -i "s/^#html_strategy cron/html_strategy cgi/g" "$munin_dir/munin.conf" || return
-                sed -i "s/^#graph_strategy cron/graph_strategy cgi/g" "$munin_dir/munin.conf" || return
+        if [[ -d "${munin_dir}" ]]; then
+            if [[ -f "${munin_dir}/munin.conf" ]]; then
+                sed -i "s/^#html_strategy cron/html_strategy cgi/g" "${munin_dir}/munin.conf" || return
+                sed -i "s/^#graph_strategy cron/graph_strategy cgi/g" "${munin_dir}/munin.conf" || return
             else
                 reverberate "error" "No munin.conf file found at
-$munin_dir/munin.conf"
+${munin_dir}/munin.conf"
                 reverberate "info" "If this file is located at a different path try
 export MUNIN_DIR=\"/path/to/directory\""
                 reverberate "exit"
@@ -327,14 +327,14 @@ export MUNIN_DIR=\"/path/to/directory\""
             fi
         else
             reverberate "error" "No Munin directory found at
-$munin_dir"
+${munin_dir}"
             reverberate "info" "If this directory is located at a different path try
 export MUNIN_DIR=\"/path/to/directory\""
             reverberate "exit"
             exit 1
         fi
         reverberate "error" "No Munin configuration directory found at
-$munin_config_dir"
+${munin_config_dir}"
         reverberate "info" "If this directory is located at a different path try
 export MUNIN_CONFIG_DIR=\"/path/to/directory\""
         reverberate "exit"
@@ -349,25 +349,25 @@ export MUNIN_CONFIG_DIR=\"/path/to/directory\""
 # the individual plugins to the monolithic plugin
 uninstall_plugins() {
     all_plugins="blocked blockrate cache cacheinfo cacherate cache_by_type cache_info clients hits percent queries reply replies_by_type status unique unique_domains"
-    if [[ -d "$munin_plugin_dir" ]]; then
+    if [[ -d "${munin_plugin_dir}" ]]; then
         reverberate "info" "Removing any existing munin-pihole-plugins plugin(s)"
-        if [[ -f "$munin_plugin_dir/pihole_" ]]; then
-            rm "$munin_plugin_dir/pihole_" || return
+        if [[ -f "${munin_plugin_dir}/pihole_" ]]; then
+            rm "${munin_plugin_dir}/pihole_" || return
             reverberate "success" "pihole_"
         fi
-        for plugin_id in $all_plugins; do
-            if [[ -f "$munin_plugin_dir/pihole_$plugin_id" ]]; then
-                rm "$munin_plugin_dir/pihole_$plugin_id" || return
-                reverberate "success" "$plugin_id"
+        for plugin_id in ${all_plugins}; do
+            if [[ -f "${munin_plugin_dir}/pihole_${plugin_id}" ]]; then
+                rm "${munin_plugin_dir}/pihole_${plugin_id}" || return
+                reverberate "success" "${plugin_id}"
             fi
         done
     fi
-    if [[ -d "$node_plugin_dir" ]]; then
+    if [[ -d "${node_plugin_dir}" ]]; then
         reverberate "info" "Removing any existing munin-pihole-plugins symbolic links"
-        for plugin_id in $all_plugins; do
-            if [[ -h "$node_plugin_dir/pihole_$plugin_id" ]]; then
-                rm "$node_plugin_dir/pihole_$plugin_id" || return
-                reverberate "success" "$plugin_id"
+        for plugin_id in ${all_plugins}; do
+            if [[ -h "${node_plugin_dir}/pihole_${plugin_id}" ]]; then
+                rm "${node_plugin_dir}/pihole_${plugin_id}" || return
+                reverberate "success" "${plugin_id}"
             fi
         done
     fi
@@ -376,19 +376,19 @@ uninstall_plugins() {
 # installs munin-pihole-plugins plugins and symbolic links
 # plugins to be installed can be configured using PLUGIN_LIST
 install_plugins() {
-    if [[ -d "$munin_plugin_dir" ]]; then
-        if [[ -d "$node_plugin_dir" ]]; then
+    if [[ -d "${munin_plugin_dir}" ]]; then
+        if [[ -d "${node_plugin_dir}" ]]; then
             reverberate "info" "Installing munin-pihole-plugins plugin"
-            download "$plugin_repo/usr/share/munin/plugins/pihole_" -P "$munin_plugin_dir" || return
-            chmod +x "$munin_plugin_dir/pihole_" || return
+            download "${plugin_repo}/usr/share/munin/plugins/pihole_" -P "${munin_plugin_dir}" || return
+            chmod +x "${munin_plugin_dir}/pihole_" || return
             reverberate "info" "Creating selected munin-pihole-plugins symbolic links"
-            for plugin_id in $plugin_list; do
-                ln -s "$munin_plugin_dir/pihole_" "$node_plugin_dir/pihole_$plugin_id" || return
-                reverberate "success" "$plugin_id"
+            for plugin_id in ${plugin_list}; do
+                ln -s "${munin_plugin_dir}/pihole_" "${node_plugin_dir}/pihole_${plugin_id}" || return
+                reverberate "success" "${plugin_id}"
             done
         else
             reverberate "error" "No Munin node plugin directory found at
-$node_plugin_dir"
+${node_plugin_dir}"
             reverberate "info" "If this directory is located at a different path try
 export NODE_PLUGIN_DIR=\"/path/to/directory\""
             reverberate "exit"
@@ -396,7 +396,7 @@ export NODE_PLUGIN_DIR=\"/path/to/directory\""
         fi
     else
         reverberate "error" "No Munin plugin directory found at
-$munin_plugin_dir"
+${munin_plugin_dir}"
         reverberate "info" "If this directory is located at a different path try
 export MUNIN_PLUGIN_DIR=\"/path/to/directory\""
         reverberate "exit"
@@ -408,42 +408,42 @@ export MUNIN_PLUGIN_DIR=\"/path/to/directory\""
 # this should not be required but if it does have to be configured it is nicer
 # if it already exists
 configure_plugins() {
-    if [[ -d "$plugin_config_dir" ]]; then
-        if [[ ! -f  "$plugin_config_dir/pihole.conf" ]]; then
-            download "$plugin_repo/etc/munin/plugin-conf.d/pihole.conf" -P "$plugin_config_dir"
+    if [[ -d "${plugin_config_dir}" ]]; then
+        if [[ ! -f  "${plugin_config_dir}/pihole.conf" ]]; then
+            download "${plugin_repo}/etc/munin/plugin-conf.d/pihole.conf" -P "${plugin_config_dir}"
             reverberate "info" "Default plugin configuration saved to
-$plugin_config_dir/pihole.conf"
+${plugin_config_dir}/pihole.conf"
         fi
     else
         reverberate "error" "No Munin plugin configuration directory found at
-$plugin_config_dir"
+${plugin_config_dir}"
         reverberate "info" "If this directory is located at a different path try
 export PLUGIN_CONFIG_DIR=\"/path/to/directory\""
         reverberate "exit"
         exit 1
     fi
-    if [[ "$pihole_on_host" == "no" ]]; then
+    if [[ "${pihole_on_host}" == "no" ]]; then
         reverberate "warning" "The Pi-hole® command 'pihole' was not found on this host
 If this was intentional you will need to edit
-$plugin_config_dir/pihole.conf
+${plugin_config_dir}/pihole.conf
 and replace the host and setupvars values with those of your Pi-hole® host"
     fi
 }
 
 # restart relevant services
 restart_services() {
-    if [[ "$install_plugins" == "true" ]]; then
-        service_list+="$plugin_services"
+    if [[ "${install_plugins}" == "true" ]]; then
+        service_list+="${plugin_services}"
     fi
-    if [[ "$install_webserver" == "true" ]]; then
-        service_list+="$webserver_services"
+    if [[ "${install_webserver}" == "true" ]]; then
+        service_list+="${webserver_services}"
     fi
-    if [[ -n "$service_list" ]]; then
+    if [[ -n "${service_list}" ]]; then
         if [[ -x "$(command -v service)" ]]; then
             reverberate "info" "Restarting services"
-            for service_id in $service_list; do
-                service "$service_id" restart
-                reverberate "success" "$service_id"
+            for service_id in ${service_list}; do
+                service "${service_id}" restart
+                reverberate "success" "${service_id}"
             done
         else
             reverberate "error" "The required command 'service' was not found"
@@ -456,31 +456,31 @@ restart_services() {
 # installs the munin-pihole-plugins script on the host
 # warn the user if script_dir is not in their path and suggest how to add it
 install_script() {
-    if [[ -d "$script_dir" ]]; then
-        if [[ -f "$script_dir/munin-pihole-plugins" ]]; then
-            download "$plugin_repo/script/munin-pihole-plugins" -O "$script_dir/munin-pihole-plugins"
+    if [[ -d "${script_dir}" ]]; then
+        if [[ -f "${script_dir}/munin-pihole-plugins" ]]; then
+            download "${plugin_repo}/script/munin-pihole-plugins" -O "${script_dir}/munin-pihole-plugins"
         else
-            download "$plugin_repo/script/munin-pihole-plugins" -P "$script_dir"
+            download "${plugin_repo}/script/munin-pihole-plugins" -P "${script_dir}"
         fi
-        chmod +x "$script_dir/munin-pihole-plugins" || return
+        chmod +x "${script_dir}/munin-pihole-plugins" || return
         reverberate "info" "A copy of the munin-pihole-plugins script was installed to
-$script_dir/munin-pihole-plugins"
+${script_dir}/munin-pihole-plugins"
         if [[ -d "/etc/bash_completion.d" ]]; then
             if [[ -f "/etc/bash_completion.d/munin-pihole-plugins" ]]; then
-                download "$plugin_repo/etc/bash_completion.d/munin-pihole-plugins" -O "/etc/bash_completion.d/munin-pihole-plugins"
+                download "${plugin_repo}/etc/bash_completion.d/munin-pihole-plugins" -O "/etc/bash_completion.d/munin-pihole-plugins"
             else
-                download "$plugin_repo/etc/bash_completion.d/munin-pihole-plugins" -P "/etc/bash_completion.d"
+                download "${plugin_repo}/etc/bash_completion.d/munin-pihole-plugins" -P "/etc/bash_completion.d"
             fi
         fi
-        if [[ ":$PATH:" != *":$script_dir:"* ]]; then
+        if [[ ":${PATH}:" != *":${script_dir}:"* ]]; then
             reverberate "warning" "The munin-pihole-plugins script directory
-$script_dir
-is not in your \$PATH variable try
-export PATH=\"\$PATH:$script_dir\""
+${script_dir}
+is not in your \${PATH} variable try
+export PATH=\"\${PATH}:${script_dir}\""
         fi
     else
         reverberate "error" "No directory found at
-   $script_dir"
+   ${script_dir}"
         reverberate "info" "If this directory is located at a different path try
    export SCRIPT_DIR=\"/path/to/directory\""
         reverberate "exit"
@@ -491,36 +491,36 @@ export PATH=\"\$PATH:$script_dir\""
 # spawns a child script to uninstall a locally installed munin-pihole-plugins
 # script if present
 uninstall_script() {
-    cat > "$temp_dir/.munin-pihole-plugins_uninstall" << EOF
+    cat > "${temp_dir}/.munin-pihole-plugins_uninstall" << EOF
 #!/usr/bin/env bash
 
 # .munin-pihole-plugins_uninstall
 # saint-lascivious (Hayden Pearce) 2022
 # saint@sainternet.xyz
 
-verbosity_level="$verbosity_level"
+verbosity_level="${verbosity_level}"
 
 # uninstalls a locally installed copy of the munin-pihole-plugins script
 uninstall_now() {
     if [[ -f "/etc/bash_completion.d/munin-pihole-plugins" ]]; then
         rm "/etc/bash_completion.d/munin-pihole-plugins" || return
     fi
-    rm "$script_dir/munin-pihole-plugins" || return
-    if [[ "$verbosity_level" -ge "3" ]]; then
+    rm "${script_dir}/munin-pihole-plugins" || return
+    if [[ "${verbosity_level}" -ge "3" ]]; then
         echo -e "[${WHITE}ℹ${RESET}] ${GREEN}Done${RESET}"
     fi
 }
 
 uninstall_now
 EOF
-    chmod +x "$temp_dir/.munin-pihole-plugins_uninstall"
+    chmod +x "${temp_dir}/.munin-pihole-plugins_uninstall"
     reverberate "info" "Uninstalling the munin-pihole-plugins script"
-    exec /bin/bash "$temp_dir/.munin-pihole-plugins_uninstall"
+    exec /bin/bash "${temp_dir}/.munin-pihole-plugins_uninstall"
 }
 
 # an opportunistic pagination wrapper, more or less
 some() {
-    if [[ "$terminal_height" -lt "$min_height" ]]; then
+    if [[ "${terminal_height}" -lt "${min_height}" ]]; then
         if [[ -x "$(command -v less)" ]]; then
             echo -e "$@" | less
         else
@@ -541,16 +541,16 @@ some() {
 # record
 # why tail 9, when we want 8 characters? fun fact: echo appends a newline
 check_version() {
-    if [[ "$branch" == "master" ]]; then
+    if [[ "${branch}" == "master" ]]; then
         plugin_domain="munin-pihole-plugins.sainternet.xyz"
         plugin_repo="https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master"
     else
-        if [[ "$branch" == "development" ]]; then
+        if [[ "${branch}" == "development" ]]; then
             plugin_domain="munin-pihole-plugins-dev.sainternet.xyz"
             plugin_repo="https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/development"
         else
             reverberate "error" "Invalid munin-pihole-plugins branch
-$branch"
+${branch}"
             reverberate "info" "Valid munin-pihole-plugins branches are
 development
 master"
@@ -559,14 +559,14 @@ master"
         fi
     fi
     if [[ -x "$(command -v dig)" ]]; then
-        version_query="$(dig txt +short +timeout=5 +tries=2 "$plugin_domain" @"$dns_server" -p "$dns_port" | sed s'/[^0-9.]//g')"
+        version_query="$(dig txt +short +timeout=5 +tries=2 "${plugin_domain}" @"${dns_server}" -p "${dns_port}" | sed s'/[^0-9.]//g')"
     else
         if [[ -x "$(command -v nslookup)" ]]; then
-            version_query="$(nslookup -port="$dns_port" -retry=2 -timeout=5 -type=txt "$plugin_domain" "$dns_server" | grep '"version: [0-9].[0-9].[0-9]"' | sed s'/[^0-9.]//g' | tail -c 9)"
+            version_query="$(nslookup -port="${dns_port}" -retry=2 -timeout=5 -type=txt "${plugin_domain}" "${dns_server}" | grep '"version: [0-9].[0-9].[0-9]"' | sed s'/[^0-9.]//g' | tail -c 9)"
         fi
     fi
-    if [[ -n "$version_query" ]]; then
-        remote_version="$version_query"
+    if [[ -n "${version_query}" ]]; then
+        remote_version="${version_query}"
     fi
 }
 
@@ -746,7 +746,7 @@ install_function() {
              exec env INSTALL_PLUGINS="false" INSTALL_SCRIPT="false" SKIP_DEPENDENCY_CHECK="true" /bin/bash "$0" "$1"
         ;;
         *                                                   )
-            if [[ ! "$install_plugins" == "true" ]] && [[ ! "$install_script" == "true" ]] && [[ ! "$install_webserver" == "true" ]]; then
+            if [[ ! "${install_plugins}" == "true" ]] && [[ ! "${install_script}" == "true" ]] && [[ ! "${install_webserver}" == "true" ]]; then
                 reverberate "error" "No action(s) to perform
 At least one INSTALL_* variable must be \"true\""
                 reverberate "exit"
@@ -754,22 +754,22 @@ At least one INSTALL_* variable must be \"true\""
             fi
             check_privilege "$@"
             check_version
-            if [[ "$update_self" == "true" ]]; then
-                if [[ -f "$temp_dir/.munin-pihole-plugins_update" ]]; then
-                    rm "$temp_dir/.munin-pihole-plugins_update" || return
+            if [[ "${update_self}" == "true" ]]; then
+                if [[ -f "${temp_dir}/.munin-pihole-plugins_update" ]]; then
+                    rm "${temp_dir}/.munin-pihole-plugins_update" || return
                 fi
-                if [[ "$remote_version" > "$VERSION" ]]; then
+                if [[ "${remote_version}" > "${VERSION}" ]]; then
                     update_script "$@"
                 fi
             fi
             obnoxious_header
-            if [[ "$skip_dependency_check" == "false" ]]; then
+            if [[ "${skip_dependency_check}" == "false" ]]; then
                 install_dependencies
             else
                 reverberate "info" "Skipping dependency checks"
             fi
-            if [[ "$install_plugins" == "true" ]]; then
-                if [[ -n "$plugin_list" ]]; then
+            if [[ "${install_plugins}" == "true" ]]; then
+                if [[ -n "${plugin_list}" ]]; then
                     uninstall_plugins
                     install_plugins
                     check_pihole
@@ -783,14 +783,14 @@ No plugins in PLUGIN_LIST"
             else
                 reverberate "info" "Skipping plugin installation"
             fi
-            if [[ "$install_webserver" == "true" ]]; then
+            if [[ "${install_webserver}" == "true" ]]; then
                 configure_proxy
                 configure_munin
             else
                 reverberate "info" "Skipping webserver installation"
             fi
             restart_services
-            if [[ "$install_script" == "true" ]]; then
+            if [[ "${install_script}" == "true" ]]; then
                 install_script
             else
                 reverberate "info" "Skipping script installation"
@@ -828,7 +828,7 @@ uninstall_function() {
              exec env INSTALL_PLUGINS="false" INSTALL_SCRIPT="false" SKIP_DEPENDENCY_CHECK="true" /bin/bash "$0" "$1"
         ;;
         *                                                   )
-            if [[ ! "$install_plugins" == "true" ]] && [[ ! "$install_script" == "true" ]] && [[ ! "$install_webserver" == "true" ]]; then
+            if [[ ! "${install_plugins}" == "true" ]] && [[ ! "${install_script}" == "true" ]] && [[ ! "${install_webserver}" == "true" ]]; then
                 reverberate "error" "No action(s) to perform
 At least one INSTALL_* variable must be \"true\""
                 reverberate "exit"
@@ -836,65 +836,65 @@ At least one INSTALL_* variable must be \"true\""
             fi
             check_privilege "$@"
             obnoxious_header
-            if [[ "$install_plugins" == "true" ]]; then
+            if [[ "${install_plugins}" == "true" ]]; then
                 dependency_list+="munin-node "
-                if [[ -d "$plugin_config_dir" ]]; then
-                    if [[ -f  "$plugin_config_dir/pihole.conf" ]]; then
-                        rm "$plugin_config_dir/pihole.conf" || return
+                if [[ -d "${plugin_config_dir}" ]]; then
+                    if [[ -f  "${plugin_config_dir}/pihole.conf" ]]; then
+                        rm "${plugin_config_dir}/pihole.conf" || return
                     fi
                 fi
                 uninstall_plugins
             fi
-            if [[ "$install_script" == "true" ]]; then
+            if [[ "${install_script}" == "true" ]]; then
                 dependency_list+="wget "
             fi
-            if [[ "$install_webserver" == "true" ]]; then
-                dependency_list+="$webserver_dependencies"
-                if [[ -d "$proxy_config_dir" ]]; then
-                    if [[ -f "$proxy_config_dir/external.conf.orig" ]]; then
-                        mv "$proxy_config_dir/external.conf.orig" "$proxy_config_dir/external.conf" || return
+            if [[ "${install_webserver}" == "true" ]]; then
+                dependency_list+="${webserver_dependencies}"
+                if [[ -d "${proxy_config_dir}" ]]; then
+                    if [[ -f "${proxy_config_dir}/external.conf.orig" ]]; then
+                        mv "${proxy_config_dir}/external.conf.orig" "${proxy_config_dir}/external.conf" || return
                         reverberate "info" "Original lighttpd external.conf restored from backup"
                     else
-                        if [[ -f "$proxy_config_dir/external.conf" ]]; then
-                            rm "$proxy_config_dir/external.conf" || return
-                            touch "$proxy_config_dir/external.conf" || return
+                        if [[ -f "${proxy_config_dir}/external.conf" ]]; then
+                            rm "${proxy_config_dir}/external.conf" || return
+                            touch "${proxy_config_dir}/external.conf" || return
                         fi
                     fi
                 fi
-                if [[ -d "$munin_config_dir" ]]; then
-                    if [[ -f "$munin_config_dir/99-graph-strategy.conf" ]]; then
-                        rm "$munin_config_dir/99-graph-strategy.conf" || return
+                if [[ -d "${munin_config_dir}" ]]; then
+                    if [[ -f "${munin_config_dir}/99-graph-strategy.conf" ]]; then
+                        rm "${munin_config_dir}/99-graph-strategy.conf" || return
                     fi
                 else
-                    if [[ -d "$munin_dir" ]]; then
-                        if [[ -f "$munin_dir/munin.conf" ]]; then
-                            sed -i "s/^html_strategy cli/#html_strategy cron/g" "$munin_dir/munin.conf" || return
-                            sed -i "s/^graph_strategy cli/#graph_strategy cron/g" "$munin_dir/munin.conf" || return
+                    if [[ -d "${munin_dir}" ]]; then
+                        if [[ -f "${munin_dir}/munin.conf" ]]; then
+                            sed -i "s/^html_strategy cli/#html_strategy cron/g" "${munin_dir}/munin.conf" || return
+                            sed -i "s/^graph_strategy cli/#graph_strategy cron/g" "${munin_dir}/munin.conf" || return
                         fi
                     fi
                 fi
 
             fi
-            if [[ "$skip_dependency_check" == "false" ]]; then
+            if [[ "${skip_dependency_check}" == "false" ]]; then
                 if [[ -x "$(command -v dpkg-query)" ]]; then
                     if [[ -x "$(command -v apt)" ]]; then
-                        for dependency_id in $dependency_list; do
-                            package_query="$(dpkg-query -W --showformat='${Status}\n' "$dependency_id" | grep "install ok installed")"
-                            if [[ -n "$package_query" ]]; then
-                                reverberate "question" "$dependency_id may have been installed by munin-pihole-plugins
-Would you like to uninstall $dependency_id now?"
-                                if [[ "$dependency_id" == "curl" ]] ||  [[ "$dependency_id" == "init-system-helpers" ]] || [[ "$dependency_id" == "wget" ]]; then
+                        for dependency_id in ${dependency_list}; do
+                            package_query="$(dpkg-query -W --showformat='${Status}\n' "${dependency_id}" | grep "install ok installed")"
+                            if [[ -n "${package_query}" ]]; then
+                                reverberate "question" "${dependency_id} may have been installed by munin-pihole-plugins
+Would you like to uninstall ${dependency_id} now?"
+                                if [[ "${dependency_id}" == "curl" ]] ||  [[ "${dependency_id}" == "init-system-helpers" ]] || [[ "${dependency_id}" == "wget" ]]; then
                                     reverberate "warning" "It probably wasn't, and you probably wouldn't"
                                 fi
-                                apt remove -qq "$dependency_id"
+                                apt remove -qq "${dependency_id}"
                             fi
                         done
                     fi
                 fi
             fi
-            if [[ "$install_script" == "true" ]]; then
-                if [[ -d "$script_dir" ]]; then
-                    if [[ -f "$script_dir/munin-pihole-plugins" ]]; then
+            if [[ "${install_script}" == "true" ]]; then
+                if [[ -d "${script_dir}" ]]; then
+                    if [[ -f "${script_dir}/munin-pihole-plugins" ]]; then
                         uninstall_script
                     fi
                 fi
@@ -908,20 +908,20 @@ Would you like to uninstall $dependency_id now?"
 # display the current and latest munin-pihole-plugins script versions
 version_function() {
     check_version
-    if [[ -n "$remote_version" ]]; then
-        if [[ "$remote_version" > "$VERSION" ]]; then
+    if [[ -n "${remote_version}" ]]; then
+        if [[ "${remote_version}" > "${VERSION}" ]]; then
             min_height="3"
             some "[${WHITE}ℹ${RESET}] An update for munin-pihole-plugins is available
-munin-pihole-plugins version is v$VERSION (Latest: v$remote_version)"
+munin-pihole-plugins version is v${VERSION} (Latest: v${remote_version})"
         else
-            some "[${WHITE}ℹ${RESET}] munin-pihole-plugins version is v$VERSION (Latest: v$remote_version)"
+            some "[${WHITE}ℹ${RESET}] munin-pihole-plugins version is v${VERSION} (Latest: v${remote_version})"
         fi
     else
         min_height="4"
         some "[${YELLOW}⚠${RESET}] Unable to locate a TXT record for
-$plugin_domain
-using the nameserver $dns_server on port $dns_port
-munin-pihole-plugins version is v$VERSION (Latest: unknown)"
+${plugin_domain}
+using the nameserver ${dns_server} on port ${dns_port}
+munin-pihole-plugins version is v${VERSION} (Latest: unknown)"
     fi
 }
 
@@ -931,41 +931,41 @@ variable_function() {
     min_height="3"
     case "$2" in
         "branch" | "BRANCH"                                 )
-            some "BRANCH: $branch"
+            some "BRANCH: ${branch}"
         ;;
         "dns_port" | "DNS_PORT"                             )
-            some "DNS_PORT: $dns_port"
+            some "DNS_PORT: ${dns_port}"
         ;;
         "dns_server" | "DNS_SERVER"                         )
-            some "DNS_SERVER: $dns_server"
+            some "DNS_SERVER: ${dns_server}"
         ;;
         "install_plugins" | "INSTALL_PLUGINS"               )
-            some "INSTALL_PLUGINS: $install_plugins"
+            some "INSTALL_PLUGINS: ${install_plugins}"
         ;;
         "install_script" | "INSTALL_SCRIPT"                 )
-            some "INSTALL_SCRIPT: $install_script"
+            some "INSTALL_SCRIPT: ${install_script}"
         ;;
         "install_webserver" | "INSTALL_WEBSERVER"           )
-            some "INSTALL_WEBSERVER: $install_webserver"
+            some "INSTALL_WEBSERVER: ${install_webserver}"
         ;;
         "munin_dir" | "MUNIN_DIR"                           )
-            some "MUNIN_DIR: $munin_dir"
+            some "MUNIN_DIR: ${munin_dir}"
         ;;
         "munin_config_dir" | "MUNIN_CONFIG_DIR"             )
-            some "MUNIN_CONFIG_DIR: $munin_config_dir"
+            some "MUNIN_CONFIG_DIR: ${munin_config_dir}"
         ;;
         "munin_plugin_dir" | "MUNIN_PLUGIN_DIR"             )
-            some "MUNIN_PLUGIN_DIR: $munin_plugin_dir"
+            some "MUNIN_PLUGIN_DIR: ${munin_plugin_dir}"
         ;;
         "node_plugin_dir" | "NODE_PLUGIN_DIR"               )
-            some "NODE_PLUGIN_DIR: $node_plugin_dir"
+            some "NODE_PLUGIN_DIR: ${node_plugin_dir}"
         ;;
         "plugin_config_dir" | "PLUGIN_CONFIG_DIR"           )
-            some "PLUGIN_CONFIG_DIR: $plugin_config_dir"
+            some "PLUGIN_CONFIG_DIR: ${plugin_config_dir}"
         ;;
         "plugin_list" | "PLUGIN_LIST"                       )
             min_height="14"
-            some "PLUGIN_LIST: $plugin_list
+            some "PLUGIN_LIST: ${plugin_list}
 \\nPlugin\\t\\t\\tDescription
  blocked\\t\\t This plugin shows domains blocked by Pi-hole®.
  cache\\t\\t\\t This plugin shows Pi-hole® cache.
@@ -978,41 +978,41 @@ variable_function() {
  unique_domains\\t\\t This plugin shows unique domains seen by Pi-hole®."
         ;;
         "proxy_config_dir" | "PROXY_CONFIG_DIR"             )
-            some "PROXY_CONFIG_DIR: $proxy_config_dir"
+            some "PROXY_CONFIG_DIR: ${proxy_config_dir}"
         ;;
         "script_dir" | "SCRIPT_DIR"                         )
-            some "SCRIPT_DIR: $script_dir"
+            some "SCRIPT_DIR: ${script_dir}"
         ;;
         "skip_dependency_check" | "SKIP_DEPENDENCY_CHECK"   )
-            some "SKIP_DEPENDENCY_CHECK: $skip_dependency_check"
+            some "SKIP_DEPENDENCY_CHECK: ${skip_dependency_check}"
         ;;
         "update_self" | "UPDATE_SELF"                       )
-            some "UPDATE_SELF: $update_self"
+            some "UPDATE_SELF: ${update_self}"
         ;;
         "verbosity_level" | "VERBOSITY_LEVEL"               )
-            some "VERBOSITY_LEVEL: $verbosity_level"
+            some "VERBOSITY_LEVEL: ${verbosity_level}"
         ;;
         ""                                                  )
             min_height="22"
             some "Usage: export [VARIABLE]=\"value\"
 \\nVariable
- BRANCH=\"$branch\"
- DNS_PORT=\"$dns_port\"
- DNS_SERVER=\"$dns_server\"
- INSTALL_PLUGINS=\"$install_plugins\"
- INSTALL_SCRIPT=\"$install_script\"
- INSTALL_WEBSERVER=\"$install_webserver\"
- MUNIN_DIR=\"$munin_dir\"
- MUNIN_CONFIG_DIR=\"$munin_config_dir\"
- MUNIN_PLUGIN_DIR=\"$munin_plugin_dir\"
- NODE_PLUGIN_DIR=\"$node_plugin_dir\"
- PLUGIN_CONFIG_DIR=\"$plugin_config_dir\"
- PLUGIN_LIST=\"$plugin_list\"
- PROXY_CONFIG_DIR=\"$proxy_config_dir\"
- SCRIPT_DIR=\"$script_dir\"
- SKIP_DEPENDENCY_CHECK=\"$skip_dependency_check\"
- UPDATE_SELF=\"$update_self\"
- VERBOSITY_LEVEL=\"$verbosity_level\""
+ BRANCH=\"${branch}\"
+ DNS_PORT=\"${dns_port}\"
+ DNS_SERVER=\"${dns_server}\"
+ INSTALL_PLUGINS=\"${install_plugins}\"
+ INSTALL_SCRIPT=\"${install_script}\"
+ INSTALL_WEBSERVER=\"${install_webserver}\"
+ MUNIN_DIR=\"${munin_dir}\"
+ MUNIN_CONFIG_DIR=\"${munin_config_dir}\"
+ MUNIN_PLUGIN_DIR=\"${munin_plugin_dir}\"
+ NODE_PLUGIN_DIR=\"${node_plugin_dir}\"
+ PLUGIN_CONFIG_DIR=\"${plugin_config_dir}\"
+ PLUGIN_LIST=\"${plugin_list}\"
+ PROXY_CONFIG_DIR=\"${proxy_config_dir}\"
+ SCRIPT_DIR=\"${script_dir}\"
+ SKIP_DEPENDENCY_CHECK=\"${skip_dependency_check}\"
+ UPDATE_SELF=\"${update_self}\"
+ VERBOSITY_LEVEL=\"${verbosity_level}\""
         ;;
         *                                                   )
 min_height="3"
