@@ -6,7 +6,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="05.07.05"
+VERSION="05.08.00"
 
 # environment variables with overrides
 branch="${BRANCH:-development}"
@@ -100,7 +100,7 @@ update_now() {
     else
         if [[ "$verbosity_level" -gt "0" ]]; then
             echo -e "[${RED}!${RESET}] The required command 'wget' was not found"
-            echo -e "[${RED}!${RESET}] Exiting $0"
+            echo -e "[${RED}!${RESET}] ${RED}Exiting $0${RESET}"
         fi
         exit 1
     fi
@@ -123,7 +123,7 @@ update_now() {
         fi
     fi
     if [[ "$verbosity_level" -ge "3" ]]; then
-        echo -e "[${WHITE}ℹ${RESET}] Restarting after update"
+        echo -e "[${WHITE}ℹ${RESET}] ${GREEN}Restarting munin-pihole-plugins after update${RESET}"
     fi
     exec env UPDATE_SELF="false" /bin/bash "$0" "$@"
 }
@@ -139,7 +139,7 @@ EOF
 # 0 - silent
 # 1 - + errors
 # 2 - ++ warnings
-# 3 - +++ informatioon
+# 3 - +++ information
 # 4 - ++++ additional information
 reverberate() {
     case "$1" in
@@ -150,7 +150,7 @@ reverberate() {
         ;;
         "exit"                                              )
             if [[ "$verbosity_level" -ge "1" ]]; then
-                echo -e "[${RED}!${RESET}] Exiting $0"
+                echo -e "[${RED}!${RESET}] ${RED}Exiting $0${RESET}"
             fi
         ;;
         "failure"                                           )
@@ -160,7 +160,7 @@ reverberate() {
         ;;
         "footer"                                            )
             if [[ "$verbosity_level" -ge "1" ]]; then
-                echo -e "[${WHITE}ℹ${RESET}] Done"
+                echo -e "[${WHITE}ℹ${RESET}] ${GREEN}Done${RESET}"
             fi
         ;;
         "header"                                            )
@@ -170,7 +170,12 @@ reverberate() {
         ;;
         "info"                                              )
             if [[ "$verbosity_level" -ge "3" ]]; then
-                echo -e "[$WHITEℹ${RESET}] $2"
+                echo -e "[$WHITEℹ${RESET}] ${GREEN}$2${RESET}"
+            fi
+        ;;
+        "question"                                           )
+            if [[ "$verbosity_level" -ge "3" ]]; then
+                echo -e "[${BLUE}?${BLUE}] ${GREEN}$2{RESET}"
             fi
         ;;
         "success"                                           )
@@ -184,7 +189,7 @@ reverberate() {
             fi
         ;;
         *                                                   )
-            if [[ "$verbosity_level" -ge "3" ]]; then
+            if [[ "$verbosity_level" -ge "4" ]]; then
                 echo -e "$1"
             fi
         ;;
@@ -483,7 +488,7 @@ export PATH=\"\$PATH:$script_dir\""
 # spawns a child script to uninstall a locally installed munin-pihole-plugins
 # script if present
 uninstall_script() {
-            cat > "$TEMP/.munin-pihole-plugins_uninstall" << EOF
+    cat > "$TEMP/.munin-pihole-plugins_uninstall" << EOF
 #!/usr/bin/env bash
 
 # .munin-pihole-plugins_uninstall
@@ -499,7 +504,7 @@ uninstall_now() {
     fi
     rm "$script_dir/munin-pihole-plugins" || return
     if [[ "$verbosity_level" -ge "3" ]]; then
-        echo -e "[${WHITE}ℹ${RESET}] Done"
+        echo -e "[${WHITE}ℹ${RESET}] ${GREEN}Done${RESET}"
     fi
 }
 
@@ -873,7 +878,7 @@ At least one INSTALL_* variable must be \"true\""
                         for dependency_id in $dependency_list; do
                             package_query="$(dpkg-query -W --showformat='${Status}\n' "$dependency_id" | grep "install ok installed")"
                             if [[ -n "$package_query" ]]; then
-                                reverberate "warning" "$dependency_id may have been installed by munin-pihole-plugins
+                                reverberate "question" "$dependency_id may have been installed by munin-pihole-plugins
 Would you like to uninstall $dependency_id now?"
                                 if [[ "$dependency_id" == "curl" ]] ||  [[ "$dependency_id" == "init-system-helpers" ]] || [[ "$dependency_id" == "wget" ]]; then
                                     reverberate "warning" "It probably wasn't, and you probably wouldn't"
