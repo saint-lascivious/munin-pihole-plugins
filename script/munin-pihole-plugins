@@ -6,7 +6,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="05.07.04"
+VERSION="05.07.05"
 
 # environment variables with overrides
 branch="${BRANCH:-development}"
@@ -193,8 +193,8 @@ reverberate() {
 
 # manditory horrific ascii header
 obnoxious_header() {
-    if [[ "$terminal_height" -ge "10" ]] && [[ "$terminal_width" -ge "80" ]]; then
-        reverberate "header" "${RED}                  _             _ _        _            _           _ v$VERSION
+    if [[ "$terminal_height" -ge "12" ]] && [[ "$terminal_width" -ge "80" ]]; then
+        reverberate "header" "\\n${RED}                  _             _ _        _            _           _ v$VERSION
 ${ORANGE}   _ __ _  _ _ _ (_)_ _ __ _ __(_) |_  ___| |___ _ _ __| |_  _ __ _(_)_ _  ___
 ${YELLOW}  | '  \\ || | ' \\| | ' \\__| '_ \\ | ' \\/ _ \\ / -_)_| '_ \\ | || / _\` | | ' \\(_-<
 ${GREEN}  |_|_|_\\_,_|_||_|_|_||_| | .__/_|_||_\\___/_\\___| | .__/_|\\_,_\\__, |_|_||_/__/
