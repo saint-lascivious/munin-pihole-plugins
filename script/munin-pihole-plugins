@@ -6,7 +6,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="05.07.03"
+VERSION="05.07.04"
 
 # environment variables with overrides
 branch="${BRANCH:-development}"
@@ -747,8 +747,8 @@ At least one INSTALL_* variable must be \"true\""
             check_privilege "$@"
             check_version
             if [[ "$update_self" == "true" ]]; then
-                if [[ -f "$TEMP/.munin-pihole-plugins" ]]; then
-                    rm "$TEMP/.munin-pihole-plugins" || return
+                if [[ -f "$TEMP/.munin-pihole-plugins_update" ]]; then
+                    rm "$TEMP/.munin-pihole-plugins_update" || return
                 fi
                 if [[ "$remote_version" > "$VERSION" ]]; then
                     update_script "$@"
