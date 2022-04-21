@@ -6,7 +6,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="05.08.00"
+VERSION="05.09.00"
 
 # environment variables with overrides
 branch="${BRANCH:-development}"
@@ -37,6 +37,9 @@ terminal_height="$(stty size | cut -d " " -f1)"
 terminal_width="$(stty size | cut -d " " -f2)"
 webserver_dependencies="lighttpd munin "
 webserver_services="lighttpd munin "
+
+# we just won't talk about this
+temp_dir="${TMPDIR:-${TEMP:-${TMP:-/tmp}}}"
 
 # define colours for later use, if supported
 if [[ -t "1" ]] && [[ $(tput colors) -ge "8" ]]; then
@@ -80,7 +83,7 @@ Install sudo or run munin-pihole-plugins as root"
 # but they all suck, and/or are extremely convoluted
 # this approach is a tradeoff
 update_script() {
-    cat > "$TEMP/.munin-pihole-plugins_update" << EOF
+    cat > "$temp_dir/.munin-pihole-plugins_update" << EOF
 #!/usr/bin/env bash
 
 # .munin-pihole-plugins_update
@@ -130,9 +133,9 @@ update_now() {
 
 update_now
 EOF
-    chmod +x "$TEMP/.munin-pihole-plugins_update"
+    chmod +x "$temp_dir/.munin-pihole-plugins_update"
     reverberate "info" "Updating munin-pihole-plugins"
-    exec /bin/bash "$TEMP/.munin-pihole-plugins_update"
+    exec /bin/bash "$temp_dir/.munin-pihole-plugins_update"
 }
 
 # echo wrapper handling verbosity levels and common output
@@ -488,7 +491,7 @@ export PATH=\"\$PATH:$script_dir\""
 # spawns a child script to uninstall a locally installed munin-pihole-plugins
 # script if present
 uninstall_script() {
-    cat > "$TEMP/.munin-pihole-plugins_uninstall" << EOF
+    cat > "$temp_dir/.munin-pihole-plugins_uninstall" << EOF
 #!/usr/bin/env bash
 
 # .munin-pihole-plugins_uninstall
@@ -510,9 +513,9 @@ uninstall_now() {
 
 uninstall_now
 EOF
-    chmod +x "$TEMP/.munin-pihole-plugins_uninstall"
+    chmod +x "$temp_dir/.munin-pihole-plugins_uninstall"
     reverberate "info" "Uninstalling the munin-pihole-plugins script"
-    exec /bin/bash "$TEMP/.munin-pihole-plugins_uninstall"
+    exec /bin/bash "$temp_dir/.munin-pihole-plugins_uninstall"
 }
 
 # an opportunistic pagination wrapper, more or less
@@ -752,8 +755,8 @@ At least one INSTALL_* variable must be \"true\""
             check_privilege "$@"
             check_version
             if [[ "$update_self" == "true" ]]; then
-                if [[ -f "$TEMP/.munin-pihole-plugins_update" ]]; then
-                    rm "$TEMP/.munin-pihole-plugins_update" || return
+                if [[ -f "$temp_dir/.munin-pihole-plugins_update" ]]; then
+                    rm "$temp_dir/.munin-pihole-plugins_update" || return
                 fi
                 if [[ "$remote_version" > "$VERSION" ]]; then
                     update_script "$@"
