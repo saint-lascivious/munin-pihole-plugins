@@ -6,7 +6,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="05.10.00"
+VERSION="05.10.01"
 
 # environment variables with overrides
 branch="${BRANCH:-development}"
@@ -290,6 +290,9 @@ configure_proxy() {
         fi
         reverberate "info" "Installing Munin webserver proxy configuration"
         download "${proxy_repo}/etc/lighttpd/external.conf" -O "${proxy_config}"
+        if [[ -f "${proxy_config}" ]]; then
+            reverberate "success" "external.conf"
+        fi
     else
         reverberate "error" "No lighttpd configuration directory found at
    ${proxy_config_dir}"
@@ -381,6 +384,7 @@ install_plugins() {
             reverberate "info" "Installing munin-pihole-plugins plugin"
             download "${plugin_repo}/usr/share/munin/plugins/pihole_" -P "${munin_plugin_dir}" || return
             chmod +x "${munin_plugin_dir}/pihole_" || return
+            reverberate "success" "pihole_"
             reverberate "info" "Creating selected munin-pihole-plugins symbolic links"
             for plugin_id in ${plugin_list}; do
                 ln -s "${munin_plugin_dir}/pihole_" "${node_plugin_dir}/pihole_${plugin_id}" || return
