@@ -6,7 +6,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="05.11.00"
+VERSION="05.11.01"
 
 # environment variables with overrides
 branch="${BRANCH:-development}"
@@ -489,8 +489,8 @@ install_script() {
             download "${plugin_repo}/script/munin-pihole-plugins" -P "${script_dir}"
         fi
         chmod +x "${script_dir}/munin-pihole-plugins" || return
-        reverberate "info" "A copy of the munin-pihole-plugins script was installed to
-${script_dir}/munin-pihole-plugins"
+        reverberate "info" "A copy of the munin-pihole-plugins script was installed"
+        reverberate "success" "${script_dir}/munin-pihole-plugins"
         if [[ -d "/etc/bash_completion.d" ]]; then
             if [[ -f "/etc/bash_completion.d/munin-pihole-plugins" ]]; then
                 download "${plugin_repo}/etc/bash_completion.d/munin-pihole-plugins" -O "/etc/bash_completion.d/munin-pihole-plugins"
@@ -504,6 +504,7 @@ ${script_dir}
 is not in your \${PATH} variable try
 export PATH=\"\${PATH}:${script_dir}\""
         fi
+        reverberate "additional_info" "You can now use munin-pihole-plugins just as you would any other command"
     else
         reverberate "error" "No directory found at
    ${script_dir}"
