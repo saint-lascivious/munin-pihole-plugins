@@ -192,9 +192,9 @@ Sets the munin-pihole-plugins script verbosity level on a scale from `0` to `4`,
 | --- | --- |
 | 0 | Silent |
 | 1 | + Errors |
-| 2 | ++ Warnings |
+| 2 | ++ Questions and Warnings |
 | 3 | +++ Information |
-| 4 | ++++ Additional information |
+| 4 | ++++ Additional Information |
 
 ## Help! My graphs aren't showing up!
 * Be patient

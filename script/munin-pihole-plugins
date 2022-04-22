@@ -6,7 +6,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="05.10.01"
+VERSION="05.10.02"
 
 # environment variables with overrides
 branch="${BRANCH:-development}"
@@ -126,7 +126,7 @@ update_now() {
         fi
     fi
     if [[ "${verbosity_level}" -ge "3" ]]; then
-        echo -e "[${WHITE}ℹ${RESET}] ${GREEN}Restarting munin-pihole-plugins after update${RESET}"
+        echo -e "\\n[${WHITE}ℹ${RESET}] ${GREEN}Restarting munin-pihole-plugins after update${RESET}"
     fi
     exec env UPDATE_SELF="false" /bin/bash "$0" "$@"
 }
@@ -141,19 +141,24 @@ EOF
 # echo wrapper handling verbosity levels and common output
 # 0 - silent
 # 1 - + errors
-# 2 - ++ warnings
+# 2 - ++ warnings/questions
 # 3 - +++ information
 # 4 - ++++ additional information
 reverberate() {
     case "$1" in
+        "additional_info"                                   )
+            if [[ "${verbosity_level}" -ge "4" ]]; then
+                echo -e "\\n[${WHITE}ℹ${RESET}] ${GREEN}$2${RESET}"
+            fi
+        ;;
         "error"                                             )
             if [[ "${verbosity_level}" -ge "1" ]]; then
-                echo -e "[${RED}!${RESET}] $2"
+                echo -e "\\n[${RED}!${RESET}] $2"
             fi
         ;;
         "exit"                                              )
             if [[ "${verbosity_level}" -ge "1" ]]; then
-                echo -e "[${RED}!${RESET}] ${RED}Exiting $0${RESET}"
+                echo -e "\\n[${RED}!${RESET}] ${RED}Exiting $0${RESET}"
             fi
         ;;
         "failure"                                           )
@@ -163,7 +168,7 @@ reverberate() {
         ;;
         "footer"                                            )
             if [[ "${verbosity_level}" -ge "1" ]]; then
-                echo -e "[${WHITE}ℹ${RESET}] ${GREEN}Done${RESET}"
+                echo -e "\\n[${WHITE}ℹ${RESET}] ${GREEN}Done${RESET}"
             fi
         ;;
         "header"                                            )
@@ -173,12 +178,12 @@ reverberate() {
         ;;
         "info"                                              )
             if [[ "${verbosity_level}" -ge "3" ]]; then
-                echo -e "[${WHITE}ℹ${RESET}] ${GREEN}$2${RESET}"
+                echo -e "\\n[${WHITE}ℹ${RESET}] ${GREEN}$2${RESET}"
             fi
         ;;
-        "question"                                           )
-            if [[ "${verbosity_level}" -ge "3" ]]; then
-                echo -e "[${BLUE}?${BLUE}] ${GREEN}$2{RESET}"
+        "question"                                          )
+            if [[ "${verbosity_level}" -ge "2" ]]; then
+                echo -e "\\n[${BLUE}?${BLUE}] ${GREEN}$2{RESET}"
             fi
         ;;
         "success"                                           )
@@ -188,7 +193,7 @@ reverberate() {
         ;;
         "warning"                                           )
             if [[ "${verbosity_level}" -ge "2" ]]; then
-                echo -e "[${YELLOW}⚠${RESET}] $2"
+                echo -e "\\n[${YELLOW}⚠${RESET}] $2"
             fi
         ;;
         *                                                   )
@@ -296,7 +301,7 @@ configure_proxy() {
     else
         reverberate "error" "No lighttpd configuration directory found at
    ${proxy_config_dir}"
-        reverberate "info" "If this directory is located at a different path try
+        reverberate "additional_info" "If this directory is located at a different path try
    export PROXY_CONFIG_DIR=\"/path/to/directory\""
         reverberate "exit"
         exit 1
@@ -323,7 +328,7 @@ configure_munin() {
             else
                 reverberate "error" "No munin.conf file found at
 ${munin_dir}/munin.conf"
-                reverberate "info" "If this file is located at a different path try
+                reverberate "additional_info" "If this file is located at a different path try
 export MUNIN_DIR=\"/path/to/directory\""
                 reverberate "exit"
                 exit 1
@@ -331,14 +336,14 @@ export MUNIN_DIR=\"/path/to/directory\""
         else
             reverberate "error" "No Munin directory found at
 ${munin_dir}"
-            reverberate "info" "If this directory is located at a different path try
+            reverberate "additional_info" "If this directory is located at a different path try
 export MUNIN_DIR=\"/path/to/directory\""
             reverberate "exit"
             exit 1
         fi
         reverberate "error" "No Munin configuration directory found at
 ${munin_config_dir}"
-        reverberate "info" "If this directory is located at a different path try
+        reverberate "additional_info" "If this directory is located at a different path try
 export MUNIN_CONFIG_DIR=\"/path/to/directory\""
         reverberate "exit"
         exit 1
@@ -393,7 +398,7 @@ install_plugins() {
         else
             reverberate "error" "No Munin node plugin directory found at
 ${node_plugin_dir}"
-            reverberate "info" "If this directory is located at a different path try
+            reverberate "additional_info" "If this directory is located at a different path try
 export NODE_PLUGIN_DIR=\"/path/to/directory\""
             reverberate "exit"
             exit 1
@@ -401,7 +406,7 @@ export NODE_PLUGIN_DIR=\"/path/to/directory\""
     else
         reverberate "error" "No Munin plugin directory found at
 ${munin_plugin_dir}"
-        reverberate "info" "If this directory is located at a different path try
+        reverberate "additional_info" "If this directory is located at a different path try
 export MUNIN_PLUGIN_DIR=\"/path/to/directory\""
         reverberate "exit"
         exit 1
@@ -421,7 +426,7 @@ ${plugin_config_dir}/pihole.conf"
     else
         reverberate "error" "No Munin plugin configuration directory found at
 ${plugin_config_dir}"
-        reverberate "info" "If this directory is located at a different path try
+        reverberate "additional_info" "If this directory is located at a different path try
 export PLUGIN_CONFIG_DIR=\"/path/to/directory\""
         reverberate "exit"
         exit 1
@@ -485,7 +490,7 @@ export PATH=\"\${PATH}:${script_dir}\""
     else
         reverberate "error" "No directory found at
    ${script_dir}"
-        reverberate "info" "If this directory is located at a different path try
+        reverberate "additional_info" "If this directory is located at a different path try
    export SCRIPT_DIR=\"/path/to/directory\""
         reverberate "exit"
         exit 1
@@ -511,7 +516,7 @@ uninstall_now() {
     fi
     rm "${script_dir}/munin-pihole-plugins" || return
     if [[ "${verbosity_level}" -ge "3" ]]; then
-        echo -e "[${WHITE}ℹ${RESET}] ${GREEN}Done${RESET}"
+        echo -e "\\n[${WHITE}ℹ${RESET}] ${GREEN}Done${RESET}"
     fi
 }
 
