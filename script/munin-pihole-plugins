@@ -6,7 +6,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="05.10.02"
+VERSION="05.11.00"
 
 # environment variables with overrides
 branch="${BRANCH:-development}"
@@ -40,6 +40,23 @@ webserver_services="lighttpd munin "
 
 # we just won't talk about this
 temp_dir="${TMPDIR:-${TEMP:-${TMP:-/tmp}}}"
+
+# fallbacks for out of range or unexpected verbosity levels
+# set to 0 when lower than 0, 4 when higher than 4
+# set to 3 if it's something entirely unexpected
+if [[ "${verbosity_level}" =~ ^(-)?[0-9]+$ ]]; then
+    if [[ "${verbosity_level}" -lt "0" ]]; then
+        verbosity_level="0"
+    else
+        if [[ "${verbosity_level}" -gt "4" ]]; then
+            verbosity_level="4"
+        fi
+    fi
+else
+    reverberate "warning" "Unexpected value for VERBOSITY_LEVEL: ${verbosity_level}"
+    verbosity_level="3"
+    reverberate "info" "Reverting to default value for VERBOSITY_LEVEL: ${verbosity_level}"
+fi
 
 # define colours for later use, if supported
 if [[ -t "1" ]] && [[ $(tput colors) -ge "8" ]]; then
