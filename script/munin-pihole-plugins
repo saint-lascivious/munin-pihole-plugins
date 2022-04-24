@@ -6,7 +6,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="04.11.00"
+VERSION="04.12.00"
 
 # environment variables with overrides
 branch="${BRANCH:-master}"
@@ -88,8 +88,8 @@ check_privilege() {
             exec sudo -E bash "$0" "$@"
             exit "$?"
         else
-            reverberate "error" "Insufficient privileges
-Install sudo or run munin-pihole-plugins as root"
+            reverberate "error" "Insufficient privileges"
+            reverberate "info" "Install sudo or run munin-pihole-plugins as root"
         reverberate "exit"
         exit 1
         fi
@@ -119,8 +119,8 @@ update_now() {
         fi
     else
         if [[ "${verbosity_level}" -gt "0" ]]; then
-            echo -e "\\n[${RED}!${RESET}] The required command '${RED}wget${RESET}' was not found"
-            echo -e "\\n[${RED}!${RESET}] ${RED}Exiting $0${RESET}"
+            echo -e "\\n  [${RED}!${RESET}] The required command '${RED}wget${RESET}' was not found"
+            echo -e "\\n  [${RED}!${RESET}] ${RED}Exiting $0${RESET}"
         fi
         exit 1
     fi
@@ -143,7 +143,7 @@ update_now() {
         fi
     fi
     if [[ "${verbosity_level}" -ge "3" ]]; then
-        echo -e "\\n[${WHITE}ℹ${RESET}] ${GREEN}Restarting munin-pihole-plugins after update${RESET}"
+        echo -e "\\n  [${WHITE}ℹ${RESET}] ${GREEN}Restarting munin-pihole-plugins after update${RESET}"
     fi
     exec env UPDATE_SELF="false" /bin/bash "$0" "$@"
 }
@@ -306,8 +306,8 @@ configure_proxy() {
         if [[ -s "${proxy_config}" ]]; then
             if [[ ! -f "${proxy_config}.orig" ]]; then
                 mv "${proxy_config}" "${proxy_config}.orig" || return
-                reverberate "info" "Existing lighttpd external.conf backed up to
-   ${proxy_config}.orig"
+                reverberate "info" "Existing lighttpd external.conf backed up to"
+                reverberate "success" "${proxy_config}.orig"
             fi
         fi
         reverberate "info" "Installing Munin webserver proxy configuration"
@@ -316,8 +316,8 @@ configure_proxy() {
             reverberate "success" "external.conf"
         fi
     else
-        reverberate "error" "No lighttpd configuration directory found at
-   ${proxy_config_dir}"
+        reverberate "error" "No lighttpd configuration directory found"
+        reverberate "failure" "${proxy_config_dir}"
         reverberate "additional_info" "If this directory is located at a different path try"
         reverberate "export PROXY_CONFIG_DIR=\"/path/to/directory\""
         reverberate "exit"
@@ -343,23 +343,23 @@ configure_munin() {
                 sed -i "s/^#html_strategy cron/html_strategy cgi/g" "${munin_dir}/munin.conf" || return
                 sed -i "s/^#graph_strategy cron/graph_strategy cgi/g" "${munin_dir}/munin.conf" || return
             else
-                reverberate "error" "No munin.conf file found at
-${munin_dir}/munin.conf"
+                reverberate "error" "No munin.conf file found"
+                reverberate "failure" "${munin_dir}/munin.conf"
                 reverberate "additional_info" "If this file is located at a different path try"
                 reverberate "export MUNIN_DIR=\"/path/to/directory\""
                 reverberate "exit"
                 exit 1
             fi
         else
-            reverberate "error" "No Munin directory found at
-${munin_dir}"
+            reverberate "error" "No Munin directory found"
+            reverberate "failure" "${munin_dir}"
             reverberate "additional_info" "If this directory is located at a different path try"
             reverberate "export MUNIN_DIR=\"/path/to/directory\""
             reverberate "exit"
             exit 1
         fi
-        reverberate "error" "No Munin configuration directory found at
-${munin_config_dir}"
+        reverberate "error" "No Munin configuration directory found"
+        reverberate "failure" "${munin_config_dir}"
         reverberate "additional_info" "If this directory is located at a different path try"
         reverberate "export MUNIN_CONFIG_DIR=\"/path/to/directory\""
         reverberate "exit"
@@ -413,16 +413,16 @@ install_plugins() {
                 reverberate "success" "${plugin_id}"
             done
         else
-            reverberate "error" "No Munin node plugin directory found at
-${node_plugin_dir}"
+            reverberate "error" "No Munin node plugin directory found"
+            reverberate "failure" "${node_plugin_dir}"
             reverberate "additional_info" "If this directory is located at a different path try"
             reverberate "export NODE_PLUGIN_DIR=\"/path/to/directory\""
             reverberate "exit"
             exit 1
         fi
     else
-        reverberate "error" "No Munin plugin directory found at
-${munin_plugin_dir}"
+        reverberate "error" "No Munin plugin directory found"
+        reverberate "failure" "${munin_plugin_dir}"
         reverberate "additional_info" "If this directory is located at a different path try"
         reverberate "export MUNIN_PLUGIN_DIR=\"/path/to/directory\""
         reverberate "exit"
@@ -437,22 +437,22 @@ configure_plugins() {
     if [[ -d "${plugin_config_dir}" ]]; then
         if [[ ! -f  "${plugin_config_dir}/pihole.conf" ]]; then
             download "${plugin_repo}/etc/munin/plugin-conf.d/pihole.conf" -P "${plugin_config_dir}"
-            reverberate "info" "Default plugin configuration saved to
-${plugin_config_dir}/pihole.conf"
+            reverberate "info" "Default plugin configuration saved"
+            reverberate "success" "${plugin_config_dir}/pihole.conf"
         fi
     else
-        reverberate "error" "No Munin plugin configuration directory found at
-${plugin_config_dir}"
+        reverberate "error" "No Munin plugin configuration directory found"
+        reverberate "failure" "${plugin_config_dir}"
         reverberate "additional_info" "If this directory is located at a different path try"
         reverberate "export PLUGIN_CONFIG_DIR=\"/path/to/directory\""
         reverberate "exit"
         exit 1
     fi
     if [[ "${pihole_on_host}" == "no" ]]; then
-        reverberate "warning" "The Pi-hole® command 'pihole' was not found on this host
-If this was intentional you will need to edit
-${plugin_config_dir}/pihole.conf
-and replace the host and setupvars values with those of your Pi-hole® host"
+        reverberate "warning" "The Pi-hole® command 'pihole' was not found on this host"
+        reverberate "additional_info" "If this was intentional you will need to edit"
+        reverberate "${plugin_config_dir}/pihole.conf"
+        reverberate "and replace the host and setupvars values with those of your Pi-hole® host"
     fi
 }
 
@@ -505,8 +505,8 @@ install_script() {
         fi
         reverberate "additional_info" "You can now use munin-pihole-plugins just as you would any other command"
     else
-        reverberate "error" "No directory found at
-   ${script_dir}"
+        reverberate "error" "No directory found"
+        reverberate "failure" "${script_dir}"
         reverberate "additional_info" "If this directory is located at a different path try"
         reverberate "export SCRIPT_DIR=\"/path/to/directory\""
         reverberate "exit"
@@ -533,7 +533,7 @@ uninstall_now() {
     fi
     rm "${script_dir}/munin-pihole-plugins" || return
     if [[ "${verbosity_level}" -ge "3" ]]; then
-        echo -e "\\n[${WHITE}ℹ${RESET}] ${GREEN}Done${RESET}"
+        echo -e "\\n  [${WHITE}ℹ${RESET}] ${GREEN}Done${RESET}"
     fi
 }
 
@@ -575,11 +575,11 @@ check_version() {
             plugin_domain="munin-pihole-plugins-dev.sainternet.xyz"
             plugin_repo="https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/development"
         else
-            reverberate "error" "Invalid munin-pihole-plugins branch
-${branch}"
-            reverberate "info" "Valid munin-pihole-plugins branches are
-development
-master"
+            reverberate "error" "Invalid munin-pihole-plugins branch"
+            reverberate "failure" "${branch}"
+            reverberate "info" "Valid munin-pihole-plugins branches are"
+            reverberate "success" "development"
+            reverberate "success" "master"
             reverberate "exit"
             exit 1
         fi
@@ -773,8 +773,8 @@ install_function() {
         ;;
         *                                                   )
             if [[ ! "${install_plugins}" == "true" ]] && [[ ! "${install_script}" == "true" ]] && [[ ! "${install_webserver}" == "true" ]]; then
-                reverberate "error" "No action(s) to perform
-At least one INSTALL_* variable must be \"true\""
+                reverberate "error" "No action(s) to perform"
+                reverberate "info" "At least one INSTALL_* variable must be \"true\""
                 reverberate "exit"
                 exit 1
             fi
@@ -801,8 +801,8 @@ At least one INSTALL_* variable must be \"true\""
                     check_pihole
                     configure_plugins
                 else
-                    reverberate "error" "No action(s) to perform
-No plugins in PLUGIN_LIST"
+                    reverberate "error" "No action(s) to perform"
+                    reverberate "info" "No plugins in PLUGIN_LIST"
                     reverberate "exit"
                     exit 1
                 fi
@@ -855,8 +855,8 @@ uninstall_function() {
         ;;
         *                                                   )
             if [[ ! "${install_plugins}" == "true" ]] && [[ ! "${install_script}" == "true" ]] && [[ ! "${install_webserver}" == "true" ]]; then
-                reverberate "error" "No action(s) to perform
-At least one INSTALL_* variable must be \"true\""
+                reverberate "error" "No action(s) to perform"
+                reverberate "info" "At least one INSTALL_* variable must be \"true\""
                 reverberate "exit"
                 exit 1
             fi
@@ -907,8 +907,8 @@ At least one INSTALL_* variable must be \"true\""
                         for dependency_id in ${dependency_list}; do
                             package_query="$(dpkg-query -W --showformat='${Status}\n' "${dependency_id}" | grep "install ok installed")"
                             if [[ -n "${package_query}" ]]; then
-                                reverberate "question" "${dependency_id} may have been installed by munin-pihole-plugins
-Would you like to uninstall ${dependency_id} now?"
+                                reverberate "info" "${dependency_id} may have been installed by munin-pihole-plugins"
+                                reverberate "question" "Would you like to uninstall ${dependency_id} now?"
                                 if [[ "${dependency_id}" == "curl" ]] ||  [[ "${dependency_id}" == "init-system-helpers" ]] || [[ "${dependency_id}" == "wget" ]]; then
                                     reverberate "warning" "It probably wasn't, and you probably wouldn't"
                                 fi
@@ -936,18 +936,17 @@ version_function() {
     check_version
     if [[ -n "${remote_version}" ]]; then
         if [[ "${remote_version}" > "${VERSION}" ]]; then
-            min_height="3"
-            some "[${WHITE}ℹ${RESET}] An update for munin-pihole-plugins is available
-munin-pihole-plugins version is v${VERSION} (Latest: v${remote_version})"
+            min_height="4"
+            some "  [${WHITE}ℹ${RESET}] An update for munin-pihole-plugins is available\\n
+  munin-pihole-plugins version is v${RED}${VERSION}${RESET} (Latest: v${GREEN}${remote_version}${RESET})"
         else
-            some "[${WHITE}ℹ${RESET}] munin-pihole-plugins version is v${VERSION} (Latest: v${remote_version})"
+            some "  [${WHITE}ℹ${RESET}] munin-pihole-plugins version is v${GREEN}${VERSION}${RESET} (Latest: v${GREEN}${remote_version}${RESET})"
         fi
     else
-        min_height="4"
-        some "[${YELLOW}⚠${RESET}] Unable to locate a TXT record for
-${plugin_domain}
-using the nameserver ${dns_server} on port ${dns_port}
-munin-pihole-plugins version is v${VERSION} (Latest: unknown)"
+        min_height="5"
+        some "  [${YELLOW}⚠${RESET}] Unable to locate a TXT record for ${plugin_domain}
+  using the nameserver ${dns_server} on port ${dns_port}\\n
+  munin-pihole-plugins version is v${VERSION} (Latest: ${RED}unknown${RESET})"
     fi
 }
 
