@@ -6,7 +6,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="04.12.01"
+VERSION="04.12.02"
 
 # environment variables with overrides
 branch="${BRANCH:-master}"
@@ -145,6 +145,8 @@ update_now() {
     if [[ "${verbosity_level}" -ge "3" ]]; then
         echo -e "\\n  [${WHITE}ℹ${RESET}] ${GREEN}Restarting munin-pihole-plugins after update${RESET}"
     fi
+    echo -e "\\n  [${WHITE}ℹ${RESET}] ${GREEN}Done${RESET}"
+    clear
     exec env UPDATE_SELF="false" /bin/bash "$0" "$@"
 }
 
@@ -785,6 +787,7 @@ install_function() {
                     rm "${temp_dir}/.munin-pihole-plugins_update" || return
                 fi
                 if [[ "${remote_version}" > "${VERSION}" ]]; then
+                    obnoxious_header
                     update_script "$@"
                 fi
             fi
