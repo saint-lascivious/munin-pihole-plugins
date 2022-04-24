@@ -1,6 +1,10 @@
+#!/usr/bin/env bash
+
 # munin-pihole-plugins
 # saint-lascivious (Hayden Pearce) 2022
 # saint@sainternet.xyz
+
+# shellcheck disable=SC2086,SC2207
 
 _munin-pihole-plugins() {
     local cur allopts lolopts_help longopts longopts_help longopts_installuninstall opts_help opts_installuninstall opts_variables prev prev2 shortopts shortopts_help shortopts_installuninstall
@@ -13,7 +17,7 @@ _munin-pihole-plugins() {
             allopts="-h help --help -i install --install -U uninstall --uninstall -V variables --variables -v version --version"
             longopts="--help --install --uninstall --variables --version"
             shortopts="-h -i -U -v -V"
-            case "$cur" in
+            case "${cur}" in
                 --*)
                     COMPREPLY=( $(compgen -W "${longopts}" -- ${cur}) )
                 ;;
@@ -26,20 +30,20 @@ _munin-pihole-plugins() {
         ;;
        "-h")
             shortopts_help="-h -i -U -V -v"
-            if [[ "$prev2" != *h ]]; then
+            if [[ "${prev2}" != *h ]]; then
                 COMPREPLY=( $(compgen -W "${shortopts_help}" -- ${cur}) )
             fi
         ;;
         "help")
             opts_help="help install uninstall variables version"
-            if [[ "$prev2" != *help ]]; then
+            if [[ "${prev2}" != *help ]]; then
                 COMPREPLY=( $(compgen -W "${opts_help}" -- ${cur}) )
             fi
         ;;
         "--help")
             lolopts_help="--I\\'ve-fallen-and-I-can\\'t-get-up"
             longopts_help="--help --install --uninstall --variables --version"
-            if [[ "$prev2" != *help ]]; then
+            if [[ "${prev2}" != *help ]]; then
                 COMPREPLY=( $(compgen -W "${longopts_help}" -- ${cur}) )
             else
                 COMPREPLY=( $(compgen -W "${lolopts_help}" -- ${cur}) )
@@ -59,7 +63,7 @@ _munin-pihole-plugins() {
         ;;
         "-V"|"variables"|"--variables")
             opts_variables="BRANCH DNS_PORT DNS_SERVER INSTALL_PLUGINS INSTALL_SCRIPT INSTALL_WEBSERVER MUNIN_DIR MUNIN_CONFIG_DIR MUNIN_PLUGIN_DIR NODE_PLUGIN_DIR PLUGIN_CONFIG_DIR PLUGIN_LIST PROXY_CONFIG_DIR SCRIPT_DIR SKIP_DEPENDENCY_CHECK UPDATE_SELF VERBOSITY_LEVEL"
-            if [[ "$prev2" != *h ]]; then
+            if [[ "${prev2}" != *h ]]; then
                 COMPREPLY=( $(compgen -W "${opts_variables}" -- ${cur}) )
             fi
         ;;
