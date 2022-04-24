@@ -6,7 +6,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="04.12.00"
+VERSION="04.12.01"
 
 # environment variables with overrides
 branch="${BRANCH:-master}"
@@ -230,7 +230,7 @@ ${YELLOW}  | '  \\ || | ' \\| | ' \\__| '_ \\ | ' \\/ _ \\ / -_)_| '_ \\ | || / 
 ${GREEN}  |_|_|_\\_,_|_||_|_|_||_| | .__/_|_||_\\___/_\\___| | .__/_|\\_,_\\__, |_|_||_/__/
 ${BLUE}                          |_|                     |_|         |___/
 \\n${INDIGO} Munin plugins and management script for monitoring various Pi-hole® statistics
-\\n${VIOLET} $(date)${RESET}\\n"
+\\n${VIOLET} $(date)${RESET}"
     fi
 }
 
