@@ -4,6 +4,8 @@
 # saint-lascivious (Hayden Pearce) 2022
 # saint@sainternet.xyz
 
+# shellcheck disable=SC2249
+
 # Environment variables for this script
 #
 #     host          - Pi-hole® host address
@@ -224,9 +226,6 @@ case $1 in
                 exit 0
             ;;
         esac
-    ;;
-    *)
-        exit 0
     ;;
 esac
 
