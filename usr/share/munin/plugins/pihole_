@@ -77,7 +77,7 @@ case $1 in
                 echo "graph_vlabel cache packets"
                 echo "graph_scale no"
                 echo "graph_category dns"
-                echo "graph_info This graph shows Pi-hole cache."
+                echo "graph_info This graph shows Pi-hole's cache."
                 for stat_id in ${get_stats}; do
                     uid="$(echo "${stat_id}" | sed 's/:.*//')"
                     if [ "${uid}" = "cache-live-freed" ] || [ "${uid}" = "cache-inserted" ] || [ "${uid}" = "expired" ] || [ "${uid}" = "immortal" ]; then
@@ -94,7 +94,7 @@ case $1 in
                 echo "graph_vlabel cache packets"
                 echo "graph_scale no"
                 echo "graph_category dns"
-                echo "graph_info This graph shows Pi-hole cache by type."
+                echo "graph_info This graph shows Pi-hole's cache by type."
                 for stat_id in ${get_stats}; do
                     uid="$(echo "${stat_id}" | sed 's/:.*//')"
                     if [ "${uid}" = "ipv4" ] || [ "${uid}" = "ipv6" ] || [ "${uid}" = "srv" ] || [ "${uid}" = "cname" ] || [ "${uid}" = "ds" ] || [ "${uid}" = "dnskey" ] || [ "${uid}" = "other" ]; then
@@ -127,7 +127,7 @@ case $1 in
                 echo "graph_vlabel percent blocked"
                 echo "graph_scale no"
                 echo "graph_category dns"
-                echo "graph_info This graph shows Pi-hole blocked query percentage."
+                echo "graph_info This graph shows Pi-hole's blocked query percentage."
                 for stat_id in ${get_stats}; do
                     uid="$(echo "${stat_id}" | sed 's/:.*//')"
                     if [ "${uid}" = "ads_percentage_today" ]; then
@@ -178,7 +178,7 @@ case $1 in
                 echo "graph_vlabel offline / disabled / enabled"
                 echo "graph_scale no"
                 echo "graph_category dns"
-                echo "graph_info This graph shows Pi-hole blocking status."
+                echo "graph_info This graph shows Pi-hole's blocking status."
                 for stat_id in ${get_stats}; do
                     uid="$(echo "${stat_id}" | sed 's/:.*//')"
                     if [ "${uid}" = "status" ]; then
@@ -212,7 +212,7 @@ case $1 in
                 echo "graph_vlabel percent blocked"
                 echo "graph_scale no"
                 echo "graph_category dns"
-                echo "graph_info This graph shows Pi-hole blocked query percentage."
+                echo "graph_info This graph shows Pi-hole's blocked query percentage."
                 for stat_id in ${get_stats}; do
                     uid="$(echo "${stat_id}" | sed 's/:.*//')"
                     if [ "${uid}" = "ads_percentage_today" ]; then
