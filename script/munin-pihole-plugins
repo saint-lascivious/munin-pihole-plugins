@@ -6,7 +6,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="05.13.00"
+VERSION="06.00.00"
 
 # environment variables with overrides
 branch="${BRANCH:-development}"
@@ -53,9 +53,7 @@ if [[ "${verbosity_level}" =~ ^(-)?[0-9]+$ ]]; then
         fi
     fi
 else
-    reverberate "warning" "Unexpected value for VERBOSITY_LEVEL: ${verbosity_level}"
     verbosity_level="3"
-    reverberate "info" "Reverting to default value for VERBOSITY_LEVEL: ${verbosity_level}"
 fi
 
 # define colours for later use, if supported
@@ -113,13 +111,14 @@ verbosity_level="${verbosity_level}"
 update_now() {
     if [[ -x "$(command -v wget)" ]]; then
         if [[ "${verbosity_level}" -ge "4" ]]; then
-            wget -q --show-progress "${plugin_domain}" -O "${current_dir}/munin-pihole-plugins"
+            wget -q --show-progress "${plugin_domain}" -O "${current_dir}/munin-pihole-plugins" || return
         else
-            wget -q "${plugin_domain}" -O "${current_dir}/munin-pihole-plugins"
+            wget -q "${plugin_domain}" -O "${current_dir}/munin-pihole-plugins" || return
         fi
     else
         if [[ "${verbosity_level}" -gt "0" ]]; then
-            echo -e "\\n  [${RED}!${RESET}] The required command '${RED}wget${RESET}' was not found"
+            echo -e "\\n  [${RED}!${RESET}] ${RED}The required command 'wget' was not found${RESET}"
+            echo -e "  [${RED}✗${RESET}] wget"
             echo -e "\\n  [${RED}!${RESET}] ${RED}Exiting $0${RESET}"
         fi
         exit 1
@@ -129,29 +128,37 @@ update_now() {
         if [[ -d "/etc/bash_completion.d" ]]; then
             if [[ "${verbosity_level}" -ge "4" ]]; then
                 if [[ -f "/etc/bash_completion.d/munin-pihole-plugins" ]]; then
-                    wget -q --show-progress "${plugin_repo}/etc/bash_completion.d/munin-pihole-plugins" -O "/etc/bash_completion.d/munin-pihole-plugins"
+                    wget -q --show-progress "${plugin_repo}/etc/bash_completion.d/munin-pihole-plugins" -O "/etc/bash_completion.d/munin-pihole-plugins" || return
                 else
-                    wget -q --show-progress "${plugin_repo}/etc/bash_completion.d/munin-pihole-plugins" -P "/etc/bash_completion.d"
+                    wget -q --show-progress "${plugin_repo}/etc/bash_completion.d/munin-pihole-plugins" -P "/etc/bash_completion.d" || return
                 fi
             else
                 if [[ -f "/etc/bash_completion.d/munin-pihole-plugins" ]]; then
-                    wget -q "${plugin_repo}/etc/bash_completion.d/munin-pihole-plugins" -O "/etc/bash_completion.d/munin-pihole-plugins"
+                    wget -q "${plugin_repo}/etc/bash_completion.d/munin-pihole-plugins" -O "/etc/bash_completion.d/munin-pihole-plugins" || return
                 else
-                    wget -q "${plugin_repo}/etc/bash_completion.d/munin-pihole-plugins" -P "/etc/bash_completion.d"
+                    wget -q "${plugin_repo}/etc/bash_completion.d/munin-pihole-plugins" -P "/etc/bash_completion.d" || return
                 fi
             fi
         fi
     fi
+    if [[ "${verbosity_level}" -ge "1" ]]; then
+        echo -e "\\n  [${WHITE}ℹ${RESET}] ${GREEN}Done${RESET}"
+    fi
     if [[ "${verbosity_level}" -ge "3" ]]; then
         echo -e "\\n  [${WHITE}ℹ${RESET}] ${GREEN}Restarting munin-pihole-plugins after update${RESET}"
     fi
+    if [[ "${verbosity_level}" -ge "4" ]]; then
+        echo -e "\\n  [${WHITE}ℹ${RESET}] ${GREEN}Restarting in 5 seconds${RESET}"
+        sleep 5
+    fi
+    clear
     exec env UPDATE_SELF="false" /bin/bash "$0" "$@"
 }
 
 update_now
 EOF
     chmod +x "${temp_dir}/.munin-pihole-plugins_update"
-    reverberate "info" "Updating munin-pihole-plugins"
+    reverberate "info" "Updating the munin-pihole-plugins script"
     exec /bin/bash "${temp_dir}/.munin-pihole-plugins_update"
 }
 
@@ -170,7 +177,7 @@ reverberate() {
         ;;
         "error"                                             )
             if [[ "${verbosity_level}" -ge "1" ]]; then
-                echo -e "\\n  [${RED}!${RESET}] $2"
+                echo -e "\\n  [${RED}!${RESET}] ${RED}$2${RESET}"
             fi
         ;;
         "exit"                                              )
@@ -185,7 +192,7 @@ reverberate() {
         ;;
         "footer"                                            )
             if [[ "${verbosity_level}" -ge "1" ]]; then
-                echo -e "\\n  [${WHITE}ℹ${RESET}] ${GREEN}Done${RESET}"
+                echo -e "\\n  [${WHITE}ℹ${RESET}] ${GREEN}Done${RESET}\\n"
             fi
         ;;
         "header"                                            )
@@ -200,7 +207,7 @@ reverberate() {
         ;;
         "question"                                          )
             if [[ "${verbosity_level}" -ge "2" ]]; then
-                echo -e "\\n  [${BLUE}?${BLUE}] ${GREEN}$2{RESET}"
+                echo -e "\\n  [${BLUE}?${BLUE}] ${BLUE}$2${RESET}"
             fi
         ;;
         "success"                                           )
@@ -210,7 +217,7 @@ reverberate() {
         ;;
         "warning"                                           )
             if [[ "${verbosity_level}" -ge "2" ]]; then
-                echo -e "\\n  [${YELLOW}⚠${RESET}] $2"
+                echo -e "\\n  [${YELLOW}⚠${RESET}] ${YELLOW}$2${RESET}"
             fi
         ;;
         *                                                   )
@@ -230,7 +237,7 @@ ${YELLOW}  | '  \\ || | ' \\| | ' \\__| '_ \\ | ' \\/ _ \\ / -_)_| '_ \\ | || / 
 ${GREEN}  |_|_|_\\_,_|_||_|_|_||_| | .__/_|_||_\\___/_\\___| | .__/_|\\_,_\\__, |_|_||_/__/
 ${BLUE}                          |_|                     |_|         |___/
 \\n${INDIGO} Munin plugins and management script for monitoring various Pi-hole® statistics
-\\n${VIOLET} $(date)${RESET}\\n"
+\\n${VIOLET} $(date)${RESET}"
     fi
 }
 
@@ -238,9 +245,9 @@ ${BLUE}                          |_|                     |_|         |___/
 check_pihole() {
     reverberate "info" "Checking if this is a Pi-hole® host"
     if [[ -x "$(command -v pihole)" ]]; then
-        reverberate "success" "The '${GREEN}pihole${RESET}' command was found"
+        reverberate "success" "pihole"
     else
-        reverberate "failure" "The '${RED}pihole${RESET}' command was not found"
+        reverberate "failure" "pihole"
         pihole_on_host="no"
     fi
 }
@@ -263,19 +270,21 @@ install_dependencies() {
             for dependency_id in ${dependency_list}; do
                 package_query="$(dpkg-query -W --showformat='${Status}\n' "${dependency_id}" | grep "install ok installed")"
                 if [[ -n "${package_query}" ]]; then
-                    reverberate success "${dependency_id} was found"
+                    reverberate "success" "${dependency_id}"
                 else
-                    reverberate failure "${dependency_id} was not found"
+                    reverberate "failure" "${dependency_id}"
                     apt install -qq "${dependency_id}"
                 fi
             done
         else
-            reverberate "error" "The required command '${RED}apt${RESET}' was not found"
+            reverberate "error" "The required command 'apt' was not found"
+            reverberate "failure" "apt"
             reverberate "exit"
             exit 1
         fi
     else
-        reverberate "error" "The required command '${RED}dpkg-query${RESET}' was not found"
+        reverberate "error" "The required command 'dpkg-query' was not found"
+        reverberate "failure" "dpkg-query"
         reverberate "exit"
         exit 1
     fi
@@ -285,12 +294,13 @@ install_dependencies() {
 download() {
     if [[ -x "$(command -v wget)" ]]; then
         if [[ "${verbosity_level}" -ge "4" ]]; then
-            wget -q --show-progress "$@"
+            wget -q --show-progress "$@" || return
         else
-            wget -q "$@"
+            wget -q "$@" || return
         fi
     else
-        reverberate "error" "The required command '${RED}wget${RESET}' was not found"
+        reverberate "error" "The required command 'wget' was not found"
+        reverberate "failure" "wget"
         reverberate "exit"
         exit 1
     fi
@@ -312,9 +322,7 @@ configure_proxy() {
         fi
         reverberate "info" "Installing Munin webserver proxy configuration"
         download "${proxy_repo}/etc/lighttpd/external.conf" -O "${proxy_config}"
-        if [[ -f "${proxy_config}" ]]; then
-            reverberate "success" "external.conf"
-        fi
+        reverberate "success" "${proxy_config}"
     else
         reverberate "error" "No lighttpd configuration directory found"
         reverberate "failure" "${proxy_config_dir}"
@@ -334,7 +342,8 @@ configure_munin() {
     if [[ -d "${munin_config_dir}" ]]; then
         if [[ ! -f "${munin_config_dir}/99-graph-strategy.conf" ]]; then
             reverberate "info" "Installing Munin server graph strategy configuration"
-            download "${plugin_repo}/etc/munin/munin-conf.d/99-graph-strategy.conf" -P "${munin_config_dir}" || return
+            download "${plugin_repo}/etc/munin/munin-conf.d/99-graph-strategy.conf" -P "${munin_config_dir}"
+            reverberate "success" "${munin_config_dir}/99-graph-strategy.conf"
         fi
     else
         reverberate "info" "Attempting fallback configuration editing munin.conf directly"
@@ -404,7 +413,7 @@ install_plugins() {
     if [[ -d "${munin_plugin_dir}" ]]; then
         if [[ -d "${node_plugin_dir}" ]]; then
             reverberate "info" "Installing munin-pihole-plugins plugin"
-            download "${plugin_repo}/usr/share/munin/plugins/pihole_" -P "${munin_plugin_dir}" || return
+            download "${plugin_repo}/usr/share/munin/plugins/pihole_" -P "${munin_plugin_dir}"
             chmod +x "${munin_plugin_dir}/pihole_" || return
             reverberate "success" "pihole_"
             reverberate "info" "Creating selected munin-pihole-plugins symbolic links"
@@ -472,7 +481,8 @@ restart_services() {
                 reverberate "success" "${service_id}"
             done
         else
-            reverberate "error" "The required command '${RED}service${RESET}' was not found"
+            reverberate "error" "The required command 'service' was not found"
+            reverberate "failure" "service"
             reverberate "exit"
             exit 1
         fi
@@ -497,13 +507,19 @@ install_script() {
             else
                 download "${plugin_repo}/etc/bash_completion.d/munin-pihole-plugins" -P "/etc/bash_completion.d"
             fi
+            reverberate "info" "A copy of the munin-pihole-plugins bash-completion script was installed"
+            reverberate "success" "/etc/bash_completion.d/munin-pihole-plugins"
         fi
         if [[ ":${PATH}:" != *":${script_dir}:"* ]]; then
-            reverberate "warning" "The munin-pihole-plugins script directory is not in your \$PATH variable"
+            reverberate "warning" "The munin-pihole-plugins script directory is not in your \$PATH"
+            reverberate "failure" "\$PATH"
             reverberate "additional_info" "To add the munin-pihole-plugins script directory to your \$PATH try"
             reverberate "export PATH=\"\$PATH:${script_dir}\""
+        else
+            reverberate "info" "The munin-pihole-plugins script directory is in your \$PATH"
+            reverberate "success" "\$PATH"
+            reverberate "additional_info" "You can now use munin-pihole-plugins just as you would any other command"
         fi
-        reverberate "additional_info" "You can now use munin-pihole-plugins just as you would any other command"
     else
         reverberate "error" "No directory found"
         reverberate "failure" "${script_dir}"
@@ -533,7 +549,7 @@ uninstall_now() {
     fi
     rm "${script_dir}/munin-pihole-plugins" || return
     if [[ "${verbosity_level}" -ge "3" ]]; then
-        echo -e "\\n  [${WHITE}ℹ${RESET}] ${GREEN}Done${RESET}"
+        echo -e "\\n  [${WHITE}ℹ${RESET}] ${GREEN}Done${RESET}\\n"
     fi
 }
 
@@ -785,6 +801,7 @@ install_function() {
                     rm "${temp_dir}/.munin-pihole-plugins_update" || return
                 fi
                 if [[ "${remote_version}" > "${VERSION}" ]]; then
+                    obnoxious_header
                     update_script "$@"
                 fi
             fi
