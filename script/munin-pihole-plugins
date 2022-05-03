@@ -6,7 +6,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="06.00.00"
+VERSION="06.00.01"
 
 # environment variables with overrides
 branch="${BRANCH:-development}"
@@ -384,24 +384,30 @@ configure_munin() {
 uninstall_plugins() {
     all_plugins="blocked blockrate cache cacheinfo cacherate cache_by_type cache_info clients hits percent queries reply replies_by_type status unique unique_domains"
     if [[ -d "${munin_plugin_dir}" ]]; then
-        reverberate "info" "Removing any existing munin-pihole-plugins plugin(s)"
+        reverberate "additional_info" "Removing any existing munin-pihole-plugins plugin(s)"
         if [[ -f "${munin_plugin_dir}/pihole_" ]]; then
             rm "${munin_plugin_dir}/pihole_" || return
-            reverberate "success" "pihole_"
+            if [[ "${verbosity_level}" -ge "4" ]]; then
+                reverberate "success" "${munin_plugin_dir}/pihole_"
+            fi
         fi
         for plugin_id in ${all_plugins}; do
             if [[ -f "${munin_plugin_dir}/pihole_${plugin_id}" ]]; then
                 rm "${munin_plugin_dir}/pihole_${plugin_id}" || return
-                reverberate "success" "${plugin_id}"
+                if [[ "${verbosity_level}" -ge "4" ]]; then
+                    reverberate "success" "${munin_plugin_dir}pihole_${plugin_id}"
+                fi
             fi
         done
     fi
     if [[ -d "${node_plugin_dir}" ]]; then
-        reverberate "info" "Removing any existing munin-pihole-plugins symbolic links"
+        reverberate "additional_info" "Removing any existing munin-pihole-plugins symbolic links"
         for plugin_id in ${all_plugins}; do
             if [[ -h "${node_plugin_dir}/pihole_${plugin_id}" ]]; then
                 rm "${node_plugin_dir}/pihole_${plugin_id}" || return
-                reverberate "success" "${plugin_id}"
+                if [[ "${verbosity_level}" -ge "4" ]]; then
+                    reverberate "success" "${node_plugin_dir}/pihole_${plugin_id}"
+                fi
             fi
         done
     fi
@@ -415,11 +421,11 @@ install_plugins() {
             reverberate "info" "Installing munin-pihole-plugins plugin"
             download "${plugin_repo}/usr/share/munin/plugins/pihole_" -P "${munin_plugin_dir}"
             chmod +x "${munin_plugin_dir}/pihole_" || return
-            reverberate "success" "pihole_"
+            reverberate "success" "${munin_plugin_dir}/pihole_"
             reverberate "info" "Creating selected munin-pihole-plugins symbolic links"
             for plugin_id in ${plugin_list}; do
                 ln -s "${munin_plugin_dir}/pihole_" "${node_plugin_dir}/pihole_${plugin_id}" || return
-                reverberate "success" "${plugin_id}"
+                reverberate "success" "${node_plugin_dir}/pihole_${plugin_id}"
             done
         else
             reverberate "error" "No Munin node plugin directory found"
@@ -516,8 +522,10 @@ install_script() {
             reverberate "additional_info" "To add the munin-pihole-plugins script directory to your \$PATH try"
             reverberate "export PATH=\"\$PATH:${script_dir}\""
         else
-            reverberate "info" "The munin-pihole-plugins script directory is in your \$PATH"
-            reverberate "success" "\$PATH"
+            reverberate "additional_info" "The munin-pihole-plugins script directory is in your \$PATH"
+            if [[ "${verbosity_level}" -ge "4" ]]; then
+                reverberate "success" "\$PATH"
+            fi
             reverberate "additional_info" "You can now use munin-pihole-plugins just as you would any other command"
         fi
     else
