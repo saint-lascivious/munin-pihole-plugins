@@ -6,7 +6,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="06.00.01"
+VERSION="06.00.02"
 
 # environment variables with overrides
 branch="${BRANCH:-development}"
@@ -962,14 +962,14 @@ version_function() {
     if [[ -n "${remote_version}" ]]; then
         if [[ "${remote_version}" > "${VERSION}" ]]; then
             min_height="4"
-            some "  [${WHITE}ℹ${RESET}] An update for munin-pihole-plugins is available\\n
+            some "  [${WHITE}ℹ${RESET}] ${GREEN}An update for munin-pihole-plugins is available${RESET}\\n
   munin-pihole-plugins version is v${RED}${VERSION}${RESET} (Latest: v${GREEN}${remote_version}${RESET})"
         else
             some "  [${WHITE}ℹ${RESET}] munin-pihole-plugins version is v${GREEN}${VERSION}${RESET} (Latest: v${GREEN}${remote_version}${RESET})"
         fi
     else
         min_height="5"
-        some "  [${YELLOW}⚠${RESET}] Unable to locate a TXT record for ${plugin_domain}
+        some "  [${YELLOW}⚠${RESET}] ${YELLOW}Unable to locate a TXT record for ${plugin_domain}${RESET}
   using the nameserver ${dns_server} on port ${dns_port}\\n
   munin-pihole-plugins version is v${VERSION} (Latest: ${RED}unknown${RESET})"
     fi
