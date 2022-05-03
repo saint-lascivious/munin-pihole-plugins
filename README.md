@@ -143,6 +143,7 @@ Variable
  PLUGIN_LIST="blocked cache cache_by_type clients percent queries replies_by_type status unique_domains"
  PROXY_CONFIG_DIR="/etc/lighttpd"
  SCRIPT_DIR="/usr/local/bin"
+ SHOW_COLOR="true"
  SKIP_DEPENDENCY_CHECK="false"
  UPDATE_SELF="true"
  VERBOSITY_LEVEL="3"
@@ -219,6 +220,10 @@ The directory in which `lighttpd`'s external.conf should be located.
 * `SCRIPT_DIR`
 
 The directory in which the `munin-pihole-plugins` script should be located when installed, the `munin-pihole-plugins` script will warn if this directory is not located in the host's $PATH variable and suggest how to correct this.
+
+* `SHOW_COLOR`
+
+Disables color output if set to any value other than `true`.
 
 * `SKIP_DEPENDENCY_CHECK`
 
