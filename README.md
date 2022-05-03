@@ -50,45 +50,63 @@ Example: `munin-pihole-plugins --help install`
 
 [pihole_blocked-day.png]:https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/gallery/pihole_blocked-day.png "This plugin shows domains blocked by Pi-hole®."
 
+This plugin shows domains blocked by Pi-hole®.
+
 * pihole_cache
 ![alt text][pihole_cache-day.png]
 
 [pihole_cache-day.png]:https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/gallery/pihole_cache-day.png "This plugin shows Pi-hole®'s cache."
+
+This plugin shows Pi-hole®'s cache.
 
 * pihole_cache_by_type
 ![alt text][pihole_cache_by_type-day.png]
 
 [pihole_cache_by_type-day.png]:https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/gallery/pihole_cache_by_type-day.png "This plugin shows Pi-hole®'s cache by type."
 
+This plugin shows Pi-hole®'s cache by type.
+
 * pihole_clients
-![alt text][pihole_clients.png]
+![alt text][pihole_clients-day.png]
 
 [pihole_clients-day.png]:https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/gallery/pihole_clients-day.png "This plugin shows clients seen by Pi-hole®."
+
+This plugin shows clients seen by Pi-hole®.
 
 * pihole_percent
 ![alt text][pihole_percent-day.png]
 
 [pihole_percent-day.png]:https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/gallery/pihole_percent-day.png "This plugin shows Pi-hole®'s blocked query percentage."
 
+This plugin shows Pi-hole®'s blocked query percentage.
+
 * pihole_queries
 ![alt text][pihole_queries-day.png]
 
 [pihole_queries-day.png]:https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/gallery/pihole_queries-day.png "This plugin shows queries seen by Pi-hole®."
+
+This plugin shows queries seen by Pi-hole®.
 
 * pihole_replies_by_type
 ![alt text][pihole_replies_by_type-day.png]
 
 [pihole_replies_by_type-day.png]:https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/gallery/pihole_replies_by_type-day.png "This plugin shows Pi-hole® replies by type."
 
+This plugin shows Pi-hole® replies by type.
+
 * pihole_status
 ![alt text][pihole_status-day.png]
 
 [pihole_status-day.png]:https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/gallery/pihole_status-day.png "This plugin shows Pi-hole®'s blocking status."
 
+This plugin shows Pi-hole®'s blocking status.
+
 * pihole_unique_domains
 ![alt text][pihole_unique_domains-day.png]
 
 [pihole_unique_domains-day.png]:https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/gallery/pihole_unique_domains-day.png "This plugin shows unique domains seen by Pi-hole®."
+
+This plugin shows unique domains seen by Pi-hole®.
 
 ## Configuration
 
