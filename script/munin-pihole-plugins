@@ -6,8 +6,12 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="06.02.01"
+VERSION="06.02.02"
 
+# source any external variables from munin-pihole-plugins.conf
+# somewhat of a security risk honestly, i don't particularly
+# like using . but if someone can write to /etc then you most
+# certainly have bigger problems
 # shellcheck disable=SC1091
 if [[ -f "/etc/munin-pihole-plugins/munin-pihole-plugins.conf" ]]; then
     . /etc/munin-pihole-plugins/munin-pihole-plugins.conf
@@ -194,6 +198,15 @@ reverberate() {
                 echo -e "\\n  [${WHITE}ℹ${RESET}] ${GREEN}$2${RESET}"
             fi
         ;;
+        "config"                                            )
+            if [[ "${verbosity_level}" -ge "3" ]]; then
+                if [[ -f "${script_dir}/munin-pihole-plugins" ]]; then
+                    echo -e "  ${WHITE}munin-pihole-plugins --variables $2${RESET} VALUE"
+                else
+                    echo -e "  ${WHITE}export $2=\"VALUE\"${RESET}"
+                fi
+            fi
+        ;;
         "error"                                             )
             if [[ "${verbosity_level}" -ge "1" ]]; then
                 echo -e "\\n  [${RED}!${RESET}] ${RED}$2${RESET}"
@@ -346,7 +359,7 @@ configure_proxy() {
         reverberate "error" "No lighttpd configuration directory found"
         reverberate "failure" "${proxy_config_dir}"
         reverberate "additional_info" "If this directory is located at a different path try"
-        reverberate "export PROXY_CONFIG_DIR=\"/path/to/directory\""
+        reverberate "config" "PROXY_CONFIG_DIR"
         reverberate "exit"
         exit 1
     fi
@@ -374,7 +387,7 @@ configure_munin() {
                 reverberate "error" "No munin.conf file found"
                 reverberate "failure" "${munin_dir}/munin.conf"
                 reverberate "additional_info" "If this file is located at a different path try"
-                reverberate "export MUNIN_DIR=\"/path/to/directory\""
+                reverberate "config" "MUNIN_DIR"
                 reverberate "exit"
                 exit 1
             fi
@@ -382,14 +395,14 @@ configure_munin() {
             reverberate "error" "No Munin directory found"
             reverberate "failure" "${munin_dir}"
             reverberate "additional_info" "If this directory is located at a different path try"
-            reverberate "export MUNIN_DIR=\"/path/to/directory\""
+            reverberate "config" "MUNIN_DIR"
             reverberate "exit"
             exit 1
         fi
         reverberate "error" "No Munin configuration directory found"
         reverberate "failure" "${munin_config_dir}"
         reverberate "additional_info" "If this directory is located at a different path try"
-        reverberate "export MUNIN_CONFIG_DIR=\"/path/to/directory\""
+        reverberate "config" "MUNIN_CONFIG_DIR"
         reverberate "exit"
         exit 1
     fi
@@ -450,7 +463,7 @@ install_plugins() {
             reverberate "error" "No Munin node plugin directory found"
             reverberate "failure" "${node_plugin_dir}"
             reverberate "additional_info" "If this directory is located at a different path try"
-            reverberate "export NODE_PLUGIN_DIR=\"/path/to/directory\""
+            reverberate "config" "NODE_PLUGIN_DIR"
             reverberate "exit"
             exit 1
         fi
@@ -458,7 +471,7 @@ install_plugins() {
         reverberate "error" "No Munin plugin directory found"
         reverberate "failure" "${munin_plugin_dir}"
         reverberate "additional_info" "If this directory is located at a different path try"
-        reverberate "export MUNIN_PLUGIN_DIR=\"/path/to/directory\""
+        reverberate "config" "MUNIN_PLUGIN_DIR"
         reverberate "exit"
         exit 1
     fi
@@ -478,7 +491,7 @@ configure_plugins() {
         reverberate "error" "No Munin plugin configuration directory found"
         reverberate "failure" "${plugin_config_dir}"
         reverberate "additional_info" "If this directory is located at a different path try"
-        reverberate "export PLUGIN_CONFIG_DIR=\"/path/to/directory\""
+        reverberate "config" "PLUGIN_CONFIG_DIR"
         reverberate "exit"
         exit 1
     fi
@@ -551,7 +564,7 @@ install_script() {
         reverberate "error" "No directory found"
         reverberate "failure" "${script_dir}"
         reverberate "additional_info" "If this directory is located at a different path try"
-        reverberate "export SCRIPT_DIR=\"/path/to/directory\""
+        reverberate "config" "SCRIPT_DIR"
         reverberate "exit"
         exit 1
     fi
@@ -1016,7 +1029,9 @@ variable_function() {
                     min_height="3"
                     if [[ ! -d "${external_var_path}" ]]; then
                         mkdir "${external_var_path}" || return
-                        touch "${external_var_path}/munin-pihole-plugins.conf" || return
+                        cat > "${external_var_path}/munin-pihole-plugins.conf" << EOF
+# external configuration file created by munin-pihole-plugins
+EOF
                     fi
                     if grep -q "^${external_var}=" "${external_var_path}/munin-pihole-plugins.conf"; then
                         sed -i "/^${external_var}=/c\\${external_var}=${external_var_value}" "${external_var_path}/munin-pihole-plugins.conf" || return
@@ -1097,9 +1112,13 @@ variable_function() {
                 some "VERBOSITY_LEVEL: ${verbosity_level}"
             ;;
             ""                                              )
-                min_height="23"
-                some "Usage: export [VARIABLE]=\"value\"
-\\nVariable
+                min_height="25"
+                if [[ -f "${script_dir}/munin-pihole-plugins" ]]; then
+                    some "Usage: munin-pihole-plugins $1 [VARIABLE [\"VALUE\"]]"
+                else
+                    some "Usage: export VARIABLE=\"VALUE\""
+                fi
+                some "\\nVariable
  BRANCH=\"${branch}\"
  DNS_PORT=\"${dns_port}\"
  DNS_SERVER=\"${dns_server}\"
@@ -1118,7 +1137,12 @@ variable_function() {
  SKIP_DEPENDENCY_CHECK=\"${skip_dependency_check}\"
  UPDATE_SELF=\"${update_self}\"
  VERBOSITY_LEVEL=\"${verbosity_level}\""
-            ;;
+                if [[ -f "${script_dir}/munin-pihole-plugins" ]]; then
+                    some "\\nExample: munin-pihole-plugins $1 DNS_SERVER 127.0.0.1"
+                else
+                    some "\\nExample: export DNS_SERVER=\"127.0.0.1\""
+                fi
+           ;;
             *                                               )
                 min_height="3"
                 some "munin-pihole-plugins: unrecognized variable '$2'
