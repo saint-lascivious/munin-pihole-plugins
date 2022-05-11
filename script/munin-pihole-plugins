@@ -6,7 +6,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="06.02.00"
+VERSION="06.02.01"
 
 # shellcheck disable=SC1091
 if [[ -f "/etc/munin-pihole-plugins/munin-pihole-plugins.conf" ]]; then
@@ -1013,16 +1013,17 @@ variable_function() {
                     external_var_path="/etc/munin-pihole-plugins"
                     external_var="${2}"
                     external_var_value="${3}"
+                    min_height="3"
                     if [[ ! -d "${external_var_path}" ]]; then
                         mkdir "${external_var_path}" || return
                         touch "${external_var_path}/munin-pihole-plugins.conf" || return
                     fi
                     if grep -q "^${external_var}=" "${external_var_path}/munin-pihole-plugins.conf"; then
                         sed -i "/^${external_var}=/c\\${external_var}=${external_var_value}" "${external_var_path}/munin-pihole-plugins.conf" || return
-                        reverberate "success" "${external_var}: ${external_var_value}"
+                        some "${external_var}: ${external_var_value}"
                     else
                         echo "${external_var}=${external_var_value}" >> "${external_var_path}/munin-pihole-plugins.conf" || return
-                        reverberate "success" "${external_var}: ${external_var_value}"
+                        some "${external_var}: ${external_var_value}"
                     fi
                 fi
             fi
