@@ -6,7 +6,12 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="06.01.00"
+VERSION="06.02.00"
+
+# shellcheck disable=SC1091
+if [[ -f "/etc/munin-pihole-plugins/munin-pihole-plugins.conf" ]]; then
+    . /etc/munin-pihole-plugins/munin-pihole-plugins.conf
+fi
 
 # environment variables with overrides
 branch="${BRANCH:-development}"
@@ -757,16 +762,19 @@ uninstall any dependencies that munin-pihole-plugins may have installed.
             esac
         ;;
         "-V" | "--variables" | "variables"                  )
-            min_height="14"
-            some "Usage: munin-pihole-plugins {$2 [VARIABLE]}
+            min_height="19"
+            some "Usage: munin-pihole-plugins {$2 [VARIABLE [VALUE]]}
 \\nOption\\t\\tGNU long option\\t\\tMeaning
  -V, variables\\t --variables\\t\\t Display environment variables
 \\nDisplay a full list of environment variables used by the munin-pihole-plugins
-script, and their current values. The variables can be used to customize
-various aspects of the munin-pihole-plugins script's operation.
+script, and their current values. These variables and this command can be used
+to customize various aspects of the munin-pihole-plugins script's operation.
 \\nTakes an optional parameter in the form of a munin-pihole-plugins environment
 variable to list the value of that variable alone.
-\\nExample: 'munin-pihole-plugins $2 INSTALL_PLUGINS'"
+\\nTakes an optional value for a munin-pihole-plugins environment variable to
+set the value of that variable.
+\\nExample: 'munin-pihole-plugins $2 INSTALL_PLUGINS'
+Example: 'munin-pihole-plugins $2 DNS_SERVER 127.0.0.1'"
         ;;
         ""                                                  )
             min_height="13"
@@ -991,45 +999,73 @@ version_function() {
 
 # display munin-pihole-plugins environment variables and their current values
 # there were too many variables to list in the main help text
+# also capable of setting environment variables when installed locally
+# variables saved in /etc/munin-pihole-plugins/munin-pihole-plugins.conf
+# in the format:
+# EXTERNAL_VAR=EXTERNAL_VAR_VALUE
 variable_function() {
-    min_height="3"
-    case "$2" in
-        "branch" | "BRANCH"                                 )
-            some "BRANCH: ${branch}"
-        ;;
-        "dns_port" | "DNS_PORT"                             )
-            some "DNS_PORT: ${dns_port}"
-        ;;
-        "dns_server" | "DNS_SERVER"                         )
-            some "DNS_SERVER: ${dns_server}"
-        ;;
-        "install_plugins" | "INSTALL_PLUGINS"               )
-            some "INSTALL_PLUGINS: ${install_plugins}"
-        ;;
-        "install_script" | "INSTALL_SCRIPT"                 )
-            some "INSTALL_SCRIPT: ${install_script}"
-        ;;
-        "install_webserver" | "INSTALL_WEBSERVER"           )
-            some "INSTALL_WEBSERVER: ${install_webserver}"
-        ;;
-        "munin_dir" | "MUNIN_DIR"                           )
-            some "MUNIN_DIR: ${munin_dir}"
-        ;;
-        "munin_config_dir" | "MUNIN_CONFIG_DIR"             )
-            some "MUNIN_CONFIG_DIR: ${munin_config_dir}"
-        ;;
-        "munin_plugin_dir" | "MUNIN_PLUGIN_DIR"             )
-            some "MUNIN_PLUGIN_DIR: ${munin_plugin_dir}"
-        ;;
-        "node_plugin_dir" | "NODE_PLUGIN_DIR"               )
-            some "NODE_PLUGIN_DIR: ${node_plugin_dir}"
-        ;;
-        "plugin_config_dir" | "PLUGIN_CONFIG_DIR"           )
-            some "PLUGIN_CONFIG_DIR: ${plugin_config_dir}"
-        ;;
-        "plugin_list" | "PLUGIN_LIST"                       )
-            min_height="14"
-            some "PLUGIN_LIST: ${plugin_list}
+    if [[ -n "$3" ]]; then
+        external_var_list="BRANCH DNS_PORT DNS_SERVER INSTALL_PLUGINS INSTALL_SCRIPT INSTALL_WEBSERVER MUNIN_DIR MUNIN_CONFIG_DIR MUNIN_PLUGIN_DIR NODE_PLUGIN_DIR PLUGIN_CONFIG_DIR PLUGIN_LIST PROXY_CONFIG_DIR SCRIPT_DIR SKIP_DEPENDENCY_CHECK UPDATE_SELF VERBOSITY_LEVEL"
+        for external_var_id in ${external_var_list}; do
+            if [[ "$2" == "${external_var_id}" ]]; then
+                if [[ -f "${script_dir}/munin-pihole-plugins" ]]; then
+                    check_privilege "$@"
+                    external_var_path="/etc/munin-pihole-plugins"
+                    external_var="${2}"
+                    external_var_value="${3}"
+                    if [[ ! -d "${external_var_path}" ]]; then
+                        mkdir "${external_var_path}" || return
+                        touch "${external_var_path}/munin-pihole-plugins.conf" || return
+                    fi
+                    if grep -q "^${external_var}=" "${external_var_path}/munin-pihole-plugins.conf"; then
+                        sed -i "/^${external_var}=/c\\${external_var}=${external_var_value}" "${external_var_path}/munin-pihole-plugins.conf" || return
+                        reverberate "success" "${external_var}: ${external_var_value}"
+                    else
+                        echo "${external_var}=${external_var_value}" >> "${external_var_path}/munin-pihole-plugins.conf" || return
+                        reverberate "success" "${external_var}: ${external_var_value}"
+                    fi
+                fi
+            fi
+        done
+    else
+        min_height="3"
+        case "$2" in
+            "BRANCH"                                        )
+                some "BRANCH: ${branch}"
+            ;;
+            "DNS_PORT"                                      )
+                some "DNS_PORT: ${dns_port}"
+            ;;
+            "DNS_SERVER"                                    )
+                some "DNS_SERVER: ${dns_server}"
+            ;;
+            "INSTALL_PLUGINS"                               )
+                some "INSTALL_PLUGINS: ${install_plugins}"
+            ;;
+            "INSTALL_SCRIPT"                                )
+                some "INSTALL_SCRIPT: ${install_script}"
+            ;;
+            "INSTALL_WEBSERVER"                             )
+                some "INSTALL_WEBSERVER: ${install_webserver}"
+            ;;
+            "MUNIN_DIR"                                     )
+                some "MUNIN_DIR: ${munin_dir}"
+            ;;
+            "MUNIN_CONFIG_DIR"                              )
+                some "MUNIN_CONFIG_DIR: ${munin_config_dir}"
+            ;;
+            "MUNIN_PLUGIN_DIR"                              )
+                some "MUNIN_PLUGIN_DIR: ${munin_plugin_dir}"
+            ;;
+            "NODE_PLUGIN_DIR"                               )
+                some "NODE_PLUGIN_DIR: ${node_plugin_dir}"
+            ;;
+            "PLUGIN_CONFIG_DIR"                             )
+                some "PLUGIN_CONFIG_DIR: ${plugin_config_dir}"
+            ;;
+            "PLUGIN_LIST"                                   )
+                min_height="14"
+                some "PLUGIN_LIST: ${plugin_list}
 \\nPlugin\\t\\t\\tDescription
  blocked\\t\\t This plugin shows domains blocked by Pi-hole®.
  cache\\t\\t\\t This plugin shows Pi-hole®'s cache.
@@ -1040,28 +1076,28 @@ variable_function() {
  replies_by_type\\t This plugin shows Pi-hole®'s replies by type.
  status\\t\\t\\t This plugin shows Pi-hole®'s blocking status.
  unique_domains\\t\\t This plugin shows unique domains seen by Pi-hole®."
-        ;;
-        "proxy_config_dir" | "PROXY_CONFIG_DIR"             )
-            some "PROXY_CONFIG_DIR: ${proxy_config_dir}"
-        ;;
-        "script_dir" | "SCRIPT_DIR"                         )
-            some "SCRIPT_DIR: ${script_dir}"
-        ;;
-        "show_color" | "SHOW_COLOR"                         )
-            some "SHOW_COLOR: ${show_color}"
-        ;;
-        "skip_dependency_check" | "SKIP_DEPENDENCY_CHECK"   )
-            some "SKIP_DEPENDENCY_CHECK: ${skip_dependency_check}"
-        ;;
-        "update_self" | "UPDATE_SELF"                       )
-            some "UPDATE_SELF: ${update_self}"
-        ;;
-        "verbosity_level" | "VERBOSITY_LEVEL"               )
-            some "VERBOSITY_LEVEL: ${verbosity_level}"
-        ;;
-        ""                                                  )
-            min_height="23"
-            some "Usage: export [VARIABLE]=\"value\"
+            ;;
+            "PROXY_CONFIG_DIR"                              )
+                some "PROXY_CONFIG_DIR: ${proxy_config_dir}"
+            ;;
+            "SCRIPT_DIR"                                    )
+                some "SCRIPT_DIR: ${script_dir}"
+            ;;
+            "SHOW_COLOR"                                    )
+                some "SHOW_COLOR: ${show_color}"
+            ;;
+            "SKIP_DEPENDENCY_CHECK"                         )
+                some "SKIP_DEPENDENCY_CHECK: ${skip_dependency_check}"
+            ;;
+            "UPDATE_SELF"                                   )
+                some "UPDATE_SELF: ${update_self}"
+            ;;
+            "VERBOSITY_LEVEL"                               )
+                some "VERBOSITY_LEVEL: ${verbosity_level}"
+            ;;
+            ""                                              )
+                min_height="23"
+                some "Usage: export [VARIABLE]=\"value\"
 \\nVariable
  BRANCH=\"${branch}\"
  DNS_PORT=\"${dns_port}\"
@@ -1081,12 +1117,13 @@ variable_function() {
  SKIP_DEPENDENCY_CHECK=\"${skip_dependency_check}\"
  UPDATE_SELF=\"${update_self}\"
  VERBOSITY_LEVEL=\"${verbosity_level}\""
-        ;;
-        *                                                   )
-min_height="3"
-    some "munin-pihole-plugins: unrecognized variable '$2'
+            ;;
+            *                                               )
+                min_height="3"
+                some "munin-pihole-plugins: unrecognized variable '$2'
 Type 'munin-pihole-plugins --variables' for a list of available options"
-    esac
+        esac
+    fi
 }
 
 # not so simple input handler
