@@ -67,6 +67,11 @@ _munin-pihole-plugins() {
                 COMPREPLY=( $(compgen -W "${opts_variables}" -- ${cur}) )
             fi
         ;;
+        "BRANCH"|"DNS_PORT"|"DNS_SERVER"|"INSTALL_PLUGINS"|"INSTALL_SCRIPT"|"INSTALL_WEBSERVER"|"MUNIN_DIR"|"MUNIN_CONFIG_DIR"|"MUNIN_PLUGIN_DIR"|"NODE_PLUGIN_DIR"|"PLUGIN_CONFIG_DIR"|"PLUGIN_LIST"|"PROXY_CONFIG_DIR"|"SCRIPT_DIR"|"SHOW_COLOR"|"SKIP_DEPENDENCY_CHECK"|"UPDATE_SELF"|"VERBOSITY_LEVEL")
+            if [[ "${prev2}" == "-V" ]] || [[ "${prev2}" == "variables" ]] || [[ "${prev2}" == "--variables" ]]; then
+                COMPREPLY=( $(compgen -W "RESET" -- ${cur}) )
+            fi
+        ;;
         *)
         return 1
         ;;

@@ -6,7 +6,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="06.02.02"
+VERSION="06.02.03"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -1016,8 +1016,14 @@ version_function() {
 # variables saved in /etc/munin-pihole-plugins/munin-pihole-plugins.conf
 # in the format:
 # EXTERNAL_VAR=EXTERNAL_VAR_VALUE
+# also capable of resetting an existing configured external variable
+# when installed locally, with support for bash completion
 variable_function() {
     if [[ -n "$3" ]]; then
+        external_var="${2}"
+        external_var_dir="/etc/munin-pihole-plugins"
+        external_var_file="${external_var_dir}/munin-pihole-plugins.conf"
+        external_var_value="${3}"
         external_var_list="BRANCH DNS_PORT DNS_SERVER INSTALL_PLUGINS INSTALL_SCRIPT INSTALL_WEBSERVER MUNIN_DIR MUNIN_CONFIG_DIR MUNIN_PLUGIN_DIR NODE_PLUGIN_DIR PLUGIN_CONFIG_DIR PLUGIN_LIST PROXY_CONFIG_DIR SCRIPT_DIR SKIP_DEPENDENCY_CHECK UPDATE_SELF VERBOSITY_LEVEL"
         for external_var_id in ${external_var_list}; do
             if [[ "$2" == "${external_var_id}" ]]; then
@@ -1029,17 +1035,25 @@ variable_function() {
                     min_height="3"
                     if [[ ! -d "${external_var_path}" ]]; then
                         mkdir "${external_var_path}" || return
-                        cat > "${external_var_path}/munin-pihole-plugins.conf" << EOF
+                        cat > "${external_var_file}" << EOF
 # external configuration file created by munin-pihole-plugins
 EOF
                     fi
-                    if grep -q "^${external_var}=" "${external_var_path}/munin-pihole-plugins.conf"; then
-                        sed -i "/^${external_var}=/c\\${external_var}=${external_var_value}" "${external_var_path}/munin-pihole-plugins.conf" || return
-                        some "${external_var}: ${external_var_value}"
-                    else
-                        echo "${external_var}=${external_var_value}" >> "${external_var_path}/munin-pihole-plugins.conf" || return
-                        some "${external_var}: ${external_var_value}"
-                    fi
+                    case "$3" in
+                        "RESET"                              )
+                            sed -i "/^${external_var}/d" "${external_var_file}"
+                        ;;
+                        *                                    )
+                            min_height="3"
+                            if grep -q "^${external_var}=" "${external_var_file}"; then
+                                sed -i "/^${external_var}=/c\\${external_var}=${external_var_value}" "${external_var_file}" || return
+                                some "${external_var}: ${external_var_value}"
+                            else
+                                echo "${external_var}=${external_var_value}" >> "${external_var_file}" || return
+                                some "${external_var}: ${external_var_value}"
+                            fi
+                        ;;
+                    esac
                 fi
             fi
         done
