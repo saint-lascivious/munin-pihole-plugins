@@ -6,7 +6,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="06.02.03"
+VERSION="06.02.04"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -775,7 +775,7 @@ uninstall any dependencies that munin-pihole-plugins may have installed.
             esac
         ;;
         "-V" | "--variables" | "variables"                  )
-            min_height="19"
+            min_height="23"
             some "Usage: munin-pihole-plugins {$2 [VARIABLE [VALUE]]}
 \\nOption\\t\\tGNU long option\\t\\tMeaning
  -V, variables\\t --variables\\t\\t Display environment variables
@@ -784,10 +784,14 @@ script, and their current values. These variables and this command can be used
 to customize various aspects of the munin-pihole-plugins script's operation.
 \\nTakes an optional parameter in the form of a munin-pihole-plugins environment
 variable to list the value of that variable alone.
-\\nTakes an optional value for a munin-pihole-plugins environment variable to
-set the value of that variable.
 \\nExample: 'munin-pihole-plugins $2 INSTALL_PLUGINS'
-Example: 'munin-pihole-plugins $2 DNS_SERVER 127.0.0.1'"
+\\nTakes an optional value for a munin-pihole-plugins environment variable to
+set the value of that variable. If the optional value passed is 'RESET', the
+corresponding environment variable will be reset to the default value. This
+function is only available if the munin-pihole-plugins script is installed
+locally.
+\\nExamples: 'munin-pihole-plugins $2 DNS_SERVER 127.0.0.1'
+          'munin-pihole-plugins $2 DNS_SERVER RESET'"
         ;;
         ""                                                  )
             min_height="13"
@@ -797,7 +801,7 @@ Example: 'munin-pihole-plugins $2 DNS_SERVER 127.0.0.1'"
  -i, install\\t --install\\t\\t Install munin-pihole-plugins
  -v, version\\t --version\\t\\t Display current and latest versions
  -U, uninstall\\t --uninstall\\t\\t Uninstall munin-pihole-plugins
- -V, variables\\t --variables\\t\\t Display environment variables
+ -V, variables\\t --variables\\t\\t Display or set environment variables
 \\nType '$1 {OPTION}' for more detailed explanations of each command
 \\nExample: 'munin-pihole-plugins $1 install'"
         ;;
