@@ -22,6 +22,56 @@
 #     env.cachesuffix ?getCacheInfo&auth=
 #     env.webpassword PIHOLE_SETUPVARS_WEBPASSWORD_HERE
 
+# Magic markers
+
+  #%# family=auto
+  #%# capabilities=autoconf suggest
+
+# Documentation
+: <<=cut
+=head1 NAME
+
+pihole_ - Munin plugins for monitoring various Pi-hole statistics.
+
+=head1 APPLICABLE SYSTEMS
+
+Systems with a default Pi-hole installation. If the Pi-hole install
+is non-standard or located on another host, additional configuration
+will be required.
+
+=head1 CONFIGURATION
+
+  [pihole_*]
+      user root
+      env.host 127.0.0.1
+      env.port 80
+      env.api /admin/api.php
+      env.cachesuffix ?getCacheInfo&auth=
+      env.webpassword PIHOLE_SETUPVARS_WEBPASSWORD_HERE
+
+Use the .env settings to override the defaults.
+
+=head1 USAGE
+
+Can be used to present different graphs. Use ln -s for that name in
+the plugins directory to enable the graph.
+
+pihole_blocked	        - This plugin shows domains blocked by Pi-hole.
+pihole_cache           - This plugin shows Pi-hole's cache.
+pihole_cache_by_type   - This plugin shows Pi-hole's cache by type.
+pihole_clients         - This plugin shows clients seen by Pi-hole.
+pihole_percent         - This plugin shows Pi-hole's blocked query percentage.
+pihole_queries         - This plugin shows queries seen by Pi-hole.
+pihole_replies_by_type - This plugin shows Pi-hole replies by type.
+pihole_status          - This plugin shows Pi-hole's blocking status.
+pihole_unique_domains  - This plugin shows unique domains seen by Pi-hole.
+
+=head1 AUTHOR
+
+Copyright 2022 Hayden Pearce - saint-lascivious
+
+=cut
+
 setupvars="/etc/pihole/setupVars.conf"
 get_webpassword="$(cat < "${setupvars}" | grep WEBPASSWORD | sed s/WEBPASSWORD=//g)"
 

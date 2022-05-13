@@ -201,13 +201,13 @@ A space separated list of `munin-pihole-plugins` plugin IDs used to determine wh
 | Plugin ID | Description |
 | --- | --- |
 | blocked | This plugin shows domains blocked by Pi-hole®. |
-| cache | This plugin shows Pi-hole® cache. |
-| cache_by_type | This plugin shows Pi-hole® cache by type. |
+| cache | This plugin shows Pi-hole®'s cache. |
+| cache_by_type | This plugin shows Pi-hole®'s cache by type. |
 | clients | This plugin shows clients seen by Pi-hole®. |
-| percent | This plugin shows Pi-hole® blocked query percentage. |
+| percent | This plugin shows Pi-hole®'s blocked query percentage. |
 | queries | This plugin shows queries seen by Pi-hole®. |
-| replies_by_type | This plugin shows Pi-hole® replies by type. |
-| status | This plugin shows Pi-hole® blocking status. |
+| replies_by_type | This plugin shows Pi-hole®'s replies by type. |
+| status | This plugin shows Pi-hole®'s blocking status. |
 | unique_domains | This plugin shows unique domains seen by Pi-hole®. |
 
 Example: `export PLUGIN_LIST="blocked percent unique_domains"`
