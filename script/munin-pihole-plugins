@@ -6,7 +6,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="06.02.04"
+VERSION="06.03.00"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -1020,6 +1020,12 @@ version_function() {
 # variables saved in /etc/munin-pihole-plugins/munin-pihole-plugins.conf
 # in the format:
 # EXTERNAL_VAR=EXTERNAL_VAR_VALUE
+# triggers are available for popular DNS_SERVER values
+# - cloudflare 1.1.1.1
+# - comodo     8.26.56.26
+# - google     8.8.8.8
+# - localhost  127.0.0.1
+# - quad9      9.9.9.9
 # also capable of resetting an existing configured external variable
 # when installed locally, with support for bash completion
 variable_function() {
@@ -1046,6 +1052,66 @@ EOF
                     case "$3" in
                         "RESET"                              )
                             sed -i "/^${external_var}/d" "${external_var_file}"
+                        ;;
+                        "CLOUDFLARE"                         )
+                            if [[ "$2" == "DNS_SERVER" ]]; then
+                                min_height="3"
+                                if grep -q "^DNS_SERVER=" "${external_var_file}"; then
+                                    sed -i "/^DNS_SERVER=/c\\DNS_SERVER=1.1.1.1" "${external_var_file}" || return
+                                    some "DNS_SERVER: 1.1.1.1"
+                                else
+                                    echo "DNS_SERVER=1.1.1.1" >> "${external_var_file}" || return
+                                    some "DNS_SERVER: 1.1.1.1"
+                                fi
+                            fi
+                        ;;
+                        "COMODO"                             )
+                            if [[ "$2" == "DNS_SERVER" ]]; then
+                                min_height="3"
+                                if grep -q "^DNS_SERVER=" "${external_var_file}"; then
+                                    sed -i "/^DNS_SERVER=/c\\DNS_SERVER=8.26.56.26" "${external_var_file}" || return
+                                    some "DNS_SERVER: 8.26.56.26"
+                                else
+                                    echo "DNS_SERVER=8.26.56.26" >> "${external_var_file}" || return
+                                    some "DNS_SERVER: 8.26.56.26"
+                                fi
+                            fi
+                        ;;
+                        "GOOGLE"                             )
+                            if [[ "$2" == "DNS_SERVER" ]]; then
+                                min_height="3"
+                                if grep -q "^DNS_SERVER=" "${external_var_file}"; then
+                                    sed -i "/^DNS_SERVER=/c\\DNS_SERVER=8.8.8.8" "${external_var_file}" || return
+                                    some "DNS_SERVER: 8.8.8.8"
+                                else
+                                    echo "DNS_SERVER=8.8.8.8" >> "${external_var_file}" || return
+                                    some "DNS_SERVER: 8.8.8.8"
+                                fi
+                            fi
+                        ;;
+                        "LOCALHOST"                          )
+                            if [[ "$2" == "DNS_SERVER" ]]; then
+                                min_height="3"
+                                if grep -q "^DNS_SERVER=" "${external_var_file}"; then
+                                    sed -i "/^DNS_SERVER=/c\\DNS_SERVER=127.0.0.1" "${external_var_file}" || return
+                                    some "DNS_SERVER: 127.0.0.1"
+                                else
+                                    echo "DNS_SERVER=127.0.0.1" >> "${external_var_file}" || return
+                                    some "DNS_SERVER: 127.0.0.1"
+                                fi
+                            fi
+                        ;;
+                        "QUAD9"                              )
+                            if [[ "$2" == "DNS_SERVER" ]]; then
+                                min_height="3"
+                                if grep -q "^DNS_SERVER=" "${external_var_file}"; then
+                                    sed -i "/^DNS_SERVER=/c\\DNS_SERVER=9.9.9.9" "${external_var_file}" || return
+                                    some "DNS_SERVER: 9.9.9.9"
+                                else
+                                    echo "DNS_SERVER=9.9.9.9" >> "${external_var_file}" || return
+                                    some "DNS_SERVER: 9.9.9.9"
+                                fi
+                            fi
                         ;;
                         *                                    )
                             min_height="3"

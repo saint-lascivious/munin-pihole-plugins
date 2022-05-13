@@ -7,7 +7,7 @@
 # shellcheck disable=SC2086,SC2207
 
 _munin-pihole-plugins() {
-    local cur allopts lolopts_help longopts longopts_help longopts_installuninstall opts_help opts_installuninstall opts_variables prev prev2 shortopts shortopts_help shortopts_installuninstall
+    local cur allopts lolopts_help longopts longopts_help longopts_installuninstall opts_dnsserver opts_help opts_installuninstall opts_variables prev prev2 shortopts shortopts_help shortopts_installuninstall
     COMPREPLY=()
     cur="${COMP_WORDS[COMP_CWORD]}"
     prev="${COMP_WORDS[COMP_CWORD-1]}"
@@ -67,7 +67,13 @@ _munin-pihole-plugins() {
                 COMPREPLY=( $(compgen -W "${opts_variables}" -- ${cur}) )
             fi
         ;;
-        "BRANCH"|"DNS_PORT"|"DNS_SERVER"|"INSTALL_PLUGINS"|"INSTALL_SCRIPT"|"INSTALL_WEBSERVER"|"MUNIN_DIR"|"MUNIN_CONFIG_DIR"|"MUNIN_PLUGIN_DIR"|"NODE_PLUGIN_DIR"|"PLUGIN_CONFIG_DIR"|"PLUGIN_LIST"|"PROXY_CONFIG_DIR"|"SCRIPT_DIR"|"SHOW_COLOR"|"SKIP_DEPENDENCY_CHECK"|"UPDATE_SELF"|"VERBOSITY_LEVEL")
+        "DNS_SERVER")
+            opts_dnsserver="CLOUDFLARE COMODO GOOGLE LOCALHOST QUAD9 RESET"
+            if [[ "${prev2}" == "-V" ]] || [[ "${prev2}" == "variables" ]] || [[ "${prev2}" == "--variables" ]]; then
+                COMPREPLY=( $(compgen -W "${opts_dnsserver}" -- ${cur}) )
+            fi
+        ;;
+        "BRANCH"|"DNS_PORT"|"INSTALL_PLUGINS"|"INSTALL_SCRIPT"|"INSTALL_WEBSERVER"|"MUNIN_DIR"|"MUNIN_CONFIG_DIR"|"MUNIN_PLUGIN_DIR"|"NODE_PLUGIN_DIR"|"PLUGIN_CONFIG_DIR"|"PLUGIN_LIST"|"PROXY_CONFIG_DIR"|"SCRIPT_DIR"|"SHOW_COLOR"|"SKIP_DEPENDENCY_CHECK"|"UPDATE_SELF"|"VERBOSITY_LEVEL")
             if [[ "${prev2}" == "-V" ]] || [[ "${prev2}" == "variables" ]] || [[ "${prev2}" == "--variables" ]]; then
                 COMPREPLY=( $(compgen -W "RESET" -- ${cur}) )
             fi
