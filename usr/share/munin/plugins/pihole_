@@ -49,26 +49,28 @@ will be required.
       env.cachesuffix ?getCacheInfo&auth=
       env.webpassword PIHOLE_SETUPVARS_WEBPASSWORD_HERE
 
-Use the .env settings to override the defaults.
+Use the relevant .env settings to override the defaults.
 
 =head1 USAGE
 
-Can be used to present different graphs. Use ln -s for that name in
-the plugins directory to enable the graph.
+Can be used to present various different graphs.
+Use ln -s for each desired plugin name within the
+plugins directory to enable that graph.
 
-pihole_blocked	        - This plugin shows domains blocked by Pi-hole.
-pihole_cache           - This plugin shows Pi-hole's cache.
-pihole_cache_by_type   - This plugin shows Pi-hole's cache by type.
-pihole_clients         - This plugin shows clients seen by Pi-hole.
-pihole_percent         - This plugin shows Pi-hole's blocked query percentage.
-pihole_queries         - This plugin shows queries seen by Pi-hole.
-pihole_replies_by_type - This plugin shows Pi-hole replies by type.
-pihole_status          - This plugin shows Pi-hole's blocking status.
-pihole_unique_domains  - This plugin shows unique domains seen by Pi-hole.
+Plugin name:	        Plugin description;
+ pihole_blocked          - Shows domains blocked by Pi-hole.
+ pihole_cache            - Shows Pi-hole's cache.
+ pihole_cache_by_type    - Shows Pi-hole's cache by type.
+ pihole_clients          - Shows clients seen by Pi-hole.
+ pihole_percent          - Shows Pi-hole's blocked query percentage.
+ pihole_queries          - Shows queries seen by Pi-hole.
+ pihole_replies_by_type  - Shows Pi-hole replies by type.
+ pihole_status           - Shows Pi-hole's blocking status.
+ pihole_unique_domains   - Shows unique domains seen by Pi-hole.
 
 =head1 AUTHOR
 
-Copyright 2022 Hayden Pearce - saint-lascivious
+Copyright saint-lascivious (Hayden Pearce) 2022
 
 =cut
 
@@ -114,6 +116,7 @@ case $1 in
                 for stat_id in ${get_stats}; do
                     uid="$(echo "${stat_id}" | sed 's/:.*//')"
                     if [ "${uid}" = "domains_being_blocked" ]; then
+                        echo "${uid}.warning 0"
                         echo "${uid}.label domains being blocked"
                         echo "${uid}.type GAUGE"
                         echo "${uid}.min 0"
@@ -125,6 +128,7 @@ case $1 in
                 echo "graph_title Pi-hole cache"
                 echo "graph_args --base 1000 -l 0"
                 echo "graph_vlabel cache packets"
+                echo "graph_total all"
                 echo "graph_scale no"
                 echo "graph_category dns"
                 echo "graph_info This graph shows Pi-hole's cache."
@@ -142,6 +146,7 @@ case $1 in
                 echo "graph_title Pi-hole cache by type"
                 echo "graph_args --base 1000 -l 0"
                 echo "graph_vlabel cache packets"
+                echo "graph_total all"
                 echo "graph_scale no"
                 echo "graph_category dns"
                 echo "graph_info This graph shows Pi-hole's cache by type."
@@ -165,8 +170,10 @@ case $1 in
                 for stat_id in ${get_stats}; do
                     uid="$(echo "${stat_id}" | sed 's/:.*//')"
                     if [ "${uid}" = "unique_clients" ] || [ "${uid}" = "clients_ever_seen" ]; then
+                        echo "${uid}.critical 100"
                         echo "${uid}.label $(echo "${uid}" | sed 's/_/ /g')"
                         echo "${uid}.min 0"
+                        echo "${uid}.warning 50"
                     fi
                 done
                 exit 0
@@ -183,7 +190,9 @@ case $1 in
                     if [ "${uid}" = "ads_percentage_today" ]; then
                         echo "${uid}.label percentage blocked"
                         echo "${uid}.type GAUGE"
+                        echo "${uid}.max 100"
                         echo "${uid}.min 0"
+                        echo "${uid}.warning 0"
                     fi
                 done
                 exit 0
@@ -209,6 +218,7 @@ case $1 in
                 echo "graph_title Pi-hole replies by type"
                 echo "graph_args --base 1000 -l 0"
                 echo "graph_vlabel answer packets"
+                echo "graph_total all"
                 echo "graph_scale no"
                 echo "graph_category dns"
                 echo "graph_info This graph shows Pi-hole replies by type."
@@ -232,9 +242,13 @@ case $1 in
                 for stat_id in ${get_stats}; do
                     uid="$(echo "${stat_id}" | sed 's/:.*//')"
                     if [ "${uid}" = "status" ]; then
+                        echo "{$uid}.critical -1"
                         echo "${uid}.label blocking status"
                         echo "${uid}.type GAUGE"
-                        echo "${uid}.min 0"
+                        echo "${uid}.line 0"
+                        echo "${uid}.max 1"
+                        echo "${uid}.min -1"
+                        echo "{$uid}.warning 0"
                     fi
                 done
                 exit 0
@@ -266,6 +280,7 @@ case $1 in
                 for stat_id in ${get_stats}; do
                     uid="$(echo "${stat_id}" | sed 's/:.*//')"
                     if [ "${uid}" = "ads_percentage_today" ]; then
+                        echo "${uid}.warning 0"
                         echo "${uid}.label percentage blocked"
                         echo "${uid}.type GAUGE"
                         echo "${uid}.min 0"
@@ -345,15 +360,20 @@ case $1 in
                     uid="$(echo "${stat_id}" | sed 's/:.*//')"
                     if [ "${uid}" = "status" ]; then
                         value="$(echo "${stat_id}" | sed 's/.*://')"
-                        if [ "${value}" = "enabled" ]; then
-                            echo "${uid}.value 1"
-                        else
-                            if [ "${value}" = "disabled" ]; then
+                        case ${value} in
+                            "disabled")
                                 echo "${uid}.value 0"
-                            else
+                            ;;
+                            "enabled")
+                                echo "${uid}.value 1"
+                            ;;
+                            "")
                                 echo "${uid}.value -1"
-                            fi
-                        fi
+                            ;;
+                            *)
+                                echo "${uid}.value -1"
+                            ;;
+                        esac
                     fi
                 done
             ;;

@@ -6,7 +6,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="06.03.01"
+VERSION="06.03.02"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -38,6 +38,9 @@ update_self="${UPDATE_SELF:-true}"
 verbosity_level="${VERBOSITY_LEVEL:-3}"
 
 # environment variables without
+# note: the spaces at the ends of the environment variable
+# values for *_dependencies and *_services are intentional
+# and must be retained for the sake of easy string concat
 current_dir="$(dirname "$(readlink -f "$0")")"
 plugin_dependencies="curl munin-node "
 plugin_services="munin-node "
