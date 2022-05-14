@@ -38,7 +38,7 @@ Usage: `munin-pihole-plugins {OPTION [PARAMETER]}`
 | -i, install | --install | Install munin-pihole-plugins |
 | -v, version | --version | Display current and latest versions |
 | -U, uninstall | --uninstall | Uninstall munin-pihole-plugins |
-| -V, variables | --variables | Display environment variables |
+| -V, variables | --variables | Display or set environment variables |
 
 Type `--help {OPTION}` for more detailed explanations of each command
 
@@ -124,31 +124,42 @@ This plugin shows unique domains seen by Pi-hole®.
 Provided munin-node and Pi-hole® exist on the same host, the default configuration should Just Work™. If you have a non-standard configuration or Pi-hole® is running on a seperate host, you will need to edit the plugin configuration. The plugin attempts to obtain this value itself, if it can not do so the `env.webpassword` value can be obtained from the Pihole host's `/etc/pihole/setupVars.conf` file.
 
 ### Script Configuration
-* Default `munin-pihole-plugins` script environment variables
-```
-Usage: export [VARIABLE]="value"
+* Usage
 
-Variable
- BRANCH="development"
- DNS_PORT="53"
- DNS_SERVER="208.67.222.222"
- INSTALL_PLUGINS="true"
- INSTALL_SCRIPT="true"
- INSTALL_WEBSERVER="true"
- MUNIN_DIR="/etc/munin"
- MUNIN_CONFIG_DIR="/etc/munin/munin-conf.d"
- MUNIN_PLUGIN_DIR="/usr/share/munin/plugins"
- NODE_PLUGIN_DIR="/etc/munin/plugins"
- PLUGIN_CONFIG_DIR="/etc/munin/plugin-conf.d"
- PLUGIN_LIST="blocked cache cache_by_type clients percent queries replies_by_type status unique_domains"
- PROXY_CONFIG_DIR="/etc/lighttpd"
- SCRIPT_DIR="/usr/local/bin"
- SHOW_COLOR="true"
- SKIP_DEPENDENCY_CHECK="false"
- UPDATE_SELF="true"
- VERBOSITY_LEVEL="3"
-```
+Initial installation, or without the `munin-pihole-plugins` script being locally installed: `export VARIABLE="VALUE"`
+
 Example: `export VERBOSITY_LEVEL="4"`
+
+Subsequent runs, with the `munin-pihole-plugins` script locally installed: `munin-pihole-plugins --variables VARIABLE VALUE`
+
+Example: `munin-pihole-plugins --variables VERBOSITY_LEVEL 4`
+
+Reset example: `munin-pihole-plugins --variables VERBOSITY_LEVEL RESET`
+
+The `/etc/munin-pihole-plugins/munin-pihole-plugins.conf` file may be manually created and placed ahead of time if desired, useful for packaging or other automated deployment. This file MUST be a plain text file and MUST consist of the format `VARIABLE=VALUE`, one variable per line, with no leading whitespace or indentation.
+
+* Default `munin-pihole-plugins` script environment variables
+
+| Variable | Default Value |
+| --- | --- |
+| BRANCH | development |
+| DNS_PORT | 53 |
+| DNS_SERVER | 208.67.222.222 |
+| INSTALL_PLUGINS | true |
+| INSTALL_SCRIPT | true |
+| INSTALL_WEBSERVER | true |
+| MUNIN_DIR | /etc/munin |
+| MUNIN_CONFIG_DIR | /etc/munin/munin-conf.d |
+| MUNIN_PLUGIN_DIR | /usr/share/munin/plugins |
+| NODE_PLUGIN_DIR | /etc/munin/plugins |
+| PLUGIN_CONFIG_DIR | /etc/munin/plugin-conf.d |
+| PLUGIN_LIST | blocked cache cache_by_type clients percent queries replies_by_type status unique_domains |
+| PROXY_CONFIG_DIR | /etc/lighttpd |
+| SCRIPT_DIR | /usr/local/bin |
+| SHOW_COLOR | true |
+| SKIP_DEPENDENCY_CHECK | false |
+| UPDATE_SELF | true |
+| VERBOSITY_LEVEL | 3 |
 
 * `BRANCH`
 

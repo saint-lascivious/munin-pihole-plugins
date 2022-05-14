@@ -6,7 +6,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="06.03.00"
+VERSION="06.03.01"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -1029,6 +1029,7 @@ version_function() {
 # also capable of resetting an existing configured external variable
 # when installed locally, with support for bash completion
 variable_function() {
+    min_height="3"
     if [[ -n "$3" ]]; then
         external_var="${2}"
         external_var_dir="/etc/munin-pihole-plugins"
@@ -1042,7 +1043,6 @@ variable_function() {
                     external_var_path="/etc/munin-pihole-plugins"
                     external_var="${2}"
                     external_var_value="${3}"
-                    min_height="3"
                     if [[ ! -d "${external_var_path}" ]]; then
                         mkdir "${external_var_path}" || return
                         cat > "${external_var_file}" << EOF
@@ -1055,7 +1055,6 @@ EOF
                         ;;
                         "CLOUDFLARE"                         )
                             if [[ "$2" == "DNS_SERVER" ]]; then
-                                min_height="3"
                                 if grep -q "^DNS_SERVER=" "${external_var_file}"; then
                                     sed -i "/^DNS_SERVER=/c\\DNS_SERVER=1.1.1.1" "${external_var_file}" || return
                                     some "DNS_SERVER: 1.1.1.1"
@@ -1067,7 +1066,6 @@ EOF
                         ;;
                         "COMODO"                             )
                             if [[ "$2" == "DNS_SERVER" ]]; then
-                                min_height="3"
                                 if grep -q "^DNS_SERVER=" "${external_var_file}"; then
                                     sed -i "/^DNS_SERVER=/c\\DNS_SERVER=8.26.56.26" "${external_var_file}" || return
                                     some "DNS_SERVER: 8.26.56.26"
@@ -1079,7 +1077,6 @@ EOF
                         ;;
                         "GOOGLE"                             )
                             if [[ "$2" == "DNS_SERVER" ]]; then
-                                min_height="3"
                                 if grep -q "^DNS_SERVER=" "${external_var_file}"; then
                                     sed -i "/^DNS_SERVER=/c\\DNS_SERVER=8.8.8.8" "${external_var_file}" || return
                                     some "DNS_SERVER: 8.8.8.8"
@@ -1091,7 +1088,6 @@ EOF
                         ;;
                         "LOCALHOST"                          )
                             if [[ "$2" == "DNS_SERVER" ]]; then
-                                min_height="3"
                                 if grep -q "^DNS_SERVER=" "${external_var_file}"; then
                                     sed -i "/^DNS_SERVER=/c\\DNS_SERVER=127.0.0.1" "${external_var_file}" || return
                                     some "DNS_SERVER: 127.0.0.1"
@@ -1103,7 +1099,6 @@ EOF
                         ;;
                         "QUAD9"                              )
                             if [[ "$2" == "DNS_SERVER" ]]; then
-                                min_height="3"
                                 if grep -q "^DNS_SERVER=" "${external_var_file}"; then
                                     sed -i "/^DNS_SERVER=/c\\DNS_SERVER=9.9.9.9" "${external_var_file}" || return
                                     some "DNS_SERVER: 9.9.9.9"
@@ -1114,7 +1109,6 @@ EOF
                             fi
                         ;;
                         *                                    )
-                            min_height="3"
                             if grep -q "^${external_var}=" "${external_var_file}"; then
                                 sed -i "/^${external_var}=/c\\${external_var}=${external_var_value}" "${external_var_file}" || return
                                 some "${external_var}: ${external_var_value}"
@@ -1128,7 +1122,6 @@ EOF
             fi
         done
     else
-        min_height="3"
         case "$2" in
             "BRANCH"                                        )
                 some "BRANCH: ${branch}"
@@ -1235,10 +1228,9 @@ Type 'munin-pihole-plugins --variables' for a list of available options"
     fi
 }
 
-# not so simple input handler
-# i hate having to do this but i realised i kinda fucked myself and dig ended
-# up quietly being a hard dependency without my noticing it this weird
-# guarding  of install and version is temporary, hopefully
+# function handler
+# whinges about being run with no input
+# whinges about being run with invalid input
 function_handler() {
     case "${1}" in
         "-h" | "--help" | "help"                            )
