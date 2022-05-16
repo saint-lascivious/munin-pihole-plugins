@@ -128,7 +128,6 @@ case $1 in
                 echo "graph_title Pi-hole cache"
                 echo "graph_args --base 1000 -l 0"
                 echo "graph_vlabel cache packets"
-                echo "graph_total all"
                 echo "graph_scale no"
                 echo "graph_category dns"
                 echo "graph_info This graph shows Pi-hole's cache."
@@ -367,11 +366,8 @@ case $1 in
                             "enabled")
                                 echo "${uid}.value 1"
                             ;;
-                            "")
-                                echo "${uid}.value -1"
-                            ;;
                             *)
-                                echo "${uid}.value -1"
+                                echo "offline.value -1"
                             ;;
                         esac
                     fi
