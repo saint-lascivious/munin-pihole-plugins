@@ -6,7 +6,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="06.03.02"
+VERSION="06.03.03"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -550,6 +550,8 @@ install_script() {
             fi
             reverberate "info" "A copy of the munin-pihole-plugins bash-completion script was installed"
             reverberate "success" "/etc/bash_completion.d/munin-pihole-plugins"
+            reverberate "additional_info" "To begin using it immediately, open a new terminal or type"
+            reverberate ". /etc/bash_completion"
         fi
         if [[ ":${PATH}:" != *":${script_dir}:"* ]]; then
             reverberate "warning" "The munin-pihole-plugins script directory is not in your \$PATH"
