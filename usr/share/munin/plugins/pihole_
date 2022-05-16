@@ -116,7 +116,6 @@ case $1 in
                 for stat_id in ${get_stats}; do
                     uid="$(echo "${stat_id}" | sed 's/:.*//')"
                     if [ "${uid}" = "domains_being_blocked" ]; then
-                        echo "${uid}.warning 0"
                         echo "${uid}.label domains being blocked"
                         echo "${uid}.type GAUGE"
                         echo "${uid}.min 0"
@@ -191,7 +190,6 @@ case $1 in
                         echo "${uid}.type GAUGE"
                         echo "${uid}.max 100"
                         echo "${uid}.min 0"
-                        echo "${uid}.warning 0"
                     fi
                 done
                 exit 0
@@ -279,9 +277,9 @@ case $1 in
                 for stat_id in ${get_stats}; do
                     uid="$(echo "${stat_id}" | sed 's/:.*//')"
                     if [ "${uid}" = "ads_percentage_today" ]; then
-                        echo "${uid}.warning 0"
                         echo "${uid}.label percentage blocked"
                         echo "${uid}.type GAUGE"
+                        echo "${uid}.max 100"
                         echo "${uid}.min 0"
                     fi
                 done
@@ -359,17 +357,15 @@ case $1 in
                     uid="$(echo "${stat_id}" | sed 's/:.*//')"
                     if [ "${uid}" = "status" ]; then
                         value="$(echo "${stat_id}" | sed 's/.*://')"
-                        case ${value} in
-                            "disabled")
+                        if [ "${value}" = "enabled" ]; then
+                            echo "${uid}.value 1"
+                        else
+                            if [ "${value}" = "disabled" ]; then
                                 echo "${uid}.value 0"
-                            ;;
-                            "enabled")
-                                echo "${uid}.value 1"
-                            ;;
-                            *)
-                                echo "offline.value -1"
-                            ;;
-                        esac
+                            else
+                                echo "${uid}.value -1"
+                            fi
+                        fi
                     fi
                 done
             ;;
