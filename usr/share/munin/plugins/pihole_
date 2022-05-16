@@ -231,21 +231,18 @@ case $1 in
             ;;
             "status")
                 echo "graph_title Pi-hole blocking status"
-                echo "graph_args --base 1000 -l -1 -u 1"
-                echo "graph_vlabel offline / disabled / enabled"
+                echo "graph_args --base 1000 -l 0 -u 1"
+                echo "graph_vlabel disabled / enabled"
                 echo "graph_scale no"
                 echo "graph_category dns"
                 echo "graph_info This graph shows Pi-hole's blocking status."
                 for stat_id in ${get_stats}; do
                     uid="$(echo "${stat_id}" | sed 's/:.*//')"
                     if [ "${uid}" = "status" ]; then
-                        echo "${uid}.critical -1"
                         echo "${uid}.label blocking status"
                         echo "${uid}.type GAUGE"
-                        echo "${uid}.line 0"
                         echo "${uid}.max 1"
-                        echo "${uid}.min -1"
-                        echo "{$uid}.warning 0"
+                        echo "${uid}.min 0"
                     fi
                 done
                 exit 0
@@ -362,8 +359,6 @@ case $1 in
                         else
                             if [ "${value}" = "disabled" ]; then
                                 echo "${uid}.value 0"
-                            else
-                                echo "${uid}.value -1"
                             fi
                         fi
                     fi
