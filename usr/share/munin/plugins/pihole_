@@ -239,7 +239,7 @@ case $1 in
                 for stat_id in ${get_stats}; do
                     uid="$(echo "${stat_id}" | sed 's/:.*//')"
                     if [ "${uid}" = "status" ]; then
-                        echo "{$uid}.critical -1"
+                        echo "${uid}.critical -1"
                         echo "${uid}.label blocking status"
                         echo "${uid}.type GAUGE"
                         echo "${uid}.line 0"
