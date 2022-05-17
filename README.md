@@ -15,7 +15,7 @@ curl -sSL munin-pihole-plugins-dev.sainternet.xyz -o munin-pihole-plugins && chm
 ```
 ./munin-pihole-plugins --install
 ```
-Dependencies are checked and met using `dpkg-query` and `apt` respectively, you will be prompted before any unmet dependencies are installed. A copy of the `munin-pihole-plugins` script will be installed on the host in `/usr/local/bin` by default. The munin-pihole-plugins script directory can be [configured](https://github.com/saint-lascivious/munin-pihole-plugins#script-configuration), or the `munin-pihole-plugins` script installation may be disabled entirely.
+Dependencies are checked and met automatically using `dpkg-query` and `apt` respectively. A copy of the `munin-pihole-plugins` script will be installed on the host in `/usr/local/bin` by default. The munin-pihole-plugins script directory can be [configured](https://github.com/saint-lascivious/munin-pihole-plugins#script-configuration), or the `munin-pihole-plugins` script installation may be disabled entirely.
 
 ### Step Three: …Wait
 * Wait, around five minutes
@@ -34,7 +34,7 @@ Usage: `munin-pihole-plugins {OPTION [PARAMETER]}`
 
 | Option | GNU long option | Meaning |
 | --- | --- | --- |
-| -h, help | --help | Display this help dialogue |
+| -h, help | --help | Display help dialogue |
 | -i, install | --install | Install munin-pihole-plugins |
 | -v, version | --version | Display current and latest versions |
 | -U, uninstall | --uninstall | Uninstall munin-pihole-plugins |

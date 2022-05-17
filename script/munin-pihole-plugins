@@ -6,7 +6,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="06.03.03"
+VERSION="06.04.00"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -130,6 +130,8 @@ update_script() {
 # .munin-pihole-plugins_update
 # saint-lascivious (Hayden Pearce) 2022
 # saint@sainternet.xyz
+
+VERSION="${VERSION}"
 
 verbosity_level="${verbosity_level}"
 
@@ -308,7 +310,9 @@ install_dependencies() {
                     reverberate "success" "${dependency_id}"
                 else
                     reverberate "failure" "${dependency_id}"
-                    apt install -qq "${dependency_id}"
+                    reverberate "info" "Installing required package ${dependency_id}"
+                    apt install -qq "${dependency_id}" > /dev/null 2>&1 &
+                    reverberate "success" "${dependency_id}"
                 fi
             done
         else
@@ -584,6 +588,8 @@ uninstall_script() {
 # .munin-pihole-plugins_uninstall
 # saint-lascivious (Hayden Pearce) 2022
 # saint@sainternet.xyz
+
+VERSION="${VERSION}"
 
 verbosity_level="${verbosity_level}"
 
@@ -981,7 +987,9 @@ uninstall_function() {
                                 if [[ "${dependency_id}" == "curl" ]] ||  [[ "${dependency_id}" == "init-system-helpers" ]] || [[ "${dependency_id}" == "wget" ]]; then
                                     reverberate "warning" "It probably wasn't, and you probably wouldn't"
                                 fi
-                                apt remove -qq "${dependency_id}"
+                                reverberate "info" "Uninstalling package ${dependency_id}"
+                                apt remove -qq "${dependency_id}" > /dev/null 2>&1 &
+                                reverberate "success" "${dependency_id}"
                             fi
                         done
                     fi

@@ -4,6 +4,8 @@
 # saint-lascivious (Hayden Pearce) 2022
 # saint@sainternet.xyz
 
+VERSION="06.04.00"
+
 # Environment variables for this script
 #
 #     host          - Pi-hole® host address
@@ -32,6 +34,10 @@
 =head1 NAME
 
 pihole_ - Munin plugins for monitoring various Pi-hole statistics.
+
+=head1 VERSION
+
+${VERSION}
 
 =head1 APPLICABLE SYSTEMS
 
@@ -144,7 +150,7 @@ case $1 in
                 echo "graph_title Pi-hole cache by type"
                 echo "graph_args --base 1000 -l 0"
                 echo "graph_vlabel cache packets"
-                echo "graph_total all"
+                echo "graph_total total"
                 echo "graph_scale no"
                 echo "graph_category dns"
                 echo "graph_info This graph shows Pi-hole's cache by type."
@@ -215,7 +221,7 @@ case $1 in
                 echo "graph_title Pi-hole replies by type"
                 echo "graph_args --base 1000 -l 0"
                 echo "graph_vlabel answer packets"
-                echo "graph_total all"
+                echo "graph_total total"
                 echo "graph_scale no"
                 echo "graph_category dns"
                 echo "graph_info This graph shows Pi-hole replies by type."
