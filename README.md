@@ -151,6 +151,7 @@ The `/etc/munin-pihole-plugins/munin-pihole-plugins.conf` file may be manually c
 | MUNIN_DIR | /etc/munin |
 | MUNIN_CONFIG_DIR | /etc/munin/munin-conf.d |
 | MUNIN_PLUGIN_DIR | /usr/share/munin/plugins |
+| MUNIN_VERSION | stable |
 | NODE_PLUGIN_DIR | /etc/munin/plugins |
 | PLUGIN_CONFIG_DIR | /etc/munin/plugin-conf.d |
 | PLUGIN_LIST | blocked cache cache_by_type clients percent queries replies_by_type status unique_domains |
@@ -196,6 +197,15 @@ The directory in which additional `munin` configuration files may be placed, the
 * `MUNIN_PLUGIN_DIR`
 
 The directory in which `munin` plugins should be located.
+
+* `MUNIN_VERSION`
+
+The Munin version to target when configuring the `lighttpd` proxy. Available options are `latest` and `stable`, with `stable` being the default value. The `latest` version should be selected for Munin versions 2.99 or higher.
+
+| Tag | Munin Version Target |
+| --- | --- |
+| latest | 2.99+ |
+| stable | 2.* |
 
 * `NODE_PLUGIN_DIR`
 
