@@ -6,7 +6,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="06.05.00"
+VERSION="06.05.01"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -377,6 +377,14 @@ $HTTP["url"] =~ "^/munin" {
   proxy.server = (""    => (( "host" => "127.0.0.1", "port" => 4948)))
 }
 EOF
+            else
+                reverberate "error" "Invalid Munin version"
+                reverberate "failure" "${munin_version}"
+                reverberate "info" "Valid Munin versions are"
+                reverberate "success" "latest"
+                reverberate "success" "stable"
+                reverberate "exit"
+                exit 1
             fi
         fi
         reverberate "success" "${proxy_config}"
