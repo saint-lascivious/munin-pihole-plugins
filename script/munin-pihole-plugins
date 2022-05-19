@@ -6,7 +6,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="06.05.01"
+VERSION="06.05.02"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -45,7 +45,7 @@ verbosity_level="${VERBOSITY_LEVEL:-3}"
 current_dir="$(dirname "$(readlink -f "$0")")"
 plugin_dependencies="curl munin-node "
 plugin_services="munin-node "
-proxy_repo="https://raw.githubusercontent.com/saint-lascivious/lighttpd-external-munin-proxy/master"
+proxy_repo="https://raw.githubusercontent.com/saint-lascivious/lighttpd-external-munin-proxy"
 script_dependencies="init-system-helpers wget "
 terminal_height="$(stty size | cut -d " " -f1)"
 terminal_width="$(stty size | cut -d " " -f2)"
@@ -363,20 +363,10 @@ configure_proxy() {
         fi
         reverberate "info" "Installing Munin webserver lighttpd proxy configuration"
         if [[ "${munin_version}" == "stable" ]]; then
-            download "${proxy_repo}/etc/lighttpd/external.conf" -O "${proxy_config}"
+            download "${proxy_repo}/master/etc/lighttpd/external.conf" -O "${proxy_config}"
         else
             if [[ "${munin_version}" == "latest" ]]; then
-                cat > "${proxy_config}" << EOF
-# Munin
-server.modules += ( "mod_alias" )
-
-alias.url += ( "/munin-static" => "/etc/munin/static" )
-alias.url += ( "/munin"        => "/var/cache/munin/www/" )
-
-$HTTP["url"] =~ "^/munin" {
-  proxy.server = (""    => (( "host" => "127.0.0.1", "port" => 4948)))
-}
-EOF
+                download "${proxy_repo}/latest/etc/lighttpd/external.conf" -O "${proxy_config}"
             else
                 reverberate "error" "Invalid Munin version"
                 reverberate "failure" "${munin_version}"
