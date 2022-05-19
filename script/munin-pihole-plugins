@@ -6,7 +6,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="06.05.02"
+VERSION="06.05.03"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -283,7 +283,7 @@ ${BLUE}                          |_|                     |_|         |___/
 check_pihole() {
     reverberate "info" "Checking if this is a Pi-hole® host"
     if [[ -x "$(command -v pihole)" ]]; then
-        reverberate "success" "pihole"
+        reverberate "success" "$(command -v pihole)"
     else
         reverberate "failure" "pihole"
         pihole_on_host="no"
