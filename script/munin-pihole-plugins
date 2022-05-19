@@ -6,7 +6,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="06.05.04"
+VERSION="06.06.00"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -613,6 +613,9 @@ verbosity_level="${verbosity_level}"
 uninstall_now() {
     if [[ -f "/etc/bash_completion.d/munin-pihole-plugins" ]]; then
         rm "/etc/bash_completion.d/munin-pihole-plugins" || return
+    fi
+    if [[ -d "/etc/munin-pihole-plugins" ]]; then
+        rm -fr "/etc/munin-pihole-plugins" || return
     fi
     rm "${script_dir}/munin-pihole-plugins" || return
     if [[ "${verbosity_level}" -ge "3" ]]; then
