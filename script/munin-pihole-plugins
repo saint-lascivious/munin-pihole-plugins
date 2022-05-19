@@ -6,7 +6,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="06.05.03"
+VERSION="06.05.04"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -1066,7 +1066,7 @@ variable_function() {
         external_var_dir="/etc/munin-pihole-plugins"
         external_var_file="${external_var_dir}/munin-pihole-plugins.conf"
         external_var_value="${3}"
-        external_var_list="BRANCH DNS_PORT DNS_SERVER INSTALL_PLUGINS INSTALL_SCRIPT INSTALL_WEBSERVER MUNIN_DIR MUNIN_CONFIG_DIR MUNIN_PLUGIN_DIR MUNIN_VERSION NODE_PLUGIN_DIR PLUGIN_CONFIG_DIR PLUGIN_LIST PROXY_CONFIG_DIR SCRIPT_DIR SKIP_DEPENDENCY_CHECK UPDATE_SELF VERBOSITY_LEVEL"
+        external_var_list="BRANCH DNS_PORT DNS_SERVER INSTALL_PLUGINS INSTALL_SCRIPT INSTALL_WEBSERVER MUNIN_DIR MUNIN_CONFIG_DIR MUNIN_PLUGIN_DIR MUNIN_VERSION NODE_PLUGIN_DIR PLUGIN_CONFIG_DIR PLUGIN_LIST PROXY_CONFIG_DIR SCRIPT_DIR SHOW_COLOR SKIP_DEPENDENCY_CHECK UPDATE_SELF VERBOSITY_LEVEL"
         for external_var_id in ${external_var_list}; do
             if [[ "$2" == "${external_var_id}" ]]; then
                 if [[ -f "${script_dir}/munin-pihole-plugins" ]]; then
