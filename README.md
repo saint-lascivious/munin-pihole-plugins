@@ -44,6 +44,32 @@ Type `--help {OPTION}` for more detailed explanations of each command
 
 Example: `munin-pihole-plugins --help install`
 
+* Optional install and uninstall parameters
+
+Basic installation or uninstallation tasks can be governed by passing an optional parameter to the `--install` or `--uninstall` commands.
+
+| Optional Install Parameter | GNU long option | Function |
+| --- | --- | --- |
+| -p, plugins | --plugins | Install and configure `munin-node`, and `munin-pihole-plugins` plugins |
+| -P, plugins-only | --plugins-only | As above, skipping dependency check |
+| -s, script | --script | Install the munin-pihole-plugins script |
+| -S, script-only | --script-only | As above, skipping dependency check |
+| -w, webserver | --webserver | Install and configure `munin`, `lighttpd` and `lighttpd-external-munin-proxy` |
+| -W, webserver-only | --webserver-only | As above, skipping dependency check |
+
+Example: `munin-pihole-plugins --install --plugins`
+
+| Optional Install Parameter | GNU long option | Function |
+| --- | --- | --- |
+| -p, plugins | --plugins | Uninstall `munin-node`, and `munin-pihole-plugins` plugins |
+| -P, plugins-only | --plugins-only | As above, skipping dependency removal |
+| -s, script | --script | Uninstall the munin-pihole-plugins script |
+| -S, script-only | --script-only | As above, skipping dependency removal |
+| -w, webserver | --webserver | Uninstall and `munin`, `lighttpd` and `lighttpd-external-munin-proxy` |
+| -W, webserver-only | --webserver-only | As above, skipping dependency removal |
+
+Example: `munin-pihole-plugins --uninstall --script-only`
+
 ## Example Graph Gallery
 * pihole_blocked
 ![alt text][pihole_blocked-day.png]
