@@ -6,10 +6,10 @@
 
 # shellcheck disable=SC2034,SC2086,SC2207
 
-VERSION="06.06.00"
+VERSION="06.07.00"
 
 _munin-pihole-plugins() {
-    local cur allopts lolopts_help longopts longopts_help longopts_installuninstall opts_dnsserver opts_help opts_installuninstall opts_muninversion opts_variables prev prev2 shortopts shortopts_help shortopts_installuninstall
+    local cur allopts lolopts_help longopts longopts_help longopts_installuninstall opts_branch opts_dnsserver opts_help opts_installuninstall opts_muninversion opts_truefalse opts_variables opts_verbositylevel prev prev2 shortopts shortopts_help shortopts_installuninstall
     COMPREPLY=()
     cur="${COMP_WORDS[COMP_CWORD]}"
     prev="${COMP_WORDS[COMP_CWORD-1]}"
@@ -64,12 +64,18 @@ _munin-pihole-plugins() {
             COMPREPLY=( $(compgen -W "${longopts_installuninstall}" -- ${cur}) )
         ;;
         "-V"|"variables"|"--variables")
-            opts_variables="BRANCH DNS_PORT DNS_SERVER INSTALL_PLUGINS INSTALL_SCRIPT INSTALL_WEBSERVER MUNIN_DIR MUNIN_CONFIG_DIR MUNIN_PLUGIN_DIR NODE_PLUGIN_DIR PLUGIN_CONFIG_DIR PLUGIN_LIST PROXY_CONFIG_DIR SCRIPT_DIR SHOW_COLOR SKIP_DEPENDENCY_CHECK UPDATE_SELF VERBOSITY_LEVEL"
+            opts_variables="BRANCH DNS_PORT DNS_SERVER INSTALL_PLUGINS INSTALL_SCRIPT INSTALL_WEBSERVER MUNIN_DIR MUNIN_CONFIG_DIR MUNIN_PLUGIN_DIR MUNIN_VERSION NODE_PLUGIN_DIR PLUGIN_CONFIG_DIR PLUGIN_LIST PROXY_CONFIG_DIR SCRIPT_DIR SHOW_COLOR SKIP_DEPENDENCY_CHECK UPDATE_SELF VERBOSITY_LEVEL"
             if [[ "${prev2}" != *h ]]; then
                 COMPREPLY=( $(compgen -W "${opts_variables}" -- ${cur}) )
             fi
         ;;
-        "BRANCH"|"DNS_PORT"|"INSTALL_PLUGINS"|"INSTALL_SCRIPT"|"INSTALL_WEBSERVER"|"MUNIN_DIR"|"MUNIN_CONFIG_DIR"|"MUNIN_PLUGIN_DIR"|"NODE_PLUGIN_DIR"|"PLUGIN_CONFIG_DIR"|"PLUGIN_LIST"|"PROXY_CONFIG_DIR"|"SCRIPT_DIR"|"SHOW_COLOR"|"SKIP_DEPENDENCY_CHECK"|"UPDATE_SELF"|"VERBOSITY_LEVEL")
+        "BRANCH")
+            opts_branch="development master RESET"
+            if [[ "${prev2}" == "-V" ]] || [[ "${prev2}" == "variables" ]] || [[ "${prev2}" == "--variables" ]]; then
+                COMPREPLY=( $(compgen -W "${opts_branch}" -- ${cur}) )
+            fi
+        ;;
+        "DNS_PORT"|"MUNIN_DIR"|"MUNIN_CONFIG_DIR"|"MUNIN_PLUGIN_DIR"|"NODE_PLUGIN_DIR"|"PLUGIN_CONFIG_DIR"|"PLUGIN_LIST"|"PROXY_CONFIG_DIR"|"SCRIPT_DIR")
             if [[ "${prev2}" == "-V" ]] || [[ "${prev2}" == "variables" ]] || [[ "${prev2}" == "--variables" ]]; then
                 COMPREPLY=( $(compgen -W "RESET" -- ${cur}) )
             fi
@@ -80,10 +86,22 @@ _munin-pihole-plugins() {
                 COMPREPLY=( $(compgen -W "${opts_dnsserver}" -- ${cur}) )
             fi
         ;;
+        "INSTALL_PLUGINS"|"INSTALL_SCRIPT"|"INSTALL_WEBSERVER"|"SHOW_COLOR"|"SKIP_DEPENDENCY_CHECK"|"UPDATE_SELF")
+            opts_truefalse="true false RESET"
+            if [[ "${prev2}" == "-V" ]] || [[ "${prev2}" == "variables" ]] || [[ "${prev2}" == "--variables" ]]; then
+                COMPREPLY=( $(compgen -W "${opts_truefalse}" -- ${cur}) )
+            fi
+        ;;
         "MUNIN_VERSION")
             opts_muninversion="latest stable"
             if [[ "${prev2}" == "-V" ]] || [[ "${prev2}" == "variables" ]] || [[ "${prev2}" == "--variables" ]]; then
                 COMPREPLY=( $(compgen -W "${opts_muninversion}" -- ${cur}) )
+            fi
+        ;;
+        "VERBOSITY_LEVEL")
+            opts_verbositylevel="0 1 2 3 4 RESET"
+            if [[ "${prev2}" == "-V" ]] || [[ "${prev2}" == "variables" ]] || [[ "${prev2}" == "--variables" ]]; then
+                COMPREPLY=( $(compgen -W "${opts_verbositylevel}" -- ${cur}) )
             fi
         ;;
         *)
