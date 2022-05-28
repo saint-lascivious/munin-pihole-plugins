@@ -6,7 +6,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="06.06.07"
+VERSION="06.07.01"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -284,9 +284,10 @@ check_pihole() {
     reverberate "info" "Checking if this is a Pi-hole® host"
     if [[ -x "$(command -v pihole)" ]]; then
         reverberate "success" "$(command -v pihole)"
+        pihole_on_host="true"
     else
         reverberate "failure" "pihole"
-        pihole_on_host="no"
+        pihole_on_host="false"
     fi
 }
 
@@ -518,7 +519,7 @@ configure_plugins() {
         reverberate "exit"
         exit 1
     fi
-    if [[ "${pihole_on_host}" == "no" ]]; then
+    if [[ "${pihole_on_host}" == "false" ]]; then
         reverberate "warning" "The Pi-hole® command 'pihole' was not found on this host"
         reverberate "additional_info" "If this was intentional you will need to edit"
         reverberate "${plugin_config_dir}/pihole.conf"
@@ -971,7 +972,12 @@ uninstall_function() {
                 dependency_list+="wget "
             fi
             if [[ "${install_webserver}" == "true" ]]; then
-                dependency_list+="${webserver_dependencies}"
+                check_pihole
+                if [[ "${pihole_on_host}" == "true" ]]; then
+                    dependency_list+="munin "
+                else
+                    dependency_list+="${webserver_dependencies}"
+                fi
                 if [[ -d "${proxy_config_dir}" ]]; then
                     if [[ -f "${proxy_config_dir}/external.conf.orig" ]]; then
                         mv "${proxy_config_dir}/external.conf.orig" "${proxy_config_dir}/external.conf" || return
