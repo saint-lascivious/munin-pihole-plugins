@@ -6,7 +6,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="06.07.02"
+VERSION="06.07.03"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -313,7 +313,11 @@ install_dependencies() {
                 else
                     reverberate "failure" "${dependency_id}"
                     reverberate "info" "Installing required package ${dependency_id}"
-                    apt install -qq "${dependency_id}" > /dev/null 2>&1 &
+                    if [[ "${verbosity_level}" -gt "0" ]]; then
+                        apt install -qq "${dependency_id}"
+                    else
+                        apt install -qq "${dependency_id}" > /dev/null 2>&1
+                    fi
                     reverberate "success" "${dependency_id}"
                 fi
             done
@@ -1019,7 +1023,11 @@ uninstall_function() {
                                     reverberate "warning" "It probably wasn't, and you probably wouldn't"
                                 fi
                                 reverberate "info" "Uninstalling package ${dependency_id}"
-                                apt remove -qq "${dependency_id}" > /dev/null 2>&1 &
+                                if [[ "${verbosity_level}" -ge "2" ]]; then
+                                    apt remove -q "${dependency_id}"
+                                else
+                                    apt remove -qq "${dependency_id}" > /dev/null 2>&1
+                                fi
                                 reverberate "success" "${dependency_id}"
                             fi
                         done
