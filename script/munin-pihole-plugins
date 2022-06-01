@@ -6,7 +6,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="06.07.03"
+VERSION="06.07.04"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -355,7 +355,6 @@ download() {
 # backup any existing non-zero lighttpd external.conf if no backup exists
 # safely merging any existing external.conf properties without conflict
 # would be tedious and annoying, and is out of scope at this point
-# shellcheck disable=SC1087
 configure_proxy() {
     proxy_config="${proxy_config_dir}/external.conf"
     if [[ -d "${proxy_config_dir}" ]]; then
