@@ -6,7 +6,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="06.07.01"
+VERSION="06.07.02"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -974,7 +974,11 @@ uninstall_function() {
             if [[ "${install_webserver}" == "true" ]]; then
                 check_pihole
                 if [[ "${pihole_on_host}" == "true" ]]; then
-                    dependency_list+="munin "
+                    if [[ -d "/var/www/html/pihole" ]]; then
+                        dependency_list+="munin "
+                    else
+                        dependency_list+="${webserver_dependencies}"
+                    fi
                 else
                     dependency_list+="${webserver_dependencies}"
                 fi
