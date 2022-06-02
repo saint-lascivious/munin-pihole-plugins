@@ -4,7 +4,7 @@
 # saint-lascivious (Hayden Pearce) 2022
 # saint@sainternet.xyz
 
-VERSION="06.07.04"
+VERSION="06.07.05"
 
 # Environment variables for this script
 #
@@ -64,7 +64,7 @@ Use ln -s for each desired plugin name within the
 plugins directory to enable that graph.
 
 Plugin name:	        Plugin description;
- pihole_blocked          - Shows domains blocked by Pi-hole.
+ pihole_blocked          - Shows the number of domains blocked by Pi-hole.
  pihole_cache            - Shows Pi-hole's cache.
  pihole_cache_by_type    - Shows Pi-hole's cache by type.
  pihole_clients          - Shows clients seen by Pi-hole.
@@ -118,7 +118,7 @@ case $1 in
                 echo "graph_vlabel domains being blocked"
                 echo "graph_scale no"
                 echo "graph_category dns"
-                echo "graph_info This graph shows domains blocked by Pi-hole."
+                echo "graph_info This graph shows the number of domains blocked by Pi-hole."
                 for stat_id in ${get_stats}; do
                     uid="$(echo "${stat_id}" | sed 's/:.*//')"
                     if [ "${uid}" = "domains_being_blocked" ]; then

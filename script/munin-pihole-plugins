@@ -6,7 +6,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="06.07.04"
+VERSION="06.07.05"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -24,6 +24,7 @@ dns_server="${DNS_SERVER:-208.67.222.222}"
 install_plugins="${INSTALL_PLUGINS:-true}"
 install_script="${INSTALL_SCRIPT:-true}"
 install_webserver="${INSTALL_WEBSERVER:-true}"
+lighttpd_webroot="${LIGHTTPD_WEBROOT:-/var/www/html}"
 munin_dir="${MUNIN_DIR:-/etc/munin}"
 munin_config_dir="${MUNIN_CONFIG_DIR:-${munin_dir}/munin-conf.d}"
 munin_plugin_dir="${MUNIN_PLUGIN_DIR:-/usr/share/munin/plugins}"
@@ -977,7 +978,7 @@ uninstall_function() {
             if [[ "${install_webserver}" == "true" ]]; then
                 check_pihole
                 if [[ "${pihole_on_host}" == "true" ]]; then
-                    if [[ -d "/var/www/html/pihole" ]]; then
+                    if [[ -d "${lighttpd_webroot}/pihole" ]]; then
                         dependency_list+="munin "
                     else
                         dependency_list+="${webserver_dependencies}"
@@ -1076,6 +1077,7 @@ version_function() {
 # - comodo     8.26.56.26
 # - google     8.8.8.8
 # - localhost  127.0.0.1
+# - opendns    208.67.222.222
 # - quad9      9.9.9.9
 # also capable of resetting an existing configured external variable
 # when installed locally, with support for bash completion
@@ -1086,7 +1088,7 @@ variable_function() {
         external_var_dir="/etc/munin-pihole-plugins"
         external_var_file="${external_var_dir}/munin-pihole-plugins.conf"
         external_var_value="${3}"
-        external_var_list="BRANCH DNS_PORT DNS_SERVER INSTALL_PLUGINS INSTALL_SCRIPT INSTALL_WEBSERVER MUNIN_DIR MUNIN_CONFIG_DIR MUNIN_PLUGIN_DIR MUNIN_VERSION NODE_PLUGIN_DIR PLUGIN_CONFIG_DIR PLUGIN_LIST PROXY_CONFIG_DIR SCRIPT_DIR SHOW_COLOR SKIP_DEPENDENCY_CHECK UPDATE_SELF VERBOSITY_LEVEL"
+        external_var_list="BRANCH DNS_PORT DNS_SERVER INSTALL_PLUGINS INSTALL_SCRIPT INSTALL_WEBSERVER LIGHTTPD_WEBROOT MUNIN_DIR MUNIN_CONFIG_DIR MUNIN_PLUGIN_DIR MUNIN_VERSION NODE_PLUGIN_DIR PLUGIN_CONFIG_DIR PLUGIN_LIST PROXY_CONFIG_DIR SCRIPT_DIR SHOW_COLOR SKIP_DEPENDENCY_CHECK UPDATE_SELF VERBOSITY_LEVEL"
         for external_var_id in ${external_var_list}; do
             if [[ "$2" == "${external_var_id}" ]]; then
                 if [[ -f "${script_dir}/munin-pihole-plugins" ]]; then
@@ -1148,6 +1150,17 @@ EOF
                                 fi
                             fi
                         ;;
+                        "OPENDNS"                            )
+                            if [[ "$2" == "DNS_SERVER" ]]; then
+                                if grep -q "^DNS_SERVER=" "${external_var_file}"; then
+                                    sed -i "/^DNS_SERVER=/c\\DNS_SERVER=208.67.222.222" "${external_var_file}" || return
+                                    some "DNS_SERVER: 208.67.222.222"
+                                else
+                                    echo "DNS_SERVER=208.67.222.222" >> "${external_var_file}" || return
+                                    some "DNS_SERVER: 208.67.222.222"
+                                fi
+                            fi
+                        ;;
                         "QUAD9"                              )
                             if [[ "$2" == "DNS_SERVER" ]]; then
                                 if grep -q "^DNS_SERVER=" "${external_var_file}"; then
@@ -1191,6 +1204,9 @@ EOF
             ;;
             "INSTALL_WEBSERVER"                             )
                 some "INSTALL_WEBSERVER: ${install_webserver}"
+            ;;
+            "LIGHTTPD_WEBROOT"                              )
+                some "LIGHTTPD_WEBROOT: ${lighttpd_webroot}"
             ;;
             "MUNIN_DIR"                                     )
                 some "MUNIN_DIR: ${munin_dir}"
@@ -1243,7 +1259,7 @@ EOF
                 some "VERBOSITY_LEVEL: ${verbosity_level}"
             ;;
             ""                                              )
-                min_height="26"
+                min_height="27"
                 if [[ -f "${script_dir}/munin-pihole-plugins" ]]; then
                     some "Usage: munin-pihole-plugins $1 [VARIABLE [\"VALUE\"]]"
                 else
@@ -1256,6 +1272,7 @@ EOF
  INSTALL_PLUGINS=\"${install_plugins}\"
  INSTALL_SCRIPT=\"${install_script}\"
  INSTALL_WEBSERVER=\"${install_webserver}\"
+ LIGHTTPD_WEBROOT=\"${lighttpd_webroot}\"
  MUNIN_DIR=\"${munin_dir}\"
  MUNIN_CONFIG_DIR=\"${munin_config_dir}\"
  MUNIN_PLUGIN_DIR=\"${munin_plugin_dir}\"
