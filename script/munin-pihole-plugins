@@ -6,7 +6,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="06.07.05"
+VERSION="06.07.06"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -1229,16 +1229,16 @@ EOF
             "PLUGIN_LIST"                                   )
                 min_height="14"
                 some "PLUGIN_LIST: ${plugin_list}
-\\nPlugin\\t\\t\\tDescription
- blocked\\t\\t This plugin shows domains blocked by Pi-hole®.
- cache\\t\\t\\t This plugin shows Pi-hole®'s cache.
- cache_by_type\\t\\t This plugin shows Pi-hole®'s cache by type.
- clients\\t\\t This plugin shows clients seen by Pi-hole®.
- percent\\t\\t This plugin shows Pi-hole®'s blocked query percentage.
- queries\\t\\t This plugin shows queries seen by Pi-hole®.
- replies_by_type\\t This plugin shows Pi-hole®'s replies by type.
- status\\t\\t\\t This plugin shows Pi-hole®'s blocking status.
- unique_domains\\t\\t This plugin shows unique domains seen by Pi-hole®."
+\\nPlugin\\t\\tDescription
+ blocked\\t This plugin shows the number of domains blocked by Pi-hole®.
+ cache\\t\\t This plugin shows Pi-hole®'s cache.
+ cache_by_type\\t This plugin shows Pi-hole®'s cache by type.
+ clients\\t This plugin shows clients seen by Pi-hole®.
+ percent\\t This plugin shows Pi-hole®'s blocked query percentage.
+ queries\\t This plugin shows queries seen by Pi-hole®.
+ replies_by_type This plugin shows Pi-hole®'s replies by type.
+ status\\t\\t This plugin shows Pi-hole®'s blocking status.
+ unique_domains\\t This plugin shows unique domains seen by Pi-hole®."
             ;;
             "PROXY_CONFIG_DIR"                              )
                 some "PROXY_CONFIG_DIR: ${proxy_config_dir}"
@@ -1261,11 +1261,14 @@ EOF
             ""                                              )
                 min_height="27"
                 if [[ -f "${script_dir}/munin-pihole-plugins" ]]; then
-                    some "Usage: munin-pihole-plugins $1 [VARIABLE [\"VALUE\"]]"
+                    usage_text="Usage: munin-pihole-plugins $1 [VARIABLE [\"VALUE\"]]"
+                    example_text="\\nExample: munin-pihole-plugins $1 DNS_SERVER 127.0.0.1"
                 else
-                    some "Usage: export VARIABLE=\"VALUE\""
+                    usage_text="Usage: export VARIABLE=\"VALUE\""
+                    example_text="\\nExample: export DNS_SERVER=\"127.0.0.1\""
                 fi
-                some "\\nVariable
+                some "${usage_text}
+\\nVariable
  BRANCH=\"${branch}\"
  DNS_PORT=\"${dns_port}\"
  DNS_SERVER=\"${dns_server}\"
@@ -1285,12 +1288,8 @@ EOF
  SHOW_COLOR=\"${show_color}\"
  SKIP_DEPENDENCY_CHECK=\"${skip_dependency_check}\"
  UPDATE_SELF=\"${update_self}\"
- VERBOSITY_LEVEL=\"${verbosity_level}\""
-                if [[ -f "${script_dir}/munin-pihole-plugins" ]]; then
-                    some "\\nExample: munin-pihole-plugins $1 DNS_SERVER 127.0.0.1"
-                else
-                    some "\\nExample: export DNS_SERVER=\"127.0.0.1\""
-                fi
+ VERBOSITY_LEVEL=\"${verbosity_level}\"
+${example_text}"
            ;;
             *                                               )
                 min_height="3"
