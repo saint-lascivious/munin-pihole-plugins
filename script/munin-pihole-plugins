@@ -6,7 +6,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="06.07.06"
+VERSION="06.07.07"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -208,10 +208,11 @@ reverberate() {
         "config"                                            )
             if [[ "${verbosity_level}" -ge "3" ]]; then
                 if [[ -f "${script_dir}/munin-pihole-plugins" ]]; then
-                    echo -e "  ${WHITE}munin-pihole-plugins --variables $2${RESET} VALUE"
+                    config_text="  ${WHITE}munin-pihole-plugins --variables $2${RESET} VALUE"
                 else
-                    echo -e "  ${WHITE}export $2=\"VALUE\"${RESET}"
+                    config_text="  ${WHITE}export $2=\"VALUE\"${RESET}"
                 fi
+                echo -e "${config_text}"
             fi
         ;;
         "error"                                             )
