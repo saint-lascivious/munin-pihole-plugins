@@ -6,7 +6,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="06.07.07"
+VERSION="06.07.08"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -44,6 +44,8 @@ verbosity_level="${VERBOSITY_LEVEL:-3}"
 # values for *_dependencies and *_services are intentional
 # and must be retained for the sake of easy string concat
 current_dir="$(dirname "$(readlink -f "$0")")"
+external_var_dir="/etc/munin-pihole-plugins"
+external_var_file="${external_var_dir}/munin-pihole-plugins.conf"
 plugin_dependencies="curl munin-node "
 plugin_services="munin-node "
 proxy_repo="https://raw.githubusercontent.com/saint-lascivious/lighttpd-external-munin-proxy"
@@ -702,7 +704,7 @@ help_function() {
         ;;
         "-i" | "--install" | "install"                      )
             case "${3}" in
-                "-p" | "-s" | "-w" | "plugins" | "script" | "webserver" | "--plugins" | "--script" | "--webserver"                                      )
+                "-p" | "-s" | "-w" | "plugins" | "script" | "webserver" | "--plugins" | "--script" | "--webserver"                                  )
                     min_height="12"
                     some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
 \\nParameter\\t\\t\\t\\tFunction
@@ -714,7 +716,7 @@ help_function() {
 \\t\\t\\t\\t\\t and lighttpd-external-munin-proxy
 \\nExample: 'munin-pihole-plugins $2 $3'"
                 ;;
-                "-P" | "-S" | "-W" | "plugins-only" | "script-only" | "webserver-only" | "--plugins-only" | "--script-only" | "--webserver-only"        )
+                "-P" | "-S" | "-W" | "plugins-only" | "script-only" | "webserver-only" | "--plugins-only" | "--script-only" | "--webserver-only"    )
                     min_height="11"
                     some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
 \\nParameter\\t\\t\\t\\tFunction
@@ -725,7 +727,7 @@ help_function() {
  -W, webserver-only --webserver-only\\t Install lighttpd-external-munin-proxy
 \\nExample: 'munin-pihole-plugins $2 $3'"
                 ;;
-                *                                                                       )
+                *                                           )
                     min_height="32"
                     some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
 \\nOption\\t\\t    GNU long option\\tMeaning
@@ -765,7 +767,7 @@ the latest munin-pihole-plugins script version.
         ;;
         "-U" | "--uninstall" | "uninstall"                  )
             case "${3}" in
-                "-p" | "-s" | "-w" | "plugins" | "script" | "webserver" | "--plugins" | "--script" | "--webserver"                                      )
+                "-p" | "-s" | "-w" | "plugins" | "script" | "webserver" | "--plugins" | "--script" | "--webserver"                                  )
                     min_height="12"
                     some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
 \\nParameter\\t\\t\\t\\tFunction
@@ -777,7 +779,7 @@ the latest munin-pihole-plugins script version.
 \\t\\t\\t\\t\\t lighttpd-external-munin-proxy
 \\nExample: 'munin-pihole-plugins $2 $3'"
                 ;;
-                "-P" | "-S" | "-W" | "plugins-only" | "script-only" | "webserver-only" | "--plugins-only" | "--script-only" | "--webserver-only"        )
+                "-P" | "-S" | "-W" | "plugins-only" | "script-only" | "webserver-only" | "--plugins-only" | "--script-only" | "--webserver-only"    )
                     min_height="11"
                     some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
 \\nParameter\\t\\t\\t\\tFunction
@@ -788,7 +790,7 @@ the latest munin-pihole-plugins script version.
  -W, webserver-only --webserver-only\\t Uninstall lighttpd-external-munin-proxy
 \\nExample: 'munin-pihole-plugins $2 $3'"
                 ;;
-                *                                                                       )
+                *                                           )
                     min_height="23"
                     some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
 \\nOption\\t\\t    GNU long option\\tMeaning
@@ -1067,6 +1069,41 @@ version_function() {
     fi
 }
 
+
+# simple wrapper to set or reset external variables
+# handles creation of the external variable configuration file if required
+# split up from the labyrintine mess that is variable_function to limit
+# some of the needless duplication that was happening there
+# as before this function only gets called if the munin-pihole-plugins
+# script is locally installed
+# bash completion works as before without change
+modify_external_var() {
+    external_var="$1"
+    external_var_value="$2"
+    if [[ ! -d "${external_var_dir}" ]]; then
+        mkdir "${external_var_dir}" || return
+        cat > "${external_var_file}" << EOF
+# external configuration file created by munin-pihole-plugins
+EOF
+    fi
+    case "$2" in
+        "RESET"                                             )
+            if grep -q "^${external_var}=" "${external_var_file}"; then
+                sed -i "/^${external_var}/d" "${external_var_file}" || return
+            fi
+        ;;
+        *                                                   )
+            if grep -q "^${external_var}=" "${external_var_file}"; then
+                sed -i "/^${external_var}=/c\\${external_var}=${external_var_value}" "${external_var_file}" || return
+                some "${external_var}: ${external_var_value}"
+            else
+                echo "${external_var}=${external_var_value}" >> "${external_var_file}" || return
+                some "${external_var}: ${external_var_value}"
+            fi
+        ;;
+    esac
+}
+
 # display munin-pihole-plugins environment variables and their current values
 # there were too many variables to list in the main help text
 # also capable of setting environment variables when installed locally
@@ -1080,109 +1117,57 @@ version_function() {
 # - localhost  127.0.0.1
 # - opendns    208.67.222.222
 # - quad9      9.9.9.9
-# also capable of resetting an existing configured external variable
-# when installed locally, with support for bash completion
 variable_function() {
     min_height="3"
     if [[ -n "$3" ]]; then
-        external_var="${2}"
-        external_var_dir="/etc/munin-pihole-plugins"
-        external_var_file="${external_var_dir}/munin-pihole-plugins.conf"
-        external_var_value="${3}"
         external_var_list="BRANCH DNS_PORT DNS_SERVER INSTALL_PLUGINS INSTALL_SCRIPT INSTALL_WEBSERVER LIGHTTPD_WEBROOT MUNIN_DIR MUNIN_CONFIG_DIR MUNIN_PLUGIN_DIR MUNIN_VERSION NODE_PLUGIN_DIR PLUGIN_CONFIG_DIR PLUGIN_LIST PROXY_CONFIG_DIR SCRIPT_DIR SHOW_COLOR SKIP_DEPENDENCY_CHECK UPDATE_SELF VERBOSITY_LEVEL"
         for external_var_id in ${external_var_list}; do
             if [[ "$2" == "${external_var_id}" ]]; then
                 if [[ -f "${script_dir}/munin-pihole-plugins" ]]; then
                     check_privilege "$@"
-                    external_var_path="/etc/munin-pihole-plugins"
-                    external_var="${2}"
-                    external_var_value="${3}"
-                    if [[ ! -d "${external_var_path}" ]]; then
-                        mkdir "${external_var_path}" || return
-                        cat > "${external_var_file}" << EOF
-# external configuration file created by munin-pihole-plugins
-EOF
-                    fi
                     case "$3" in
-                        "RESET"                              )
-                            sed -i "/^${external_var}/d" "${external_var_file}"
+                        "RESET"                             )
+                            modify_external_var "$2" "RESET"
                         ;;
-                        "CLOUDFLARE"                         )
+                        "CLOUDFLARE"                        )
                             if [[ "$2" == "DNS_SERVER" ]]; then
-                                if grep -q "^DNS_SERVER=" "${external_var_file}"; then
-                                    sed -i "/^DNS_SERVER=/c\\DNS_SERVER=1.1.1.1" "${external_var_file}" || return
-                                    some "DNS_SERVER: 1.1.1.1"
-                                else
-                                    echo "DNS_SERVER=1.1.1.1" >> "${external_var_file}" || return
-                                    some "DNS_SERVER: 1.1.1.1"
-                                fi
+                                modify_external_var "$2" "1.1.1.1"
                             fi
                         ;;
-                        "COMODO"                             )
+                        "COMODO"                            )
                             if [[ "$2" == "DNS_SERVER" ]]; then
-                                if grep -q "^DNS_SERVER=" "${external_var_file}"; then
-                                    sed -i "/^DNS_SERVER=/c\\DNS_SERVER=8.26.56.26" "${external_var_file}" || return
-                                    some "DNS_SERVER: 8.26.56.26"
-                                else
-                                    echo "DNS_SERVER=8.26.56.26" >> "${external_var_file}" || return
-                                    some "DNS_SERVER: 8.26.56.26"
-                                fi
+                                modify_external_var "$2" "8.26.56.26"
                             fi
                         ;;
-                        "GOOGLE"                             )
+                        "GOOGLE"                            )
                             if [[ "$2" == "DNS_SERVER" ]]; then
-                                if grep -q "^DNS_SERVER=" "${external_var_file}"; then
-                                    sed -i "/^DNS_SERVER=/c\\DNS_SERVER=8.8.8.8" "${external_var_file}" || return
-                                    some "DNS_SERVER: 8.8.8.8"
-                                else
-                                    echo "DNS_SERVER=8.8.8.8" >> "${external_var_file}" || return
-                                    some "DNS_SERVER: 8.8.8.8"
-                                fi
+                                modify_external_var "$2" "8.8.8.8"
                             fi
                         ;;
-                        "LOCALHOST"                          )
+                        "LOCALHOST"                         )
                             if [[ "$2" == "DNS_SERVER" ]]; then
-                                if grep -q "^DNS_SERVER=" "${external_var_file}"; then
-                                    sed -i "/^DNS_SERVER=/c\\DNS_SERVER=127.0.0.1" "${external_var_file}" || return
-                                    some "DNS_SERVER: 127.0.0.1"
-                                else
-                                    echo "DNS_SERVER=127.0.0.1" >> "${external_var_file}" || return
-                                    some "DNS_SERVER: 127.0.0.1"
-                                fi
+                                modify_external_var "$2" "127.0.0.1"
                             fi
                         ;;
-                        "OPENDNS"                            )
+                        "OPENDNS"                           )
                             if [[ "$2" == "DNS_SERVER" ]]; then
-                                if grep -q "^DNS_SERVER=" "${external_var_file}"; then
-                                    sed -i "/^DNS_SERVER=/c\\DNS_SERVER=208.67.222.222" "${external_var_file}" || return
-                                    some "DNS_SERVER: 208.67.222.222"
-                                else
-                                    echo "DNS_SERVER=208.67.222.222" >> "${external_var_file}" || return
-                                    some "DNS_SERVER: 208.67.222.222"
-                                fi
+                                modify_external_var "$2" "208.67.222.222"
                             fi
                         ;;
-                        "QUAD9"                              )
+                        "QUAD9"                             )
                             if [[ "$2" == "DNS_SERVER" ]]; then
-                                if grep -q "^DNS_SERVER=" "${external_var_file}"; then
-                                    sed -i "/^DNS_SERVER=/c\\DNS_SERVER=9.9.9.9" "${external_var_file}" || return
-                                    some "DNS_SERVER: 9.9.9.9"
-                                else
-                                    echo "DNS_SERVER=9.9.9.9" >> "${external_var_file}" || return
-                                    some "DNS_SERVER: 9.9.9.9"
-                                fi
+                                modify_external_var "$2" "9.9.9.9"
                             fi
                         ;;
-                        *                                    )
-                            if grep -q "^${external_var}=" "${external_var_file}"; then
-                                sed -i "/^${external_var}=/c\\${external_var}=${external_var_value}" "${external_var_file}" || return
-                                some "${external_var}: ${external_var_value}"
-                            else
-                                echo "${external_var}=${external_var_value}" >> "${external_var_file}" || return
-                                some "${external_var}: ${external_var_value}"
-                            fi
+                        *                                   )
+                            modify_external_var "$2" "$3"
                         ;;
                     esac
+                else
+                    min_height="4"
+                    some "munin-pihole-plugins: funtion unavailable
+The munin-pihole-plugins script must be installed to use this function
+Type 'munin-pihole-plugins --install --script' to install it now"
                 fi
             fi
         done
@@ -1293,7 +1278,7 @@ EOF
 ${example_text}"
            ;;
             *                                               )
-                min_height="3"
+                min_height="4"
                 some "munin-pihole-plugins: unrecognized variable '$2'
 Type 'munin-pihole-plugins --variables' for a list of available options"
         esac
