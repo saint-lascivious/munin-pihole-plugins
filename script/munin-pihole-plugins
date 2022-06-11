@@ -6,7 +6,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="06.08.00"
+VERSION="06.08.01"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -1097,7 +1097,7 @@ transmogrify() {
     if [[ ! -d "${external_config_dir}" ]]; then
         mkdir -p "${external_config_dir}" || return
     fi
-    if [[ ! -f "${external_config_file}" ]]; then
+    if [[ ! -f "${external_config_dir}/${external_config_file}" ]]; then
         cat > "${external_config_dir}/${external_config_file}" << EOF
 # external configuration file created by $0
 # ${rfc3339_date}
