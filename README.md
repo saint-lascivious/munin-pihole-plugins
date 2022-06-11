@@ -162,7 +162,7 @@ Example: `munin-pihole-plugins --variables VERBOSITY_LEVEL 4`
 
 Reset example: `munin-pihole-plugins --variables VERBOSITY_LEVEL RESET`
 
-The `/etc/munin-pihole-plugins/munin-pihole-plugins.conf` file may be manually created and placed ahead of time if desired, useful for packaging or other automated deployment. This file MUST be a plain text file and MUST consist of the format `VARIABLE=VALUE`, one variable per line, with no leading whitespace or indentation.
+The configuration file, of which the default is `/etc/munin-pihole-plugins/munin-pihole-plugins.conf`, may be manually created or generated ahead of time if desired, useful for packaging or other automated deployment. This configuration file MUST be a plain text file and MUST consist of the format `VARIABLE=VALUE` (or `VARIABLE="VALUE"` for arrays, like `PLUGIN_LIST`), one variable per line, with no leading whitespace or indentation. Comments to assist usability may exist but MUST be preceeded with a hash (`#`) character.
 
 * Default `munin-pihole-plugins` script environment variables
 
@@ -171,6 +171,8 @@ The `/etc/munin-pihole-plugins/munin-pihole-plugins.conf` file may be manually c
 | `BRANCH` | `development` |
 | `DNS_PORT` | `53` |
 | `DNS_SERVER` | `208.67.222.222` |
+| `EXTERNAL_CONFIG_DIR` | `/etc/munin-pihole-plugins` |
+| `EXTERNAL_CONFIG_FILE` | `munin-pihole-plugins.conf` |
 | `INSTALL_PLUGINS` | `true` |
 | `INSTALL_SCRIPT` | `true` |
 | `INSTALL_WEBSERVER` | `true` |
@@ -213,6 +215,18 @@ When the `munin-pihole-plugins` script is installed locally, the `-V`, `variable
 | `QUAD9` | `9.9.9.9` |
 
 Example: `munin-pihole-plugins --variables DNS_SERVER LOCALHOST`
+
+* `EXTERNAL_CONFIG_DIR`
+
+The directory in which an external configuration file should be located, to be created if required.
+
+Example: `export EXTERNAL_CONFIG_DIR="/etc/munin-pihole-plugins"`
+
+* `EXTERNAL_CONFIG_FILE`
+
+The name of external configuration file `munin-pihole-plugins` should use, to be created if required.
+
+Example: `export EXTERNAL_CONFIG_FILE="munin-pihole-plugins.conf"`
 
 * `INSTALL_PLUGINS`
 
