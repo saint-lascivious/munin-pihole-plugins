@@ -6,7 +6,23 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="05.00.00"
+VERSION="06.00.00"
+
+# source any external variables from munin-pihole-plugins.conf
+# somewhat of a security risk honestly, i don't particularly
+# like using . but if someone can write to /etc then you most
+# certainly have bigger problems
+# hey saint, what in kitten's whiskers is this bullshit all about?
+# good question, see the following as to why we dance this stupid
+# dance pseudo-sourcing /dev/null for shellcheck
+# https://github.com/koalaman/shellcheck/wiki/SC1090
+# tl;dr: it's dumb
+external_config_dir="${EXTERNAL_CONFIG_DIR:-/etc/munin-pihole-plugins}"
+external_config_file="${EXTERNAL_CONFIG_FILE:-munin-pihole-plugins.conf}"
+if [[ -f "${external_config_dir}/${external_config_file}" ]]; then
+    # shellcheck source=/dev/null
+    . "${external_config_dir}/${external_config_file}"
+fi
 
 # environment variables with overrides
 branch="${BRANCH:-master}"
@@ -15,23 +31,30 @@ dns_server="${DNS_SERVER:-208.67.222.222}"
 install_plugins="${INSTALL_PLUGINS:-true}"
 install_script="${INSTALL_SCRIPT:-true}"
 install_webserver="${INSTALL_WEBSERVER:-true}"
+lighttpd_webroot="${LIGHTTPD_WEBROOT:-/var/www/html}"
 munin_dir="${MUNIN_DIR:-/etc/munin}"
 munin_config_dir="${MUNIN_CONFIG_DIR:-${munin_dir}/munin-conf.d}"
 munin_plugin_dir="${MUNIN_PLUGIN_DIR:-/usr/share/munin/plugins}"
+munin_version="${MUNIN_VERSION:-stable}"
 node_plugin_dir="${NODE_PLUGIN_DIR:-${munin_dir}/plugins}"
 plugin_config_dir="${PLUGIN_CONFIG_DIR:-${munin_dir}/plugin-conf.d}"
 plugin_list="${PLUGIN_LIST:-blocked cache cache_by_type clients percent queries replies_by_type status unique_domains}"
 proxy_config_dir="${PROXY_CONFIG_DIR:-/etc/lighttpd}"
+rfc3339_date="$(date --rfc-3339="seconds")"
 script_dir="${SCRIPT_DIR:-/usr/local/bin}"
+show_color="${SHOW_COLOR:-true}"
 skip_dependency_check="${SKIP_DEPENDENCY_CHECK:-false}"
 update_self="${UPDATE_SELF:-true}"
 verbosity_level="${VERBOSITY_LEVEL:-3}"
 
 # environment variables without
+# note: the spaces at the ends of the environment variable
+# values for *_dependencies and *_services are intentional
+# and must be retained for the sake of easy string concat
 current_dir="$(dirname "$(readlink -f "$0")")"
 plugin_dependencies="curl munin-node "
 plugin_services="munin-node "
-proxy_repo="https://raw.githubusercontent.com/saint-lascivious/lighttpd-external-munin-proxy/master"
+proxy_repo="https://raw.githubusercontent.com/saint-lascivious/lighttpd-external-munin-proxy"
 script_dependencies="init-system-helpers wget "
 terminal_height="$(stty size | cut -d " " -f1)"
 terminal_width="$(stty size | cut -d " " -f2)"
@@ -57,16 +80,29 @@ else
 fi
 
 # define colours for later use, if supported
+# allow the display of colours to be disabled
 if [[ -t "1" ]] && [[ $(tput colors) -ge "8" ]]; then
-    WHITE="\\e[97m"
-    RED="\\e[31m"
-    ORANGE="\\e[33m"
-    YELLOW="\\e[93m"
-    GREEN="\\e[32m"
-    BLUE="\\e[94m"
-    INDIGO="\\e[34m"
-    VIOLET="\\e[35m"
-    RESET="\\e[0m"
+    if [[ "${show_color}" == "true" ]]; then
+        WHITE="\\e[97m"
+        RED="\\e[31m"
+        ORANGE="\\e[33m"
+        YELLOW="\\e[93m"
+        GREEN="\\e[32m"
+        BLUE="\\e[94m"
+        INDIGO="\\e[34m"
+        VIOLET="\\e[35m"
+        RESET="\\e[0m"
+    else
+        WHITE=""
+        RED=""
+        ORANGE=""
+        YELLOW=""
+        GREEN=""
+        BLUE=""
+        INDIGO=""
+        VIOLET=""
+        RESET=""
+    fi
 else
     WHITE=""
     RED=""
@@ -104,6 +140,8 @@ update_script() {
 # .munin-pihole-plugins_update
 # saint-lascivious (Hayden Pearce) 2022
 # saint@sainternet.xyz
+
+VERSION="${VERSION}"
 
 verbosity_level="${verbosity_level}"
 
@@ -175,6 +213,16 @@ reverberate() {
                 echo -e "\\n  [${WHITE}ℹ${RESET}] ${GREEN}$2${RESET}"
             fi
         ;;
+        "config"                                            )
+            if [[ "${verbosity_level}" -ge "3" ]]; then
+                if [[ -f "${script_dir}/munin-pihole-plugins" ]]; then
+                    config_text="  ${WHITE}munin-pihole-plugins --variables $2${RESET} VALUE"
+                else
+                    config_text="  ${WHITE}export $2=\"VALUE\"${RESET}"
+                fi
+                echo -e "${config_text}"
+            fi
+        ;;
         "error"                                             )
             if [[ "${verbosity_level}" -ge "1" ]]; then
                 echo -e "\\n  [${RED}!${RESET}] ${RED}$2${RESET}"
@@ -237,7 +285,7 @@ ${YELLOW}  | '  \\ || | ' \\| | ' \\__| '_ \\ | ' \\/ _ \\ / -_)_| '_ \\ | || / 
 ${GREEN}  |_|_|_\\_,_|_||_|_|_||_| | .__/_|_||_\\___/_\\___| | .__/_|\\_,_\\__, |_|_||_/__/
 ${BLUE}                          |_|                     |_|         |___/
 \\n${INDIGO} Munin plugins and management script for monitoring various Pi-hole® statistics
-\\n${VIOLET} $(date)${RESET}"
+\\n${VIOLET} ${rfc3339_date}${RESET}"
     fi
 }
 
@@ -245,10 +293,11 @@ ${BLUE}                          |_|                     |_|         |___/
 check_pihole() {
     reverberate "info" "Checking if this is a Pi-hole® host"
     if [[ -x "$(command -v pihole)" ]]; then
-        reverberate "success" "pihole"
+        reverberate "success" "$(command -v pihole)"
+        pihole_on_host="true"
     else
         reverberate "failure" "pihole"
-        pihole_on_host="no"
+        pihole_on_host="false"
     fi
 }
 
@@ -273,7 +322,13 @@ install_dependencies() {
                     reverberate "success" "${dependency_id}"
                 else
                     reverberate "failure" "${dependency_id}"
-                    apt install -qq "${dependency_id}"
+                    reverberate "info" "Installing required package ${dependency_id}"
+                    if [[ "${verbosity_level}" -gt "0" ]]; then
+                        apt install -qq "${dependency_id}"
+                    else
+                        apt install -qq "${dependency_id}" > /dev/null 2>&1
+                    fi
+                    reverberate "success" "${dependency_id}"
                 fi
             done
         else
@@ -320,14 +375,28 @@ configure_proxy() {
                 reverberate "success" "${proxy_config}.orig"
             fi
         fi
-        reverberate "info" "Installing Munin webserver proxy configuration"
-        download "${proxy_repo}/etc/lighttpd/external.conf" -O "${proxy_config}"
+        reverberate "info" "Installing Munin webserver lighttpd proxy configuration"
+        if [[ "${munin_version}" == "stable" ]]; then
+            download "${proxy_repo}/master/etc/lighttpd/external.conf" -O "${proxy_config}"
+        else
+            if [[ "${munin_version}" == "latest" ]]; then
+                download "${proxy_repo}/latest/etc/lighttpd/external.conf" -O "${proxy_config}"
+            else
+                reverberate "error" "Invalid Munin version"
+                reverberate "failure" "${munin_version}"
+                reverberate "info" "Valid Munin versions are"
+                reverberate "success" "latest"
+                reverberate "success" "stable"
+                reverberate "exit"
+                exit 1
+            fi
+        fi
         reverberate "success" "${proxy_config}"
     else
         reverberate "error" "No lighttpd configuration directory found"
         reverberate "failure" "${proxy_config_dir}"
         reverberate "additional_info" "If this directory is located at a different path try"
-        reverberate "export PROXY_CONFIG_DIR=\"/path/to/directory\""
+        reverberate "config" "PROXY_CONFIG_DIR"
         reverberate "exit"
         exit 1
     fi
@@ -355,7 +424,7 @@ configure_munin() {
                 reverberate "error" "No munin.conf file found"
                 reverberate "failure" "${munin_dir}/munin.conf"
                 reverberate "additional_info" "If this file is located at a different path try"
-                reverberate "export MUNIN_DIR=\"/path/to/directory\""
+                reverberate "config" "MUNIN_DIR"
                 reverberate "exit"
                 exit 1
             fi
@@ -363,14 +432,14 @@ configure_munin() {
             reverberate "error" "No Munin directory found"
             reverberate "failure" "${munin_dir}"
             reverberate "additional_info" "If this directory is located at a different path try"
-            reverberate "export MUNIN_DIR=\"/path/to/directory\""
+            reverberate "config" "MUNIN_DIR"
             reverberate "exit"
             exit 1
         fi
         reverberate "error" "No Munin configuration directory found"
         reverberate "failure" "${munin_config_dir}"
         reverberate "additional_info" "If this directory is located at a different path try"
-        reverberate "export MUNIN_CONFIG_DIR=\"/path/to/directory\""
+        reverberate "config" "MUNIN_CONFIG_DIR"
         reverberate "exit"
         exit 1
     fi
@@ -384,24 +453,30 @@ configure_munin() {
 uninstall_plugins() {
     all_plugins="blocked blockrate cache cacheinfo cacherate cache_by_type cache_info clients hits percent queries reply replies_by_type status unique unique_domains"
     if [[ -d "${munin_plugin_dir}" ]]; then
-        reverberate "info" "Removing any existing munin-pihole-plugins plugin(s)"
+        reverberate "additional_info" "Removing any existing munin-pihole-plugins plugin(s)"
         if [[ -f "${munin_plugin_dir}/pihole_" ]]; then
             rm "${munin_plugin_dir}/pihole_" || return
-            reverberate "success" "pihole_"
+            if [[ "${verbosity_level}" -ge "4" ]]; then
+                reverberate "success" "${munin_plugin_dir}/pihole_"
+            fi
         fi
         for plugin_id in ${all_plugins}; do
             if [[ -f "${munin_plugin_dir}/pihole_${plugin_id}" ]]; then
                 rm "${munin_plugin_dir}/pihole_${plugin_id}" || return
-                reverberate "success" "${plugin_id}"
+                if [[ "${verbosity_level}" -ge "4" ]]; then
+                    reverberate "success" "${munin_plugin_dir}pihole_${plugin_id}"
+                fi
             fi
         done
     fi
     if [[ -d "${node_plugin_dir}" ]]; then
-        reverberate "info" "Removing any existing munin-pihole-plugins symbolic links"
+        reverberate "additional_info" "Removing any existing munin-pihole-plugins symbolic links"
         for plugin_id in ${all_plugins}; do
             if [[ -h "${node_plugin_dir}/pihole_${plugin_id}" ]]; then
                 rm "${node_plugin_dir}/pihole_${plugin_id}" || return
-                reverberate "success" "${plugin_id}"
+                if [[ "${verbosity_level}" -ge "4" ]]; then
+                    reverberate "success" "${node_plugin_dir}/pihole_${plugin_id}"
+                fi
             fi
         done
     fi
@@ -415,17 +490,17 @@ install_plugins() {
             reverberate "info" "Installing munin-pihole-plugins plugin"
             download "${plugin_repo}/usr/share/munin/plugins/pihole_" -P "${munin_plugin_dir}"
             chmod +x "${munin_plugin_dir}/pihole_" || return
-            reverberate "success" "pihole_"
+            reverberate "success" "${munin_plugin_dir}/pihole_"
             reverberate "info" "Creating selected munin-pihole-plugins symbolic links"
             for plugin_id in ${plugin_list}; do
                 ln -s "${munin_plugin_dir}/pihole_" "${node_plugin_dir}/pihole_${plugin_id}" || return
-                reverberate "success" "${plugin_id}"
+                reverberate "success" "${node_plugin_dir}/pihole_${plugin_id}"
             done
         else
             reverberate "error" "No Munin node plugin directory found"
             reverberate "failure" "${node_plugin_dir}"
             reverberate "additional_info" "If this directory is located at a different path try"
-            reverberate "export NODE_PLUGIN_DIR=\"/path/to/directory\""
+            reverberate "config" "NODE_PLUGIN_DIR"
             reverberate "exit"
             exit 1
         fi
@@ -433,7 +508,7 @@ install_plugins() {
         reverberate "error" "No Munin plugin directory found"
         reverberate "failure" "${munin_plugin_dir}"
         reverberate "additional_info" "If this directory is located at a different path try"
-        reverberate "export MUNIN_PLUGIN_DIR=\"/path/to/directory\""
+        reverberate "config" "MUNIN_PLUGIN_DIR"
         reverberate "exit"
         exit 1
     fi
@@ -453,11 +528,11 @@ configure_plugins() {
         reverberate "error" "No Munin plugin configuration directory found"
         reverberate "failure" "${plugin_config_dir}"
         reverberate "additional_info" "If this directory is located at a different path try"
-        reverberate "export PLUGIN_CONFIG_DIR=\"/path/to/directory\""
+        reverberate "config" "PLUGIN_CONFIG_DIR"
         reverberate "exit"
         exit 1
     fi
-    if [[ "${pihole_on_host}" == "no" ]]; then
+    if [[ "${pihole_on_host}" == "false" ]]; then
         reverberate "warning" "The Pi-hole® command 'pihole' was not found on this host"
         reverberate "additional_info" "If this was intentional you will need to edit"
         reverberate "${plugin_config_dir}/pihole.conf"
@@ -509,6 +584,8 @@ install_script() {
             fi
             reverberate "info" "A copy of the munin-pihole-plugins bash-completion script was installed"
             reverberate "success" "/etc/bash_completion.d/munin-pihole-plugins"
+            reverberate "additional_info" "To begin using it immediately, open a new terminal or type"
+            reverberate ". /etc/bash_completion"
         fi
         if [[ ":${PATH}:" != *":${script_dir}:"* ]]; then
             reverberate "warning" "The munin-pihole-plugins script directory is not in your \$PATH"
@@ -516,15 +593,17 @@ install_script() {
             reverberate "additional_info" "To add the munin-pihole-plugins script directory to your \$PATH try"
             reverberate "export PATH=\"\$PATH:${script_dir}\""
         else
-            reverberate "info" "The munin-pihole-plugins script directory is in your \$PATH"
-            reverberate "success" "\$PATH"
+            reverberate "additional_info" "The munin-pihole-plugins script directory is in your \$PATH"
+            if [[ "${verbosity_level}" -ge "4" ]]; then
+                reverberate "success" "\$PATH"
+            fi
             reverberate "additional_info" "You can now use munin-pihole-plugins just as you would any other command"
         fi
     else
         reverberate "error" "No directory found"
         reverberate "failure" "${script_dir}"
         reverberate "additional_info" "If this directory is located at a different path try"
-        reverberate "export SCRIPT_DIR=\"/path/to/directory\""
+        reverberate "config" "SCRIPT_DIR"
         reverberate "exit"
         exit 1
     fi
@@ -540,12 +619,20 @@ uninstall_script() {
 # saint-lascivious (Hayden Pearce) 2022
 # saint@sainternet.xyz
 
+VERSION="${VERSION}"
+
 verbosity_level="${verbosity_level}"
 
 # uninstalls a locally installed copy of the munin-pihole-plugins script
+# users may set external config dir/file to something mission critical,
+# hence the reasoning for leaving the hardcoded config dir/file path
+# intact here rather than following variables
 uninstall_now() {
     if [[ -f "/etc/bash_completion.d/munin-pihole-plugins" ]]; then
         rm "/etc/bash_completion.d/munin-pihole-plugins" || return
+    fi
+    if [[ -d "/etc/munin-pihole-plugins" ]]; then
+        rm -fr "/etc/munin-pihole-plugins" || return
     fi
     rm "${script_dir}/munin-pihole-plugins" || return
     if [[ "${verbosity_level}" -ge "3" ]]; then
@@ -626,7 +713,7 @@ help_function() {
         ;;
         "-i" | "--install" | "install"                      )
             case "${3}" in
-                "-p" | "-s" | "-w" | "plugins" | "script" | "webserver" | "--plugins" | "--script" | "--webserver"                                      )
+                "-p" | "-s" | "-w" | "plugins" | "script" | "webserver" | "--plugins" | "--script" | "--webserver"                                  )
                     min_height="12"
                     some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
 \\nParameter\\t\\t\\t\\tFunction
@@ -638,7 +725,7 @@ help_function() {
 \\t\\t\\t\\t\\t and lighttpd-external-munin-proxy
 \\nExample: 'munin-pihole-plugins $2 $3'"
                 ;;
-                "-P" | "-S" | "-W" | "plugins-only" | "script-only" | "webserver-only" | "--plugins-only" | "--script-only" | "--webserver-only"        )
+                "-P" | "-S" | "-W" | "plugins-only" | "script-only" | "webserver-only" | "--plugins-only" | "--script-only" | "--webserver-only"    )
                     min_height="11"
                     some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
 \\nParameter\\t\\t\\t\\tFunction
@@ -649,7 +736,7 @@ help_function() {
  -W, webserver-only --webserver-only\\t Install lighttpd-external-munin-proxy
 \\nExample: 'munin-pihole-plugins $2 $3'"
                 ;;
-                *                                                                       )
+                *                                           )
                     min_height="32"
                     some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
 \\nOption\\t\\t    GNU long option\\tMeaning
@@ -689,7 +776,7 @@ the latest munin-pihole-plugins script version.
         ;;
         "-U" | "--uninstall" | "uninstall"                  )
             case "${3}" in
-                "-p" | "-s" | "-w" | "plugins" | "script" | "webserver" | "--plugins" | "--script" | "--webserver"                                      )
+                "-p" | "-s" | "-w" | "plugins" | "script" | "webserver" | "--plugins" | "--script" | "--webserver"                                  )
                     min_height="12"
                     some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
 \\nParameter\\t\\t\\t\\tFunction
@@ -701,7 +788,7 @@ the latest munin-pihole-plugins script version.
 \\t\\t\\t\\t\\t lighttpd-external-munin-proxy
 \\nExample: 'munin-pihole-plugins $2 $3'"
                 ;;
-                "-P" | "-S" | "-W" | "plugins-only" | "script-only" | "webserver-only" | "--plugins-only" | "--script-only" | "--webserver-only"        )
+                "-P" | "-S" | "-W" | "plugins-only" | "script-only" | "webserver-only" | "--plugins-only" | "--script-only" | "--webserver-only"    )
                     min_height="11"
                     some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
 \\nParameter\\t\\t\\t\\tFunction
@@ -712,7 +799,7 @@ the latest munin-pihole-plugins script version.
  -W, webserver-only --webserver-only\\t Uninstall lighttpd-external-munin-proxy
 \\nExample: 'munin-pihole-plugins $2 $3'"
                 ;;
-                *                                                                       )
+                *                                           )
                     min_height="23"
                     some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
 \\nOption\\t\\t    GNU long option\\tMeaning
@@ -735,16 +822,23 @@ uninstall any dependencies that munin-pihole-plugins may have installed.
             esac
         ;;
         "-V" | "--variables" | "variables"                  )
-            min_height="14"
-            some "Usage: munin-pihole-plugins {$2 [VARIABLE]}
+            min_height="23"
+            some "Usage: munin-pihole-plugins {$2 [VARIABLE [VALUE]]}
 \\nOption\\t\\tGNU long option\\t\\tMeaning
  -V, variables\\t --variables\\t\\t Display environment variables
 \\nDisplay a full list of environment variables used by the munin-pihole-plugins
-script, and their current values. The variables can be used to customize
-various aspects of the munin-pihole-plugins script's operation.
+script, and their current values. These variables and this command can be used
+to customize various aspects of the munin-pihole-plugins script's operation.
 \\nTakes an optional parameter in the form of a munin-pihole-plugins environment
 variable to list the value of that variable alone.
-\\nExample: 'munin-pihole-plugins $2 INSTALL_PLUGINS'"
+\\nExample: 'munin-pihole-plugins $2 INSTALL_PLUGINS'
+\\nTakes an optional value for a munin-pihole-plugins environment variable to
+set the value of that variable. If the optional value passed is 'RESET', the
+corresponding environment variable will be reset to the default value. This
+function is only available if the munin-pihole-plugins script is installed
+locally.
+\\nExamples: 'munin-pihole-plugins $2 DNS_SERVER 127.0.0.1'
+          'munin-pihole-plugins $2 DNS_SERVER RESET'"
         ;;
         ""                                                  )
             min_height="13"
@@ -754,7 +848,7 @@ variable to list the value of that variable alone.
  -i, install\\t --install\\t\\t Install munin-pihole-plugins
  -v, version\\t --version\\t\\t Display current and latest versions
  -U, uninstall\\t --uninstall\\t\\t Uninstall munin-pihole-plugins
- -V, variables\\t --variables\\t\\t Display environment variables
+ -V, variables\\t --variables\\t\\t Display or set environment variables
 \\nType '$1 {OPTION}' for more detailed explanations of each command
 \\nExample: 'munin-pihole-plugins $1 install'"
         ;;
@@ -827,8 +921,10 @@ install_function() {
                 reverberate "info" "Skipping plugin installation"
             fi
             if [[ "${install_webserver}" == "true" ]]; then
+                if [[ "${munin_version}" == "stable" ]]; then
+                    configure_munin
+                fi
                 configure_proxy
-                configure_munin
             else
                 reverberate "info" "Skipping webserver installation"
             fi
@@ -892,7 +988,16 @@ uninstall_function() {
                 dependency_list+="wget "
             fi
             if [[ "${install_webserver}" == "true" ]]; then
-                dependency_list+="${webserver_dependencies}"
+                check_pihole
+                if [[ "${pihole_on_host}" == "true" ]]; then
+                    if [[ -d "${lighttpd_webroot}/pihole" ]]; then
+                        dependency_list+="munin "
+                    else
+                        dependency_list+="${webserver_dependencies}"
+                    fi
+                else
+                    dependency_list+="${webserver_dependencies}"
+                fi
                 if [[ -d "${proxy_config_dir}" ]]; then
                     if [[ -f "${proxy_config_dir}/external.conf.orig" ]]; then
                         mv "${proxy_config_dir}/external.conf.orig" "${proxy_config_dir}/external.conf" || return
@@ -929,7 +1034,13 @@ uninstall_function() {
                                 if [[ "${dependency_id}" == "curl" ]] ||  [[ "${dependency_id}" == "init-system-helpers" ]] || [[ "${dependency_id}" == "wget" ]]; then
                                     reverberate "warning" "It probably wasn't, and you probably wouldn't"
                                 fi
-                                apt remove -qq "${dependency_id}"
+                                reverberate "info" "Uninstalling package ${dependency_id}"
+                                if [[ "${verbosity_level}" -ge "2" ]]; then
+                                    apt remove -q "${dependency_id}"
+                                else
+                                    apt remove -qq "${dependency_id}" > /dev/null 2>&1
+                                fi
+                                reverberate "success" "${dependency_id}"
                             fi
                         done
                     fi
@@ -954,119 +1065,264 @@ version_function() {
     if [[ -n "${remote_version}" ]]; then
         if [[ "${remote_version}" > "${VERSION}" ]]; then
             min_height="4"
-            some "  [${WHITE}ℹ${RESET}] An update for munin-pihole-plugins is available\\n
+            some "  [${WHITE}ℹ${RESET}] ${GREEN}An update for munin-pihole-plugins is available${RESET}\\n
   munin-pihole-plugins version is v${RED}${VERSION}${RESET} (Latest: v${GREEN}${remote_version}${RESET})"
         else
             some "  [${WHITE}ℹ${RESET}] munin-pihole-plugins version is v${GREEN}${VERSION}${RESET} (Latest: v${GREEN}${remote_version}${RESET})"
         fi
     else
         min_height="5"
-        some "  [${YELLOW}⚠${RESET}] Unable to locate a TXT record for ${plugin_domain}
+        some "  [${YELLOW}⚠${RESET}] ${YELLOW}Unable to locate a TXT record for ${plugin_domain}${RESET}
   using the nameserver ${dns_server} on port ${dns_port}\\n
   munin-pihole-plugins version is v${VERSION} (Latest: ${RED}unknown${RESET})"
     fi
 }
 
+
+# simple wrapper to set or reset external variables in the format:
+# EXTERNAL_VAR=EXTERNAL_VAR_VALUE
+# handles creation of the external variable configuration file including path
+# if required, split up from the labyrintine mess that is variable_function to
+# limit some of the needless duplication that was happening there
+# usage:
+# 'transmogrify EXTERNAL_VAR EXTERNAL_VAR_VALUE [[/PATH/TO/]EXTERNAL_VAR_FILE]'
+transmogrify() {
+    external_var="$1"
+    external_var_value="$2"
+    if [[ -n "$3" ]]; then
+        external_var_file="$3"
+    else
+        external_var_file="${external_config_dir}/${external_config_file}"
+    fi
+    if [[ ! -d "${external_config_dir}" ]]; then
+        mkdir -p "${external_config_dir}" || return
+    fi
+    if [[ ! -f "${external_config_dir}/${external_config_file}" ]]; then
+        cat > "${external_config_dir}/${external_config_file}" << EOF
+# external configuration file created by $0
+# ${rfc3339_date}
+
+EOF
+    fi
+    case "$2" in
+        "RESET"                                             )
+            if grep -q "^${external_var}=" "${external_var_file}"; then
+                sed -i "/^${external_var}/d" "${external_var_file}" || return
+            fi
+        ;;
+        *                                                   )
+            if grep -q "^${external_var}=" "${external_var_file}"; then
+                sed -i "/^${external_var}=/c\\${external_var}=\"${external_var_value}\"" "${external_var_file}" || return
+                some "${external_var}: ${external_var_value}"
+            else
+                echo "${external_var}=\"${external_var_value}\"" >> "${external_var_file}" || return
+                some "${external_var}: ${external_var_value}"
+            fi
+        ;;
+    esac
+}
+
 # display munin-pihole-plugins environment variables and their current values
 # there were too many variables to list in the main help text
+# triggers are available for popular DNS_SERVER values
+# - cloudflare 1.1.1.1
+# - comodo     8.26.56.26
+# - google     8.8.8.8
+# - localhost  127.0.0.1
+# - opendns    208.67.222.222
+# - quad9      9.9.9.9
 variable_function() {
     min_height="3"
-    case "$2" in
-        "branch" | "BRANCH"                                 )
-            some "BRANCH: ${branch}"
-        ;;
-        "dns_port" | "DNS_PORT"                             )
-            some "DNS_PORT: ${dns_port}"
-        ;;
-        "dns_server" | "DNS_SERVER"                         )
-            some "DNS_SERVER: ${dns_server}"
-        ;;
-        "install_plugins" | "INSTALL_PLUGINS"               )
-            some "INSTALL_PLUGINS: ${install_plugins}"
-        ;;
-        "install_script" | "INSTALL_SCRIPT"                 )
-            some "INSTALL_SCRIPT: ${install_script}"
-        ;;
-        "install_webserver" | "INSTALL_WEBSERVER"           )
-            some "INSTALL_WEBSERVER: ${install_webserver}"
-        ;;
-        "munin_dir" | "MUNIN_DIR"                           )
-            some "MUNIN_DIR: ${munin_dir}"
-        ;;
-        "munin_config_dir" | "MUNIN_CONFIG_DIR"             )
-            some "MUNIN_CONFIG_DIR: ${munin_config_dir}"
-        ;;
-        "munin_plugin_dir" | "MUNIN_PLUGIN_DIR"             )
-            some "MUNIN_PLUGIN_DIR: ${munin_plugin_dir}"
-        ;;
-        "node_plugin_dir" | "NODE_PLUGIN_DIR"               )
-            some "NODE_PLUGIN_DIR: ${node_plugin_dir}"
-        ;;
-        "plugin_config_dir" | "PLUGIN_CONFIG_DIR"           )
-            some "PLUGIN_CONFIG_DIR: ${plugin_config_dir}"
-        ;;
-        "plugin_list" | "PLUGIN_LIST"                       )
-            min_height="14"
-            some "PLUGIN_LIST: ${plugin_list}
-\\nPlugin\\t\\t\\tDescription
- blocked\\t\\t This plugin shows domains blocked by Pi-hole®.
- cache\\t\\t\\t This plugin shows Pi-hole® cache.
- cache_by_type\\t\\t This plugin shows Pi-hole® cache by type.
- clients\\t\\t This plugin shows clients seen by Pi-hole®.
- percent\\t\\t This plugin shows Pi-hole® blocked query percentage.
- queries\\t\\t This plugin shows queries seen by Pi-hole®.
- replies_by_type\\t This plugin shows Pi-hole® replies by type.
- status\\t\\t\\t This plugin shows Pi-hole® blocking status.
- unique_domains\\t\\t This plugin shows unique domains seen by Pi-hole®."
-        ;;
-        "proxy_config_dir" | "PROXY_CONFIG_DIR"             )
-            some "PROXY_CONFIG_DIR: ${proxy_config_dir}"
-        ;;
-        "script_dir" | "SCRIPT_DIR"                         )
-            some "SCRIPT_DIR: ${script_dir}"
-        ;;
-        "skip_dependency_check" | "SKIP_DEPENDENCY_CHECK"   )
-            some "SKIP_DEPENDENCY_CHECK: ${skip_dependency_check}"
-        ;;
-        "update_self" | "UPDATE_SELF"                       )
-            some "UPDATE_SELF: ${update_self}"
-        ;;
-        "verbosity_level" | "VERBOSITY_LEVEL"               )
-            some "VERBOSITY_LEVEL: ${verbosity_level}"
-        ;;
-        ""                                                  )
-            min_height="22"
-            some "Usage: export [VARIABLE]=\"value\"
+    if [[ -n "$3" ]]; then
+        external_var_list="BRANCH DNS_PORT DNS_SERVER EXTERNAL_CONFIG_DIR EXTERNAL_CONFIG_FILE INSTALL_PLUGINS INSTALL_SCRIPT INSTALL_WEBSERVER LIGHTTPD_WEBROOT MUNIN_DIR MUNIN_CONFIG_DIR MUNIN_PLUGIN_DIR MUNIN_VERSION NODE_PLUGIN_DIR PLUGIN_CONFIG_DIR PLUGIN_LIST PROXY_CONFIG_DIR SCRIPT_DIR SHOW_COLOR SKIP_DEPENDENCY_CHECK UPDATE_SELF VERBOSITY_LEVEL"
+        for external_var_id in ${external_var_list}; do
+            if [[ "$2" == "${external_var_id}" ]]; then
+                if [[ -f "${script_dir}/munin-pihole-plugins" ]]; then
+                    check_privilege "$@"
+                    case "$3" in
+                        "RESET"                             )
+                            transmogrify "$2" "RESET"
+                        ;;
+                        "CLOUDFLARE"                        )
+                            if [[ "$2" == "DNS_SERVER" ]]; then
+                                transmogrify "$2" "1.1.1.1"
+                            fi
+                        ;;
+                        "COMODO"                            )
+                            if [[ "$2" == "DNS_SERVER" ]]; then
+                                transmogrify "$2" "8.26.56.26"
+                            fi
+                        ;;
+                        "GOOGLE"                            )
+                            if [[ "$2" == "DNS_SERVER" ]]; then
+                                transmogrify "$2" "8.8.8.8"
+                            fi
+                        ;;
+                        "LOCALHOST"                         )
+                            if [[ "$2" == "DNS_SERVER" ]]; then
+                                transmogrify "$2" "127.0.0.1"
+                            fi
+                        ;;
+                        "OPENDNS"                           )
+                            if [[ "$2" == "DNS_SERVER" ]]; then
+                                transmogrify "$2" "208.67.222.222"
+                            fi
+                        ;;
+                        "QUAD9"                             )
+                            if [[ "$2" == "DNS_SERVER" ]]; then
+                                transmogrify "$2" "9.9.9.9"
+                            fi
+                        ;;
+                        *                                   )
+                            if [[ "$2" == "DNS_PORT" ]]; then
+                                if [[ "$3" =~ ^[0-9]+$ ]]; then
+                                    if [[ "$3" -ge "0" ]] && [[ "$3" -le "65535" ]]; then
+                                        transmogrify "$2" "$3"
+                                    else
+                                        some "munin-pihole-plugins: $3 doesn't look like a valid port number
+The DNS_PORT value must be between 0 and 65535"
+                                    fi
+                                else
+                                    some "munin-pihole-plugins: $3 doesn't look like a valid port number
+The DNS_PORT value must be a positive integer"
+                                fi
+                            else
+                                transmogrify "$2" "$3"
+                            fi
+                        ;;
+                    esac
+                else
+                    min_height="4"
+                    some "munin-pihole-plugins: funtion unavailable
+The munin-pihole-plugins script must be installed to use this function
+Type 'munin-pihole-plugins --install --script' to install it now"
+                fi
+            fi
+        done
+    else
+        case "$2" in
+            "BRANCH"                                        )
+                some "BRANCH: ${branch}"
+            ;;
+            "DNS_PORT"                                      )
+                some "DNS_PORT: ${dns_port}"
+            ;;
+            "DNS_SERVER"                                    )
+                some "DNS_SERVER: ${dns_server}"
+            ;;
+            "EXTERNAL_CONFIG_DIR"                           )
+                some "EXTERNAL_CONFIG_DIR: ${external_config_dir}"
+            ;;
+            "EXTERNAL_CONFIG_FILE"                          )
+                some "EXTERNAL_CONFIG_FILE: ${external_config_file}"
+            ;;
+            "INSTALL_PLUGINS"                               )
+                some "INSTALL_PLUGINS: ${install_plugins}"
+            ;;
+            "INSTALL_SCRIPT"                                )
+                some "INSTALL_SCRIPT: ${install_script}"
+            ;;
+            "INSTALL_WEBSERVER"                             )
+                some "INSTALL_WEBSERVER: ${install_webserver}"
+            ;;
+            "LIGHTTPD_WEBROOT"                              )
+                some "LIGHTTPD_WEBROOT: ${lighttpd_webroot}"
+            ;;
+            "MUNIN_DIR"                                     )
+                some "MUNIN_DIR: ${munin_dir}"
+            ;;
+            "MUNIN_CONFIG_DIR"                              )
+                some "MUNIN_CONFIG_DIR: ${munin_config_dir}"
+            ;;
+            "MUNIN_PLUGIN_DIR"                              )
+                some "MUNIN_PLUGIN_DIR: ${munin_plugin_dir}"
+            ;;
+            "MUNIN_VERSION"                                 )
+                some "MUNIN_VERSION: ${munin_version}"
+            ;;
+            "NODE_PLUGIN_DIR"                               )
+                some "NODE_PLUGIN_DIR: ${node_plugin_dir}"
+            ;;
+            "PLUGIN_CONFIG_DIR"                             )
+                some "PLUGIN_CONFIG_DIR: ${plugin_config_dir}"
+            ;;
+            "PLUGIN_LIST"                                   )
+                min_height="14"
+                some "PLUGIN_LIST: ${plugin_list}
+\\nPlugin\\t\\tDescription
+ blocked\\t This plugin shows the number of domains blocked by Pi-hole®.
+ cache\\t\\t This plugin shows Pi-hole®'s cache.
+ cache_by_type\\t This plugin shows Pi-hole®'s cache by type.
+ clients\\t This plugin shows clients seen by Pi-hole®.
+ percent\\t This plugin shows Pi-hole®'s blocked query percentage.
+ queries\\t This plugin shows queries seen by Pi-hole®.
+ replies_by_type This plugin shows Pi-hole®'s replies by type.
+ status\\t\\t This plugin shows Pi-hole®'s blocking status.
+ unique_domains\\t This plugin shows unique domains seen by Pi-hole®."
+            ;;
+            "PROXY_CONFIG_DIR"                              )
+                some "PROXY_CONFIG_DIR: ${proxy_config_dir}"
+            ;;
+            "SCRIPT_DIR"                                    )
+                some "SCRIPT_DIR: ${script_dir}"
+            ;;
+            "SHOW_COLOR"                                    )
+                some "SHOW_COLOR: ${show_color}"
+            ;;
+            "SKIP_DEPENDENCY_CHECK"                         )
+                some "SKIP_DEPENDENCY_CHECK: ${skip_dependency_check}"
+            ;;
+            "UPDATE_SELF"                                   )
+                some "UPDATE_SELF: ${update_self}"
+            ;;
+            "VERBOSITY_LEVEL"                               )
+                some "VERBOSITY_LEVEL: ${verbosity_level}"
+            ;;
+            ""                                              )
+                min_height="29"
+                if [[ -f "${script_dir}/munin-pihole-plugins" ]]; then
+                    usage_text="Usage: munin-pihole-plugins $1 [VARIABLE [\"VALUE\"]]"
+                    example_text="\\nExample: munin-pihole-plugins $1 DNS_SERVER 127.0.0.1"
+                else
+                    usage_text="Usage: export VARIABLE=\"VALUE\""
+                    example_text="\\nExample: export DNS_SERVER=\"127.0.0.1\""
+                fi
+                some "${usage_text}
 \\nVariable
  BRANCH=\"${branch}\"
  DNS_PORT=\"${dns_port}\"
  DNS_SERVER=\"${dns_server}\"
+ EXTERNAL_CONFIG_DIR=\"${external_config_dir}\"
+ EXTERNAL_CONFIG_FILE=\"${external_config_file}\"
  INSTALL_PLUGINS=\"${install_plugins}\"
  INSTALL_SCRIPT=\"${install_script}\"
  INSTALL_WEBSERVER=\"${install_webserver}\"
+ LIGHTTPD_WEBROOT=\"${lighttpd_webroot}\"
  MUNIN_DIR=\"${munin_dir}\"
  MUNIN_CONFIG_DIR=\"${munin_config_dir}\"
  MUNIN_PLUGIN_DIR=\"${munin_plugin_dir}\"
+ MUNIN_VERSION=\"${munin_version}\"
  NODE_PLUGIN_DIR=\"${node_plugin_dir}\"
  PLUGIN_CONFIG_DIR=\"${plugin_config_dir}\"
  PLUGIN_LIST=\"${plugin_list}\"
  PROXY_CONFIG_DIR=\"${proxy_config_dir}\"
  SCRIPT_DIR=\"${script_dir}\"
+ SHOW_COLOR=\"${show_color}\"
  SKIP_DEPENDENCY_CHECK=\"${skip_dependency_check}\"
  UPDATE_SELF=\"${update_self}\"
- VERBOSITY_LEVEL=\"${verbosity_level}\""
-        ;;
-        *                                                   )
-min_height="3"
-    some "munin-pihole-plugins: unrecognized variable '$2'
+ VERBOSITY_LEVEL=\"${verbosity_level}\"
+${example_text}"
+           ;;
+            *                                               )
+                some "munin-pihole-plugins: unrecognized variable '$2'
 Type 'munin-pihole-plugins --variables' for a list of available options"
-    esac
+        esac
+    fi
 }
 
-# not so simple input handler
-# i hate having to do this but i realised i kinda fucked myself and dig ended
-# up quietly being a hard dependency without my noticing it this weird
-# guarding  of install and version is temporary, hopefully
+# function handler
+# whinges about being run with no input
+# whinges about being run with invalid input
 function_handler() {
     case "${1}" in
         "-h" | "--help" | "help"                            )

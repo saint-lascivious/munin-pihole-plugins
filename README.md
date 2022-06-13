@@ -15,7 +15,7 @@ curl -sSL munin-pihole-plugins.sainternet.xyz -o munin-pihole-plugins && chmod +
 ```
 ./munin-pihole-plugins --install
 ```
-Dependencies are checked and met using `dpkg-query` and `apt` respectively, you will be prompted before any unmet dependencies are installed. A copy of the `munin-pihole-plugins` script will be installed on the host in `/usr/local/bin` by default. The munin-pihole-plugins script directory can be [configured](https://github.com/saint-lascivious/munin-pihole-plugins#script-configuration), or the `munin-pihole-plugins` script installation may be disabled entirely.
+Dependencies are checked and met automatically using `dpkg-query` and `apt` respectively. A copy of the `munin-pihole-plugins` script will be installed on the host in `/usr/local/bin` by default. The munin-pihole-plugins script directory can be [configured](https://github.com/saint-lascivious/munin-pihole-plugins#script-configuration), or the `munin-pihole-plugins` script installation may be disabled entirely.
 
 ### Step Three: …Wait
 * Wait, around five minutes
@@ -34,23 +34,49 @@ Usage: `munin-pihole-plugins {OPTION [PARAMETER]}`
 
 | Option | GNU long option | Meaning |
 | --- | --- | --- |
-| -h, help | --help | Display this help dialogue |
-| -i, install | --install | Install munin-pihole-plugins |
-| -v, version | --version | Display current and latest versions |
-| -U, uninstall | --uninstall | Uninstall munin-pihole-plugins |
-| -V, variables | --variables | Display environment variables |
+| `-h`, `help` | `--help` | Display help dialogue |
+| `-i`, `install` | `--install` | Install munin-pihole-plugins |
+| `-v`, `version` | `--version` | Display current and latest versions |
+| `-U`, `uninstall` | `--uninstall` | Uninstall munin-pihole-plugins |
+| `-V`, `variables` | `--variables` | Display or set environment variables |
 
 Type `--help {OPTION}` for more detailed explanations of each command
 
 Example: `munin-pihole-plugins --help install`
 
+* List of optional parameters for the `-i`, `install`, `--install` and `-U`, `uninstall`, `--uninstall` commands
+
+Basic installation or uninstallation tasks can be governed by passing an optional parameter to the `--install` or `--uninstall` commands.
+
+| Optional Install Parameter | GNU long option | Function |
+| --- | --- | --- |
+| `-p`, `plugins` | `--plugins` | Install and configure `munin-node`, and `munin-pihole-plugins` plugins |
+| `-P`, `plugins-only` | `--plugins-only` | As above, skipping dependency satisfaction |
+| `-s`, `script` | `--script` | Install the munin-pihole-plugins script |
+| `-S`, `script-only` | `--script-only` | As above, skipping dependency satisfaction |
+| `-w`, `webserver` | `--webserver` | Install and configure `munin`, `lighttpd` and `lighttpd-external-munin-proxy` |
+| `-W`, `webserver-only` | `--webserver-only` | As above, skipping dependency satisfaction |
+
+Example: `munin-pihole-plugins --install --plugins`
+
+| Optional Uninstall Parameter | GNU long option | Function |
+| --- | --- | --- |
+| `-p`, `plugins` | `--plugins` | Uninstall `munin-node`, `munin-pihole-plugins` plugins, and related configuration |
+| `-P`, `plugins-only` | `--plugins-only` | As above, skipping dependency removal |
+| `-s`, `script` | `--script` | Uninstall the munin-pihole-plugins script and related configuration |
+| `-S`, `script-only` | `--script-only` | As above, skipping dependency removal |
+| `-w`, `webserver` | `--webserver` | Uninstall `munin`, `lighttpd`, `lighttpd-external-munin-proxy`, and related configuration |
+| `-W`, `webserver-only` | `--webserver-only` | As above, skipping dependency removal |
+
+Example: `munin-pihole-plugins --uninstall --script-only`
+
 ## Example Graph Gallery
 * pihole_blocked
 ![alt text][pihole_blocked-day.png]
 
-[pihole_blocked-day.png]:https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/gallery/pihole_blocked-day.png "This plugin shows domains blocked by Pi-hole®."
+[pihole_blocked-day.png]:https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/master/gallery/pihole_blocked-day.png "This plugin shows the number of domains blocked by Pi-hole®."
 
-This plugin shows domains blocked by Pi-hole®.
+This plugin shows the number of domains blocked by Pi-hole®.
 
 * pihole_cache
 ![alt text][pihole_cache-day.png]
@@ -124,30 +150,46 @@ This plugin shows unique domains seen by Pi-hole®.
 Provided munin-node and Pi-hole® exist on the same host, the default configuration should Just Work™. If you have a non-standard configuration or Pi-hole® is running on a seperate host, you will need to edit the plugin configuration. The plugin attempts to obtain this value itself, if it can not do so the `env.webpassword` value can be obtained from the Pihole host's `/etc/pihole/setupVars.conf` file.
 
 ### Script Configuration
-* Default `munin-pihole-plugins` script environment variables
-```
-Usage: export [VARIABLE]="value"
+* Usage
 
-Variable
- BRANCH="master"
- DNS_PORT="53"
- DNS_SERVER="208.67.222.222"
- INSTALL_PLUGINS="true"
- INSTALL_SCRIPT="true"
- INSTALL_WEBSERVER="true"
- MUNIN_DIR="/etc/munin"
- MUNIN_CONFIG_DIR="/etc/munin/munin-conf.d"
- MUNIN_PLUGIN_DIR="/usr/share/munin/plugins"
- NODE_PLUGIN_DIR="/etc/munin/plugins"
- PLUGIN_CONFIG_DIR="/etc/munin/plugin-conf.d"
- PLUGIN_LIST="blocked cache cache_by_type clients percent queries replies_by_type status unique_domains"
- PROXY_CONFIG_DIR="/etc/lighttpd"
- SCRIPT_DIR="/usr/local/bin"
- SKIP_DEPENDENCY_CHECK="false"
- UPDATE_SELF="true"
- VERBOSITY_LEVEL="3"
-```
+Initial installation, or without the `munin-pihole-plugins` script being locally installed: `export VARIABLE="VALUE"`
+
 Example: `export VERBOSITY_LEVEL="4"`
+
+Subsequent runs, with the `munin-pihole-plugins` script locally installed: `munin-pihole-plugins --variables VARIABLE VALUE`
+
+Example: `munin-pihole-plugins --variables VERBOSITY_LEVEL 4`
+
+Reset example: `munin-pihole-plugins --variables VERBOSITY_LEVEL RESET`
+
+The configuration file, of which the default is `/etc/munin-pihole-plugins/munin-pihole-plugins.conf`, may be manually created or generated ahead of time if desired, useful for packaging or other automated deployment. This configuration file MUST be a plain text file and MUST consist of the format `VARIABLE=VALUE` (or `VARIABLE="VALUE"` for arrays, like `PLUGIN_LIST`), one variable per line, with no leading whitespace or indentation. Comments to assist usability may exist but MUST be preceeded with a hash (`#`) character.
+
+* Default `munin-pihole-plugins` script environment variables
+
+| Variable | Default Value |
+| --- | --- |
+| `BRANCH` | `master` |
+| `DNS_PORT` | `53` |
+| `DNS_SERVER` | `208.67.222.222` |
+| `EXTERNAL_CONFIG_DIR` | `/etc/munin-pihole-plugins` |
+| `EXTERNAL_CONFIG_FILE` | `munin-pihole-plugins.conf` |
+| `INSTALL_PLUGINS` | `true` |
+| `INSTALL_SCRIPT` | `true` |
+| `INSTALL_WEBSERVER` | `true` |
+| `LIGHTTPD_WEBROOT` | `/var/www/html` |
+| `MUNIN_DIR` | `/etc/munin` |
+| `MUNIN_CONFIG_DIR` | `/etc/munin/munin-conf.d` |
+| `MUNIN_PLUGIN_DIR` | `/usr/share/munin/plugins` |
+| `MUNIN_VERSION` | `stable` |
+| `NODE_PLUGIN_DIR` | `/etc/munin/plugins` |
+| `PLUGIN_CONFIG_DIR` | `/etc/munin/plugin-conf.d` |
+| `PLUGIN_LIST` | `blocked cache cache_by_type clients percent queries replies_by_type status unique_domains` |
+| `PROXY_CONFIG_DIR` | `/etc/lighttpd` |
+| `SCRIPT_DIR` | `/usr/local/bin` |
+| `SHOW_COLOR` | `true` |
+| `SKIP_DEPENDENCY_CHECK` | `false` |
+| `UPDATE_SELF` | `true` |
+| `VERBOSITY_LEVEL` | `3` |
 
 * `BRANCH`
 
@@ -161,6 +203,31 @@ The port which the `munin-pihole-plugins` script will contact in order to contac
 
 The DNS server which the `munin-pihole-plugins` script will contact in order to retrieve its version information (from a `TXT` record at `munin-pihole-plugins.sainternet.xyz`). This should ideally be an IP rather than a hostname, and it should ideally be external, but I'm not your mother.
 
+When the `munin-pihole-plugins` script is installed locally, the `-V`, `variables`, `--variables` command can set the value of `DNS_SERVER` using user input, or one of the following optional presets:
+
+| `DNS_SERVER` Preset | Value |
+| --- | --- |
+| `CLOUDFLARE` | `1.1.1.1` |
+| `COMODO` | `8.26.56.26` |
+| `GOOGLE` | `8.8.8.8` |
+| `LOCALHOST` | `127.0.0.1` |
+| `OPENDNS` | `208.67.222.222` (default) |
+| `QUAD9` | `9.9.9.9` |
+
+Example: `munin-pihole-plugins --variables DNS_SERVER LOCALHOST`
+
+* `EXTERNAL_CONFIG_DIR`
+
+The directory in which an external configuration file should be located, to be created if required.
+
+Example: `export EXTERNAL_CONFIG_DIR="/etc/munin-pihole-plugins"`
+
+* `EXTERNAL_CONFIG_FILE`
+
+The name of external configuration file `munin-pihole-plugins` should use, to be created if required.
+
+Example: `export EXTERNAL_CONFIG_FILE="munin-pihole-plugins.conf"`
+
 * `INSTALL_PLUGINS`
 
 Disables installation of `munin-node` and `munin-pihole-plugins` plugins if set to any value other than `true`.
@@ -172,6 +239,10 @@ Disables installation of the `munin-pihole-plugins` script if set to any value o
 * `INSTALL_WEBSERVER`
 
 Disables installation of the `munin` webserver and `lighttpd` proxy if set to any value other than `true`. Useful for additional Munin nodes in a multi-node, single-server environment.
+
+* `LIGHTTPD_WEBROOT`
+
+The directory in which, if installed, the Pi-hole® AdminLTE web interface should be found. The presence or absence of a `pihole` directory here is used to determine whether or not `munin-pihole-plugins` should offer to remove `lighttpd` during `munin-pihole-plugins` uninstallation. The `admin` directory is not used for this purpose due to the ambiguity of its name.
 
 * `MUNIN_DIR`
 
@@ -185,9 +256,18 @@ The directory in which additional `munin` configuration files may be placed, the
 
 The directory in which `munin` plugins should be located.
 
+* `MUNIN_VERSION`
+
+The Munin version to target when configuring the `lighttpd` proxy. Available options are `latest` and `stable`, with `stable` being the default value. The `latest` version should be selected for Munin versions 2.99 or higher.
+
+| Tag | Munin Version Target |
+| --- | --- |
+| `latest` | munin 2.99+ |
+| `stable` | munin 2.* |
+
 * `NODE_PLUGIN_DIR`
 
-The directory in which `munin-node` symbolic links should be created.
+The directory in which `munin-node` plugin symbolic links should be created.
 
 * `PLUGIN_CONFIG_DIR`
 
@@ -199,15 +279,15 @@ A space separated list of `munin-pihole-plugins` plugin IDs used to determine wh
 
 | Plugin ID | Description |
 | --- | --- |
-| blocked | This plugin shows domains blocked by Pi-hole®. |
-| cache | This plugin shows Pi-hole® cache. |
-| cache_by_type | This plugin shows Pi-hole® cache by type. |
-| clients | This plugin shows clients seen by Pi-hole®. |
-| percent | This plugin shows Pi-hole® blocked query percentage. |
-| queries | This plugin shows queries seen by Pi-hole®. |
-| replies_by_type | This plugin shows Pi-hole® replies by type. |
-| status | This plugin shows Pi-hole® blocking status. |
-| unique_domains | This plugin shows unique domains seen by Pi-hole®. |
+| `blocked` | This plugin shows the number of domains blocked by Pi-hole®. |
+| `cache` | This plugin shows Pi-hole®'s cache. |
+| `cache_by_type` | This plugin shows Pi-hole®'s cache by type. |
+| `clients` | This plugin shows clients seen by Pi-hole®. |
+| `percent` | This plugin shows Pi-hole®'s blocked query percentage. |
+| `queries` | This plugin shows queries seen by Pi-hole®. |
+| `replies_by_type` | This plugin shows Pi-hole®'s replies by type. |
+| `status` | This plugin shows Pi-hole®'s blocking status. |
+| `unique_domains` | This plugin shows unique domains seen by Pi-hole®. |
 
 Example: `export PLUGIN_LIST="blocked percent unique_domains"`
 
@@ -219,6 +299,10 @@ The directory in which `lighttpd`'s external.conf should be located.
 * `SCRIPT_DIR`
 
 The directory in which the `munin-pihole-plugins` script should be located when installed, the `munin-pihole-plugins` script will warn if this directory is not located in the host's $PATH variable and suggest how to correct this.
+
+* `SHOW_COLOR`
+
+Disables color output if set to any value other than `true`.
 
 * `SKIP_DEPENDENCY_CHECK`
 
@@ -234,11 +318,11 @@ Sets the munin-pihole-plugins script verbosity level on a scale from `0` to `4`,
 
 | Verbosity Level | Output |
 | --- | --- |
-| 0 | Silent |
-| 1 | + Errors |
-| 2 | ++ Questions and Warnings |
-| 3 | +++ Information |
-| 4 | ++++ Additional Information |
+| `0` | Silent |
+| `1` | + Errors |
+| `2` | ++ Questions and Warnings |
+| `3` | +++ Information |
+| `4` | ++++ Additional Information |
 
 ## Help! My graphs aren't showing up!
 * Be patient
