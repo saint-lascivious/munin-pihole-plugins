@@ -4,7 +4,7 @@
 # saint-lascivious (Hayden Pearce) 2022
 # saint@sainternet.xyz
 
-VERSION="07.00.00"
+VERSION="07.00.01"
 
 # Environment variables for this script
 #
@@ -107,7 +107,7 @@ case ${plugin_id} in
     ;;
 esac
 
-get_stats="$(echo "${apicall}" | sed 's/[{}"]//g' | tr "," "\\n")"
+get_stats="$(echo "${apicall}" | sed 's/[{}"]//g' | tr "," "\\n" | sort -u)"
 
 case $1 in
     "config")
