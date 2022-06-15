@@ -6,7 +6,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="07.00.01"
+VERSION="07.01.00"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -1187,13 +1187,22 @@ The DNS_PORT value must be between 0 and 65535"
 The DNS_PORT value must be a positive integer"
                                 fi
                             else
-                                transmogrify "$2" "$3"
+                                if [[ "$2" == "DNS_SERVER" ]]; then
+                                    if [[ "$2" =~ ^(([1-9]?[0-9]|1[0-9][0-9]|2([0-4][0-9]|5[0-5]))\.){3}([1-9]?[0-9]|1[0-9][0-9]|2([0-4][0-9]|5[0-5]))$ ]]; then
+                                        transmogrify "$2" "$3"
+                                    else
+                                        some "munin-pihole-plugins: $3 doesn't look like a valid IP address
+The DNS_SERVER value must be between 0.0.0.0 and 255.255.255.255"
+                                    fi
+                                else
+                                    transmogrify "$2" "$3"
+                                fi
                             fi
                         ;;
                     esac
                 else
                     min_height="4"
-                    some "munin-pihole-plugins: funtion unavailable
+                    some "munin-pihole-plugins: function unavailable
 The munin-pihole-plugins script must be installed to use this function
 Type 'munin-pihole-plugins --install --script' to install it now"
                 fi
