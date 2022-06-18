@@ -4,7 +4,7 @@
 # saint-lascivious (Hayden Pearce) 2022
 # saint@sainternet.xyz
 
-VERSION="06.00.00"
+VERSION="06.01.00"
 
 # Environment variables for this script
 #
@@ -38,6 +38,10 @@ pihole_ - Munin plugins for monitoring various Pi-hole statistics.
 =head1 VERSION
 
 ${VERSION}
+
+=head1 LICENSE
+
+GNU GPLv3
 
 =head1 APPLICABLE SYSTEMS
 
@@ -107,7 +111,7 @@ case ${plugin_id} in
     ;;
 esac
 
-get_stats="$(echo "${apicall}" | sed 's/[{}"]//g' | tr "," "\\n")"
+get_stats="$(echo "${apicall}" | sed 's/[{}"]//g' | tr "," "\\n" | sort -u)"
 
 case $1 in
     "config")
