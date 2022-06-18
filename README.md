@@ -2,6 +2,9 @@
 
 [Munin](https://munin-monitoring.org) [plugins](https://gallery.munin-monitoring.org) and management script for monitoring various [Pi-hole®](https://github.com/pi-hole/pi-hole) statistics. Transforms a server into a powerful monitoring platform, as simple as [one](https://github.com/saint-lascivious/munin-pihole-plugins#step-one-download), [two](https://github.com/saint-lascivious/munin-pihole-plugins#step-two-install), […three](https://github.com/saint-lascivious/munin-pihole-plugins#step-three-wait), [four](https://github.com/saint-lascivious/munin-pihole-plugins#step-four-monitor).
 
+### Version
+* VERSION="07.02.00"
+
 ## Usage
 
 ### Step One: Download
@@ -34,17 +37,17 @@ Usage: `munin-pihole-plugins {OPTION [PARAMETER]}`
 
 | Option | GNU long option | Meaning |
 | --- | --- | --- |
+| `-c`, `configure` | `--configure` | Display or set environment variables |
 | `-h`, `help` | `--help` | Display help dialogue |
 | `-i`, `install` | `--install` | Install munin-pihole-plugins |
+| `-u`, `uninstall` | `--uninstall` | Uninstall munin-pihole-plugins |
 | `-v`, `version` | `--version` | Display current and latest versions |
-| `-U`, `uninstall` | `--uninstall` | Uninstall munin-pihole-plugins |
-| `-V`, `variables` | `--variables` | Display or set environment variables |
 
-Type `--help {OPTION}` for more detailed explanations of each command
+Type `--help [OPTION]` for more detailed explanations of each command
 
 Example: `munin-pihole-plugins --help install`
 
-* List of optional parameters for the `-i`, `install`, `--install` and `-U`, `uninstall`, `--uninstall` commands
+* List of optional parameters for the `-i`, `install`, `--install` and `-u`, `uninstall`, `--uninstall` commands
 
 Basic installation or uninstallation tasks can be governed by passing an optional parameter to the `--install` or `--uninstall` commands.
 
@@ -156,11 +159,11 @@ Initial installation, or without the `munin-pihole-plugins` script being locally
 
 Example: `export VERBOSITY_LEVEL="4"`
 
-Subsequent runs, with the `munin-pihole-plugins` script locally installed: `munin-pihole-plugins --variables VARIABLE VALUE`
+Subsequent runs, with the `munin-pihole-plugins` script locally installed: `munin-pihole-plugins --configure VARIABLE VALUE`
 
-Example: `munin-pihole-plugins --variables VERBOSITY_LEVEL 4`
+Example: `munin-pihole-plugins --configure VERBOSITY_LEVEL 4`
 
-Reset example: `munin-pihole-plugins --variables VERBOSITY_LEVEL RESET`
+Reset example: `munin-pihole-plugins --configure VERBOSITY_LEVEL RESET`
 
 The configuration file, of which the default is `/etc/munin-pihole-plugins/munin-pihole-plugins.conf`, may be manually created or generated ahead of time if desired, useful for packaging or other automated deployment. This configuration file MUST be a plain text file and MUST consist of the format `VARIABLE=VALUE` (or `VARIABLE="VALUE"` for arrays, like `PLUGIN_LIST`), one variable per line, with no leading whitespace or indentation. Comments to assist usability may exist but MUST be preceeded with a hash (`#`) character.
 
@@ -203,7 +206,7 @@ The port which the `munin-pihole-plugins` script will contact in order to contac
 
 The DNS server which the `munin-pihole-plugins` script will contact in order to retrieve its version information (from a `TXT` record at `munin-pihole-plugins.sainternet.xyz`). This should ideally be an IP rather than a hostname, and it should ideally be external, but I'm not your mother.
 
-When the `munin-pihole-plugins` script is installed locally, the `-V`, `variables`, `--variables` command can set the value of `DNS_SERVER` using user input, or one of the following optional presets:
+When the `munin-pihole-plugins` script is installed locally, the `-c`, `configure`, `--configure` command can set the value of `DNS_SERVER` using user input, or one of the following optional presets:
 
 | `DNS_SERVER` Preset | Value |
 | --- | --- |
@@ -214,7 +217,7 @@ When the `munin-pihole-plugins` script is installed locally, the `-V`, `variable
 | `OPENDNS` | `208.67.222.222` (default) |
 | `QUAD9` | `9.9.9.9` |
 
-Example: `munin-pihole-plugins --variables DNS_SERVER LOCALHOST`
+Example: `munin-pihole-plugins --configure DNS_SERVER LOCALHOST`
 
 * `EXTERNAL_CONFIG_DIR`
 
@@ -328,6 +331,17 @@ Sets the munin-pihole-plugins script verbosity level on a scale from `0` to `4`,
 * Be patient
 
 Graphs should be generated at five minute intervals. If you still do not see graphs after this time, try restarting the machine and waiting a further five minutes. If you still can not get any graphs to display, [contact me](https://github.com/saint-lascivious/munin-pihole-plugins#contact) for further support.
+
+## Uninstall
+* Uninstall `munin-pihole-plugins`
+
+Usage: `munin-pihole-plugins --uninstall`
+
+* Uninstall individual `munin-pihole-plugins` components
+
+Usage: `munin-pihole-plugins --uninstall [OPTION]`
+
+Example: `munin-pihole-plugins --uninstall --script`
 
 ## Contact
 * Discord
