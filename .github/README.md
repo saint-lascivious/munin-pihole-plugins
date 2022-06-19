@@ -12,8 +12,8 @@
 * [Command List](https://github.com/saint-lascivious/munin-pihole-plugins#command-list)
 * [Example Graph Gallery](https://github.com/saint-lascivious/munin-pihole-plugins#example-graph-gallery)
 * [Configuration](https://github.com/saint-lascivious/munin-pihole-plugins#configuration)
-    * [Plugin Configuration]((https://github.com/saint-lascivious/munin-pihole-plugins#plugin-configuration)
-    * [Script Configuration]((https://github.com/saint-lascivious/munin-pihole-plugins#script-configuration)
+    * [Plugin Configuration](https://github.com/saint-lascivious/munin-pihole-plugins#plugin-configuration)
+    * [Script Configuration](https://github.com/saint-lascivious/munin-pihole-plugins#script-configuration)
 * [Uninstall](https://github.com/saint-lascivious/munin-pihole-plugins#uninstall)
 * [Contributing](https://github.com/saint-lascivious/munin-pihole-plugins#contributing-to-munin-pihole-plugins)
 * [Security Policy](https://github.com/saint-lascivious/munin-pihole-plugins#security-policy)
@@ -21,7 +21,7 @@
 * [Contact](https://github.com/saint-lascivious/munin-pihole-plugins#contact)
 
 ### Version
-* VERSION="06.01.01"
+* VERSION="06.01.02"
 
 ## Usage
 
