@@ -2,8 +2,26 @@
 
 [Munin](https://munin-monitoring.org) [plugins](https://gallery.munin-monitoring.org) and management script for monitoring various [Pi-hole®](https://github.com/pi-hole/pi-hole) statistics. Transforms a server into a powerful monitoring platform, as simple as [one](https://github.com/saint-lascivious/munin-pihole-plugins#step-one-download), [two](https://github.com/saint-lascivious/munin-pihole-plugins#step-two-install), […three](https://github.com/saint-lascivious/munin-pihole-plugins#step-three-wait), [four](https://github.com/saint-lascivious/munin-pihole-plugins#step-four-monitor).
 
+## Index
+* [Version](https://github.com/saint-lascivious/munin-pihole-plugins#version)
+* [Usage](https://github.com/saint-lascivious/munin-pihole-plugins#usage)
+    * [Download](https://github.com/saint-lascivious/munin-pihole-plugins#step-one-download)
+    * [Install](https://github.com/saint-lascivious/munin-pihole-plugins#step-two-install)
+    * […Wait](https://github.com/saint-lascivious/munin-pihole-plugins#step-three-wait)
+    * [Monitor](https://github.com/saint-lascivious/munin-pihole-plugins#step-four-monitor)
+* [Command List](https://github.com/saint-lascivious/munin-pihole-plugins#command-list)
+* [Example Graph Gallery](https://github.com/saint-lascivious/munin-pihole-plugins#example-graph-gallery)
+* [Configuration](https://github.com/saint-lascivious/munin-pihole-plugins#configuration)
+    * [Plugin Configuration]((https://github.com/saint-lascivious/munin-pihole-plugins#plugin-configuration)
+    * [Script Configuration]((https://github.com/saint-lascivious/munin-pihole-plugins#script-configuration)
+* [Uninstall](https://github.com/saint-lascivious/munin-pihole-plugins#uninstall)
+* [Contributing](https://github.com/saint-lascivious/munin-pihole-plugins#contributing-to-munin-pihole-plugins)
+* [Security Policy](https://github.com/saint-lascivious/munin-pihole-plugins#security-policy)
+* [Help](https://github.com/saint-lascivious/munin-pihole-plugins#help-my-graphs-arent-showing-up)
+* [Contact](https://github.com/saint-lascivious/munin-pihole-plugins#contact)
+
 ### Version
-* VERSION="06.01.00"
+* VERSION="06.01.01"
 
 ## Usage
 
@@ -343,6 +361,16 @@ Usage: `munin-pihole-plugins --uninstall [OPTION]`
 
 Example: `munin-pihole-plugins --uninstall --script`
 
+## Contributing to `munin-pihole-plugins`
+
+[contribute]: CONTRIBUTING.md
+[Contributing to munin-pihole-plugins][contribute].
+
+## Security Policy
+
+[policy]: SECURITY.md
+[munin-pihole-plugins security policy][policy].
+
 ## Contact
 * Discord
 [SaintLascivious](https://discord.gg/NC7taVyn)
@@ -360,7 +388,7 @@ saint@sainternet.xyz
 
 [logo]:https://vignette.wikia.nocookie.net/pokemon/images/7/76/265Wurmple.png "Using the spikes on its rear end, Wurmple peels the bark off trees and feeds on the sap that oozes out. This Pokémon's feet are tipped with suction pads that allow it to cling to glass without slipping."
 
-## Related projects
+## Related Projects
 * [lighttpd-external-munin-proxy](https://github.com/saint-lascivious/lighttpd-external-munin-proxy)
 
 lighttpd external.conf for Munin webserver proxy
