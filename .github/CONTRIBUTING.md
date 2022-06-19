@@ -14,7 +14,8 @@ We'd also love PRs. If you're thinking of a large PR, we advise opening up an is
 
 ## Submitting a PR
 
-- Fork and clone the repository.
+- If you haven't already done so, [set up Git](https://docs.github.com/en/get-started/quickstart/set-up-git#setting-up-git).
+- [Fork](https://docs.github.com/en/get-started/quickstart/fork-a-repo) the [munin-pihole-plugins repository](https://github.com/saint-lascivious/munin-pihole-plugins).
 - Create a new branch: `git checkout -b descriptive-branch-name`.
 - Make your change.
 - Push to your fork and submit a pull request.
@@ -29,5 +30,6 @@ Work in Progress pull requests are also welcome to get feedback early on, or if 
 
 ## Resources
 
+- [Git Cheat Sheets](https://training.github.com/)
 - [Using Pull Requests](https://help.github.com/articles/about-pull-requests/)
 - [GitHub Help](https://help.github.com)
