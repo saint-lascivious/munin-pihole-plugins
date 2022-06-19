@@ -24,6 +24,9 @@ If applicable, add screenshots to help explain your problem.
 
 **Desktop (please complete the following information):**
  - munin-pihole-plugins version [e.g. 06.xx.xx]
+ - munin-pihole-plugins branch [e.g. master, development]
+- [ ] master
+- [ ] development
  - OS: [e.g. Debian, Ubuntu]
  - Version [e.g. 9, 21.10]
 
