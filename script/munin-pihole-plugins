@@ -6,7 +6,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="07.06.00"
+VERSION="07.07.00"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -28,6 +28,7 @@ fi
 branch="${BRANCH:-development}"
 dns_port="${DNS_PORT:-53}"
 dns_server="${DNS_SERVER:-208.67.222.222}"
+ignore_pihole_on_host="${IGNORE_PIHOLE_ON_HOST:-false}"
 install_plugins="${INSTALL_PLUGINS:-true}"
 install_script="${INSTALL_SCRIPT:-true}"
 install_webserver="${INSTALL_WEBSERVER:-true}"
@@ -290,11 +291,28 @@ ${BLUE}                          |_|                     |_|         |___/
 }
 
 # is this a pihole host?
+# and if so, can we support its API?
+# yes - i am aware that pihole_version is...non optimal, there is probably
+# going to be a much better way to strip the text and formatting from pihole's
+# version output
 check_pihole() {
     reverberate "info" "Checking if this is a Pi-hole® host"
     if [[ -x "$(command -v pihole)" ]]; then
-        reverberate "success" "$(command -v pihole)"
-        pihole_on_host="true"
+        pihole_version="$(pihole -v | grep "Pi-hole" | sed 's/Pi-hole version is v//; s/[(][^)]*[)]//; s/[^.0-9]*//g')"
+        if [[ "${pihole_version}" -ge "6" ]]; then
+            if [[ "${ignore_pihole_on_host}" != "false" ]]; then
+                reverberate "error" "Incompatible Pi-hole® version v${pihole_version}"
+                reverberate "info" "Supported Pi-hole® versions ≤ v5.*"
+                reverberate "exit"
+                exit 1
+            else
+                reverberate "info" "Ignoring Pi-hole® version v${pihole_version}"
+                pihole_on_host="false"
+            fi
+        else
+            reverberate "success" "$(command -v pihole) v${pihole_version}"
+            pihole_on_host="true"
+        fi
     else
         reverberate "failure" "pihole"
         pihole_on_host="false"
@@ -754,7 +772,7 @@ EOF
 config_function() {
     min_height="3"
     if [[ -n "$3" ]]; then
-        external_var_list="BRANCH DNS_PORT DNS_SERVER EXTERNAL_CONFIG_DIR EXTERNAL_CONFIG_FILE INSTALL_PLUGINS INSTALL_SCRIPT INSTALL_WEBSERVER LIGHTTPD_WEBROOT MUNIN_DIR MUNIN_CONFIG_DIR MUNIN_PLUGIN_DIR MUNIN_VERSION NODE_PLUGIN_DIR PLUGIN_CONFIG_DIR PLUGIN_LIST PROXY_CONFIG_DIR SCRIPT_DIR SHOW_COLOR SKIP_DEPENDENCY_CHECK UPDATE_SELF VERBOSITY_LEVEL"
+        external_var_list="BRANCH DNS_PORT DNS_SERVER EXTERNAL_CONFIG_DIR EXTERNAL_CONFIG_FILE IGNORE_PIHOLE_ON_HOST INSTALL_PLUGINS INSTALL_SCRIPT INSTALL_WEBSERVER LIGHTTPD_WEBROOT MUNIN_DIR MUNIN_CONFIG_DIR MUNIN_PLUGIN_DIR MUNIN_VERSION NODE_PLUGIN_DIR PLUGIN_CONFIG_DIR PLUGIN_LIST PROXY_CONFIG_DIR SCRIPT_DIR SHOW_COLOR SKIP_DEPENDENCY_CHECK UPDATE_SELF VERBOSITY_LEVEL"
         for external_var_id in ${external_var_list}; do
             if [[ "$2" == "${external_var_id}" ]]; then
                 if [[ -f "${script_dir}/munin-pihole-plugins" ]]; then
@@ -845,6 +863,9 @@ Type 'munin-pihole-plugins --install --script' to install it now"
             "EXTERNAL_CONFIG_FILE"                          )
                 some "EXTERNAL_CONFIG_FILE: ${external_config_file}"
             ;;
+            "IGNORE_PIHOLE_ON_HOST"                         )
+                some "IGNORE_PIHOLE_ON_HOST: ${ignore_pihole_on_host}"
+            ;;
             "INSTALL_PLUGINS"                               )
                 some "INSTALL_PLUGINS: ${install_plugins}"
             ;;
@@ -908,7 +929,7 @@ Type 'munin-pihole-plugins --install --script' to install it now"
                 some "VERBOSITY_LEVEL: ${verbosity_level}"
             ;;
             ""                                              )
-                min_height="29"
+                min_height="30"
                 if [[ -f "${script_dir}/munin-pihole-plugins" ]]; then
                     usage_text="Usage: munin-pihole-plugins $1 [VARIABLE [\"VALUE\"]]"
                     example_text="\\nExample: munin-pihole-plugins $1 DNS_SERVER 127.0.0.1"
@@ -923,6 +944,7 @@ Type 'munin-pihole-plugins --install --script' to install it now"
  DNS_SERVER=\"${dns_server}\"
  EXTERNAL_CONFIG_DIR=\"${external_config_dir}\"
  EXTERNAL_CONFIG_FILE=\"${external_config_file}\"
+ IGNORE_PIHOLE_ON_HOST=\"${ignore_pihole_on_host}\"
  INSTALL_PLUGINS=\"${install_plugins}\"
  INSTALL_SCRIPT=\"${install_script}\"
  INSTALL_WEBSERVER=\"${install_webserver}\"
@@ -1157,9 +1179,9 @@ install_function() {
             fi
             if [[ "${install_plugins}" == "true" ]]; then
                 if [[ -n "${plugin_list}" ]]; then
+                    check_pihole
                     uninstall_plugins
                     install_plugins
-                    check_pihole
                     configure_plugins
                 else
                     reverberate "error" "No action(s) to perform"

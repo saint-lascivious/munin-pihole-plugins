@@ -3,7 +3,7 @@
 [Munin](https://munin-monitoring.org) [plugins](https://gallery.munin-monitoring.org) and management script for monitoring various [Pi-hole®](https://github.com/pi-hole/pi-hole) statistics. Transforms a server into a powerful monitoring platform, as simple as [one](https://github.com/saint-lascivious/munin-pihole-plugins#step-one-download), [two](https://github.com/saint-lascivious/munin-pihole-plugins#step-two-install), […three](https://github.com/saint-lascivious/munin-pihole-plugins#step-three-wait), [four](https://github.com/saint-lascivious/munin-pihole-plugins#step-four-monitor).
 
 ### Version
-* VERSION="07.06.00"
+* VERSION="07.07.00"
 
 ## Usage
 
@@ -176,6 +176,7 @@ The configuration file, of which the default is `/etc/munin-pihole-plugins/munin
 | `DNS_SERVER` | `208.67.222.222` |
 | `EXTERNAL_CONFIG_DIR` | `/etc/munin-pihole-plugins` |
 | `EXTERNAL_CONFIG_FILE` | `munin-pihole-plugins.conf` |
+| `IGNORE_PIHOLE_ON_HOST` | `false` |
 | `INSTALL_PLUGINS` | `true` |
 | `INSTALL_SCRIPT` | `true` |
 | `INSTALL_WEBSERVER` | `true` |
@@ -230,6 +231,10 @@ Example: `export EXTERNAL_CONFIG_DIR="/etc/munin-pihole-plugins"`
 The name of external configuration file `munin-pihole-plugins` should use, to be created if required.
 
 Example: `export EXTERNAL_CONFIG_FILE="munin-pihole-plugins.conf"`
+
+* `IGNORE_PIHOLE_ON_HOST`
+
+Ignore the existance of any potentially incompatible (≥ v6.*) `pihole` binary on the host server.
 
 * `INSTALL_PLUGINS`
 
