@@ -5,19 +5,10 @@
 ## Quick Start
 
 ### Step One: Download
-* Download munin-pihole-plugins from the `master` branch
-```
-curl -sSL munin-pihole-plugins.sainternet.xyz -o munin-pihole-plugins && chmod +x munin-pihole-plugins
-```
-
-Or,
-
-* Download munin-pihole-plugins from the `development` branch
+* Download munin-pihole-plugins
 ```
 curl -sSL munin-pihole-plugins-dev.sainternet.xyz -o munin-pihole-plugins && chmod +x munin-pihole-plugins
 ```
-
-The chosen branch [can be changed](https://github.com/saint-lascivious/munin-pihole-plugins/wiki/Configuration#branch) at any later time if desired.
 
 ### Step Two: Install
 * Install munin-pihole-plugins
