@@ -1,12 +1,23 @@
 #!/usr/bin/env bash
 
 # munin-pihole-plugins
-# saint-lascivious (Hayden Pearce) 2022
-# saint@sainternet.xyz
+# saint-lascivious (Hayden Pearce) ©2022
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# Contact: munin-pihole-plugins@sainternet.xyz
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="06.02.00"
+VERSION="06.03.00"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -842,7 +853,7 @@ The DNS_SERVER value must be between 0.0.0.0 and 255.255.255.255"
                     min_height="4"
                     some "munin-pihole-plugins: function unavailable
 The munin-pihole-plugins script must be installed to use this function
-Type 'munin-pihole-plugins --install --script' to install it now"
+Type \"munin-pihole-plugins --install --script\" to install it now"
                 fi
             fi
         done
@@ -966,7 +977,7 @@ ${example_text}"
            ;;
             *                                               )
                 some "munin-pihole-plugins: unrecognized variable '$2'
-Type 'munin-pihole-plugins --configure' for a list of available options"
+Type \"munin-pihole-plugins --configure\" for a list of available options"
         esac
     fi
 }
@@ -1056,6 +1067,32 @@ install using the PLUGIN_LIST variable.
                 ;;
             esac
         ;;
+        "-s" | "show" | "--show"                            )
+            min_height="4"
+            case "${3}" in
+                "-c" | "conditions" | "--conditions"        )
+                    some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
+\\nExample: 'munin-pihole-plugins $2 --conditions'"
+                ;;
+                "-l" | "liability" | "--liability"          )
+                    some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
+\\nExample: 'munin-pihole-plugins $2 --liability'"
+                ;;
+                "-w" | "warranty" | "--warranty"            )
+                    some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
+\\nExample: 'munin-pihole-plugins $2 --warranty'"
+                ;;
+                *                                           )
+                    min_height="9"
+                    some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
+\\nOption\\t\\t    GNU long option\\tMeaning
+ -c, conditions\\t     --conditions\\t Show GNU GPLv3 licensing conditions
+ -l, liability\\t     --liability\\t Show liability definition
+ -w, warranty\\t     --warranty\\t\\t Show warranty information
+\\nExample: 'munin-pihole-plugins $2 warranty'"
+                ;;
+            esac
+        ;;
         "-u" | "--uninstall" | "uninstall"                  )
             case "${3}" in
                 "-p" | "-s" | "-w" | "plugins" | "script" | "webserver" | "--plugins" | "--script" | "--webserver"                                  )
@@ -1113,21 +1150,22 @@ the latest munin-pihole-plugins script version.
 \\nAn additional notification will be displayed if an update is available."
         ;;
         ""                                                  )
-            min_height="13"
+            min_height="14"
             some "Usage: munin-pihole-plugins {OPTION [PARAMETER]}
 \\nOption\\t\\tGNU long option\\t\\tMeaning
  -c, configure\\t --configure\\t\\t Display or set environment variables
  -h, help\\t --help\\t\\t\\t Display this help dialogue
  -i, install\\t --install\\t\\t Install munin-pihole-plugins
+ -s, show\\t --show\\t\\t\\t Display GNU GPLv3 license information
  -u, uninstall\\t --uninstall\\t\\t Uninstall munin-pihole-plugins
  -v, version\\t --version\\t\\t Display current and latest versions
-\\nType '$1 {OPTION}' for more detailed explanations of each command
+\\nType \"$1 {OPTION}\" for more detailed explanations of each command
 \\nExample: 'munin-pihole-plugins $1 install'"
         ;;
         *                                                   )
         min_height="3"
     some "munin-pihole-plugins: unrecognized option '$2'
-Type 'munin-pihole-plugins --help' for a list of available options"
+Type \"munin-pihole-plugins --help\" for a list of available options"
         ;;
     esac
 }
@@ -1211,6 +1249,70 @@ install_function() {
     esac
 }
 
+# GNU GPL v3 license magic for the sake of completion
+# spits out some boilerplate that's technically required
+# (and a little that isn't {-l,liability,--liability})
+gnugpl_info_function() {
+    case "${2}" in
+        "-c" | "conditions" | "--conditions"                )
+            min_height="14"
+            some "munin-pihole-plugins saint-lascivious (Hayden Pearce) ©2022
+\\nThis program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+\\nThis program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+\\nContact: munin-pihole-plugins@sainternet.xyz"
+        ;;
+        "-l" | "liability" | "--liability"                  )
+            min_height="14"
+            some "munin-pihole-plugins saint-lascivious (Hayden Pearce) ©2022
+\\nIN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING
+WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MODIFIES AND/OR CONVEYS
+THE PROGRAM AS PERMITTED ABOVE, BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY
+GENERAL, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE
+USE OR INABILITY TO USE THE PROGRAM (INCLUDING BUT NOT LIMITED TO LOSS OF
+DATA OR DATA BEING RENDERED INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD
+PARTIES OR A FAILURE OF THE PROGRAM TO OPERATE WITH ANY OTHER PROGRAMS),
+EVEN IF SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGES.
+\\nContact: munin-pihole-plugins@sainternet.xyz"
+        ;;
+        "-w" | "warranty" | "--warranty"                    )
+            min_height="13"
+            some "munin-pihole-plugins saint-lascivious (Hayden Pearce) ©2022
+\\nTHERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED BY
+APPLICABLE LAW.  EXCEPT WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT
+HOLDERS AND/OR OTHER PARTIES PROVIDE THE PROGRAM \"AS IS\" WITHOUT WARRANTY
+OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO,
+THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+PURPOSE.  THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE PROGRAM
+IS WITH YOU.  SHOULD THE PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF
+ALL NECESSARY SERVICING, REPAIR OR CORRECTION.
+\\nContact: munin-pihole-plugins@sainternet.xyz"
+        ;;
+        ""                                                  )
+            if [[ "${verbosity_level}" -ge "1" ]]; then
+                min_height="9"
+                some "munin-pihole-plugins saint-lascivious (Hayden Pearce) ©2022
+\\nThis program comes with ABSOLUTELY NO WARRANTY; for details type
+\"munin-pihole-plugins --show --waranty\"
+\\nThis is free software, and you are welcome to redistribute it
+under certain conditions; for details type
+\"munin-pihole-plugins --show --conditions\""
+            fi
+        ;;
+        *                                                   )
+            min_height="3"
+            some "munin-pihole-plugins: unrecognized option '$2'
+Type \"munin-pihole-plugins --help --show\" for a list of available options"
+        ;;
+    esac
+}
+
 # uninstall munin-pihole-plugins
 # removes all munin plugins and related configuration placed by
 # munin-pihole-plugins and then prompts to remove any dependencies that may
@@ -1247,6 +1349,7 @@ uninstall_function() {
             fi
             check_privilege "$@"
             obnoxious_header
+            gnugpl_info_function
             if [[ "${install_plugins}" == "true" ]]; then
                 dependency_list+="munin-node "
                 if [[ -d "${plugin_config_dir}" ]]; then
@@ -1364,6 +1467,9 @@ function_handler() {
         "-i" | "--install" | "install"                      )
             install_function "$@"
         ;;
+        "-s" | "show" | "--show"                            )
+            gnugpl_info_function "$@"
+        ;;
         "-u" | "--uninstall" | "uninstall"                  )
             uninstall_function "$@"
         ;;
@@ -1373,12 +1479,12 @@ function_handler() {
         ""                                                  )
             min_height="3"
     some "munin-pihole-plugins: no option selected
-Type 'munin-pihole-plugins --help' for a list of available options"
+Type \"munin-pihole-plugins --help\" for a list of available options"
         ;;
         *                                                   )
             min_height="3"
     some "munin-pihole-plugins: unrecognized option '$1'
-Type 'munin-pihole-plugins --help' for a list of available options"
+Type \"munin-pihole-plugins --help\" for a list of available options"
         ;;
     esac
 }
