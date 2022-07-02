@@ -18,7 +18,7 @@
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
 # shellcheck disable=SC2034
-VERSION="06.03.01"
+VERSION="06.03.02"
 
 # shellcheck disable=SC2207
 _munin-pihole-plugins() {
@@ -30,7 +30,7 @@ _munin-pihole-plugins() {
     case "${prev}" in
         "munin-pihole-plugins")
             allopts="-c configure --configure -h help --help -i install --install -s show --show -u uninstall --uninstall -v version --version"
-            longopts="--help --install --show --uninstall --variables --version"
+            longopts="--configure --help --install --show --uninstall --version"
             shortopts="-c -h -i -s -u -v"
             case "${cur}" in
                 --*)
@@ -56,13 +56,13 @@ _munin-pihole-plugins() {
             fi
         ;;
         "help")
-            opts_help="help install show uninstall variables version"
+            opts_help="configure help install show uninstall version"
             if [[ "${prev2}" != "-h" ]] && [[ "${prev2}" != "help" ]] && [[ "${prev2}" != "--help" ]]; then
                 COMPREPLY=( $(compgen -W "${opts_help}" -- "${cur}") )
             fi
         ;;
         "--help")
-            longopts_help="--help --show --install --uninstall --variables --version"
+            longopts_help="--configure --help --install --show --uninstall --version"
             if [[ "${prev2}" != "-h" ]] && [[ "${prev2}" != "help" ]] && [[ "${prev2}" != "--help" ]]; then
                 COMPREPLY=( $(compgen -W "${longopts_help}" -- "${cur}") )
             else
