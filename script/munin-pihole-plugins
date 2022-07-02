@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="06.03.03"
+VERSION="06.03.04"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -310,6 +310,7 @@ check_pihole() {
     reverberate "info" "Checking if this is a Pi-hole® host"
     if [[ -x "$(command -v pihole)" ]]; then
         pihole_version="$(pihole -v | grep "Pi-hole" | sed 's/Pi-hole version is v//; s/[(][^)]*[)]//; s/[^.0-9]*//g')"
+        # shellcheck disable=SC2071
         if [[ "${pihole_version}" > "6" ]]; then
             if [[ "${ignore_pihole_on_host}" != "false" ]]; then
                 reverberate "error" "Incompatible Pi-hole® version v${pihole_version}"
@@ -1297,12 +1298,17 @@ gnugpl_info_function() {
         ;;
         ""                                                  )
             if [[ "${verbosity_level}" -ge "1" ]]; then
+                if [[ -f "${script_dir}/munin-pihole-plugins" ]]; then
+                    example_text="munin-pihole-plugins --show --waranty"
+                else
+                    example_text="./munin-pihole-plugins --show --waranty"
+                fi
                 min_height="9"
                 some "\\n  This program comes with ${RED}ABSOLUTELY NO WARRANTY${RESET}; for details type
-  \"munin-pihole-plugins --show --waranty\"
+  \"${example_text}\"
 \\n  This is ${GREEN}FREE SOFTWARE${RESET}, and you are welcome to redistribute it
   under certain conditions; for details type
-  \"munin-pihole-plugins --show --conditions\""
+  \"${example_text}\""
             fi
         ;;
         *                                                   )

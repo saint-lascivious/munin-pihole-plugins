@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="06.03.03"
+VERSION="06.03.04"
 
 # Environment variables for this script
 #

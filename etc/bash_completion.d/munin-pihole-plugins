@@ -18,7 +18,7 @@
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
 # shellcheck disable=SC2034
-VERSION="06.03.03"
+VERSION="06.03.04"
 
 # shellcheck disable=SC2207
 _munin-pihole-plugins() {
