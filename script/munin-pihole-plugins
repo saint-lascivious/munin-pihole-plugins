@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="06.03.00"
+VERSION="06.03.01"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -310,7 +310,7 @@ check_pihole() {
     reverberate "info" "Checking if this is a Pi-hole® host"
     if [[ -x "$(command -v pihole)" ]]; then
         pihole_version="$(pihole -v | grep "Pi-hole" | sed 's/Pi-hole version is v//; s/[(][^)]*[)]//; s/[^.0-9]*//g')"
-        if [[ "${pihole_version}" -ge "6" ]]; then
+        if [[ "${pihole_version}" > "6" ]]; then
             if [[ "${ignore_pihole_on_host}" != "false" ]]; then
                 reverberate "error" "Incompatible Pi-hole® version v${pihole_version}"
                 reverberate "info" "Supported Pi-hole® versions ≤ v5.*"
@@ -1210,6 +1210,7 @@ install_function() {
                 fi
             fi
             obnoxious_header
+            gnugpl_info_function
             if [[ "${skip_dependency_check}" == "false" ]]; then
                 install_dependencies
             else
@@ -1257,58 +1258,57 @@ gnugpl_info_function() {
         "-c" | "conditions" | "--conditions"                )
             min_height="14"
             some "munin-pihole-plugins saint-lascivious (Hayden Pearce) ©2022
-\\nThis program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-\\nThis program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+\\n  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+\\n  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 \\nContact: munin-pihole-plugins@sainternet.xyz"
         ;;
         "-l" | "liability" | "--liability"                  )
             min_height="14"
             some "munin-pihole-plugins saint-lascivious (Hayden Pearce) ©2022
-\\nIN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING
-WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MODIFIES AND/OR CONVEYS
-THE PROGRAM AS PERMITTED ABOVE, BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY
-GENERAL, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE
-USE OR INABILITY TO USE THE PROGRAM (INCLUDING BUT NOT LIMITED TO LOSS OF
-DATA OR DATA BEING RENDERED INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD
-PARTIES OR A FAILURE OF THE PROGRAM TO OPERATE WITH ANY OTHER PROGRAMS),
-EVEN IF SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF
-SUCH DAMAGES.
+\\n  IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING
+  WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MODIFIES AND/OR CONVEYS
+  THE PROGRAM AS PERMITTED ABOVE, BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY
+  GENERAL, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE
+  USE OR INABILITY TO USE THE PROGRAM (INCLUDING BUT NOT LIMITED TO LOSS OF
+  DATA OR DATA BEING RENDERED INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD
+  PARTIES OR A FAILURE OF THE PROGRAM TO OPERATE WITH ANY OTHER PROGRAMS),
+  EVEN IF SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF
+  SUCH DAMAGES.
 \\nContact: munin-pihole-plugins@sainternet.xyz"
         ;;
         "-w" | "warranty" | "--warranty"                    )
             min_height="13"
             some "munin-pihole-plugins saint-lascivious (Hayden Pearce) ©2022
-\\nTHERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED BY
-APPLICABLE LAW.  EXCEPT WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT
-HOLDERS AND/OR OTHER PARTIES PROVIDE THE PROGRAM \"AS IS\" WITHOUT WARRANTY
-OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO,
-THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-PURPOSE.  THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE PROGRAM
-IS WITH YOU.  SHOULD THE PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF
-ALL NECESSARY SERVICING, REPAIR OR CORRECTION.
+\\n  THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED BY
+  APPLICABLE LAW.  EXCEPT WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT
+  HOLDERS AND/OR OTHER PARTIES PROVIDE THE PROGRAM \"AS IS\" WITHOUT WARRANTY
+  OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO,
+  THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+  PURPOSE.  THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE PROGRAM
+  IS WITH YOU.  SHOULD THE PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF
+  ALL NECESSARY SERVICING, REPAIR OR CORRECTION.
 \\nContact: munin-pihole-plugins@sainternet.xyz"
         ;;
         ""                                                  )
             if [[ "${verbosity_level}" -ge "1" ]]; then
                 min_height="9"
-                some "munin-pihole-plugins saint-lascivious (Hayden Pearce) ©2022
-\\nThis program comes with ABSOLUTELY NO WARRANTY; for details type
-\"munin-pihole-plugins --show --waranty\"
-\\nThis is free software, and you are welcome to redistribute it
-under certain conditions; for details type
-\"munin-pihole-plugins --show --conditions\""
+                some "\\n  ${RED}This program comes with ABSOLUTELY NO WARRANTY${RESET}; for details type
+  \"munin-pihole-plugins --show --waranty\"
+\\n  This is free software, and you are welcome to redistribute it
+  under certain conditions; for details type
+  \"munin-pihole-plugins --show --conditions\""
             fi
         ;;
         *                                                   )
             min_height="3"
             some "munin-pihole-plugins: unrecognized option '$2'
-Type \"munin-pihole-plugins --help --show\" for a list of available options"
+  Type \"munin-pihole-plugins --help --show\" for a list of available options"
         ;;
     esac
 }
