@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="06.03.04"
+VERSION="06.03.05"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -144,7 +144,7 @@ check_privilege() {
 
 # there are ways of doing this without spawning a child script
 # but they all suck, and/or are extremely convoluted
-# this approach is a tradeoff
+# this approach is a trade-off
 update_script() {
     cat > "${temp_dir}/.munin-pihole-plugins_update" << EOF
 #!/usr/bin/env bash
@@ -157,7 +157,7 @@ VERSION="${VERSION}"
 
 verbosity_level="${verbosity_level}"
 
-# a simple you self update function for the munin-pihole-plugins script
+# a simple self update function for the munin-pihole-plugins script
 update_now() {
     if [[ -x "$(command -v wget)" ]]; then
         if [[ "${verbosity_level}" -ge "4" ]]; then
@@ -288,7 +288,7 @@ reverberate() {
     esac
 }
 
-# manditory horrific ascii header
+# mandatory horrific ascii header
 obnoxious_header() {
     if [[ "${terminal_height}" -ge "12" ]] && [[ "${terminal_width}" -ge "80" ]]; then
         reverberate "header" "\\n${RED}                  _             _ _        _            _           _ v${VERSION}
@@ -435,7 +435,7 @@ configure_proxy() {
 # configure the munin monitoring environment
 # two different approaches may be used to set the graph strategy depending on
 # the existence of the munin_config_dir
-# if it is not found munin-pihole-plugins aill attempt to edit the munin.conf
+# if it is not found munin-pihole-plugins will attempt to edit the munin.conf
 # file directly
 configure_munin() {
     if [[ -d "${munin_config_dir}" ]]; then
@@ -513,7 +513,7 @@ uninstall_plugins() {
 }
 
 # installs munin-pihole-plugins plugins and symbolic links
-# plugins to be installed can be configured using PLUGIN_LIST
+# plugins to be installed can be configured using the PLUGIN_LIST variable
 install_plugins() {
     if [[ -d "${munin_plugin_dir}" ]]; then
         if [[ -d "${node_plugin_dir}" ]]; then
@@ -732,7 +732,7 @@ check_version() {
 # simple wrapper to set or reset external variables in the format:
 # EXTERNAL_VAR=EXTERNAL_VAR_VALUE
 # handles creation of the external variable configuration file including path
-# if required, split up from the labyrintine mess that is config_function to
+# if required, split up from the labyrinthine mess that is config_function to
 # limit some of the needless duplication that was happening there
 # usage:
 # 'transmogrify EXTERNAL_VAR EXTERNAL_VAR_VALUE [[/PATH/TO/]EXTERNAL_VAR_FILE]'
@@ -1205,7 +1205,7 @@ install_function() {
                 if [[ -f "${temp_dir}/.munin-pihole-plugins_update" ]]; then
                     rm "${temp_dir}/.munin-pihole-plugins_update" || return
                 fi
-                if [[ "${remote_version}" > "${VERSION}" ]]; then
+                if [[ "${remote_version}" != "${VERSION}" ]]; then
                     obnoxious_header
                     update_script "$@"
                 fi
