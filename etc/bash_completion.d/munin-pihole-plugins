@@ -1,24 +1,37 @@
 #!/usr/bin/env bash
 
 # munin-pihole-plugins
-# saint-lascivious (Hayden Pearce) 2022
-# saint@sainternet.xyz
+# saint-lascivious (Hayden Pearce) ©2022
 
-# shellcheck disable=SC2034,SC2207
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 
-VERSION="07.07.00"
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
 
+# Contact: munin-pihole-plugins@sainternet.xyz
+
+# munin-pihole-plugins version
+# must follow 8 character major.minor.micro scheme
+# shellcheck disable=SC2034
+VERSION="07.08.00"
+
+# shellcheck disable=SC2207
 _munin-pihole-plugins() {
-    local cur allopts lolopts_help longopts longopts_help longopts_installuninstall opts_branch opts_dnsserver opts_help opts_installuninstall opts_muninversion opts_truefalse opts_variables opts_verbositylevel prev prev2 shortopts shortopts_help shortopts_installuninstall
+    local cur allopts lolopts_help longopts longopts_help longopts_installuninstall longopts_show opts_branch opts_dnsserver opts_help opts_installuninstall opts_muninversion opts_show opts_truefalse opts_variables opts_verbositylevel prev prev2 shortopts shortopts_help shortopts_installuninstall shortopts_show
     COMPREPLY=()
     cur="${COMP_WORDS[COMP_CWORD]}"
     prev="${COMP_WORDS[COMP_CWORD-1]}"
     prev2="${COMP_WORDS[COMP_CWORD-2]}"
     case "${prev}" in
         "munin-pihole-plugins")
-            allopts="-c configure --configure -h help --help -i install --install -u uninstall --uninstall -v version --version"
-            longopts="--help --install --uninstall --variables --version"
-            shortopts="-c -h -i -u -v"
+            allopts="-c configure --configure -h help --help -i install --install -s show --show -u uninstall --uninstall -v version --version"
+            longopts="--configure --help --install --show --uninstall --version"
+            shortopts="-c -h -i -s -u -v"
             case "${cur}" in
                 --*)
                     COMPREPLY=( $(compgen -W "${longopts}" -- "${cur}") )
@@ -32,28 +45,28 @@ _munin-pihole-plugins() {
         ;;
         "-c"|"configure"|"--configure")
             opts_variables="BRANCH DNS_PORT DNS_SERVER IGNORE_PIHOLE_ON_HOST INSTALL_PLUGINS INSTALL_SCRIPT LIGHTTPD_WEBROOT INSTALL_WEBSERVER MUNIN_DIR MUNIN_CONFIG_DIR MUNIN_PLUGIN_DIR MUNIN_VERSION NODE_PLUGIN_DIR PLUGIN_CONFIG_DIR PLUGIN_LIST PROXY_CONFIG_DIR SCRIPT_DIR SHOW_COLOR SKIP_DEPENDENCY_CHECK UPDATE_SELF VERBOSITY_LEVEL"
-            if [[ "${prev2}" != *h ]]; then
+            if [[ "${prev2}" != "-h" ]] && [[ "${prev2}" != "help" ]] && [[ "${prev2}" != "--help" ]]; then
                 COMPREPLY=( $(compgen -W "${opts_variables}" -- "${cur}") )
             fi
         ;;
        "-h")
-            shortopts_help="-c -h -i -u -v"
-            if [[ "${prev2}" != *h ]]; then
+            shortopts_help="-c -h -i -s -u -v"
+            if [[ "${prev2}" != "-h" ]] && [[ "${prev2}" != "help" ]] && [[ "${prev2}" != "--help" ]]; then
                 COMPREPLY=( $(compgen -W "${shortopts_help}" -- "${cur}") )
             fi
         ;;
         "help")
-            opts_help="help install uninstall variables version"
-            if [[ "${prev2}" != *help ]]; then
+            opts_help="configure help install show uninstall version"
+            if [[ "${prev2}" != "-h" ]] && [[ "${prev2}" != "help" ]] && [[ "${prev2}" != "--help" ]]; then
                 COMPREPLY=( $(compgen -W "${opts_help}" -- "${cur}") )
             fi
         ;;
         "--help")
-            lolopts_help="--I\\'ve-fallen-and-I-can\\'t-get-up"
-            longopts_help="--help --install --uninstall --variables --version"
-            if [[ "${prev2}" != *help ]]; then
+            longopts_help="--configure --help --install --show --uninstall --version"
+            if [[ "${prev2}" != "-h" ]] && [[ "${prev2}" != "help" ]] && [[ "${prev2}" != "--help" ]]; then
                 COMPREPLY=( $(compgen -W "${longopts_help}" -- "${cur}") )
             else
+                lolopts_help="--i\\'ve-fallen-and-i-can\\'t-get-up"
                 COMPREPLY=( $(compgen -W "${lolopts_help}" -- "${cur}") )
             fi
         ;;
@@ -61,13 +74,25 @@ _munin-pihole-plugins() {
             shortopts_installuninstall="-p -P -s -S -w -W"
             COMPREPLY=( $(compgen -W "${shortopts_installuninstall}" -- "${cur}") )
         ;;
+        "-s")
+            shortopts_show="-c -l -w"
+            COMPREPLY=( $(compgen -W "${shortopts_show}" -- "${cur}") )
+        ;;
         "install"|"uninstall")
             opts_installuninstall="plugins plugins-only script script-only webserver webserver-only"
             COMPREPLY=( $(compgen -W "${opts_installuninstall}" -- "${cur}") )
         ;;
+        "show")
+            opts_show="conditions liability warranty"
+            COMPREPLY=( $(compgen -W "${opts_show}" -- "${cur}") )
+        ;;
         "--install"|"--uninstall")
             longopts_installuninstall="--plugins --plugins-only --script --script-only --webserver --webserver-only"
             COMPREPLY=( $(compgen -W "${longopts_installuninstall}" -- "${cur}") )
+        ;;
+        "--show")
+            longopts_show="--conditions --liability --warranty"
+            COMPREPLY=( $(compgen -W "${longopts_show}" -- "${cur}") )
         ;;
         "BRANCH")
             opts_branch="development master RESET"
@@ -105,9 +130,10 @@ _munin-pihole-plugins() {
             fi
         ;;
         *)
-        return 1
+            return 1
         ;;
     esac
     return 0
 }
+
 complete -F _munin-pihole-plugins munin-pihole-plugins
