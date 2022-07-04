@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="07.08.00"
+VERSION="07.08.01"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -1299,16 +1299,16 @@ gnugpl_info_function() {
         ""                                                  )
             if [[ "${verbosity_level}" -ge "1" ]]; then
                 if [[ -f "${script_dir}/munin-pihole-plugins" ]]; then
-                    example_text="munin-pihole-plugins --show --waranty"
+                    example_prefix="munin-pihole-plugins"
                 else
-                    example_text="./munin-pihole-plugins --show --waranty"
+                    example_prefix="./munin-pihole-plugins"
                 fi
                 min_height="9"
                 some "\\n  This program comes with ${RED}ABSOLUTELY NO WARRANTY${RESET}; for details type
-  \"${example_text}\"
+  \"${example_prefix} --show --warranty\"
 \\n  This is ${GREEN}FREE SOFTWARE${RESET}, and you are welcome to redistribute it
   under certain conditions; for details type
-  \"${example_text}\""
+  \"${example_prefix} --show --conditions\""
             fi
         ;;
         *                                                   )
