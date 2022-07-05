@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="07.08.01"
+VERSION="07.08.02"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -1001,9 +1001,9 @@ variable to list the value of that variable alone.
 \\nExample: 'munin-pihole-plugins $2 INSTALL_PLUGINS'
 \\nTakes an optional value for a munin-pihole-plugins environment variable to
 set the value of that variable. If the optional value passed is 'RESET', the
-corresponding environment variable will be reset to the default value. This
-function is only available if the munin-pihole-plugins script is installed
-locally.
+corresponding environment variable will be reset to its default value. This
+functionality is only available if the munin-pihole-plugins script is found to
+exist within SCRIPT_DIR
 \\nExamples: 'munin-pihole-plugins $2 DNS_SERVER 127.0.0.1'
           'munin-pihole-plugins $2 DNS_SERVER RESET'"
         ;;
@@ -1441,10 +1441,12 @@ uninstall_function() {
 }
 
 # display the current and latest munin-pihole-plugins script versions
+# since we can change branches on a whim, we can't always assume that the remote
+# version will be greater than the current version, we only care if it differs
 version_function() {
     check_version
     if [[ -n "${remote_version}" ]]; then
-        if [[ "${remote_version}" > "${VERSION}" ]]; then
+        if [[ "${remote_version}" != "${VERSION}" ]]; then
             min_height="4"
             some "  [${WHITE}ℹ${RESET}] ${GREEN}An update for munin-pihole-plugins is available${RESET}\\n
   munin-pihole-plugins version is v${RED}${VERSION}${RESET} (Latest: v${GREEN}${remote_version}${RESET})"
@@ -1453,7 +1455,7 @@ version_function() {
         fi
     else
         min_height="5"
-        some "  [${YELLOW}⚠${RESET}] ${YELLOW}Unable to locate a TXT record for ${plugin_domain}${RESET}
+        some "  [${YELLOW}⚠${RESET}] ${YELLOW}Unable to locate TXT record for ${plugin_domain}${RESET}
   using the nameserver ${dns_server} on port ${dns_port}\\n
   munin-pihole-plugins version is v${VERSION} (Latest: ${RED}unknown${RESET})"
     fi
