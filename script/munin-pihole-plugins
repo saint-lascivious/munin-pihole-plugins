@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="07.08.02"
+VERSION="07.09.00"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -39,6 +39,7 @@ fi
 branch="${BRANCH:-development}"
 dns_port="${DNS_PORT:-53}"
 dns_server="${DNS_SERVER:-208.67.222.222}"
+hold_duration="${HOLD_DURATION:-0}"
 ignore_pihole_on_host="${IGNORE_PIHOLE_ON_HOST:-false}"
 install_plugins="${INSTALL_PLUGINS:-true}"
 install_script="${INSTALL_SCRIPT:-true}"
@@ -75,6 +76,21 @@ webserver_services="lighttpd munin "
 
 # we just won't talk about this
 temp_dir="${TMPDIR:-${TEMP:-${TMP:-/tmp}}}"
+
+# fallbacks for out of range or unexpected hold durations
+# set to 0 when lower than 0, 5 when higher than 5
+# set to 0 if it's something entirely unexpected
+if [[ "${hold_duration}" =~ ^(-)?[0-9]+$ ]]; then
+    if [[ "${hold_duration}" -lt "0" ]]; then
+        hold_duration="0"
+    else
+        if [[ "${hold_duration}" -gt "5" ]]; then
+            hold_duration="5"
+        fi
+    fi
+else
+    hold_duration="0"
+fi
 
 # fallbacks for out of range or unexpected verbosity levels
 # set to 0 when lower than 0, 4 when higher than 4
@@ -198,8 +214,8 @@ update_now() {
         echo -e "\\n  [${WHITE}ℹ${RESET}] ${GREEN}Restarting munin-pihole-plugins after update${RESET}"
     fi
     if [[ "${verbosity_level}" -ge "4" ]]; then
-        echo -e "\\n  [${WHITE}ℹ${RESET}] ${GREEN}Restarting in 5 seconds${RESET}"
-        sleep 5
+        echo -e "\\n  [${WHITE}ℹ${RESET}] ${GREEN}Restarting in ${hold_duration} seconds${RESET}"
+        sleep "${hold_duration}"
     fi
     clear
     exec env UPDATE_SELF="false" /bin/bash "$0" "$@"
@@ -210,6 +226,13 @@ EOF
     chmod +x "${temp_dir}/.munin-pihole-plugins_update"
     reverberate "info" "Updating the munin-pihole-plugins script"
     exec /bin/bash "${temp_dir}/.munin-pihole-plugins_update"
+}
+
+# user request, variable output delay
+# many actions are near instantaneous, add some dwell time (default 0) after
+# output
+hold_up() {
+    sleep "${hold_duration}"
 }
 
 # echo wrapper handling verbosity levels and common output
@@ -223,6 +246,7 @@ reverberate() {
         "additional_info"                                   )
             if [[ "${verbosity_level}" -ge "4" ]]; then
                 echo -e "\\n  [${WHITE}ℹ${RESET}] ${GREEN}$2${RESET}"
+                hold_up
             fi
         ;;
         "config"                                            )
@@ -233,56 +257,67 @@ reverberate() {
                     config_text="  ${WHITE}export $2=\"VALUE\"${RESET}"
                 fi
                 echo -e "${config_text}"
+                hold_up
             fi
         ;;
         "error"                                             )
             if [[ "${verbosity_level}" -ge "1" ]]; then
                 echo -e "\\n  [${RED}!${RESET}] ${RED}$2${RESET}"
+                hold_up
             fi
         ;;
         "exit"                                              )
             if [[ "${verbosity_level}" -ge "1" ]]; then
                 echo -e "\\n  [${RED}!${RESET}] ${RED}Exiting $0${RESET}"
+                hold_up
             fi
         ;;
         "failure"                                           )
             if [[ "${verbosity_level}" -ge "3" ]]; then
                 echo -e "  [${RED}✗${RESET}] $2"
+                hold_up
             fi
         ;;
         "footer"                                            )
             if [[ "${verbosity_level}" -ge "1" ]]; then
                 echo -e "\\n  [${WHITE}ℹ${RESET}] ${GREEN}Done${RESET}\\n"
+                hold_up
             fi
         ;;
         "header"                                            )
             if [[ "${verbosity_level}" -ge "1" ]]; then
                 echo -e "$2"
+                hold_up
             fi
         ;;
         "info"                                              )
             if [[ "${verbosity_level}" -ge "3" ]]; then
                 echo -e "\\n  [${WHITE}ℹ${RESET}] ${GREEN}$2${RESET}"
+                hold_up
             fi
         ;;
         "question"                                          )
             if [[ "${verbosity_level}" -ge "2" ]]; then
                 echo -e "\\n  [${BLUE}?${BLUE}] ${BLUE}$2${RESET}"
+                hold_up
             fi
         ;;
         "success"                                           )
             if [[ "${verbosity_level}" -ge "3" ]]; then
                 echo -e "  [${GREEN}✓${RESET}] $2"
+                hold_up
             fi
         ;;
         "warning"                                           )
             if [[ "${verbosity_level}" -ge "2" ]]; then
                 echo -e "\\n  [${YELLOW}⚠${RESET}] ${YELLOW}$2${RESET}"
+                hold_up
             fi
         ;;
         *                                                   )
             if [[ "${verbosity_level}" -ge "4" ]]; then
                 echo -e "  $1"
+                hold_up
             fi
         ;;
     esac
@@ -875,6 +910,9 @@ Type \"munin-pihole-plugins --install --script\" to install it now"
             "EXTERNAL_CONFIG_FILE"                          )
                 some "EXTERNAL_CONFIG_FILE: ${external_config_file}"
             ;;
+            "HOLD_DURATION"                                 )
+                some "HOLD_DURATION: ${hold_duration}"
+            ;;
             "IGNORE_PIHOLE_ON_HOST"                         )
                 some "IGNORE_PIHOLE_ON_HOST: ${ignore_pihole_on_host}"
             ;;
@@ -941,7 +979,7 @@ Type \"munin-pihole-plugins --install --script\" to install it now"
                 some "VERBOSITY_LEVEL: ${verbosity_level}"
             ;;
             ""                                              )
-                min_height="30"
+                min_height="31"
                 if [[ -f "${script_dir}/munin-pihole-plugins" ]]; then
                     usage_text="Usage: munin-pihole-plugins $1 [VARIABLE [\"VALUE\"]]"
                     example_text="\\nExample: munin-pihole-plugins $1 DNS_SERVER 127.0.0.1"
@@ -956,6 +994,7 @@ Type \"munin-pihole-plugins --install --script\" to install it now"
  DNS_SERVER=\"${dns_server}\"
  EXTERNAL_CONFIG_DIR=\"${external_config_dir}\"
  EXTERNAL_CONFIG_FILE=\"${external_config_file}\"
+ HOLD_DURATION=\"${hold_duration}\"
  IGNORE_PIHOLE_ON_HOST=\"${ignore_pihole_on_host}\"
  INSTALL_PLUGINS=\"${install_plugins}\"
  INSTALL_SCRIPT=\"${install_script}\"

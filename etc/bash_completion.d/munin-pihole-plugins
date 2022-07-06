@@ -18,11 +18,16 @@
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
 # shellcheck disable=SC2034
-VERSION="07.08.02"
+VERSION="07.09.00"
 
 # shellcheck disable=SC2207
 _munin-pihole-plugins() {
-    local cur allopts lolopts_help longopts longopts_help longopts_installuninstall longopts_show opts_branch opts_dnsserver opts_help opts_installuninstall opts_muninversion opts_show opts_truefalse opts_variables opts_verbositylevel prev prev2 shortopts shortopts_help shortopts_installuninstall shortopts_show
+    local cur allopts lolopts_help longopts \
+        longopts_help longopts_installuninstall longopts_show \
+        opts_branch opts_dnsserver opts_help opts_holdduration \
+        opts_installuninstall opts_muninversion opts_show opts_truefalse \
+        opts_variables opts_verbositylevel prev prev2 shortopts shortopts_help \
+        shortopts_installuninstall shortopts_show
     COMPREPLY=()
     cur="${COMP_WORDS[COMP_CWORD]}"
     prev="${COMP_WORDS[COMP_CWORD-1]}"
@@ -44,7 +49,7 @@ _munin-pihole-plugins() {
             esac
         ;;
         "-c"|"configure"|"--configure")
-            opts_variables="BRANCH DNS_PORT DNS_SERVER IGNORE_PIHOLE_ON_HOST INSTALL_PLUGINS INSTALL_SCRIPT LIGHTTPD_WEBROOT INSTALL_WEBSERVER MUNIN_DIR MUNIN_CONFIG_DIR MUNIN_PLUGIN_DIR MUNIN_VERSION NODE_PLUGIN_DIR PLUGIN_CONFIG_DIR PLUGIN_LIST PROXY_CONFIG_DIR SCRIPT_DIR SHOW_COLOR SKIP_DEPENDENCY_CHECK UPDATE_SELF VERBOSITY_LEVEL"
+            opts_variables="BRANCH DNS_PORT DNS_SERVER HOLD_DURATION IGNORE_PIHOLE_ON_HOST INSTALL_PLUGINS INSTALL_SCRIPT LIGHTTPD_WEBROOT INSTALL_WEBSERVER MUNIN_DIR MUNIN_CONFIG_DIR MUNIN_PLUGIN_DIR MUNIN_VERSION NODE_PLUGIN_DIR PLUGIN_CONFIG_DIR PLUGIN_LIST PROXY_CONFIG_DIR SCRIPT_DIR SHOW_COLOR SKIP_DEPENDENCY_CHECK UPDATE_SELF VERBOSITY_LEVEL"
             if [[ "${prev2}" != "-h" ]] && [[ "${prev2}" != "help" ]] && [[ "${prev2}" != "--help" ]]; then
                 COMPREPLY=( $(compgen -W "${opts_variables}" -- "${cur}") )
             fi
@@ -109,6 +114,12 @@ _munin-pihole-plugins() {
             opts_dnsserver="CLOUDFLARE COMODO GOOGLE LOCALHOST QUAD9 RESET"
             if [[ "${prev2}" == "-c" ]] || [[ "${prev2}" == "configure" ]] || [[ "${prev2}" == "--configure" ]]; then
                 COMPREPLY=( $(compgen -W "${opts_dnsserver}" -- "${cur}") )
+            fi
+        ;;
+        "HOLD_DURATION")
+            opts_holdduration="0 1 2 3 4 5 RESET"
+            if [[ "${prev2}" == "-c" ]] || [[ "${prev2}" == "configure" ]] || [[ "${prev2}" == "--configure" ]]; then
+                COMPREPLY=( $(compgen -W "${opts_holdduration}" -- "${cur}") )
             fi
         ;;
         "IGNORE_PIHOLE_ON_HOST"|"INSTALL_PLUGINS"|"INSTALL_SCRIPT"|"INSTALL_WEBSERVER"|"SHOW_COLOR"|"SKIP_DEPENDENCY_CHECK"|"UPDATE_SELF")
