@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="07.09.00"
+VERSION="07.09.01"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -171,6 +171,7 @@ update_script() {
 
 VERSION="${VERSION}"
 
+hold_duration="${hold_duration}"
 verbosity_level="${verbosity_level}"
 
 # a simple self update function for the munin-pihole-plugins script
@@ -178,8 +179,10 @@ update_now() {
     if [[ -x "$(command -v wget)" ]]; then
         if [[ "${verbosity_level}" -ge "4" ]]; then
             wget -q --show-progress "${plugin_domain}" -O "${current_dir}/munin-pihole-plugins" || return
+            sleep "${hold_duration}"
         else
             wget -q "${plugin_domain}" -O "${current_dir}/munin-pihole-plugins" || return
+            sleep "${hold_duration}"
         fi
     else
         if [[ "${verbosity_level}" -gt "0" ]]; then
@@ -195,23 +198,29 @@ update_now() {
             if [[ "${verbosity_level}" -ge "4" ]]; then
                 if [[ -f "/etc/bash_completion.d/munin-pihole-plugins" ]]; then
                     wget -q --show-progress "${plugin_repo}/etc/bash_completion.d/munin-pihole-plugins" -O "/etc/bash_completion.d/munin-pihole-plugins" || return
+                    sleep "${hold_duration}"
                 else
                     wget -q --show-progress "${plugin_repo}/etc/bash_completion.d/munin-pihole-plugins" -P "/etc/bash_completion.d" || return
+                    sleep "${hold_duration}"
                 fi
             else
                 if [[ -f "/etc/bash_completion.d/munin-pihole-plugins" ]]; then
                     wget -q "${plugin_repo}/etc/bash_completion.d/munin-pihole-plugins" -O "/etc/bash_completion.d/munin-pihole-plugins" || return
+                    sleep "${hold_duration}"
                 else
                     wget -q "${plugin_repo}/etc/bash_completion.d/munin-pihole-plugins" -P "/etc/bash_completion.d" || return
+                    sleep "${hold_duration}"
                 fi
             fi
         fi
     fi
     if [[ "${verbosity_level}" -ge "1" ]]; then
         echo -e "\\n  [${WHITE}ℹ${RESET}] ${GREEN}Done${RESET}"
+        sleep "${hold_duration}"
     fi
     if [[ "${verbosity_level}" -ge "3" ]]; then
         echo -e "\\n  [${WHITE}ℹ${RESET}] ${GREEN}Restarting munin-pihole-plugins after update${RESET}"
+        sleep "${hold_duration}"
     fi
     if [[ "${verbosity_level}" -ge "4" ]]; then
         echo -e "\\n  [${WHITE}ℹ${RESET}] ${GREEN}Restarting in ${hold_duration} seconds${RESET}"
@@ -232,7 +241,11 @@ EOF
 # many actions are near instantaneous, add some dwell time (default 0) after
 # output
 hold_up() {
-    sleep "${hold_duration}"
+    if [[ "${verbosity_level}" -ge "1" ]]; then
+        if [[ "${hold_duration}" -gt "0" ]]; then
+            sleep "${hold_duration}"
+        fi
+    fi
 }
 
 # echo wrapper handling verbosity levels and common output
@@ -269,7 +282,6 @@ reverberate() {
         "exit"                                              )
             if [[ "${verbosity_level}" -ge "1" ]]; then
                 echo -e "\\n  [${RED}!${RESET}] ${RED}Exiting $0${RESET}"
-                hold_up
             fi
         ;;
         "failure"                                           )
@@ -299,7 +311,6 @@ reverberate() {
         "question"                                          )
             if [[ "${verbosity_level}" -ge "2" ]]; then
                 echo -e "\\n  [${BLUE}?${BLUE}] ${BLUE}$2${RESET}"
-                hold_up
             fi
         ;;
         "success"                                           )
@@ -415,8 +426,10 @@ download() {
     if [[ -x "$(command -v wget)" ]]; then
         if [[ "${verbosity_level}" -ge "4" ]]; then
             wget -q --show-progress "$@" || return
+            hold_up
         else
             wget -q "$@" || return
+            hold_up
         fi
     else
         reverberate "error" "The required command 'wget' was not found"
@@ -686,6 +699,7 @@ uninstall_script() {
 
 VERSION="${VERSION}"
 
+hold_duration="${hold_duration}"
 verbosity_level="${verbosity_level}"
 
 # uninstalls a locally installed copy of the munin-pihole-plugins script
@@ -702,6 +716,7 @@ uninstall_now() {
     rm "${script_dir}/munin-pihole-plugins" || return
     if [[ "${verbosity_level}" -ge "3" ]]; then
         echo -e "\\n  [${WHITE}ℹ${RESET}] ${GREEN}Done${RESET}\\n"
+        sleep "${hold_duration}"
     fi
 }
 
