@@ -18,7 +18,7 @@
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
 # shellcheck disable=SC2034
-VERSION="07.12.00"
+VERSION="07.12.01"
 
 # shellcheck disable=SC2207
 _munin-pihole-plugins() {
@@ -29,37 +29,35 @@ _munin-pihole-plugins() {
         shortopts_installuninstall shortopts_show
     COMPREPLY=()
     cur="${COMP_WORDS[COMP_CWORD]}"
+    allopts="-c configure --configure -h help --help -i install --install -s \
+        show --show -u uninstall --uninstall -v version --version"
+    longopts="--configure --help --install --show --uninstall --version"
+    longopts_installuninstall="--plugins --plugins-only --script --script-only \
+        --webserver --webserver-only"
+    longopts_show="--conditions --liability --warranty"
+    opts="configure help install show uninstall version"
+    opts_branch="development master RESET"
+    opts_holdduration="0 1 2 3 4 5 RESET"
+    opts_installuninstall="plugins plugins-only script script-only webserver \
+        webserver-only"
+    opts_dnsserver="CLOUDFLARE COMODO GOOGLE LOCALHOST QUAD9 RESET"
+    opts_muninversion="latest stable"
+    opts_show="conditions liability warranty"
+    opts_truefalse="true false RESET"
+    opts_variables="BRANCH DNS_PORT DNS_SERVER HOLD_DURATION \
+        IGNORE_PIHOLE_ON_HOST INSTALL_PLUGINS INSTALL_SCRIPT LIGHTTPD_WEBROOT \
+        INSTALL_WEBSERVER MUNIN_DIR MUNIN_CONFIG_DIR MUNIN_PLUGIN_DIR \
+        MUNIN_VERSION NODE_PLUGIN_DIR PLUGIN_CONFIG_DIR PLUGIN_LIST \
+        PROXY_CONFIG_DIR SCRIPT_DIR SHOW_COLOUR SHOW_HEADER \
+        SKIP_DEPENDENCY_CHECK UPDATE_SELF VERBOSITY_LEVEL"
+    opts_verbositylevel="0 1 2 3 4 RESET"
     prev="${COMP_WORDS[COMP_CWORD-1]}"
     prev2="${COMP_WORDS[COMP_CWORD-2]}"
+    shortopts="-c -h -i -s -u -v"
+    shortopts_installuninstall="-p -P -s -S -w -W"
+    shortopts_show="-c -l -w"
     case "${prev}" in
         "munin-pihole-plugins")
-            allopts="-c configure --configure -h help --help -i install \
-                --install -s show --show -u uninstall --uninstall -v version \
-                --version"
-            longopts="--configure --help --install --show --uninstall --version"
-            longopts_installuninstall="--plugins --plugins-only --script \
-                --script-only --webserver --webserver-only"
-            longopts_show="--conditions --liability --warranty"
-            opts="configure help install show uninstall version"
-            opts_branch="development master RESET"
-            opts_holdduration="0 1 2 3 4 5 RESET"
-            opts_installuninstall="plugins plugins-only script script-only \
-                webserver webserver-only"
-            opts_dnsserver="CLOUDFLARE COMODO GOOGLE LOCALHOST QUAD9 RESET"
-            opts_muninversion="latest stable"
-            opts_show="conditions liability warranty"
-            opts_truefalse="true false RESET"
-            opts_variables="BRANCH DNS_PORT DNS_SERVER HOLD_DURATION \
-                IGNORE_PIHOLE_ON_HOST INSTALL_PLUGINS INSTALL_SCRIPT \
-                LIGHTTPD_WEBROOT INSTALL_WEBSERVER MUNIN_DIR MUNIN_CONFIG_DIR \
-                MUNIN_PLUGIN_DIR MUNIN_VERSION NODE_PLUGIN_DIR \
-                PLUGIN_CONFIG_DIR PLUGIN_LIST PROXY_CONFIG_DIR SCRIPT_DIR \
-                SHOW_COLOUR SHOW_HEADER SKIP_DEPENDENCY_CHECK UPDATE_SELF \
-                VERBOSITY_LEVEL"
-            opts_verbositylevel="0 1 2 3 4 RESET"
-            shortopts="-c -h -i -s -u -v"
-            shortopts_installuninstall="-p -P -s -S -w -W"
-            shortopts_show="-c -l -w"
             case "${cur}" in
                 --*)
                     COMPREPLY=( $(compgen -W "${longopts}" -- "${cur}") )
