@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="07.11.00"
+VERSION="07.12.00"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -56,6 +56,7 @@ proxy_config_dir="${PROXY_CONFIG_DIR:-/etc/lighttpd}"
 rfc3339_date="$(date --rfc-3339="seconds")"
 script_dir="${SCRIPT_DIR:-/usr/local/bin}"
 show_colour="${SHOW_COLOR:-${SHOW_COLOUR:-true}}"
+show_header="${SHOW_HEADER:-true}"
 skip_dependency_check="${SKIP_DEPENDENCY_CHECK:-false}"
 update_self="${UPDATE_SELF:-true}"
 verbosity_level="${VERBOSITY_LEVEL:-3}"
@@ -298,7 +299,6 @@ reverberate() {
         "header")
             if [[ "${verbosity_level}" -ge "1" ]]; then
                 echo -e "$2"
-                hold_up
             fi
         ;;
         "info")
@@ -335,8 +335,8 @@ reverberate() {
 
 # mandatory horrific ascii header
 obnoxious_header() {
-    if [[ "${terminal_height}" -ge "12" ]] && [[ "${terminal_width}" -ge "80" ]]; then
-        reverberate "header" "\\n${RED}                  _             _ _        _            _           _ v${VERSION}
+    if [[ "${show_header}" == "true" ]] && [[ "${terminal_height}" -ge "10" ]] && [[ "${terminal_width}" -ge "80" ]]; then
+        reverberate "header" "${RED}                  _             _ _        _            _           _ v${VERSION}
 ${ORANGE}   _ __ _  _ _ _ (_)_ _ __ _ __(_) |_  ___| |___ _ _ __| |_  _ __ _(_)_ _  ___
 ${YELLOW}  | '  \\ || | ' \\| | ' \\__| '_ \\ | ' \\/ _ \\ / -_)_| '_ \\ | || / _\` | | ' \\(_-<
 ${GREEN}  |_|_|_\\_,_|_||_|_|_||_| | .__/_|_||_\\___/_\\___| | .__/_|\\_,_\\__, |_|_||_/__/
@@ -832,7 +832,7 @@ EOF
 config_function() {
     min_height="3"
     if [[ -n "$3" ]]; then
-        external_var_list="BRANCH DNS_PORT DNS_SERVER EXTERNAL_CONFIG_DIR EXTERNAL_CONFIG_FILE IGNORE_PIHOLE_ON_HOST INSTALL_PLUGINS INSTALL_SCRIPT INSTALL_WEBSERVER LIGHTTPD_WEBROOT MUNIN_DIR MUNIN_CONFIG_DIR MUNIN_PLUGIN_DIR MUNIN_VERSION NODE_PLUGIN_DIR PLUGIN_CONFIG_DIR PLUGIN_LIST PROXY_CONFIG_DIR SCRIPT_DIR SHOW_COLOUR SKIP_DEPENDENCY_CHECK UPDATE_SELF VERBOSITY_LEVEL"
+        external_var_list="BRANCH DNS_PORT DNS_SERVER EXTERNAL_CONFIG_DIR EXTERNAL_CONFIG_FILE IGNORE_PIHOLE_ON_HOST INSTALL_PLUGINS INSTALL_SCRIPT INSTALL_WEBSERVER LIGHTTPD_WEBROOT MUNIN_DIR MUNIN_CONFIG_DIR MUNIN_PLUGIN_DIR MUNIN_VERSION NODE_PLUGIN_DIR PLUGIN_CONFIG_DIR PLUGIN_LIST PROXY_CONFIG_DIR SCRIPT_DIR SHOW_COLOUR SHOW_HEADER SKIP_DEPENDENCY_CHECK UPDATE_SELF VERBOSITY_LEVEL"
         for external_var_id in ${external_var_list}; do
             if [[ "$2" == "${external_var_id}" ]]; then
                 if [[ -f "${script_dir}/munin-pihole-plugins" ]]; then
@@ -985,8 +985,11 @@ Type \"munin-pihole-plugins --install --script\" to install it now"
             "SCRIPT_DIR")
                 some "SCRIPT_DIR: ${script_dir}"
             ;;
-            "SHOW_COLOUR"|"SHOW_COLOR")
+            "SHOW_COLOR"|"SHOW_COLOUR")
                 some "SHOW_COLOUR: ${show_colour}"
+            ;;
+            "SHOW_HEADER")
+                some "SHOW_HEADER: ${show_header}"
             ;;
             "SKIP_DEPENDENCY_CHECK")
                 some "SKIP_DEPENDENCY_CHECK: ${skip_dependency_check}"
@@ -998,7 +1001,7 @@ Type \"munin-pihole-plugins --install --script\" to install it now"
                 some "VERBOSITY_LEVEL: ${verbosity_level}"
             ;;
             "")
-                min_height="31"
+                min_height="32"
                 if [[ -f "${script_dir}/munin-pihole-plugins" ]]; then
                     usage_text="Usage: munin-pihole-plugins $1 [VARIABLE [\"VALUE\"]]"
                     example_text="\\nExample: munin-pihole-plugins $1 DNS_SERVER 127.0.0.1"
@@ -1029,6 +1032,7 @@ Type \"munin-pihole-plugins --install --script\" to install it now"
  PROXY_CONFIG_DIR=\"${proxy_config_dir}\"
  SCRIPT_DIR=\"${script_dir}\"
  SHOW_COLOUR=\"${show_colour}\"
+ SHOW_HEADER=\"${show_header}\"
  SKIP_DEPENDENCY_CHECK=\"${skip_dependency_check}\"
  UPDATE_SELF=\"${update_self}\"
  VERBOSITY_LEVEL=\"${verbosity_level}\"
@@ -1047,7 +1051,7 @@ Type \"munin-pihole-plugins --configure\" for a list of available options"
 help_function() {
     case "${2}" in
         "-c" | "--configure" | "configure")
-            min_height="28"
+            min_height="30"
             some "Usage: munin-pihole-plugins {$2 [RESET_ALL]|[VARIABLE [VALUE]]}
 \\nOption\\t\\tGNU long option\\t\\tMeaning
  -c, configure\\t --configure\\t\\t Display or set environment variables
@@ -1061,11 +1065,13 @@ variable to list the value of that variable alone.
 set the value of that variable. If the optional value passed is 'RESET', the
 corresponding environment variable will be reset to its default value. This
 functionality is only available if the munin-pihole-plugins script is found to
-exist within SCRIPT_DIR
+exist within 'SCRIPT_DIR'.
 \\nExamples: 'munin-pihole-plugins $2 DNS_SERVER 127.0.0.1'
           'munin-pihole-plugins $2 DNS_SERVER RESET'
 \\nTakes an optional parameter in the form of 'RESET_ALL' to restore all
-munin-pihole-plugins environment variables to their default values
+munin-pihole-plugins environment variables to their default values. Again,
+this functionality is only available if the munin-pihole-plugins script is
+found to exist within 'SCRIPT_DIR', whereby it's considered \"installed\".
 \\nExample: 'munin-pihole-plugins $2 RESET_ALL'"
         ;;
         "-h" | "--help" | "help")

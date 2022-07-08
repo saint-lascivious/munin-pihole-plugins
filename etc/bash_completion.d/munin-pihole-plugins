@@ -18,7 +18,7 @@
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
 # shellcheck disable=SC2034
-VERSION="07.11.00"
+VERSION="07.12.00"
 
 # shellcheck disable=SC2207
 _munin-pihole-plugins() {
@@ -54,7 +54,8 @@ _munin-pihole-plugins() {
                 LIGHTTPD_WEBROOT INSTALL_WEBSERVER MUNIN_DIR MUNIN_CONFIG_DIR \
                 MUNIN_PLUGIN_DIR MUNIN_VERSION NODE_PLUGIN_DIR \
                 PLUGIN_CONFIG_DIR PLUGIN_LIST PROXY_CONFIG_DIR SCRIPT_DIR \
-                SHOW_COLOUR SKIP_DEPENDENCY_CHECK UPDATE_SELF VERBOSITY_LEVEL"
+                SHOW_COLOUR SHOW_HEADER SKIP_DEPENDENCY_CHECK UPDATE_SELF \
+                VERBOSITY_LEVEL"
             opts_verbositylevel="0 1 2 3 4 RESET"
             shortopts="-c -h -i -s -u -v"
             shortopts_installuninstall="-p -P -s -S -w -W"
@@ -131,7 +132,7 @@ _munin-pihole-plugins() {
                 COMPREPLY=( $(compgen -W "${opts_holdduration}" -- "${cur}") )
             fi
         ;;
-        "IGNORE_PIHOLE_ON_HOST"|"INSTALL_PLUGINS"|"INSTALL_SCRIPT"|"INSTALL_WEBSERVER"|"SHOW_COLOUR"|"SHOW_COLOR"|"SKIP_DEPENDENCY_CHECK"|"UPDATE_SELF")
+        "IGNORE_PIHOLE_ON_HOST"|"INSTALL_PLUGINS"|"INSTALL_SCRIPT"|"INSTALL_WEBSERVER"|"SHOW_COLOR"|"SHOW_COLOUR"|"SHOW_HEADER"|"SKIP_DEPENDENCY_CHECK"|"UPDATE_SELF")
             if [[ "${prev2}" == "-c" ]] || [[ "${prev2}" == "configure" ]] || [[ "${prev2}" == "--configure" ]]; then
                 COMPREPLY=( $(compgen -W "${opts_truefalse}" -- "${cur}") )
             fi
