@@ -18,20 +18,48 @@
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
 # shellcheck disable=SC2034
-VERSION="06.03.05"
+VERSION="06.04.00"
 
 # shellcheck disable=SC2207
 _munin-pihole-plugins() {
-    local cur allopts lolopts_help longopts longopts_help longopts_installuninstall longopts_show opts_branch opts_dnsserver opts_help opts_installuninstall opts_muninversion opts_show opts_truefalse opts_variables opts_verbositylevel prev prev2 shortopts shortopts_help shortopts_installuninstall shortopts_show
+    local cur allopts lolopts_help longopts longopts_installuninstall \
+        longopts_show opts_branch opts_dnsserver opts opts_holdduration \
+        opts_installuninstall opts_muninversion opts_show opts_truefalse \
+        opts_variables opts_verbositylevel prev prev2 shortopts \
+        shortopts_installuninstall shortopts_show
     COMPREPLY=()
     cur="${COMP_WORDS[COMP_CWORD]}"
     prev="${COMP_WORDS[COMP_CWORD-1]}"
     prev2="${COMP_WORDS[COMP_CWORD-2]}"
     case "${prev}" in
         "munin-pihole-plugins")
-            allopts="-c configure --configure -h help --help -i install --install -s show --show -u uninstall --uninstall -v version --version"
+            allopts="-c configure --configure -h help --help -i install \
+                --install -s show --show -u uninstall --uninstall -v version \
+                --version"
             longopts="--configure --help --install --show --uninstall --version"
+            longopts_installuninstall="--plugins --plugins-only --script \
+                --script-only --webserver --webserver-only"
+            longopts_show="--conditions --liability --warranty"
+            opts="configure help install show uninstall version"
+            opts_branch="development master RESET"
+            opts_holdduration="0 1 2 3 4 5 RESET"
+            opts_installuninstall="plugins plugins-only script script-only \
+                webserver webserver-only"
+            opts_dnsserver="CLOUDFLARE COMODO GOOGLE LOCALHOST QUAD9 RESET"
+            opts_muninversion="latest stable"
+            opts_show="conditions liability warranty"
+            opts_truefalse="true false RESET"
+            opts_variables="BRANCH DNS_PORT DNS_SERVER HOLD_DURATION \
+                IGNORE_PIHOLE_ON_HOST INSTALL_PLUGINS INSTALL_SCRIPT \
+                LIGHTTPD_WEBROOT INSTALL_WEBSERVER MUNIN_DIR MUNIN_CONFIG_DIR \
+                MUNIN_PLUGIN_DIR MUNIN_VERSION NODE_PLUGIN_DIR \
+                PLUGIN_CONFIG_DIR PLUGIN_LIST PROXY_CONFIG_DIR SCRIPT_DIR \
+                SHOW_COLOUR SHOW_HEADER SKIP_DEPENDENCY_CHECK UPDATE_SELF \
+                VERBOSITY_LEVEL"
+            opts_verbositylevel="0 1 2 3 4 RESET"
             shortopts="-c -h -i -s -u -v"
+            shortopts_installuninstall="-p -P -s -S -w -W"
+            shortopts_show="-c -l -w"
             case "${cur}" in
                 --*)
                     COMPREPLY=( $(compgen -W "${longopts}" -- "${cur}") )
@@ -44,58 +72,47 @@ _munin-pihole-plugins() {
             esac
         ;;
         "-c"|"configure"|"--configure")
-            opts_variables="BRANCH DNS_PORT DNS_SERVER IGNORE_PIHOLE_ON_HOST INSTALL_PLUGINS INSTALL_SCRIPT LIGHTTPD_WEBROOT INSTALL_WEBSERVER MUNIN_DIR MUNIN_CONFIG_DIR MUNIN_PLUGIN_DIR MUNIN_VERSION NODE_PLUGIN_DIR PLUGIN_CONFIG_DIR PLUGIN_LIST PROXY_CONFIG_DIR SCRIPT_DIR SHOW_COLOR SKIP_DEPENDENCY_CHECK UPDATE_SELF VERBOSITY_LEVEL"
             if [[ "${prev2}" != "-h" ]] && [[ "${prev2}" != "help" ]] && [[ "${prev2}" != "--help" ]]; then
                 COMPREPLY=( $(compgen -W "${opts_variables}" -- "${cur}") )
             fi
         ;;
        "-h")
-            shortopts_help="-c -h -i -s -u -v"
             if [[ "${prev2}" != "-h" ]] && [[ "${prev2}" != "help" ]] && [[ "${prev2}" != "--help" ]]; then
-                COMPREPLY=( $(compgen -W "${shortopts_help}" -- "${cur}") )
+                COMPREPLY=( $(compgen -W "${shortopts} ${longopts}" -- "${cur}") )
             fi
         ;;
         "help")
-            opts_help="configure help install show uninstall version"
             if [[ "${prev2}" != "-h" ]] && [[ "${prev2}" != "help" ]] && [[ "${prev2}" != "--help" ]]; then
-                COMPREPLY=( $(compgen -W "${opts_help}" -- "${cur}") )
+                COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
             fi
         ;;
         "--help")
-            longopts_help="--configure --help --install --show --uninstall --version"
             if [[ "${prev2}" != "-h" ]] && [[ "${prev2}" != "help" ]] && [[ "${prev2}" != "--help" ]]; then
-                COMPREPLY=( $(compgen -W "${longopts_help}" -- "${cur}") )
+                COMPREPLY=( $(compgen -W "${longopts}" -- "${cur}") )
             else
                 lolopts_help="--i\\'ve-fallen-and-i-can\\'t-get-up"
                 COMPREPLY=( $(compgen -W "${lolopts_help}" -- "${cur}") )
             fi
         ;;
         "-i"|"-u")
-            shortopts_installuninstall="-p -P -s -S -w -W"
-            COMPREPLY=( $(compgen -W "${shortopts_installuninstall}" -- "${cur}") )
+            COMPREPLY=( $(compgen -W "${shortopts_installuninstall} ${longopts_installuninstall}" -- "${cur}") )
         ;;
         "-s")
-            shortopts_show="-c -l -w"
-            COMPREPLY=( $(compgen -W "${shortopts_show}" -- "${cur}") )
+            COMPREPLY=( $(compgen -W "${shortopts_show} ${longopts_show}" -- "${cur}") )
         ;;
         "install"|"uninstall")
-            opts_installuninstall="plugins plugins-only script script-only webserver webserver-only"
             COMPREPLY=( $(compgen -W "${opts_installuninstall}" -- "${cur}") )
         ;;
         "show")
-            opts_show="conditions liability warranty"
             COMPREPLY=( $(compgen -W "${opts_show}" -- "${cur}") )
         ;;
         "--install"|"--uninstall")
-            longopts_installuninstall="--plugins --plugins-only --script --script-only --webserver --webserver-only"
             COMPREPLY=( $(compgen -W "${longopts_installuninstall}" -- "${cur}") )
         ;;
         "--show")
-            longopts_show="--conditions --liability --warranty"
             COMPREPLY=( $(compgen -W "${longopts_show}" -- "${cur}") )
         ;;
         "BRANCH")
-            opts_branch="development master RESET"
             if [[ "${prev2}" == "-c" ]] || [[ "${prev2}" == "configure" ]] || [[ "${prev2}" == "--configure" ]]; then
                 COMPREPLY=( $(compgen -W "${opts_branch}" -- "${cur}") )
             fi
@@ -106,25 +123,26 @@ _munin-pihole-plugins() {
             fi
         ;;
         "DNS_SERVER")
-            opts_dnsserver="CLOUDFLARE COMODO GOOGLE LOCALHOST QUAD9 RESET"
             if [[ "${prev2}" == "-c" ]] || [[ "${prev2}" == "configure" ]] || [[ "${prev2}" == "--configure" ]]; then
                 COMPREPLY=( $(compgen -W "${opts_dnsserver}" -- "${cur}") )
             fi
         ;;
-        "IGNORE_PIHOLE_ON_HOST"|"INSTALL_PLUGINS"|"INSTALL_SCRIPT"|"INSTALL_WEBSERVER"|"SHOW_COLOR"|"SKIP_DEPENDENCY_CHECK"|"UPDATE_SELF")
-            opts_truefalse="true false RESET"
+        "HOLD_DURATION")
+            if [[ "${prev2}" == "-c" ]] || [[ "${prev2}" == "configure" ]] || [[ "${prev2}" == "--configure" ]]; then
+                COMPREPLY=( $(compgen -W "${opts_holdduration}" -- "${cur}") )
+            fi
+        ;;
+        "IGNORE_PIHOLE_ON_HOST"|"INSTALL_PLUGINS"|"INSTALL_SCRIPT"|"INSTALL_WEBSERVER"|"SHOW_COLOR"|"SHOW_COLOUR"|"SHOW_HEADER"|"SKIP_DEPENDENCY_CHECK"|"UPDATE_SELF")
             if [[ "${prev2}" == "-c" ]] || [[ "${prev2}" == "configure" ]] || [[ "${prev2}" == "--configure" ]]; then
                 COMPREPLY=( $(compgen -W "${opts_truefalse}" -- "${cur}") )
             fi
         ;;
         "MUNIN_VERSION")
-            opts_muninversion="latest stable"
             if [[ "${prev2}" == "-c" ]] || [[ "${prev2}" == "configure" ]] || [[ "${prev2}" == "--configure" ]]; then
                 COMPREPLY=( $(compgen -W "${opts_muninversion}" -- "${cur}") )
             fi
         ;;
         "VERBOSITY_LEVEL")
-            opts_verbositylevel="0 1 2 3 4 RESET"
             if [[ "${prev2}" == "-c" ]] || [[ "${prev2}" == "configure" ]] || [[ "${prev2}" == "--configure" ]]; then
                 COMPREPLY=( $(compgen -W "${opts_verbositylevel}" -- "${cur}") )
             fi
