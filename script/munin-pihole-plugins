@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="07.14.00"
+VERSION="07.14.01"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -987,7 +987,7 @@ Type \"munin-pihole-plugins --install --script\" to install it now"
                 min_height="32"
                 if [[ -f "${script_dir}/munin-pihole-plugins" ]]; then
                     usage_text="Usage: munin-pihole-plugins $1 [VARIABLE [\"VALUE\"]]"
-                    example_text="\\nExample: munin-pihole-plugins $1 DNS_SERVER 127.0.0.1"
+                    example_text="\\nExample: munin-pihole-plugins $1 DNS_SERVER LOCALHOST"
                 else
                     usage_text="Usage: export VARIABLE=\"VALUE\""
                     example_text="\\nExample: export DNS_SERVER=\"127.0.0.1\""
@@ -1043,26 +1043,29 @@ script, and their current values. These variables and this command can be used
 to customize various aspects of the munin-pihole-plugins script's operation.
 \\nTakes an optional parameter in the form of a munin-pihole-plugins environment
 variable to list the value of that variable alone.
-\\nExample: 'munin-pihole-plugins $2 INSTALL_PLUGINS'
+\\nExample: \"munin-pihole-plugins $2 INSTALL_PLUGINS\"
 \\nTakes an optional value for a munin-pihole-plugins environment variable to
 set the value of that variable. If the optional value passed is 'RESET', the
 corresponding environment variable will be reset to its default value. This
 functionality is only available if the munin-pihole-plugins script is found to
 exist within 'SCRIPT_DIR'.
-\\nExamples: 'munin-pihole-plugins $2 DNS_SERVER 127.0.0.1'
+\\nExamples: \"munin-pihole-plugins $2 DNS_SERVER 127.0.0.1\"
           'munin-pihole-plugins $2 DNS_SERVER RESET'
 \\nTakes an optional parameter in the form of 'RESET_ALL' to restore all
 munin-pihole-plugins environment variables to their default values. Again,
 this functionality is only available if the munin-pihole-plugins script is
 found to exist within 'SCRIPT_DIR', whereby it's considered \"installed\".
-\\nExample: 'munin-pihole-plugins $2 RESET_ALL'"
+\\nExample: \"munin-pihole-plugins $2 RESET_ALL\""
         ;;
         "-h" | "--help" | "help")
-            min_height="7"
-            some "Usage: munin-pihole-plugins $2
+            min_height="11"
+            some "Usage: munin-pihole-plugins $2 {OPTION[PARAMETER]}
 \\nOption\\t\\tGNU long option\\t\\tMeaning
- -h, help\\t --help\\t\\t\\t Display this help dialogue
-\\nDisplay munin-pihole-plugins help information."
+ -h, help\\t --help\\t\\t\\t Display this and other help dialogues
+\\nDisplay simple or detailed munin-pihole-plugins help information.
+Type \"munin-pihole-plugins $2 {OPTION [PARAMETER]}\" for more detailed
+explanations of each command.
+\\nExample: \"munin-pihole-plugins $2 --install --plugins\""
         ;;
         "-i" | "--install" | "install")
             case "${3}" in
@@ -1072,7 +1075,7 @@ found to exist within 'SCRIPT_DIR', whereby it's considered \"installed\".
 \\nParameter\\t\\t\\t\\tFunction
  -p, plugins\\t    --plugins\\t\\t Install and configure munin-node, and
 \\t\\t\\t\\t\\t munin-pihole-plugins plugins
-\\nExample: 'munin-pihole-plugins $2 $3'"
+\\nExample: \"munin-pihole-plugins $2 $3\""
                 ;;
                 "-s" | "--script" | "script")
                     min_height="8"
@@ -1080,7 +1083,7 @@ found to exist within 'SCRIPT_DIR', whereby it's considered \"installed\".
 \\nParameter\\t\\t\\t\\tFunction
  -s, script\\t    --script\\t\\t Install the munin-pihole-plugins
 \\t\\t\\t\\t\\t script
-\\nExample: 'munin-pihole-plugins $2 $3'"
+\\nExample: \"munin-pihole-plugins $2 $3\""
                 ;;
                 "-w" | "--webserver" | "webserver")
                     min_height="8"
@@ -1088,7 +1091,7 @@ found to exist within 'SCRIPT_DIR', whereby it's considered \"installed\".
 \\nParameter\\t\\t\\t\\tFunction
  -w, webserver\\t    --webserver\\t\\t Install and configure munin, lighttpd
 \\t\\t\\t\\t\\t and lighttpd-external-munin-proxy
-\\nExample: 'munin-pihole-plugins $2 $3'"
+\\nExample: \"munin-pihole-plugins $2 $3\""
                 ;;
                 "-P" | "--plugins-only" | "plugins-only")
                     min_height="8"
@@ -1096,7 +1099,7 @@ found to exist within 'SCRIPT_DIR', whereby it's considered \"installed\".
 \\nParameter\\t\\t\\t\\tFunction
  -P, plugins-only   --plugins-only\\t Install munin-pihole-plugins
 \\t\\t\\t\\t\\t plugins
-\\nExample: 'munin-pihole-plugins $2 $3'"
+\\nExample: \"munin-pihole-plugins $2 $3\""
                 ;;
                 "-S" | "--script-only" | "script-only")
                     min_height="8"
@@ -1104,14 +1107,14 @@ found to exist within 'SCRIPT_DIR', whereby it's considered \"installed\".
 \\nParameter\\t\\t\\t\\tFunction
  -S, script-only    --script-only\\t Install the munin-pihole-plugins
 \\t\\t\\t\\t\\t script
-\\nExample: 'munin-pihole-plugins $2 $3'"
+\\nExample: \"munin-pihole-plugins $2 $3\""
                 ;;
                 "-W" | "--webserver-only" | "webserver-only")
                     min_height="7"
                     some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
 \\nParameter\\t\\t\\t\\tFunction
  -W, webserver-only --webserver-only\\t Install lighttpd-external-munin-proxy
-\\nExample: 'munin-pihole-plugins $2 $3'"
+\\nExample: \"munin-pihole-plugins $2 $3\""
                 ;;
                 *)
                     min_height="32"
@@ -1138,7 +1141,7 @@ install using the PLUGIN_LIST variable.
  -w, webserver\\t    --webserver\\t\\t Install and configure munin, lighttpd
 \\t\\t\\t\\t\\t and lighttpd-external-munin-proxy
  -W, webserver-only --webserver-only\\t As above, skipping dependency check
-\\nExample: 'munin-pihole-plugins $2 plugins'"
+\\nExample: \"munin-pihole-plugins $2 --plugins\""
                 ;;
             esac
         ;;
@@ -1147,15 +1150,15 @@ install using the PLUGIN_LIST variable.
             case "${3}" in
                 "-c" | "conditions" | "--conditions")
                     some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
-\\nExample: 'munin-pihole-plugins $2 --conditions'"
+\\nExample: \"munin-pihole-plugins $2 --conditions\""
                 ;;
                 "-l" | "liability" | "--liability")
                     some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
-\\nExample: 'munin-pihole-plugins $2 --liability'"
+\\nExample: \"munin-pihole-plugins $2 --liability\""
                 ;;
                 "-w" | "warranty" | "--warranty")
                     some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
-\\nExample: 'munin-pihole-plugins $2 --warranty'"
+\\nExample: \"munin-pihole-plugins $2 --warranty\""
                 ;;
                 *)
                     min_height="9"
@@ -1164,7 +1167,7 @@ install using the PLUGIN_LIST variable.
  -c, conditions\\t     --conditions\\t Show GNU GPLv3 licensing conditions
  -l, liability\\t     --liability\\t Show liability definition
  -w, warranty\\t     --warranty\\t\\t Show warranty information
-\\nExample: 'munin-pihole-plugins $2 warranty'"
+\\nExample: \"munin-pihole-plugins $2 --warranty\""
                 ;;
             esac
         ;;
@@ -1176,7 +1179,7 @@ install using the PLUGIN_LIST variable.
 \\nParameter\\t\\t\\t\\tFunction
  -p, plugins\\t    --plugins\\t\\t Uninstall muninin-pihole-plugins
 \\t\\t\\t\\t\\t plugins
-\\nExample: 'munin-pihole-plugins $2 $3'"
+\\nExample: \"munin-pihole-plugins $2 $3\""
                 ;;
                 "-s" | "--script" | "script")
                     min_height="8"
@@ -1184,7 +1187,7 @@ install using the PLUGIN_LIST variable.
 \\nParameter\\t\\t\\t\\tFunction
  -s, script\\t    --script\\t\\t Uninstall the munin-pihole-plugins
 \\t\\t\\t\\t\\t script
-\\nExample: 'munin-pihole-plugins $2 $3'"
+\\nExample: \"munin-pihole-plugins $2 $3\""
                 ;;
                 "-w" | "--webserver" | "webserver")
                     min_height="8"
@@ -1192,7 +1195,7 @@ install using the PLUGIN_LIST variable.
 \\nParameter\\t\\t\\t\\tFunction
  -w, webserver\\t    --webserver\\t\\t Uninstall munin, lighttpd, and
 \\t\\t\\t\\t\\t lighttpd-external-munin-proxy
-\\nExample: 'munin-pihole-plugins $2 $3'"
+\\nExample: \"munin-pihole-plugins $2 $3\""
                 ;;
                 "-P" | "--plugins-only" | "plugins-only")
                     min_height="8"
@@ -1200,7 +1203,7 @@ install using the PLUGIN_LIST variable.
 \\nParameter\\t\\t\\t\\tFunction
  -P, plugins-only   --plugins-only\\t Uninstall munin-pihole-plugins
 \\t\\t\\t\\t\\t plugins
-\\nExample: 'munin-pihole-plugins $2 $3'"
+\\nExample: \"munin-pihole-plugins $2 $3\""
                 ;;
                 "-S" | "--script-only" | "script-only")
                     min_height="8"
@@ -1208,14 +1211,14 @@ install using the PLUGIN_LIST variable.
 \\nParameter\\t\\t\\t\\tFunction
  -S, script-only    --script-only\\t Uninstall the munin-pihole-plugins
 \\t\\t\\t\\t\\t script
-\\nExample: 'munin-pihole-plugins $2 $3'"
+\\nExample: \"munin-pihole-plugins $2 $3\""
                 ;;
                 "-W" | "--webserver-only" | "webserver-only")
                     min_height="7"
                     some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
 \\nParameter\\t\\t\\t\\tFunction
  -W, webserver-only --webserver-only\\t Uninstall lighttpd-external-munin-proxy
-\\nExample: 'munin-pihole-plugins $2 $3'"
+\\nExample: \"munin-pihole-plugins $2 $3\""
                 ;;
                 *)
                     min_height="23"
@@ -1235,7 +1238,7 @@ uninstall any dependencies that munin-pihole-plugins may have installed.
  -w, webserver\\t    --webserver\\t\\t Uninstall munin, lighttpd, and
 \\t\\t\\t\\t\\t lighttpd-external-munin-proxy
  -W, webserver-only --webserver-only\\t As above, skipping dependency removal
-\\nExample: 'munin-pihole-plugins $2 script-only'"
+\\nExample: \"munin-pihole-plugins $2 --script-only\""
                 ;;
             esac
         ;;
@@ -1249,17 +1252,18 @@ the latest munin-pihole-plugins script version.
 \\nAn additional notification will be displayed if an update is available."
         ;;
         "")
-            min_height="14"
+            min_height="15"
             some "Usage: munin-pihole-plugins {OPTION [PARAMETER]}
 \\nOption\\t\\tGNU long option\\t\\tMeaning
  -c, configure\\t --configure\\t\\t Display or set environment variables
- -h, help\\t --help\\t\\t\\t Display this help dialogue
+ -h, help\\t --help\\t\\t\\t Display this and other help dialogues
  -i, install\\t --install\\t\\t Install munin-pihole-plugins
  -s, show\\t --show\\t\\t\\t Display GNU GPLv3 license information
  -u, uninstall\\t --uninstall\\t\\t Uninstall munin-pihole-plugins
  -v, version\\t --version\\t\\t Display current and latest versions
-\\nType \"$1 {OPTION}\" for more detailed explanations of each command
-\\nExample: 'munin-pihole-plugins $1 install'"
+\\nType \"munin-pihole-plugins $1 {OPTION [PARAMETER]}\" for more detailed
+explanations of each command.
+\\nExample: \"munin-pihole-plugins $1 --install --plugins\""
         ;;
         *)
         min_height="3"
