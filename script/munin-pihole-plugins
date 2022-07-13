@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="07.14.01"
+VERSION="07.14.02"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -187,6 +187,8 @@ VERSION="${VERSION}"
 
 # source current munin-pihole-plugins script to re-use its functions
 # and environment
+# output squased because munin-pihole-plugins produces a small help output
+# when not given any additional input
 if [[ -f "${current_dir}/munin-pihole-plugins" ]]; then
     . "${current_dir}/munin-pihole-plugins" > /dev/null 2>&1
 else
@@ -200,7 +202,7 @@ update_now() {
     reverberate "info" "Updating the munin-pihole-plugins script"
     download "${plugin_domain}" -O "${current_dir}/munin-pihole-plugins"
     if [[ "${verbosity_level}" -ge "4" ]]; then
-        reverberate "success" "${current_dir}/munin-pihole-plugins"
+        reverberate "success" "${current_dir}/munin-pihole-plugins installed"
     fi
     chmod +x "${current_dir}/munin-pihole-plugins" || return
     if [[ "${current_dir}" == "${script_dir}" ]]; then
@@ -209,7 +211,7 @@ update_now() {
                 reverberate "info" "Updating the munin-pihole-plugins bash completion script"
                 download "${plugin_repo}/etc/bash_completion.d/munin-pihole-plugins" -O "/etc/bash_completion.d/munin-pihole-plugins"
                 if [[ "${verbosity_level}" -ge "4" ]]; then
-                    reverberate "success" "/etc/bash_completion.d/munin-pihole-plugins"
+                    reverberate "success" "/etc/bash_completion.d/munin-pihole-plugins installed"
                 fi
             fi
         fi
@@ -403,6 +405,7 @@ download() {
     if i_can_haz wget; then
         if [[ "${verbosity_level}" -ge "4" ]]; then
             wget -q --show-progress "$@" || return
+            hold_up
         else
             wget -q "$@" || return
         fi
@@ -664,8 +667,10 @@ uninstall_script() {
 
 VERSION="${VERSION}"
 
-# source munin-pihole-plugins script to re-use its functions
+# source current munin-pihole-plugins script to re-use its functions
 # and environment
+# output squased because munin-pihole-plugins produces a small help output
+# when not given any additional input
 if [[ -f "${current_dir}/munin-pihole-plugins" ]]; then
     . "${current_dir}/munin-pihole-plugins" > /dev/null 2>&1
 else
@@ -683,21 +688,21 @@ uninstall_now() {
         reverberate "info" "Uninstalling the munin-pihole-plugins bash completion script"
         rm "/etc/bash_completion.d/munin-pihole-plugins" || return
         if [[ "${verbosity_level}" -ge "4" ]]; then
-            reverberate "success" "/etc/bash_completion.d/munin-pihole-plugins"
+            reverberate "success" "/etc/bash_completion.d/munin-pihole-plugins removed"
         fi
     fi
     if [[ -d "/etc/munin-pihole-plugins" ]]; then
         reverberate "info" "Removing the munin-pihole-plugins external configuration directory"
         rm -fr "/etc/munin-pihole-plugins" || return
         if [[ "${verbosity_level}" -ge "4" ]]; then
-            reverberate "success" "/etc/munin-pihole-plugins"
+            reverberate "success" "/etc/munin-pihole-plugins removed"
         fi
     fi
     if [[ -f "$(script_dir)/munin-pihole-plugins" ]]; then
         reverberate "info" "Uninstalling the munin-pihole-plugins script"
         rm "${script_dir}/munin-pihole-plugins" || return
         if [[ "${verbosity_level}" -ge "4" ]]; then
-            reverberate "success" "${script_dir}/munin-pihole-plugins"
+            reverberate "success" "${script_dir}/munin-pihole-plugins removed"
         fi
     reverberate "footer"
 }
