@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="07.14.02"
+VERSION="07.14.03"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -1154,15 +1154,21 @@ install using the PLUGIN_LIST variable.
             min_height="4"
             case "${3}" in
                 "-c" | "conditions" | "--conditions")
+                    min_height="6"
                     some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
+\\nDisplay munin-pihole-plugins GNU GPL licensing conditions.
 \\nExample: \"munin-pihole-plugins $2 --conditions\""
                 ;;
                 "-l" | "liability" | "--liability")
+                    min_height="6"
                     some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
+\\nDisplay munin-pihole plugins liability definition.
 \\nExample: \"munin-pihole-plugins $2 --liability\""
                 ;;
                 "-w" | "warranty" | "--warranty")
+                    min_height="6"
                     some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
+\\nDisplay munin-pihole plugins warranty information.
 \\nExample: \"munin-pihole-plugins $2 --warranty\""
                 ;;
                 *)
