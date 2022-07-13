@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="07.13.00"
+VERSION="07.14.00"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -59,7 +59,7 @@ show_colour="${SHOW_COLOR:-${SHOW_COLOUR:-true}}"
 show_header="${SHOW_HEADER:-true}"
 skip_dependency_check="${SKIP_DEPENDENCY_CHECK:-false}"
 update_self="${UPDATE_SELF:-true}"
-verbosity_level="${VERBOSITY_LEVEL:-4}"
+verbosity_level="${VERBOSITY_LEVEL:-3}"
 
 # environment variables without
 # note: the spaces at the ends of the environment variable
@@ -166,8 +166,8 @@ check_privilege() {
         else
             reverberate "error" "Insufficient privileges"
             reverberate "info" "Install sudo or run munin-pihole-plugins as root"
-        reverberate "exit"
-        exit 1
+            reverberate "exit"
+            exit 1
         fi
     fi
 }
@@ -185,61 +185,37 @@ update_script() {
 
 VERSION="${VERSION}"
 
-hold_duration="${hold_duration}"
-verbosity_level="${verbosity_level}"
+# source current munin-pihole-plugins script to re-use its functions
+# and environment
+if [[ -f "${current_dir}/munin-pihole-plugins" ]]; then
+    . "${current_dir}/munin-pihole-plugins" > /dev/null 2>&1
+else
+    # this should never happen
+    # but if it does we need to abort
+    exit 1
+fi
 
 # a simple self update function for the munin-pihole-plugins script
 update_now() {
-    if [[ -x "$(command -v wget)" ]]; then
-        if [[ "${verbosity_level}" -ge "4" ]]; then
-            wget -q --show-progress "${plugin_domain}" -O "${current_dir}/munin-pihole-plugins" || >
-            sleep "${hold_duration}"
-        else
-            wget -q "${plugin_domain}" -O "${current_dir}/munin-pihole-plugins" || return
-            sleep "${hold_duration}"
-        fi
-    else
-        if [[ "${verbosity_level}" -gt "0" ]]; then
-            echo -e "\\n  [${RED}!${RESET}] ${RED}The required command 'wget' was not found${RESET}"
-            echo -e "  [${RED}✗${RESET}] wget"
-            echo -e "\\n  [${RED}!${RESET}] ${RED}Exiting $0${RESET}"
-        fi
-        exit 1
+    reverberate "info" "Updating the munin-pihole-plugins script"
+    download "${plugin_domain}" -O "${current_dir}/munin-pihole-plugins"
+    if [[ "${verbosity_level}" -ge "4" ]]; then
+        reverberate "success" "${current_dir}/munin-pihole-plugins"
     fi
     chmod +x "${current_dir}/munin-pihole-plugins" || return
     if [[ "${current_dir}" == "${script_dir}" ]]; then
         if [[ -d "/etc/bash_completion.d" ]]; then
-            if [[ "${verbosity_level}" -ge "4" ]]; then
-                if [[ -f "/etc/bash_completion.d/munin-pihole-plugins" ]]; then
-                    wget -q --show-progress "${plugin_repo}/etc/bash_completion.d/munin-pihole-plugins" -O "/etc/bash_completion.d/munin-pihole-plugins" || return
-                    sleep "${hold_duration}"
-                else
-                    wget -q --show-progress "${plugin_repo}/etc/bash_completion.d/munin-pihole-plugins" -P "/etc/bash_completion.d" || return
-                    sleep "${hold_duration}"
-                fi
-            else
-                if [[ -f "/etc/bash_completion.d/munin-pihole-plugins" ]]; then
-                    wget -q "${plugin_repo}/etc/bash_completion.d/munin-pihole-plugins" -O "/etc/bash_completion.d/munin-pihole-plugins" || return
-                    sleep "${hold_duration}"
-                else
-                    wget -q "${plugin_repo}/etc/bash_completion.d/munin-pihole-plugins" -P "/etc/bash_completion.d" || return
-                    sleep "${hold_duration}"
+            if [[ -f "/etc/bash_completion.d/munin-pihole-plugins" ]]; then
+                reverberate "info" "Updating the munin-pihole-plugins bash completion script"
+                download "${plugin_repo}/etc/bash_completion.d/munin-pihole-plugins" -O "/etc/bash_completion.d/munin-pihole-plugins"
+                if [[ "${verbosity_level}" -ge "4" ]]; then
+                    reverberate "success" "/etc/bash_completion.d/munin-pihole-plugins"
                 fi
             fi
         fi
     fi
-    if [[ "${verbosity_level}" -ge "1" ]]; then
-        echo -e "\\n  [${WHITE}ℹ${RESET}] ${GREEN}Done${RESET}"
-        sleep "${hold_duration}"
-    fi
-    if [[ "${verbosity_level}" -ge "3" ]]; then
-        echo -e "\\n  [${WHITE}ℹ${RESET}] ${GREEN}Restarting munin-pihole-plugins after update${RESET}"
-        sleep "${hold_duration}"
-    fi
-    if [[ "${verbosity_level}" -ge "4" ]]; then
-        echo -e "\\n  [${WHITE}ℹ${RESET}] ${GREEN}Restarting in ${hold_duration} seconds${RESET}"
-        sleep "${hold_duration}"
-    fi
+    reverberate "footer"
+    reverberate "info" "Restarting munin-pihole-plugins after update"
     clear
     exec env UPDATE_SELF="false" /bin/bash "$0" "$@"
 }
@@ -247,7 +223,6 @@ update_now() {
 update_now
 EOF
     chmod +x "${temp_dir}/.munin-pihole-plugins_update"
-    reverberate "info" "Updating the munin-pihole-plugins script"
     exec /bin/bash "${temp_dir}/.munin-pihole-plugins_update"
 }
 
@@ -428,10 +403,8 @@ download() {
     if i_can_haz wget; then
         if [[ "${verbosity_level}" -ge "4" ]]; then
             wget -q --show-progress "$@" || return
-            hold_up
         else
             wget -q "$@" || return
-            hold_up
         fi
     fi
 }
@@ -691,8 +664,15 @@ uninstall_script() {
 
 VERSION="${VERSION}"
 
-hold_duration="${hold_duration}"
-verbosity_level="${verbosity_level}"
+# source munin-pihole-plugins script to re-use its functions
+# and environment
+if [[ -f "${current_dir}/munin-pihole-plugins" ]]; then
+    . "${current_dir}/munin-pihole-plugins" > /dev/null 2>&1
+else
+    # this should never happen
+    # but if it does we need to abort
+    exit 1
+fi
 
 # uninstalls a locally installed copy of the munin-pihole-plugins script
 # users may set external config dir/file to something mission critical,
@@ -700,21 +680,31 @@ verbosity_level="${verbosity_level}"
 # intact here rather than following variables
 uninstall_now() {
     if [[ -f "/etc/bash_completion.d/munin-pihole-plugins" ]]; then
+        reverberate "info" "Uninstalling the munin-pihole-plugins bash completion script"
         rm "/etc/bash_completion.d/munin-pihole-plugins" || return
+        if [[ "${verbosity_level}" -ge "4" ]]; then
+            reverberate "success" "/etc/bash_completion.d/munin-pihole-plugins"
+        fi
     fi
     if [[ -d "/etc/munin-pihole-plugins" ]]; then
+        reverberate "info" "Removing the munin-pihole-plugins external configuration directory"
         rm -fr "/etc/munin-pihole-plugins" || return
+        if [[ "${verbosity_level}" -ge "4" ]]; then
+            reverberate "success" "/etc/munin-pihole-plugins"
+        fi
     fi
-    rm "${script_dir}/munin-pihole-plugins" || return
-    if [[ "${verbosity_level}" -ge "3" ]]; then
-        echo -e "\\n  [${WHITE}ℹ${RESET}] ${GREEN}Done${RESET}\\n"
-    fi
+    if [[ -f "$(script_dir)/munin-pihole-plugins" ]]; then
+        reverberate "info" "Uninstalling the munin-pihole-plugins script"
+        rm "${script_dir}/munin-pihole-plugins" || return
+        if [[ "${verbosity_level}" -ge "4" ]]; then
+            reverberate "success" "${script_dir}/munin-pihole-plugins"
+        fi
+    reverberate "footer"
 }
 
 uninstall_now
 EOF
     chmod +x "${temp_dir}/.munin-pihole-plugins_uninstall"
-    reverberate "info" "Uninstalling the munin-pihole-plugins script"
     exec /bin/bash "${temp_dir}/.munin-pihole-plugins_uninstall"
 }
 
