@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="07.15.00"
+VERSION="07.15.01"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -1042,8 +1042,8 @@ Type \"munin-pihole-plugins --install --script\" to install it now"
 ${example_text}"
            ;;
             *)
-                some "munin-pihole-plugins: unrecognized variable '$2'
-Type \"munin-pihole-plugins --configure\" for a list of available options"
+                some "munin-pihole-plugins: unrecognized variable \"${RED}$2${RESET}\"
+Type \"munin-pihole-plugins --configure\" for a list of available variables"
         esac
     fi
 }
@@ -1300,7 +1300,7 @@ explanations of each command.
         ;;
         *)
         min_height="3"
-    some "munin-pihole-plugins: unrecognized option '$2'
+    some "munin-pihole-plugins: unrecognized option \"${RED}$2${RESET}\"
 Type \"munin-pihole-plugins --help\" for a list of available options"
         ;;
     esac
@@ -1341,7 +1341,6 @@ install_function() {
                     rm "${temp_dir}/.munin-pihole-plugins_update" || return
                 fi
                 if [[ "${remote_version}" != "${VERSION}" ]]; then
-                    obnoxious_header
                     update_script "$@"
                 fi
             fi
@@ -1390,32 +1389,35 @@ install_function() {
 # spits out some boilerplate that's technically required
 # (and a little that isn't {-l,liability,--liability})
 gnugpl_info_function() {
+    if [[ -f "${script_dir}/munin-pihole-plugins" ]]; then
+        example_prefix="munin-pihole-plugins"
+    else
+        example_prefix="./munin-pihole-plugins"
+    fi
     case "${2}" in
         "-c" | "conditions" | "--conditions")
-            min_height="14"
+            min_height="17"
             some "munin-pihole-plugins saint-lascivious (Hayden Pearce) ©2022
-\\n  This program is free software: you can redistribute it and/or modify
+\\n  This program is ${GREEN}free software${RESET}: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation, either version 3 of the License, or
   (at your option) any later version.
 \\n  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  but ${RED}WITHOUT ANY WARRANTY${RESET}; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
+\\n  To read the full GNU GPL v3 license text, type
+  \"${example_prefix} --show --gnu-gpl\"
 \\nContact: munin-pihole-plugins@sainternet.xyz"
         ;;
         "-g" | "gnu-gpl" | "--gnu-gpl")
             download "${gnu_gpl_v3}" -O "${temp_dir}/.munin-pihole-plugins_license"
             if i_can_haz less; then
                 less "${temp_dir}/.munin-pihole-plugins_license"
-            else
-                if i_can_haz more; then
-                    more "${temp_dir}/.munin-pihole-plugins_license"
-                fi
             fi
         ;;
         "-l" | "liability" | "--liability")
-            min_height="14"
+            min_height="17"
             some "munin-pihole-plugins saint-lascivious (Hayden Pearce) ©2022
 \\n  IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING
   WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MODIFIES AND/OR CONVEYS
@@ -1426,10 +1428,12 @@ gnugpl_info_function() {
   PARTIES OR A FAILURE OF THE PROGRAM TO OPERATE WITH ANY OTHER PROGRAMS),
   EVEN IF SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF
   SUCH DAMAGES.
+\\n  To read the full GNU GPL v3 license text, type
+  \"${example_prefix} --show --gnu-gpl\"
 \\nContact: munin-pihole-plugins@sainternet.xyz"
         ;;
         "-w" | "warranty" | "--warranty")
-            min_height="13"
+            min_height="16"
             some "munin-pihole-plugins saint-lascivious (Hayden Pearce) ©2022
 \\n  THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED BY
   APPLICABLE LAW.  EXCEPT WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT
@@ -1439,27 +1443,25 @@ gnugpl_info_function() {
   PURPOSE.  THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE PROGRAM
   IS WITH YOU.  SHOULD THE PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF
   ALL NECESSARY SERVICING, REPAIR OR CORRECTION.
+\\n  To read the full GNU GPL v3 license text, type
+  \"${example_prefix} --show --gnu-gpl\"
 \\nContact: munin-pihole-plugins@sainternet.xyz"
         ;;
         "runtime_disclaimer")
-            if [[ "${verbosity_level}" -ge "1" ]]; then
-                if [[ -f "${script_dir}/munin-pihole-plugins" ]]; then
-                    example_prefix="munin-pihole-plugins"
-                else
-                    example_prefix="./munin-pihole-plugins"
-                fi
-                min_height="9"
+                min_height="11"
                 some "\\n  This program comes with ${RED}ABSOLUTELY NO WARRANTY${RESET}; for details type
   \"${example_prefix} --show --warranty\"
 \\n  This is ${GREEN}FREE SOFTWARE${RESET}, and you are welcome to redistribute it
   under certain conditions; for details type
-  \"${example_prefix} --show --conditions\""
-            fi
+  \"${example_prefix} --show --conditions\"
+\\n  To read the full GNU GPL v3 license text, type
+  \"${example_prefix} --show --gnu-gpl\""
         ;;
         *)
-            min_height="3"
-            some "munin-pihole-plugins: unrecognized option '$2'
-  Type \"munin-pihole-plugins --help --show\" for a list of available options"
+            min_height="5"
+            some "munin-pihole-plugins: unrecognized option \"${RED}$2${RESET}\"
+\\nFor a list of available options, type
+\"${example_prefix} --help --show\""
         ;;
     esac
 }
@@ -1635,7 +1637,7 @@ Type \"munin-pihole-plugins --help\" for a list of available options"
         ;;
         *)
             min_height="3"
-    some "munin-pihole-plugins: unrecognized option '$1'
+    some "munin-pihole-plugins: unrecognized option \"${RED}$1${RESET}\"
 Type \"munin-pihole-plugins --help\" for a list of available options"
         ;;
     esac

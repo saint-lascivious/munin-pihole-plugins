@@ -18,7 +18,7 @@
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
 # shellcheck disable=SC2034
-VERSION="07.15.00"
+VERSION="07.15.01"
 
 # shellcheck disable=SC2207
 _munin-pihole-plugins() {
@@ -41,7 +41,7 @@ _munin-pihole-plugins() {
     opts_installuninstall="plugins plugins-only script script-only webserver \
         webserver-only"
     opts_dnsserver="CLOUDFLARE COMODO GOOGLE LOCALHOST QUAD9 RESET"
-    opts_muninversion="latest stable"
+    opts_muninbranch="latest stable"
     opts_show="conditions gnu-gpl liability warranty"
     opts_truefalse="true false RESET"
     opts_variables="BRANCH DNS_PORT DNS_SERVER HOLD_DURATION \
@@ -137,7 +137,7 @@ _munin-pihole-plugins() {
         ;;
         "MUNIN_BRANCH")
             if [[ "${prev2}" == "-c" ]] || [[ "${prev2}" == "configure" ]] || [[ "${prev2}" == "--configure" ]]; then
-                COMPREPLY=( $(compgen -W "${opts_muninversion}" -- "${cur}") )
+                COMPREPLY=( $(compgen -W "${opts_muninbranch}" -- "${cur}") )
             fi
         ;;
         "VERBOSITY_LEVEL")
