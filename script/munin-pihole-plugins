@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="07.15.01"
+VERSION="07.15.02"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -151,24 +151,27 @@ fi
 i_can_haz() {
     command_name="$1"
     if [[ ! -x "$(command -v "${command_name}")" ]]; then
-        reverberate "error" "The required command ${command_name} was not found"
-        reverberate "failure" "${command_name}"
-        reverberate "exit"
-        exit 1
+        if [[ "$2" != "noncritical" ]]; then
+            reverberate "error" "The required command ${command_name} was not found"
+            reverberate "failure" "${command_name}"
+            reverberate "exit"
+            exit 1
+        else
+            if [[ "${verbosity_level}" -ge "4" ]]; then
+                reverberate "error" "${command_name} not found"
+                reverberate "failure" "${command_name}"
+            fi
+            error 127
+        fi
     fi
 }
 
 # simple privilege check
 check_privilege() {
     if [[ ! "${EUID}" -eq "0" ]];then
-        if [[ -x "$(command -v sudo)" ]]; then
+        if i_can_haz "sudo"; then
             exec sudo -E bash "$0" "$@"
             exit "$?"
-        else
-            reverberate "error" "Insufficient privileges"
-            reverberate "info" "Install sudo or run munin-pihole-plugins as root"
-            reverberate "exit"
-            exit 1
         fi
     fi
 }
@@ -346,7 +349,7 @@ ${BLUE}                          |_|                     |_|         |___/
 # version output
 check_pihole() {
     reverberate "info" "Checking if this is a Pi-hole® host"
-    if [[ -x "$(command -v pihole)" ]]; then
+    if i_can_haz "pihole" "noncritical"; then
         pihole_version="$(pihole -v | grep "Pi-hole" | sed 's/Pi-hole version is v//; s/[(][^)]*[)]//; s/[^.0-9]*//g')"
         # shellcheck disable=SC2071
         if [[ "${pihole_version}" > "6" ]]; then
@@ -381,8 +384,8 @@ install_dependencies() {
     if [[ "${install_webserver}" == "true" ]]; then
         dependency_list+="${webserver_dependencies}"
     fi
-    if i_can_haz dpkg-query; then
-        if i_can_haz apt; then
+    if i_can_haz "dpkg-query"; then
+        if i_can_haz "apt"; then
             reverberate "info" "Checking for required dependencies"
             for dependency_id in ${dependency_list}; do
                 package_query="$(dpkg-query -W --showformat='${Status}\n' "${dependency_id}" | grep "install ok installed")"
@@ -405,7 +408,7 @@ install_dependencies() {
 
 # simple wget wrapper
 download() {
-    if i_can_haz wget; then
+    if i_can_haz "wget"; then
         if [[ "${verbosity_level}" -ge "4" ]]; then
             wget -q --show-progress "$@" || return
             hold_up
@@ -605,7 +608,7 @@ restart_services() {
         service_list+="${webserver_services}"
     fi
     if [[ -n "${service_list}" ]]; then
-        if i_can_haz service; then
+        if i_can_haz "service"; then
             reverberate "info" "Restarting services"
             for service_id in ${service_list}; do
                 service "${service_id}" restart
@@ -729,17 +732,35 @@ EOF
 }
 
 # an opportunistic pagination wrapper, more or less
+# handles files and strings
+# terminal width when factoring terminal height should always be 80 characters
+# usage:
+# min_height="10"
+# some ["file"] "path to file or string to be paginated"
 some() {
     if [[ "${terminal_height}" -lt "${min_height}" ]]; then
-        if [[ -x "$(command -v less)" ]]; then
-            echo -e "$@" | less
-        else
-            if [[ -x "$(command -v more)" ]]; then
-                echo -e "$@" | more
-            else
-                echo -e "$@"
-            fi
-        fi
+        case $1 in
+            "file")
+                if i_can_haz "less" "noncritical"; then
+                    less "$2"
+                else
+                    if i_can_haz "more"; then
+                        more "$2"
+                    fi
+                fi
+            ;;
+            *)
+                if i_can_haz "less" "noncritical"; then
+                    echo -e "$@" | less
+                else
+                    if i_can_haz "more" "noncritical"; then
+                        echo -e "$@" | more
+                    else
+                        echo -e "$@"
+                    fi
+                fi
+            ;;
+        esac
     else
         echo -e "$@"
     fi
@@ -768,10 +789,10 @@ check_version() {
             exit 1
         fi
     fi
-    if [[ -x "$(command -v dig)" ]]; then
+    if i_can_haz "dig" "noncritical"; then
         version_query="$(dig txt +short +timeout=5 +tries=2 "${plugin_domain}" @"${dns_server}" -p "${dns_port}" | sed s'/[^0-9.]//g')"
     else
-        if [[ -x "$(command -v nslookup)" ]]; then
+        if i_can_haz "nslookup"; then
             version_query="$(nslookup -port="${dns_port}" -retry=2 -timeout=5 -type=txt "${plugin_domain}" "${dns_server}" | grep '"version: [0-9].[0-9].[0-9]"' | sed s'/[^0-9.]//g' | tail -c 9)"
         fi
     fi
@@ -1052,6 +1073,11 @@ Type \"munin-pihole-plugins --configure\" for a list of available variables"
 # its sprawling nature is actually a good thing i guess
 # interactive help is always better than a giant wall of text
 help_function() {
+    if [[ -f "${script_dir}/munin-pihole-plugins" ]]; then
+        example_prefix="munin-pihole-plugins"
+    else
+        example_prefix="./munin-pihole-plugins"
+    fi
     case "${2}" in
         "-c" | "--configure" | "configure")
             min_height="30"
@@ -1069,13 +1095,13 @@ set the value of that variable. If the optional value passed is 'RESET', the
 corresponding environment variable will be reset to its default value. This
 functionality is only available if the munin-pihole-plugins script is found to
 exist within 'SCRIPT_DIR'.
-\\nExamples: \"munin-pihole-plugins $2 DNS_SERVER 127.0.0.1\"
-          'munin-pihole-plugins $2 DNS_SERVER RESET'
+\\nExamples: \"${example_prefix} $2 DNS_SERVER 127.0.0.1\"
+          \"${example_prefix} $2 DNS_SERVER RESET\"
 \\nTakes an optional parameter in the form of 'RESET_ALL' to restore all
 munin-pihole-plugins environment variables to their default values. Again,
 this functionality is only available if the munin-pihole-plugins script is
 found to exist within 'SCRIPT_DIR', whereby it's considered \"installed\".
-\\nExample: \"munin-pihole-plugins $2 RESET_ALL\""
+\\nExample: \"${example_prefix} $2 RESET_ALL\""
         ;;
         "-h" | "--help" | "help")
             min_height="11"
@@ -1083,9 +1109,9 @@ found to exist within 'SCRIPT_DIR', whereby it's considered \"installed\".
 \\nOption\\t\\tGNU long option\\t\\tMeaning
  -h, help\\t --help\\t\\t\\t Display this and other help dialogues
 \\nDisplay simple or detailed munin-pihole-plugins help information.
-Type \"munin-pihole-plugins $2 {OPTION [PARAMETER]}\" for more detailed
+Type \"${example_prefix} $2 {OPTION [PARAMETER]}\" for more detailed
 explanations of each command.
-\\nExample: \"munin-pihole-plugins $2 --install --plugins\""
+\\nExample: \"${example_prefix} $2 --install --plugins\""
         ;;
         "-i" | "--install" | "install")
             case "${3}" in
@@ -1095,7 +1121,7 @@ explanations of each command.
 \\nParameter\\t\\t\\t\\tFunction
  -p, plugins\\t    --plugins\\t\\t Install and configure munin-node, and
 \\t\\t\\t\\t\\t munin-pihole-plugins plugins
-\\nExample: \"munin-pihole-plugins $2 $3\""
+\\nExample: \"${example_prefix} $2 $3\""
                 ;;
                 "-s" | "--script" | "script")
                     min_height="8"
@@ -1103,7 +1129,7 @@ explanations of each command.
 \\nParameter\\t\\t\\t\\tFunction
  -s, script\\t    --script\\t\\t Install the munin-pihole-plugins
 \\t\\t\\t\\t\\t script
-\\nExample: \"munin-pihole-plugins $2 $3\""
+\\nExample: \"${example_prefix} $2 $3\""
                 ;;
                 "-w" | "--webserver" | "webserver")
                     min_height="8"
@@ -1111,7 +1137,7 @@ explanations of each command.
 \\nParameter\\t\\t\\t\\tFunction
  -w, webserver\\t    --webserver\\t\\t Install and configure munin, lighttpd
 \\t\\t\\t\\t\\t and lighttpd-external-munin-proxy
-\\nExample: \"munin-pihole-plugins $2 $3\""
+\\nExample: \"${example_prefix} $2 $3\""
                 ;;
                 "-P" | "--plugins-only" | "plugins-only")
                     min_height="8"
@@ -1119,7 +1145,7 @@ explanations of each command.
 \\nParameter\\t\\t\\t\\tFunction
  -P, plugins-only   --plugins-only\\t Install munin-pihole-plugins
 \\t\\t\\t\\t\\t plugins
-\\nExample: \"munin-pihole-plugins $2 $3\""
+\\nExample: \"${example_prefix} $2 $3\""
                 ;;
                 "-S" | "--script-only" | "script-only")
                     min_height="8"
@@ -1127,14 +1153,14 @@ explanations of each command.
 \\nParameter\\t\\t\\t\\tFunction
  -S, script-only    --script-only\\t Install the munin-pihole-plugins
 \\t\\t\\t\\t\\t script
-\\nExample: \"munin-pihole-plugins $2 $3\""
+\\nExample: \"${example_prefix} $2 $3\""
                 ;;
                 "-W" | "--webserver-only" | "webserver-only")
                     min_height="7"
                     some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
 \\nParameter\\t\\t\\t\\tFunction
  -W, webserver-only --webserver-only\\t Install lighttpd-external-munin-proxy
-\\nExample: \"munin-pihole-plugins $2 $3\""
+\\nExample: \"${example_prefix} $2 $3\""
                 ;;
                 *)
                     min_height="32"
@@ -1161,7 +1187,7 @@ install using the PLUGIN_LIST variable.
  -w, webserver\\t    --webserver\\t\\t Install and configure munin, lighttpd
 \\t\\t\\t\\t\\t and lighttpd-external-munin-proxy
  -W, webserver-only --webserver-only\\t As above, skipping dependency check
-\\nExample: \"munin-pihole-plugins $2 --plugins\""
+\\nExample: \"${example_prefix} $2 --plugins\""
                 ;;
             esac
         ;;
@@ -1172,25 +1198,25 @@ install using the PLUGIN_LIST variable.
                     min_height="6"
                     some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
 \\nDisplay munin-pihole-plugins GNU GPL licensing conditions.
-\\nExample: \"munin-pihole-plugins $2 --conditions\""
+\\nExample: \"${example_prefix} $2 --conditions\""
                 ;;
                 "-g" | "gnu-gpl" | "--gnu-gpl")
                     min_height="6"
                     some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
 \\nDisplay the full GNU GPL v3 license text.
-\\nExample: \"munin-pihole-plugins $2 --gnu-gpl\""
+\\nExample: \"${example_prefix} $2 --gnu-gpl\""
                 ;;
                 "-l" | "liability" | "--liability")
                     min_height="6"
                     some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
 \\nDisplay munin-pihole plugins liability definition.
-\\nExample: \"munin-pihole-plugins $2 --liability\""
+\\nExample: \"${example_prefix} $2 --liability\""
                 ;;
                 "-w" | "warranty" | "--warranty")
                     min_height="6"
                     some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
 \\nDisplay munin-pihole plugins warranty information.
-\\nExample: \"munin-pihole-plugins $2 --warranty\""
+\\nExample: \"${example_prefix} $2 --warranty\""
                 ;;
                 *)
                     min_height="9"
@@ -1200,7 +1226,7 @@ install using the PLUGIN_LIST variable.
  -g, gnu-gpl\\t     --gnu-gpl\\t\\t Show full GNU GPL v3 license text
  -l, liability\\t     --liability\\t Show liability definition
  -w, warranty\\t     --warranty\\t\\t Show warranty information
-\\nExample: \"munin-pihole-plugins $2 --warranty\""
+\\nExample: \"${example_prefix} $2 --warranty\""
                 ;;
             esac
         ;;
@@ -1212,7 +1238,7 @@ install using the PLUGIN_LIST variable.
 \\nParameter\\t\\t\\t\\tFunction
  -p, plugins\\t    --plugins\\t\\t Uninstall muninin-pihole-plugins
 \\t\\t\\t\\t\\t plugins
-\\nExample: \"munin-pihole-plugins $2 $3\""
+\\nExample: \"${example_prefix} $2 $3\""
                 ;;
                 "-s" | "--script" | "script")
                     min_height="8"
@@ -1220,7 +1246,7 @@ install using the PLUGIN_LIST variable.
 \\nParameter\\t\\t\\t\\tFunction
  -s, script\\t    --script\\t\\t Uninstall the munin-pihole-plugins
 \\t\\t\\t\\t\\t script
-\\nExample: \"munin-pihole-plugins $2 $3\""
+\\nExample: \"${example_prefix} $2 $3\""
                 ;;
                 "-w" | "--webserver" | "webserver")
                     min_height="8"
@@ -1228,7 +1254,7 @@ install using the PLUGIN_LIST variable.
 \\nParameter\\t\\t\\t\\tFunction
  -w, webserver\\t    --webserver\\t\\t Uninstall munin, lighttpd, and
 \\t\\t\\t\\t\\t lighttpd-external-munin-proxy
-\\nExample: \"munin-pihole-plugins $2 $3\""
+\\nExample: \"${example_prefix} $2 $3\""
                 ;;
                 "-P" | "--plugins-only" | "plugins-only")
                     min_height="8"
@@ -1236,7 +1262,7 @@ install using the PLUGIN_LIST variable.
 \\nParameter\\t\\t\\t\\tFunction
  -P, plugins-only   --plugins-only\\t Uninstall munin-pihole-plugins
 \\t\\t\\t\\t\\t plugins
-\\nExample: \"munin-pihole-plugins $2 $3\""
+\\nExample: \"${example_prefix} $2 $3\""
                 ;;
                 "-S" | "--script-only" | "script-only")
                     min_height="8"
@@ -1244,14 +1270,14 @@ install using the PLUGIN_LIST variable.
 \\nParameter\\t\\t\\t\\tFunction
  -S, script-only    --script-only\\t Uninstall the munin-pihole-plugins
 \\t\\t\\t\\t\\t script
-\\nExample: \"munin-pihole-plugins $2 $3\""
+\\nExample: \"${example_prefix} $2 $3\""
                 ;;
                 "-W" | "--webserver-only" | "webserver-only")
                     min_height="7"
                     some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
 \\nParameter\\t\\t\\t\\tFunction
  -W, webserver-only --webserver-only\\t Uninstall lighttpd-external-munin-proxy
-\\nExample: \"munin-pihole-plugins $2 $3\""
+\\nExample: \"${example_prefix} $2 $3\""
                 ;;
                 *)
                     min_height="23"
@@ -1271,7 +1297,7 @@ uninstall any dependencies that munin-pihole-plugins may have installed.
  -w, webserver\\t    --webserver\\t\\t Uninstall munin, lighttpd, and
 \\t\\t\\t\\t\\t lighttpd-external-munin-proxy
  -W, webserver-only --webserver-only\\t As above, skipping dependency removal
-\\nExample: \"munin-pihole-plugins $2 --script-only\""
+\\nExample: \"${example_prefix} $2 --script-only\""
                 ;;
             esac
         ;;
@@ -1294,14 +1320,14 @@ the latest munin-pihole-plugins script version.
  -s, show\\t --show\\t\\t\\t Display GNU GPLv3 license information
  -u, uninstall\\t --uninstall\\t\\t Uninstall munin-pihole-plugins
  -v, version\\t --version\\t\\t Display current and latest versions
-\\nType \"munin-pihole-plugins $1 {OPTION [PARAMETER]}\" for more detailed
+\\nType \"${example_prefix} $1 {OPTION [PARAMETER]}\" for more detailed
 explanations of each command.
-\\nExample: \"munin-pihole-plugins $1 --install --plugins\""
+\\nExample: \"${example_prefix} $1 --install --plugins\""
         ;;
         *)
         min_height="3"
     some "munin-pihole-plugins: unrecognized option \"${RED}$2${RESET}\"
-Type \"munin-pihole-plugins --help\" for a list of available options"
+Type \"${example_prefix} --help\" for a list of available options"
         ;;
     esac
 }
@@ -1412,9 +1438,8 @@ gnugpl_info_function() {
         ;;
         "-g" | "gnu-gpl" | "--gnu-gpl")
             download "${gnu_gpl_v3}" -O "${temp_dir}/.munin-pihole-plugins_license"
-            if i_can_haz less; then
-                less "${temp_dir}/.munin-pihole-plugins_license"
-            fi
+            min_height="676"
+            some "file" "${temp_dir}/.munin-pihole-plugins_license"
         ;;
         "-l" | "liability" | "--liability")
             min_height="17"
@@ -1551,8 +1576,8 @@ uninstall_function() {
                 fi
             fi
             if [[ "${skip_dependency_check}" == "false" ]]; then
-                if i_can_haz dpkg-query; then
-                    if i_can_haz apt; then
+                if i_can_haz "dpkg-query"; then
+                    if i_can_haz "apt"; then
                         for dependency_id in ${dependency_list}; do
                             package_query="$(dpkg-query -W --showformat='${Status}\n' "${dependency_id}" | grep "install ok installed")"
                             if [[ -n "${package_query}" ]]; then
