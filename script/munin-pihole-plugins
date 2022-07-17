@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="07.15.02"
+VERSION="07.15.03"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -742,19 +742,19 @@ some() {
         case $1 in
             "file")
                 if i_can_haz "less" "noncritical"; then
-                    less "$2"
+                    less -~eMF "$2"
                 else
                     if i_can_haz "more"; then
-                        more "$2"
+                        more -d "$2"
                     fi
                 fi
             ;;
             *)
                 if i_can_haz "less" "noncritical"; then
-                    echo -e "$@" | less
+                    echo -e "$@" | less -e~MF
                 else
                     if i_can_haz "more" "noncritical"; then
-                        echo -e "$@" | more
+                        echo -e "$@" | more -d
                     else
                         echo -e "$@"
                     fi

@@ -1,0 +1,183 @@
+.TH man 1 "17 July 2022" "0.1" "munin-pihole-plugins man page"
+
+.SH NAME
+munin-pihole-plugins
+
+.SH VERSION
+07.16.00
+
+.SH SYNOPSIS
+munin-pihole-plugins {OPTION [PARAMETER]}
+
+.SH DESCRIPTION
+Munin plugins and management script for monitoring various Pi-hole® statistics. Transforms a server into a powerful monitoring platform.
+
+.SH OPTIONS
+Option          GNU long option     Meaning
+ -c, configure   --configure         Display or set environment variables
+ -h, help        --help              Display this and other help dialogues
+ -i, install     --install           Install munin-pihole-plugins
+ -s, show        --show              Display GNU GPLv3 license information
+ -u, uninstall   --uninstall         Uninstall munin-pihole-plugins
+ -v, version     --version           Display current and latest versions
+
+.SS -c, configure, --configure
+
+Display a full list of environment variables used by the munin-pihole-plugins
+script, and their current values. These variables and this command can be used
+to customize various aspects of the munin-pihole-plugins script's operation.
+
+Takes an optional parameter in the form of a munin-pihole-plugins environment
+variable to list the value of that variable alone.
+
+Example: "munin-pihole-plugins -c INSTALL_PLUGINS"
+
+Takes an optional value for a munin-pihole-plugins environment variable to
+set the value of that variable. If the optional value passed is 'RESET', the
+corresponding environment variable will be reset to its default value. This
+functionality is only available if the munin-pihole-plugins script is found to
+exist within 'SCRIPT_DIR'.
+
+Examples: "./munin-pihole-plugins --configure DNS_SERVER 127.0.0.1"
+          "./munin-pihole-plugins --configure DNS_SERVER RESET"
+
+Takes an optional parameter in the form of 'RESET_ALL' to restore all
+munin-pihole-plugins environment variables to their default values. Again,
+this functionality is only available if the munin-pihole-plugins script is
+found to exist within 'SCRIPT_DIR', whereby it's considered "installed".
+
+Example: "./munin-pihole-plugins --configure RESET_ALL"
+
+
+.SS -h, help, --help
+
+Display simple or detailed munin-pihole-plugins help information.
+Type "./munin-pihole-plugins --help {OPTION [PARAMETER]}" for more detailed
+explanations of each command.
+
+Example: "./munin-pihole-plugins --help --install --plugins"
+
+.SS -i, install, --install
+
+Install and configure Munin monitoring server software (default: true), client
+software (default: true), selected munin-pihole-plugins plugins (default: all)
+and install a copy of the munin-pihole-plugins script (default: true) to a
+selected directory (default: /usr/local/bin).
+
+The munin-pihole-plugins script will self update (default: true) before install
+if a newer version of the munin-pihole-plugins script is available.
+
+You can run the installation again at any time afterwards to update the
+munin-pihole-plugins script and plugins, optionally selecting which plugins to
+install using the PLUGIN_LIST variable.
+
+Takes an optional parameter to install just that component.
+
+Parameter                           Function
+ -p, plugins        --plugins        Install and configure munin-node, and
+                                     munin-pihole-plugins plugins.
+ -P, plugins-only   --plugins-only   As above, skipping dependency check
+ -s, script         --script         Install the munin-pihole-plugins script.
+ -S, script-only    --script-only    As above, skipping dependency check.
+ -w, webserver      --webserver      Install and configure munin, lighttpd
+                                     and lighttpd-external-munin-proxy.
+ -W, webserver-only --webserver-only As above, skipping dependency check.
+
+Example: "./munin-pihole-plugins --install --plugins"
+
+
+.SS -s, show, --show
+
+Parameter                           Function
+ -c, conditions  --conditions        Show GNU GPLv3 licensing conditions.
+ -g, gnu-gpl     --gnu-gpl           Show full GNU GPL v3 license text.
+ -l, liability   --liability         Show liability definition.
+ -w, warranty    --warranty          Show warranty information.
+
+Example: "./munin-pihole-plugins --show --warranty"
+
+
+.SS -u, uninstall, --uninstall
+
+Completely uninstall munin-pihole-plugins, you will be asked if you want to
+uninstall any dependencies that munin-pihole-plugins may have installed.
+
+Takes an optional parameter to uninstall just that component.
+
+Parameter                           Function
+ -p, plugins        --plugins        Uninstall munin-node, and
+                                     munin-pihole-plugins plugins.
+ -P, plugins-only   --plugins-only   As above, skipping dependency removal.
+ -s, script         --script         Uninstall the munin-pihole-plugins
+                                     script.
+ -S, script-only    --script-only    As above, skipping dependency removal.
+ -w, webserver      --webserver      Uninstall munin, lighttpd, and
+                                     lighttpd-external-munin-proxy.
+ -W, webserver-only --webserver-only As above, skipping dependency removal.
+
+Example: "./munin-pihole-plugins --uninstall --script-only"
+
+
+.SS -v, version, --version
+
+Display the current munin-pihole-plugins script version, and compare it to
+the latest munin-pihole-plugins script version.
+
+An additional notification will be displayed if an update is available.
+
+.SH ENVIRONMENT
+Variable                 Default Value
+ BRANCH                   "development"
+ DNS_PORT                 "53"
+ DNS_SERVER               "208.67.222.222" (OPENDNS)
+ EXTERNAL_CONFIG_DIR      "/etc/munin-pihole-plugins"
+ EXTERNAL_CONFIG_FILE     "munin-pihole-plugins.conf"
+ HOLD_DURATION            "0"
+ IGNORE_PIHOLE_ON_HOST    "false"
+ INSTALL_PLUGINS          "true"
+ INSTALL_SCRIPT           "true"
+ INSTALL_WEBSERVER        "true"
+ LIGHTTPD_WEBROOT         "/var/www/html"
+ MUNIN_BRANCH             "stable"
+ MUNIN_DIR                "/etc/munin"
+ MUNIN_CONFIG_DIR         "/etc/munin/munin-conf.d"
+ MUNIN_PLUGIN_DIR         "/usr/share/munin/plugins"
+ NODE_PLUGIN_DIR          "/etc/munin/plugins"
+ PLUGIN_CONFIG_DIR        "/etc/munin/plugin-conf.d"
+ PLUGIN_LIST              "blocked cache cache_by_type clients percent queries replies_by_type status unique_domains"
+ PROXY_CONFIG_DIR         "/etc/lighttpd"
+ SCRIPT_DIR               "/usr/local/bin"
+ SHOW_COLOUR              "true"
+ SHOW_HEADER              "true"
+ SKIP_DEPENDENCY_CHECK    "false"
+ UPDATE_SELF              "true"
+ VERBOSITY_LEVEL          "3"
+
+.SH PLUGIN CONFIGURATION
+Default /etc/munin/plugin-conf.d/pihole.conf plugin configuration.
+
+[pihole_*]
+    user root
+    env.host 127.0.0.1
+    env.port 80
+    env.api /admin/api.php
+    env.cachesuffix ?getCacheInfo&auth=
+    #env.webpassword PIHOLE_SETUPVARS_WEBPASSWORD_HERE
+
+.SH SEE ALSO
+munin(8), munin-node(1p)
+
+.SH BUGS
+No known bugs.
+
+.SH LICENSE
+GNU GPL v3 (https://www.gnu.org/licenses/gpl-3.0-standalone.html)
+
+.SH SOURCE
+munin-pihole-plugins on GitHub (https://github.com/saint-lascivious/munin-pihole-plugins)
+
+.SH AUTHOR
+saint-lascivious (Hayden Pearce), ©2022
+
+.SH CONTACT
+munin-pihole-plugins@sainternet.xyz
