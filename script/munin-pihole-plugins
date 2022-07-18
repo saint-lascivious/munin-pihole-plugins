@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="07.16.00"
+VERSION="07.16.01"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -158,10 +158,8 @@ i_can_haz() {
             reverberate "exit"
             exit 1
         else
-            if [[ "${verbosity_level}" -ge "4" ]]; then
-                reverberate "error" "${command_name} not found"
-                reverberate "failure" "${command_name}"
-            fi
+            reverberate "error" "${command_name} not found"
+            reverberate "failure" "${command_name}"
             error 127
         fi
     fi
@@ -208,18 +206,14 @@ update_now() {
     gnugpl_info_function "runtime_disclaimer"
     reverberate "info" "Updating the munin-pihole-plugins script"
     download "${plugin_domain}" -O "${current_dir}/munin-pihole-plugins"
-    if [[ "${verbosity_level}" -ge "4" ]]; then
-        reverberate "success" "${current_dir}/munin-pihole-plugins installed"
-    fi
+    reverberate "success" "${current_dir}/munin-pihole-plugins installed"
     chmod +x "${current_dir}/munin-pihole-plugins" || return
     if [[ "${current_dir}" == "${script_dir}" ]]; then
         if [[ -d "/etc/bash_completion.d" ]]; then
             if [[ -f "/etc/bash_completion.d/munin-pihole-plugins" ]]; then
                 reverberate "info" "Updating the munin-pihole-plugins bash completion script"
                 download "${plugin_repo}/etc/bash_completion.d/munin-pihole-plugins" -O "/etc/bash_completion.d/munin-pihole-plugins"
-                if [[ "${verbosity_level}" -ge "4" ]]; then
-                    reverberate "success" "/etc/bash_completion.d/munin-pihole-plugins installed"
-                fi
+                reverberate "success" "/etc/bash_completion.d/munin-pihole-plugins installed"
             fi
         fi
     fi
@@ -442,11 +436,9 @@ configure_proxy() {
             else
                 reverberate "error" "Invalid Munin branch"
                 reverberate "failure" "${munin_branch}"
-                if [[ "${verbosity_level}" -ge "4" ]]; then
-                    reverberate "info" "Valid Munin branches are"
-                    reverberate "success" "latest"
-                    reverberate "success" "stable"
-                fi
+                reverberate "info" "Valid Munin branches are"
+                reverberate "success" "latest"
+                reverberate "success" "stable"
                 reverberate "exit"
                 exit 1
             fi
@@ -513,30 +505,24 @@ configure_munin() {
 uninstall_plugins() {
     all_plugins="blocked blockrate cache cacheinfo cacherate cache_by_type cache_info clients hits percent queries reply replies_by_type status unique unique_domains"
     if [[ -d "${munin_plugin_dir}" ]]; then
-        reverberate "additional_info" "Removing any existing munin-pihole-plugins plugin(s)"
+        reverberate "info" "Removing any existing munin-pihole-plugins plugin(s)"
         if [[ -f "${munin_plugin_dir}/pihole_" ]]; then
             rm "${munin_plugin_dir}/pihole_" || return
-            if [[ "${verbosity_level}" -ge "4" ]]; then
-                reverberate "success" "${munin_plugin_dir}/pihole_"
-            fi
+            reverberate "success" "${munin_plugin_dir}/pihole_ removed"
         fi
         for plugin_id in ${all_plugins}; do
             if [[ -f "${munin_plugin_dir}/pihole_${plugin_id}" ]]; then
                 rm "${munin_plugin_dir}/pihole_${plugin_id}" || return
-                if [[ "${verbosity_level}" -ge "4" ]]; then
-                    reverberate "success" "${munin_plugin_dir}pihole_${plugin_id}"
-                fi
+                reverberate "success" "${munin_plugin_dir}pihole_${plugin_id} removed"
             fi
         done
     fi
     if [[ -d "${node_plugin_dir}" ]]; then
-        reverberate "additional_info" "Removing any existing munin-pihole-plugins symbolic links"
+        reverberate "info" "Removing any existing munin-pihole-plugins symbolic links"
         for plugin_id in ${all_plugins}; do
             if [[ -h "${node_plugin_dir}/pihole_${plugin_id}" ]]; then
                 rm "${node_plugin_dir}/pihole_${plugin_id}" || return
-                if [[ "${verbosity_level}" -ge "4" ]]; then
-                    reverberate "success" "${node_plugin_dir}/pihole_${plugin_id}"
-                fi
+                reverberate "success" "${node_plugin_dir}/pihole_${plugin_id} removed"
             fi
         done
     fi
@@ -632,13 +618,16 @@ install_script() {
         reverberate "info" "A copy of the munin-pihole-plugins script was installed"
         reverberate "success" "${script_dir}/munin-pihole-plugins"
         if [[ -d "/usr/local/man" ]]; then
-            if [[ -f "${man_dir}/munin-pihole-plugins.1" ]]; then
+            if [[ -f "${man_dir}/munin-pihole-plugins.1*" ]]; then
                 download "${plugin_repo}/usr/local/man/man1/munin-pihole-plugins.1" -O "${man_dir}/munin-pihole-plugins.1"
             else
                 download "${plugin_repo}/usr/local/man/man1/munin-pihole-plugins.1" -P "${man_dir}"
             fi
             reverberate "info" "A copy of the munin-pihole-plugins manual was installed"
             reverberate "success" "${man_dir}/munin-pihole-plugins.1"
+            if i_can_haz "gzip" "noncritical"; then
+                "${man_dir}/munin-pihole-plugins.1"
+            fi
             reverberate "additional_info" "To access the munin-pihole-plugins manual, type"
             reverberate "man munin-pihole-plugins"
         fi
@@ -660,9 +649,7 @@ install_script() {
             reverberate "export PATH=\"\$PATH:${script_dir}\""
         else
             reverberate "additional_info" "The munin-pihole-plugins script directory is in your \$PATH"
-            if [[ "${verbosity_level}" -ge "4" ]]; then
-                reverberate "success" "\$PATH"
-            fi
+            reverberate "success" "\$PATH"
             reverberate "additional_info" "You can now use munin-pihole-plugins just as you would any other command"
         fi
     else
@@ -707,48 +694,36 @@ uninstall_now() {
     reverberate "header"
     gnugpl_info_function "runtime_disclaimer"
     if [[ -f "/etc/bash_completion.d/munin-pihole-plugins" ]]; then
-        reverberate "info" "Uninstalling the munin-pihole-plugins bash completion script"
+        reverberate "info" "Removing the munin-pihole-plugins bash completion script"
         rm "/etc/bash_completion.d/munin-pihole-plugins" || return
-        if [[ "${verbosity_level}" -ge "4" ]]; then
-            reverberate "success" "/etc/bash_completion.d/munin-pihole-plugins removed"
-        fi
+        reverberate "success" "/etc/bash_completion.d/munin-pihole-plugins removed"
     fi
-    if [[ -f "${man_dir}/munin-pihole-plugins.1" ]]; then
-        reverberate "info" "Removing munin-pihole-plugins manual"
-        rm "${man_dir}/munin-pihole-plugins.1" || return
-        if [[ "${verbosity_level}" -ge "4" ]]; then
-            reverberate "success" "${man_dir}/munin-pihole-plugins.1 removed"
-        fi
+    if [[ -f "${man_dir}/munin-pihole-plugins.1*" ]]; then
+        reverberate "info" "Removing the munin-pihole-plugins man page"
+        rm "${man_dir}/munin-pihole-plugins.1*" || return
+        reverberate "success" "${man_dir}/munin-pihole-plugins.1* removed"
     fi
     if [[ "$(ls -A "${man_dir}")" ]]; then
         reverberate "info" "munin-pihole-plugins manual directory is empty"
-        reverberate "info" "Removing munin-pihole-plugins manual directory"
+        reverberate "info" "Removing the munin-pihole-plugins manual directory"
         rm -fr "${man_dir}" || return
-        if [[ "${verbosity_level}" -ge "4" ]]; then
-            reverberate "success" "/usr/local/man/man1 removed"
-        fi
+        reverberate "success" "/usr/local/man/man1 removed"
     fi
     if [[ -f "${external_config_dir}/${external_config_file}" ]]; then
         reverberate "info" "Removing munin-pihole-plugins external configuration"
         rm "${external_config_dir}/${external_config_file}" || return
-        if [[ "${verbosity_level}" -ge "4" ]]; then
-            reverberate "success" "${external_config_dir}/${external_config_file} removed"
-        fi
+        reverberate "success" "${external_config_dir}/${external_config_file} removed"
     fi
     if [[ "$(ls -A "${external_config_dir}")" ]]; then
         reverberate "info" "munin-pihole-plugins external configuration is empty"
         reverberate "info" "Removing munin-pihole-plugins external configuration directory"
         rm -fr "${external_config_dir}" || return
-        if [[ "${verbosity_level}" -ge "4" ]]; then
-            reverberate "success" "${external_config_dir} removed"
-        fi
+        reverberate "success" "${external_config_dir} removed"
     fi
     if [[ -f "$(script_dir)/munin-pihole-plugins" ]]; then
         reverberate "info" "Uninstalling the munin-pihole-plugins script"
         rm "${script_dir}/munin-pihole-plugins" || return
-        if [[ "${verbosity_level}" -ge "4" ]]; then
-            reverberate "success" "${script_dir}/munin-pihole-plugins removed"
-        fi
+        reverberate "success" "${script_dir}/munin-pihole-plugins removed"
     reverberate "footer"
 }
 
@@ -760,37 +735,31 @@ EOF
 
 # an opportunistic pagination wrapper, more or less
 # handles files and strings
-# terminal width when factoring terminal height should always be 80 characters
 # usage:
-# min_height="10"
 # some ["file"] "path to file or string to be paginated"
 some() {
-    if [[ "${terminal_height}" -lt "${min_height}" ]]; then
-        case $1 in
-            "file")
-                if i_can_haz "less" "noncritical"; then
-                    less -~eMF "$2"
-                else
-                    if i_can_haz "more"; then
-                        more -d "$2"
-                    fi
+    case $1 in
+        "file")
+            if i_can_haz "less" "noncritical"; then
+                less -~eMF "$2"
+            else
+                if i_can_haz "more"; then
+                    more -d "$2"
                 fi
-            ;;
-            *)
-                if i_can_haz "less" "noncritical"; then
-                    echo -e "$@" | less -e~MF
+            fi
+        ;;
+        *)
+            if i_can_haz "less" "noncritical"; then
+                echo -e "$@" | less -e~MF
+            else
+                if i_can_haz "more" "noncritical"; then
+                    echo -e "$@" | more -d
                 else
-                    if i_can_haz "more" "noncritical"; then
-                        echo -e "$@" | more -d
-                    else
-                        echo -e "$@"
-                    fi
+                    echo -e "$@"
                 fi
-            ;;
-        esac
-    else
-        echo -e "$@"
-    fi
+            fi
+        ;;
+    esac
 }
 
 # check the version reported by munin-pihole-plugins.sainternet.xyz
@@ -881,7 +850,6 @@ EOF
 # - opendns    208.67.222.222
 # - quad9      9.9.9.9
 config_function() {
-    min_height="3"
     if [[ -n "$3" ]]; then
         external_var_list="BRANCH DNS_PORT DNS_SERVER EXTERNAL_CONFIG_DIR EXTERNAL_CONFIG_FILE IGNORE_PIHOLE_ON_HOST INSTALL_PLUGINS INSTALL_SCRIPT INSTALL_WEBSERVER LIGHTTPD_WEBROOT MUNIN_BRANCH MUNIN_DIR MUNIN_CONFIG_DIR MUNIN_PLUGIN_DIR NODE_PLUGIN_DIR PLUGIN_CONFIG_DIR PLUGIN_LIST PROXY_CONFIG_DIR SCRIPT_DIR SHOW_COLOUR SHOW_HEADER SKIP_DEPENDENCY_CHECK UPDATE_SELF VERBOSITY_LEVEL"
         for external_var_id in ${external_var_list}; do
@@ -950,7 +918,6 @@ The DNS_SERVER value must be between 0.0.0.0 and 255.255.255.255"
                         ;;
                     esac
                 else
-                    min_height="4"
                     some "munin-pihole-plugins: function unavailable
 The munin-pihole-plugins script must be installed to use this function
 Type \"munin-pihole-plugins --install --script\" to install it now"
@@ -1017,7 +984,6 @@ Type \"munin-pihole-plugins --install --script\" to install it now"
                 some "PLUGIN_CONFIG_DIR: ${plugin_config_dir}"
             ;;
             "PLUGIN_LIST")
-                min_height="14"
                 some "PLUGIN_LIST: ${plugin_list}
 \\nPlugin\\t\\tDescription
  blocked\\t This plugin shows the number of domains blocked by Pi-hole®.
@@ -1052,7 +1018,6 @@ Type \"munin-pihole-plugins --install --script\" to install it now"
                 some "VERBOSITY_LEVEL: ${verbosity_level}"
             ;;
             "")
-                min_height="32"
                 if [[ -f "${script_dir}/munin-pihole-plugins" ]]; then
                     usage_text="Usage: munin-pihole-plugins $1 [VARIABLE [\"VALUE\"]]"
                     example_text="\\nExample: munin-pihole-plugins $1 DNS_SERVER LOCALHOST"
@@ -1107,7 +1072,6 @@ help_function() {
     fi
     case "${2}" in
         "-c" | "--configure" | "configure")
-            min_height="30"
             some "Usage: munin-pihole-plugins {$2 [RESET_ALL]|[VARIABLE [VALUE]]}
 \\nOption\\t\\tGNU long option\\t\\tMeaning
  -c, configure\\t --configure\\t\\t Display or set environment variables
@@ -1131,7 +1095,6 @@ found to exist within 'SCRIPT_DIR', whereby it's considered \"installed\".
 \\nExample: \"${example_prefix} $2 RESET_ALL\""
         ;;
         "-h" | "--help" | "help")
-            min_height="11"
             some "Usage: munin-pihole-plugins $2 {OPTION[PARAMETER]}
 \\nOption\\t\\tGNU long option\\t\\tMeaning
  -h, help\\t --help\\t\\t\\t Display this and other help dialogues
@@ -1143,7 +1106,6 @@ explanations of each command.
         "-i" | "--install" | "install")
             case "${3}" in
                 "-p" | "--plugins" | "plugins")
-                    min_height="8"
                     some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
 \\nParameter\\t\\t\\t\\tFunction
  -p, plugins\\t    --plugins\\t\\t Install and configure munin-node, and
@@ -1151,7 +1113,6 @@ explanations of each command.
 \\nExample: \"${example_prefix} $2 $3\""
                 ;;
                 "-s" | "--script" | "script")
-                    min_height="8"
                     some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
 \\nParameter\\t\\t\\t\\tFunction
  -s, script\\t    --script\\t\\t Install the munin-pihole-plugins
@@ -1159,7 +1120,6 @@ explanations of each command.
 \\nExample: \"${example_prefix} $2 $3\""
                 ;;
                 "-w" | "--webserver" | "webserver")
-                    min_height="8"
                     some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
 \\nParameter\\t\\t\\t\\tFunction
  -w, webserver\\t    --webserver\\t\\t Install and configure munin, lighttpd
@@ -1167,7 +1127,6 @@ explanations of each command.
 \\nExample: \"${example_prefix} $2 $3\""
                 ;;
                 "-P" | "--plugins-only" | "plugins-only")
-                    min_height="8"
                     some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
 \\nParameter\\t\\t\\t\\tFunction
  -P, plugins-only   --plugins-only\\t Install munin-pihole-plugins
@@ -1175,7 +1134,6 @@ explanations of each command.
 \\nExample: \"${example_prefix} $2 $3\""
                 ;;
                 "-S" | "--script-only" | "script-only")
-                    min_height="8"
                     some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
 \\nParameter\\t\\t\\t\\tFunction
  -S, script-only    --script-only\\t Install the munin-pihole-plugins
@@ -1183,14 +1141,12 @@ explanations of each command.
 \\nExample: \"${example_prefix} $2 $3\""
                 ;;
                 "-W" | "--webserver-only" | "webserver-only")
-                    min_height="7"
                     some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
 \\nParameter\\t\\t\\t\\tFunction
  -W, webserver-only --webserver-only\\t Install lighttpd-external-munin-proxy
 \\nExample: \"${example_prefix} $2 $3\""
                 ;;
                 *)
-                    min_height="32"
                     some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
 \\nOption\\t\\t    GNU long option\\tMeaning
  -i, install\\t     --install\\t\\t Install munin-pihole-plugins
@@ -1219,34 +1175,28 @@ install using the PLUGIN_LIST variable.
             esac
         ;;
         "-s" | "show" | "--show")
-            min_height="4"
             case "${3}" in
                 "-c" | "conditions" | "--conditions")
-                    min_height="6"
                     some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
 \\nDisplay munin-pihole-plugins GNU GPL licensing conditions.
 \\nExample: \"${example_prefix} $2 --conditions\""
                 ;;
                 "-g" | "gnu-gpl" | "--gnu-gpl")
-                    min_height="6"
                     some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
 \\nDisplay the full GNU GPL v3 license text.
 \\nExample: \"${example_prefix} $2 --gnu-gpl\""
                 ;;
                 "-l" | "liability" | "--liability")
-                    min_height="6"
                     some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
 \\nDisplay munin-pihole plugins liability definition.
 \\nExample: \"${example_prefix} $2 --liability\""
                 ;;
                 "-w" | "warranty" | "--warranty")
-                    min_height="6"
                     some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
 \\nDisplay munin-pihole plugins warranty information.
 \\nExample: \"${example_prefix} $2 --warranty\""
                 ;;
                 *)
-                    min_height="9"
                     some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
 \\nOption\\t\\t    GNU long option\\tMeaning
  -c, conditions\\t     --conditions\\t Show GNU GPLv3 licensing conditions
@@ -1260,7 +1210,6 @@ install using the PLUGIN_LIST variable.
         "-u" | "--uninstall" | "uninstall")
             case "${3}" in
                 "-p" | "--plugins" | "plugins")
-                    min_height="8"
                     some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
 \\nParameter\\t\\t\\t\\tFunction
  -p, plugins\\t    --plugins\\t\\t Uninstall muninin-pihole-plugins
@@ -1268,7 +1217,6 @@ install using the PLUGIN_LIST variable.
 \\nExample: \"${example_prefix} $2 $3\""
                 ;;
                 "-s" | "--script" | "script")
-                    min_height="8"
                     some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
 \\nParameter\\t\\t\\t\\tFunction
  -s, script\\t    --script\\t\\t Uninstall the munin-pihole-plugins
@@ -1276,7 +1224,6 @@ install using the PLUGIN_LIST variable.
 \\nExample: \"${example_prefix} $2 $3\""
                 ;;
                 "-w" | "--webserver" | "webserver")
-                    min_height="8"
                     some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
 \\nParameter\\t\\t\\t\\tFunction
  -w, webserver\\t    --webserver\\t\\t Uninstall munin, lighttpd, and
@@ -1284,7 +1231,6 @@ install using the PLUGIN_LIST variable.
 \\nExample: \"${example_prefix} $2 $3\""
                 ;;
                 "-P" | "--plugins-only" | "plugins-only")
-                    min_height="8"
                     some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
 \\nParameter\\t\\t\\t\\tFunction
  -P, plugins-only   --plugins-only\\t Uninstall munin-pihole-plugins
@@ -1292,7 +1238,6 @@ install using the PLUGIN_LIST variable.
 \\nExample: \"${example_prefix} $2 $3\""
                 ;;
                 "-S" | "--script-only" | "script-only")
-                    min_height="8"
                     some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
 \\nParameter\\t\\t\\t\\tFunction
  -S, script-only    --script-only\\t Uninstall the munin-pihole-plugins
@@ -1300,14 +1245,12 @@ install using the PLUGIN_LIST variable.
 \\nExample: \"${example_prefix} $2 $3\""
                 ;;
                 "-W" | "--webserver-only" | "webserver-only")
-                    min_height="7"
                     some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
 \\nParameter\\t\\t\\t\\tFunction
  -W, webserver-only --webserver-only\\t Uninstall lighttpd-external-munin-proxy
 \\nExample: \"${example_prefix} $2 $3\""
                 ;;
                 *)
-                    min_height="23"
                     some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
 \\nOption\\t\\t    GNU long option\\tMeaning
  -u, uninstall\\t     --uninstall\\t Uninstall munin-pihole-plugins
@@ -1329,7 +1272,6 @@ uninstall any dependencies that munin-pihole-plugins may have installed.
             esac
         ;;
         "-v" | "--version" | "version")
-            min_height="10"
             some "Usage: munin-pihole-plugins {$2}
 \\nOption\\t\\tGNU long option\\t\\tMeaning
  -v, version\\t --version\\t\\t Display current and latest versions
@@ -1338,7 +1280,6 @@ the latest munin-pihole-plugins script version.
 \\nAn additional notification will be displayed if an update is available."
         ;;
         "")
-            min_height="15"
             some "Usage: munin-pihole-plugins {OPTION [PARAMETER]}
 \\nOption\\t\\tGNU long option\\t\\tMeaning
  -c, configure\\t --configure\\t\\t Display or set environment variables
@@ -1352,8 +1293,7 @@ explanations of each command.
 \\nExample: \"${example_prefix} $1 --install --plugins\""
         ;;
         *)
-        min_height="3"
-    some "munin-pihole-plugins: unrecognized option \"${RED}$2${RESET}\"
+            some "munin-pihole-plugins: unrecognized option \"${RED}$2${RESET}\"
 Type \"${example_prefix} --help\" for a list of available options"
         ;;
     esac
@@ -1449,7 +1389,6 @@ gnugpl_info_function() {
     fi
     case "${2}" in
         "-c" | "conditions" | "--conditions")
-            min_height="17"
             some "munin-pihole-plugins saint-lascivious (Hayden Pearce) ©2022
 \\n  This program is ${GREEN}free software${RESET}: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -1465,11 +1404,10 @@ gnugpl_info_function() {
         ;;
         "-g" | "gnu-gpl" | "--gnu-gpl")
             download "${gnu_gpl_v3}" -O "${temp_dir}/.munin-pihole-plugins_license"
-            min_height="676"
             some "file" "${temp_dir}/.munin-pihole-plugins_license"
+            rm "${temp_dir}/.munin-pihole-plugins_license"
         ;;
         "-l" | "liability" | "--liability")
-            min_height="17"
             some "munin-pihole-plugins saint-lascivious (Hayden Pearce) ©2022
 \\n  IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING
   WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MODIFIES AND/OR CONVEYS
@@ -1485,7 +1423,6 @@ gnugpl_info_function() {
 \\nContact: munin-pihole-plugins@sainternet.xyz"
         ;;
         "-w" | "warranty" | "--warranty")
-            min_height="16"
             some "munin-pihole-plugins saint-lascivious (Hayden Pearce) ©2022
 \\n  THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED BY
   APPLICABLE LAW.  EXCEPT WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT
@@ -1500,7 +1437,6 @@ gnugpl_info_function() {
 \\nContact: munin-pihole-plugins@sainternet.xyz"
         ;;
         "runtime_disclaimer")
-                min_height="11"
                 some "\\n  This program comes with ${RED}ABSOLUTELY NO WARRANTY${RESET}; for details type
   \"${example_prefix} --show --warranty\"
 \\n  This is ${GREEN}FREE SOFTWARE${RESET}, and you are welcome to redistribute it
@@ -1510,7 +1446,6 @@ gnugpl_info_function() {
   \"${example_prefix} --show --gnu-gpl\""
         ;;
         *)
-            min_height="5"
             some "munin-pihole-plugins: unrecognized option \"${RED}$2${RESET}\"
 \\nFor a list of available options, type
 \"${example_prefix} --help --show\""
@@ -1645,14 +1580,12 @@ version_function() {
     check_version
     if [[ -n "${remote_version}" ]]; then
         if [[ "${remote_version}" != "${VERSION}" ]]; then
-            min_height="4"
             some "  [${WHITE}ℹ${RESET}] ${GREEN}An update for munin-pihole-plugins is available${RESET}\\n
   munin-pihole-plugins version is v${RED}${VERSION}${RESET} (Latest: v${GREEN}${remote_version}${RESET})"
         else
             some "  [${WHITE}ℹ${RESET}] munin-pihole-plugins version is v${GREEN}${VERSION}${RESET} (Latest: v${GREEN}${remote_version}${RESET})"
         fi
     else
-        min_height="5"
         some "  [${YELLOW}⚠${RESET}] ${YELLOW}Unable to locate TXT record for ${plugin_domain}${RESET}
   using the nameserver ${dns_server} on port ${dns_port}\\n
   munin-pihole-plugins version is v${VERSION} (Latest: ${RED}unknown${RESET})"
@@ -1683,12 +1616,10 @@ function_handler() {
             version_function "$@"
         ;;
         "")
-            min_height="3"
     some "munin-pihole-plugins: no option selected
 Type \"munin-pihole-plugins --help\" for a list of available options"
         ;;
         *)
-            min_height="3"
     some "munin-pihole-plugins: unrecognized option \"${RED}$1${RESET}\"
 Type \"munin-pihole-plugins --help\" for a list of available options"
         ;;
