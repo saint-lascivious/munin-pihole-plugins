@@ -1,4 +1,4 @@
-.TH man 1 "17 July 2022" "0.1" "munin-pihole-plugins man page"
+.TH man 1 "18 July 2022" "0.1" "munin-pihole-plugins man page"
 
 .SH NAME
 munin-pihole-plugins
@@ -22,7 +22,6 @@ Option          GNU long option     Meaning
  -v, version     --version           Display current and latest versions
 
 .SS -c, configure, --configure
-
 Display a full list of environment variables used by the munin-pihole-plugins
 script, and their current values. These variables and this command can be used
 to customize various aspects of the munin-pihole-plugins script's operation.
@@ -48,9 +47,7 @@ found to exist within 'SCRIPT_DIR', whereby it's considered "installed".
 
 Example: "./munin-pihole-plugins --configure RESET_ALL"
 
-
 .SS -h, help, --help
-
 Display simple or detailed munin-pihole-plugins help information.
 Type "./munin-pihole-plugins --help {OPTION [PARAMETER]}" for more detailed
 explanations of each command.
@@ -58,7 +55,6 @@ explanations of each command.
 Example: "./munin-pihole-plugins --help --install --plugins"
 
 .SS -i, install, --install
-
 Install and configure Munin monitoring server software (default: true), client
 software (default: true), selected munin-pihole-plugins plugins (default: all)
 and install a copy of the munin-pihole-plugins script (default: true) to a
@@ -85,9 +81,7 @@ Parameter                           Function
 
 Example: "./munin-pihole-plugins --install --plugins"
 
-
 .SS -s, show, --show
-
 Parameter                           Function
  -c, conditions  --conditions        Show GNU GPLv3 licensing conditions.
  -g, gnu-gpl     --gnu-gpl           Show full GNU GPL v3 license text.
@@ -96,9 +90,7 @@ Parameter                           Function
 
 Example: "./munin-pihole-plugins --show --warranty"
 
-
 .SS -u, uninstall, --uninstall
-
 Completely uninstall munin-pihole-plugins, you will be asked if you want to
 uninstall any dependencies that munin-pihole-plugins may have installed.
 
@@ -117,15 +109,25 @@ Parameter                           Function
 
 Example: "./munin-pihole-plugins --uninstall --script-only"
 
-
 .SS -v, version, --version
-
 Display the current munin-pihole-plugins script version, and compare it to
 the latest munin-pihole-plugins script version.
 
 An additional notification will be displayed if an update is available.
 
 .SH ENVIRONMENT
+.SS PLUGIN CONFIGURATION
+Default /etc/munin/plugin-conf.d/pihole.conf plugin configuration.
+
+[pihole_*]
+    user root
+    env.host 127.0.0.1
+    env.port 80
+    env.api /admin/api.php
+    env.cachesuffix ?getCacheInfo&auth=
+    #env.webpassword PIHOLE_SETUPVARS_WEBPASSWORD_HERE
+
+.SS SCRIPT CONFIGURATION
 Variable                 Default Value
  BRANCH                   "development"
  DNS_PORT                 "53"
@@ -153,17 +155,6 @@ Variable                 Default Value
  UPDATE_SELF              "true"
  VERBOSITY_LEVEL          "3"
 
-.SH PLUGIN CONFIGURATION
-Default /etc/munin/plugin-conf.d/pihole.conf plugin configuration.
-
-[pihole_*]
-    user root
-    env.host 127.0.0.1
-    env.port 80
-    env.api /admin/api.php
-    env.cachesuffix ?getCacheInfo&auth=
-    #env.webpassword PIHOLE_SETUPVARS_WEBPASSWORD_HERE
-
 .SH SEE ALSO
 munin(8), munin-node(1p)
 
@@ -171,7 +162,7 @@ munin(8), munin-node(1p)
 No known bugs.
 
 .SH LICENSE
-GNU GPL v3 (https://www.gnu.org/licenses/gpl-3.0-standalone.html)
+GNU GPL v3.0 (https://www.gnu.org/licenses/gpl-3.0-standalone.html)
 
 .SH SOURCE
 munin-pihole-plugins on GitHub (https://github.com/saint-lascivious/munin-pihole-plugins)

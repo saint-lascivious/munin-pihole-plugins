@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="07.15.03"
+VERSION="07.16.00"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -67,6 +67,7 @@ verbosity_level="${VERBOSITY_LEVEL:-3}"
 # and must be retained for the sake of easy string concat
 current_dir="$(dirname "$(readlink -f "$0")")"
 gnu_gpl_v3="https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/development/LICENSE.md"
+man_dir="/usr/local/man/man1"
 plugin_dependencies="curl munin-node "
 plugin_services="munin-node "
 proxy_repo="https://raw.githubusercontent.com/saint-lascivious/lighttpd-external-munin-proxy"
@@ -630,6 +631,17 @@ install_script() {
         chmod +x "${script_dir}/munin-pihole-plugins" || return
         reverberate "info" "A copy of the munin-pihole-plugins script was installed"
         reverberate "success" "${script_dir}/munin-pihole-plugins"
+        if [[ -d "/usr/local/man" ]]; then
+            if [[ -f "${man_dir}/munin-pihole-plugins.1" ]]; then
+                download "${plugin_repo}/usr/local/man/man1/munin-pihole-plugins.1" -O "${man_dir}/munin-pihole-plugins.1"
+            else
+                download "${plugin_repo}/usr/local/man/man1/munin-pihole-plugins.1" -P "${man_dir}"
+            fi
+            reverberate "info" "A copy of the munin-pihole-plugins manual was installed"
+            reverberate "success" "${man_dir}/munin-pihole-plugins.1"
+            reverberate "additional_info" "To access the munin-pihole-plugins manual, type"
+            reverberate "man munin-pihole-plugins"
+        fi
         if [[ -d "/etc/bash_completion.d" ]]; then
             if [[ -f "/etc/bash_completion.d/munin-pihole-plugins" ]]; then
                 download "${plugin_repo}/etc/bash_completion.d/munin-pihole-plugins" -O "/etc/bash_completion.d/munin-pihole-plugins"
@@ -701,6 +713,21 @@ uninstall_now() {
             reverberate "success" "/etc/bash_completion.d/munin-pihole-plugins removed"
         fi
     fi
+    if [[ -f "${man_dir}/munin-pihole-plugins.1" ]]; then
+        reverberate "info" "Removing munin-pihole-plugins manual"
+        rm "${man_dir}/munin-pihole-plugins.1" || return
+        if [[ "${verbosity_level}" -ge "4" ]]; then
+            reverberate "success" "${man_dir}/munin-pihole-plugins.1 removed"
+        fi
+    fi
+    if [[ "$(ls -A "${man_dir}")" ]]; then
+        reverberate "info" "munin-pihole-plugins manual directory is empty"
+        reverberate "info" "Removing munin-pihole-plugins manual directory"
+        rm -fr "${man_dir}" || return
+        if [[ "${verbosity_level}" -ge "4" ]]; then
+            reverberate "success" "/usr/local/man/man1 removed"
+        fi
+    fi
     if [[ -f "${external_config_dir}/${external_config_file}" ]]; then
         reverberate "info" "Removing munin-pihole-plugins external configuration"
         rm "${external_config_dir}/${external_config_file}" || return
@@ -711,7 +738,7 @@ uninstall_now() {
     if [[ "$(ls -A "${external_config_dir}")" ]]; then
         reverberate "info" "munin-pihole-plugins external configuration is empty"
         reverberate "info" "Removing munin-pihole-plugins external configuration directory"
-        rm "${external_config_dir}/${external_config_file}" || return
+        rm -fr "${external_config_dir}" || return
         if [[ "${verbosity_level}" -ge "4" ]]; then
             reverberate "success" "${external_config_dir} removed"
         fi
