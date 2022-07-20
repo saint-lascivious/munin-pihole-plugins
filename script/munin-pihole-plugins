@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="07.16.01"
+VERSION="07.16.02"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -618,7 +618,7 @@ install_script() {
         reverberate "info" "A copy of the munin-pihole-plugins script was installed"
         reverberate "success" "${script_dir}/munin-pihole-plugins"
         if [[ -d "/usr/local/man" ]]; then
-            if [[ -f "${man_dir}/munin-pihole-plugins.1*" ]]; then
+            if [[ -f "${man_dir}/munin-pihole-plugins.1" ]] || [[ -f "${man_dir}/munin-pihole-plugins.1.gz" ]]; then
                 download "${plugin_repo}/usr/local/man/man1/munin-pihole-plugins.1" -O "${man_dir}/munin-pihole-plugins.1"
             else
                 download "${plugin_repo}/usr/local/man/man1/munin-pihole-plugins.1" -P "${man_dir}"
@@ -626,7 +626,7 @@ install_script() {
             reverberate "info" "A copy of the munin-pihole-plugins manual was installed"
             reverberate "success" "${man_dir}/munin-pihole-plugins.1"
             if i_can_haz "gzip" "noncritical"; then
-                "${man_dir}/munin-pihole-plugins.1"
+                gzip "${man_dir}/munin-pihole-plugins.1"
             fi
             reverberate "additional_info" "To access the munin-pihole-plugins manual, type"
             reverberate "man munin-pihole-plugins"
@@ -698,15 +698,20 @@ uninstall_now() {
         rm "/etc/bash_completion.d/munin-pihole-plugins" || return
         reverberate "success" "/etc/bash_completion.d/munin-pihole-plugins removed"
     fi
-    if [[ -f "${man_dir}/munin-pihole-plugins.1*" ]]; then
+    if [[ -f "${man_dir}/munin-pihole-plugins.1" ]]; then
         reverberate "info" "Removing the munin-pihole-plugins man page"
-        rm "${man_dir}/munin-pihole-plugins.1*" || return
-        reverberate "success" "${man_dir}/munin-pihole-plugins.1* removed"
+        rm "${man_dir}/munin-pihole-plugins.1" || return
+        reverberate "success" "${man_dir}/munin-pihole-plugins.1 removed"
+    fi
+    if [[ -f "${man_dir}/munin-pihole-plugins.1.gz" ]]; then
+        reverberate "info" "Removing the munin-pihole-plugins man page archive"
+        rm "${man_dir}/munin-pihole-plugins.1.gz" || return
+        reverberate "success" "${man_dir}/munin-pihole-plugins.1.gz removed"
     fi
     if [[ "$(ls -A "${man_dir}")" ]]; then
         reverberate "info" "munin-pihole-plugins manual directory is empty"
         reverberate "info" "Removing the munin-pihole-plugins manual directory"
-        rm -fr "${man_dir}" || return
+        rm -r "${man_dir}" || return
         reverberate "success" "/usr/local/man/man1 removed"
     fi
     if [[ -f "${external_config_dir}/${external_config_file}" ]]; then
@@ -717,7 +722,7 @@ uninstall_now() {
     if [[ "$(ls -A "${external_config_dir}")" ]]; then
         reverberate "info" "munin-pihole-plugins external configuration is empty"
         reverberate "info" "Removing munin-pihole-plugins external configuration directory"
-        rm -fr "${external_config_dir}" || return
+        rm -r "${external_config_dir}" || return
         reverberate "success" "${external_config_dir} removed"
     fi
     if [[ -f "$(script_dir)/munin-pihole-plugins" ]]; then
@@ -741,7 +746,7 @@ some() {
     case $1 in
         "file")
             if i_can_haz "less" "noncritical"; then
-                less -~eMF "$2"
+                less -~erMF "$2"
             else
                 if i_can_haz "more"; then
                     more -d "$2"
@@ -750,7 +755,7 @@ some() {
         ;;
         *)
             if i_can_haz "less" "noncritical"; then
-                echo -e "$@" | less -e~MF
+                echo -e "$@" | less -~erMF
             else
                 if i_can_haz "more" "noncritical"; then
                     echo -e "$@" | more -d
@@ -924,7 +929,7 @@ Type \"munin-pihole-plugins --install --script\" to install it now"
                 fi
             else
                 if [[ "$2" == "RESET_ALL" ]]; then
-                    for external_var in $external_var_list; do
+                    for external_var in ${external_var_list}; do
                         transmogrify "${external_var}" "RESET"
                     done
                 fi
