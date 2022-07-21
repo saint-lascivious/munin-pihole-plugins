@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="07.16.03"
+VERSION="07.17.00"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -59,7 +59,7 @@ show_colour="${SHOW_COLOR:-${SHOW_COLOUR:-true}}"
 show_header="${SHOW_HEADER:-true}"
 skip_dependency_check="${SKIP_DEPENDENCY_CHECK:-false}"
 update_self="${UPDATE_SELF:-true}"
-verbosity_level="${VERBOSITY_LEVEL:-3}"
+verbosity_level="${VERBOSITY_LEVEL:-4}"
 
 # environment variables without
 # note: the spaces at the ends of the environment variable
@@ -203,7 +203,6 @@ fi
 # a simple self update function for the munin-pihole-plugins script
 update_now() {
     reverberate "header"
-    gnugpl_info_function "runtime_disclaimer"
     reverberate "info" "Updating the munin-pihole-plugins script"
     download "${plugin_domain}" -O "${current_dir}/munin-pihole-plugins"
     reverberate "success" "${current_dir}/munin-pihole-plugins installed"
@@ -242,7 +241,7 @@ hold_up() {
 
 # echo wrapper handling verbosity levels and common output
 # 0 - silent
-# 1 - + errors
+# 1 - + errors/runtime disclaimer
 # 2 - ++ warnings/questions
 # 3 - +++ information
 # 4 - ++++ additional information
@@ -301,6 +300,18 @@ reverberate() {
         "question")
             if [[ "${verbosity_level}" -ge "2" ]]; then
                 echo -e "\\n  [${BLUE}?${BLUE}] ${BLUE}$2${RESET}"
+            fi
+        ;;
+        "runtime_disclaimer")
+            if [[ "${verbosity_level}" -ge "1" ]]; then
+                echo -e "\\n  This program comes with ${RED}ABSOLUTELY NO WARRANTY${RESET}; for details type
+  \"munin-pihole-plugins --show --warranty\"
+\\n  This is ${GREEN}FREE SOFTWARE${RESET}, and you are welcome to redistribute it
+  under certain conditions; for details type
+  \"munin-pihole-plugins --show --conditions\"
+\\n  To read the full GNU GPL v3 license text, type
+  \"munin-pihole-plugins --show --gnu-gpl\""
+                hold_up
             fi
         ;;
         "success")
@@ -694,7 +705,6 @@ fi
 # intact here rather than following variables
 uninstall_now() {
     reverberate "header"
-    gnugpl_info_function "runtime_disclaimer"
     if [[ -f "/etc/bash_completion.d/munin-pihole-plugins" ]]; then
         reverberate "info" "Removing the munin-pihole-plugins bash completion script"
         rm "/etc/bash_completion.d/munin-pihole-plugins" || return
@@ -1345,7 +1355,7 @@ install_function() {
                 fi
             fi
             obnoxious_header
-            gnugpl_info_function "runtime_disclaimer"
+            reverberate "runtime_disclaimer"
             if [[ "${skip_dependency_check}" == "false" ]]; then
                 install_dependencies
             else
@@ -1443,15 +1453,6 @@ gnugpl_info_function() {
   \"${example_prefix} --show --gnu-gpl\"
 \\nContact: munin-pihole-plugins@sainternet.xyz"
         ;;
-        "runtime_disclaimer")
-                some "\\n  This program comes with ${RED}ABSOLUTELY NO WARRANTY${RESET}; for details type
-  \"${example_prefix} --show --warranty\"
-\\n  This is ${GREEN}FREE SOFTWARE${RESET}, and you are welcome to redistribute it
-  under certain conditions; for details type
-  \"${example_prefix} --show --conditions\"
-\\n  To read the full GNU GPL v3 license text, type
-  \"${example_prefix} --show --gnu-gpl\""
-        ;;
         *)
             some "munin-pihole-plugins: unrecognized option \"${RED}$2${RESET}\"
 \\nFor a list of available options, type
@@ -1496,7 +1497,7 @@ uninstall_function() {
             fi
             check_privilege "$@"
             obnoxious_header
-            gnugpl_info_function "runtime_disclaimer"
+            reverberate "runtime_disclaimer"
             if [[ "${install_plugins}" == "true" ]]; then
                 dependency_list+="munin-node "
                 if [[ -d "${plugin_config_dir}" ]]; then
