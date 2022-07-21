@@ -18,13 +18,13 @@
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
 # shellcheck disable=SC2034
-VERSION="07.16.02"
+VERSION="07.16.03"
 
 # shellcheck disable=SC2207
 _munin-pihole-plugins() {
     local cur allopts lolopts_help longopts longopts_installuninstall \
         longopts_show opts_branch opts_dnsserver opts opts_holdduration \
-        opts_installuninstall opts_muninversion opts_show opts_truefalse \
+        opts_installuninstall opts_muninbranch opts_show opts_truefalse \
         opts_variables opts_verbositylevel prev prev2 shortopts \
         shortopts_installuninstall shortopts_show
     COMPREPLY=()

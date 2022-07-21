@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="07.16.02"
+VERSION="07.16.03"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -626,7 +626,9 @@ install_script() {
             reverberate "info" "A copy of the munin-pihole-plugins manual was installed"
             reverberate "success" "${man_dir}/munin-pihole-plugins.1"
             if i_can_haz "gzip" "noncritical"; then
-                gzip "${man_dir}/munin-pihole-plugins.1"
+                reverberate "additional_info" "Compressing the munin-pihole-plugins man file"
+                gzip --force --quiet "${man_dir}/munin-pihole-plugins.1"
+                reverberate "success" "${man_dir}/munin-pihole-plugins.1.gz"
             fi
             reverberate "additional_info" "To access the munin-pihole-plugins manual, type"
             reverberate "man munin-pihole-plugins"
@@ -746,7 +748,7 @@ some() {
     case $1 in
         "file")
             if i_can_haz "less" "noncritical"; then
-                less -~erMF "$2"
+                less  --chop-long-lines --LONG-PROMPT --quit-at-eof --quit-if-one-screen --RAW-CONTROL-CHARS --squeeze-blank-lines --tilde "$2"
             else
                 if i_can_haz "more"; then
                     more -d "$2"
@@ -755,7 +757,7 @@ some() {
         ;;
         *)
             if i_can_haz "less" "noncritical"; then
-                echo -e "$@" | less -~erMF
+                echo -e "$@" | less  --chop-long-lines --LONG-PROMPT --quit-at-eof --quit-if-one-screen --RAW-CONTROL-CHARS --squeeze-blank-lines --tilde
             else
                 if i_can_haz "more" "noncritical"; then
                     echo -e "$@" | more -d
