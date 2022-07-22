@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="07.17.00"
+VERSION="07.17.01"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -276,7 +276,7 @@ reverberate() {
             fi
         ;;
         "failure")
-            if [[ "${verbosity_level}" -ge "3" ]]; then
+            if [[ "${verbosity_level}" -ge "4" ]]; then
                 echo -e "  [${RED}✗${RESET}] $2"
                 hold_up
             fi
@@ -315,7 +315,7 @@ reverberate() {
             fi
         ;;
         "success")
-            if [[ "${verbosity_level}" -ge "3" ]]; then
+            if [[ "${verbosity_level}" -ge "4" ]]; then
                 echo -e "  [${GREEN}✓${RESET}] $2"
                 hold_up
             fi

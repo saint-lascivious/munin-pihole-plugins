@@ -1,10 +1,10 @@
-.TH man 1 "18 July 2022" "0.1" "munin-pihole-plugins man page"
+.TH man 1 "22 July 2022" "0.2" "munin-pihole-plugins man page"
 
 .SH NAME
 munin-pihole-plugins
 
 .SH VERSION
-07.16.00
+07.17.01
 
 .SH SYNOPSIS
 munin-pihole-plugins {OPTION [PARAMETER]}
@@ -37,22 +37,22 @@ corresponding environment variable will be reset to its default value. This
 functionality is only available if the munin-pihole-plugins script is found to
 exist within 'SCRIPT_DIR'.
 
-Examples: "./munin-pihole-plugins --configure DNS_SERVER 127.0.0.1"
-          "./munin-pihole-plugins --configure DNS_SERVER RESET"
+Examples: "munin-pihole-plugins --configure DNS_SERVER 127.0.0.1"
+          "munin-pihole-plugins --configure DNS_SERVER RESET"
 
 Takes an optional parameter in the form of 'RESET_ALL' to restore all
 munin-pihole-plugins environment variables to their default values. Again,
 this functionality is only available if the munin-pihole-plugins script is
 found to exist within 'SCRIPT_DIR', whereby it's considered "installed".
 
-Example: "./munin-pihole-plugins --configure RESET_ALL"
+Example: "munin-pihole-plugins --configure RESET_ALL"
 
 .SS -h, help, --help
 Display simple or detailed munin-pihole-plugins help information.
-Type "./munin-pihole-plugins --help {OPTION [PARAMETER]}" for more detailed
+Type "munin-pihole-plugins --help {OPTION [PARAMETER]}" for more detailed
 explanations of each command.
 
-Example: "./munin-pihole-plugins --help --install --plugins"
+Example: "munin-pihole-plugins --help --install --plugins"
 
 .SS -i, install, --install
 Install and configure Munin monitoring server software (default: true), client
@@ -79,7 +79,7 @@ Parameter                           Function
                                      and lighttpd-external-munin-proxy.
  -W, webserver-only --webserver-only As above, skipping dependency check.
 
-Example: "./munin-pihole-plugins --install --plugins"
+Example: "munin-pihole-plugins --install --plugins"
 
 .SS -s, show, --show
 Parameter                           Function
@@ -88,7 +88,7 @@ Parameter                           Function
  -l, liability   --liability         Show liability definition.
  -w, warranty    --warranty          Show warranty information.
 
-Example: "./munin-pihole-plugins --show --warranty"
+Example: "munin-pihole-plugins --show --warranty"
 
 .SS -u, uninstall, --uninstall
 Completely uninstall munin-pihole-plugins, you will be asked if you want to
@@ -107,7 +107,7 @@ Parameter                           Function
                                      lighttpd-external-munin-proxy.
  -W, webserver-only --webserver-only As above, skipping dependency removal.
 
-Example: "./munin-pihole-plugins --uninstall --script-only"
+Example: "munin-pihole-plugins --uninstall --script-only"
 
 .SS -v, version, --version
 Display the current munin-pihole-plugins script version, and compare it to
@@ -153,7 +153,7 @@ Variable                 Default Value
  SHOW_HEADER              "true"
  SKIP_DEPENDENCY_CHECK    "false"
  UPDATE_SELF              "true"
- VERBOSITY_LEVEL          "3"
+ VERBOSITY_LEVEL          "4"
 
 .SH SEE ALSO
 munin(8), munin-node(1p)
