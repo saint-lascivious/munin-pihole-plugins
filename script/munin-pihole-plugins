@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="07.17.01"
+VERSION="07.17.02"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -98,7 +98,7 @@ fi
 # fallbacks for out of range or unexpected verbosity levels
 # set to 0 when lower than 0, 4 when higher than 4
 # set to 3 if it's something entirely unexpected
-if [[ "${verbosity_level}" =~ ^(-)?[0-9]+$ ]]; then
+if [[ "${verbosity_level}" =~ ^(-)?[0-4]+$ ]]; then
     if [[ "${verbosity_level}" -lt "0" ]]; then
         verbosity_level="0"
     else
@@ -107,7 +107,7 @@ if [[ "${verbosity_level}" =~ ^(-)?[0-9]+$ ]]; then
         fi
     fi
 else
-    verbosity_level="3"
+    verbosity_level="4"
 fi
 
 # define colours for later use, if supported
@@ -202,20 +202,12 @@ fi
 
 # a simple self update function for the munin-pihole-plugins script
 update_now() {
-    reverberate "header"
+    obnoxious_header
+    reverberate "runtime_disclaimer"
     reverberate "info" "Updating the munin-pihole-plugins script"
     download "${plugin_domain}" -O "${current_dir}/munin-pihole-plugins"
     reverberate "success" "${current_dir}/munin-pihole-plugins installed"
     chmod +x "${current_dir}/munin-pihole-plugins" || return
-    if [[ "${current_dir}" == "${script_dir}" ]]; then
-        if [[ -d "/etc/bash_completion.d" ]]; then
-            if [[ -f "/etc/bash_completion.d/munin-pihole-plugins" ]]; then
-                reverberate "info" "Updating the munin-pihole-plugins bash completion script"
-                download "${plugin_repo}/etc/bash_completion.d/munin-pihole-plugins" -O "/etc/bash_completion.d/munin-pihole-plugins"
-                reverberate "success" "/etc/bash_completion.d/munin-pihole-plugins installed"
-            fi
-        fi
-    fi
     reverberate "footer"
     reverberate "info" "Restarting munin-pihole-plugins after update"
     clear
@@ -620,21 +612,23 @@ restart_services() {
 # warn the user if script_dir is not in their path and suggest how to add it
 install_script() {
     if [[ -d "${script_dir}" ]]; then
+        reverberate "info" "Installing the munin-pihole-plugins script"
         if [[ -f "${script_dir}/munin-pihole-plugins" ]]; then
             download "${plugin_repo}/script/munin-pihole-plugins" -O "${script_dir}/munin-pihole-plugins"
         else
             download "${plugin_repo}/script/munin-pihole-plugins" -P "${script_dir}"
         fi
         chmod +x "${script_dir}/munin-pihole-plugins" || return
-        reverberate "info" "A copy of the munin-pihole-plugins script was installed"
+        reverberate "additional_info" "A copy of the munin-pihole-plugins script was installed"
         reverberate "success" "${script_dir}/munin-pihole-plugins"
         if [[ -d "/usr/local/man" ]]; then
+        reverberate "info" "Installing the munin-pihole-plugins manual"
             if [[ -f "${man_dir}/munin-pihole-plugins.1" ]] || [[ -f "${man_dir}/munin-pihole-plugins.1.gz" ]]; then
                 download "${plugin_repo}/usr/local/man/man1/munin-pihole-plugins.1" -O "${man_dir}/munin-pihole-plugins.1"
             else
                 download "${plugin_repo}/usr/local/man/man1/munin-pihole-plugins.1" -P "${man_dir}"
             fi
-            reverberate "info" "A copy of the munin-pihole-plugins manual was installed"
+            reverberate "additional_info" "A copy of the munin-pihole-plugins manual was installed"
             reverberate "success" "${man_dir}/munin-pihole-plugins.1"
             if i_can_haz "gzip" "noncritical"; then
                 reverberate "additional_info" "Compressing the munin-pihole-plugins man file"
@@ -645,12 +639,13 @@ install_script() {
             reverberate "man munin-pihole-plugins"
         fi
         if [[ -d "/etc/bash_completion.d" ]]; then
+        reverberate "info" "Installing the munin-pihole-plugins bash completion script"
             if [[ -f "/etc/bash_completion.d/munin-pihole-plugins" ]]; then
                 download "${plugin_repo}/etc/bash_completion.d/munin-pihole-plugins" -O "/etc/bash_completion.d/munin-pihole-plugins"
             else
                 download "${plugin_repo}/etc/bash_completion.d/munin-pihole-plugins" -P "/etc/bash_completion.d"
             fi
-            reverberate "info" "A copy of the munin-pihole-plugins bash-completion script was installed"
+            reverberate "additional_info" "A copy of the munin-pihole-plugins bash-completion script was installed"
             reverberate "success" "/etc/bash_completion.d/munin-pihole-plugins"
             reverberate "additional_info" "To begin using it immediately, open a new terminal or type"
             reverberate ". /etc/bash_completion"
@@ -704,7 +699,8 @@ fi
 # hence the reasoning for leaving the hardcoded config dir/file path
 # intact here rather than following variables
 uninstall_now() {
-    reverberate "header"
+    obnoxious_header
+    reverberate "runtime_disclaimer"
     if [[ -f "/etc/bash_completion.d/munin-pihole-plugins" ]]; then
         reverberate "info" "Removing the munin-pihole-plugins bash completion script"
         rm "/etc/bash_completion.d/munin-pihole-plugins" || return
@@ -721,7 +717,7 @@ uninstall_now() {
         reverberate "success" "${man_dir}/munin-pihole-plugins.1.gz removed"
     fi
     if [[ "$(ls -A "${man_dir}")" ]]; then
-        reverberate "info" "munin-pihole-plugins manual directory is empty"
+        reverberate "additional_info" "munin-pihole-plugins manual directory is empty"
         reverberate "info" "Removing the munin-pihole-plugins manual directory"
         rm -r "${man_dir}" || return
         reverberate "success" "/usr/local/man/man1 removed"
@@ -732,7 +728,7 @@ uninstall_now() {
         reverberate "success" "${external_config_dir}/${external_config_file} removed"
     fi
     if [[ "$(ls -A "${external_config_dir}")" ]]; then
-        reverberate "info" "munin-pihole-plugins external configuration is empty"
+        reverberate "additional_info" "munin-pihole-plugins external configuration is empty"
         reverberate "info" "Removing munin-pihole-plugins external configuration directory"
         rm -r "${external_config_dir}" || return
         reverberate "success" "${external_config_dir} removed"
