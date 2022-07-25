@@ -1,10 +1,10 @@
-.TH man 1 "22 July 2022" "0.2" "munin-pihole-plugins man page"
+.TH man 1 "27 July 2022" "0.3" "munin-pihole-plugins man page"
 
 .SH NAME
 munin-pihole-plugins
 
 .SH VERSION
-07.17.02
+07.18.00
 
 .SH SYNOPSIS
 munin-pihole-plugins {OPTION [PARAMETER]}
@@ -85,6 +85,7 @@ Example: "munin-pihole-plugins --install --plugins"
 Parameter                           Function
  -c, conditions  --conditions        Show GNU GPLv3 licensing conditions.
  -g, gnu-gpl     --gnu-gpl           Show full GNU GPL v3 license text.
+                                     (less/more terminal paginator required)
  -l, liability   --liability         Show liability definition.
  -w, warranty    --warranty          Show warranty information.
 
@@ -153,7 +154,7 @@ Variable                 Default Value
  SHOW_HEADER              "true"
  SKIP_DEPENDENCY_CHECK    "false"
  UPDATE_SELF              "true"
- VERBOSITY_LEVEL          "4"
+ VERBOSITY_LEVEL          "3"
 
 .SH SEE ALSO
 munin(8), munin-node(1p)
