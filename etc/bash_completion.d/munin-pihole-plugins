@@ -18,22 +18,26 @@
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
 # shellcheck disable=SC2034
-VERSION="07.18.00"
+VERSION="07.19.00"
 
 # shellcheck disable=SC2207
 _munin-pihole-plugins() {
     local cur allopts lolopts_help longopts longopts_installuninstall \
-        longopts_show opts_branch opts_dnsserver opts opts_holdduration \
-        opts_installuninstall opts_muninbranch opts_show opts_truefalse \
-        opts_variables opts_verbositylevel prev prev2 shortopts \
-        shortopts_installuninstall shortopts_show
+        longopts_restart longopts_show opts_branch opts_dnsserver opts \
+        opts_holdduration opts_installuninstall opts_muninbranch opts_restart \
+        opts_show opts_truefalse opts_variables opts_verbositylevel prev \
+        prev2 shortopts shortopts_installuninstall shortopts_restart \
+        shortopts_show
     COMPREPLY=()
     cur="${COMP_WORDS[COMP_CWORD]}"
-    allopts="-c configure --configure -h help --help -i install --install -s \
-        show --show -u uninstall --uninstall -v version --version"
-    longopts="--configure --help --install --show --uninstall --version"
+    allopts="-c configure --configure -h help --help -i install --install -r
+        restart --restart -s show --show -u uninstall --uninstall -v version \
+        --version"
+    longopts="--configure --help --install --restart --show --uninstall \
+        --version"
     longopts_installuninstall="--plugins --plugins-only --script --script-only \
         --webserver --webserver-only"
+    longopts_restart"--plugins --webserver"
     longopts_show="--conditions --gnu-gpl --liability --warranty"
     opts="configure help install show uninstall version"
     opts_branch="development master RESET"
@@ -42,6 +46,7 @@ _munin-pihole-plugins() {
         webserver-only"
     opts_dnsserver="CLOUDFLARE COMODO GOOGLE LOCALHOST QUAD9 RESET"
     opts_muninbranch="latest stable"
+    opts_restart="plugins webserver"
     opts_show="conditions gnu-gpl liability warranty"
     opts_truefalse="true false RESET"
     opts_variables="BRANCH DNS_PORT DNS_SERVER HOLD_DURATION \
@@ -53,8 +58,9 @@ _munin-pihole-plugins() {
     opts_verbositylevel="0 1 2 3 4 RESET"
     prev="${COMP_WORDS[COMP_CWORD-1]}"
     prev2="${COMP_WORDS[COMP_CWORD-2]}"
-    shortopts="-c -h -i -s -u -v"
+    shortopts="-c -h -i -r -s -u -v"
     shortopts_installuninstall="-p -P -s -S -w -W"
+    shortopts_restart"-p -w"
     shortopts_show="-c -g -l -w"
     case "${prev}" in
         "munin-pihole-plugins")
@@ -95,17 +101,26 @@ _munin-pihole-plugins() {
         "-i"|"-u")
             COMPREPLY=( $(compgen -W "${shortopts_installuninstall} ${longopts_installuninstall}" -- "${cur}") )
         ;;
+        "-r")
+            COMPREPLY=( $(compgen -W "${shortopts_restart} ${longopts_restart}" -- "${cur}") )
+        ;;
         "-s")
             COMPREPLY=( $(compgen -W "${shortopts_show} ${longopts_show}" -- "${cur}") )
         ;;
         "install"|"uninstall")
             COMPREPLY=( $(compgen -W "${opts_installuninstall}" -- "${cur}") )
         ;;
+        "restart")
+            COMPREPLY=( $(compgen -W "${opts_restart}" -- "${cur}") )
+        ;;
         "show")
             COMPREPLY=( $(compgen -W "${opts_show}" -- "${cur}") )
         ;;
         "--install"|"--uninstall")
             COMPREPLY=( $(compgen -W "${longopts_installuninstall}" -- "${cur}") )
+        ;;
+        "--restart")
+            COMPREPLY=( $(compgen -W "${longopts_restart}" -- "${cur}") )
         ;;
         "--show")
             COMPREPLY=( $(compgen -W "${longopts_show}" -- "${cur}") )

@@ -1,27 +1,37 @@
-.TH man 1 "27 July 2022" "0.3" "munin-pihole-plugins man page"
+q.TH man 1 "1 August 2022" "0.4" "munin-pihole-plugins man page"
 
 .SH NAME
 munin-pihole-plugins
 
 .SH VERSION
-07.18.00
-
-.SH SYNOPSIS
-munin-pihole-plugins {OPTION [PARAMETER]}
+07.19.00
 
 .SH DESCRIPTION
 Munin plugins and management script for monitoring various Pi-hole® statistics. Transforms a server into a powerful monitoring platform.
 
 .SH OPTIONS
-Option          GNU long option     Meaning
- -c, configure   --configure         Display or set environment variables
- -h, help        --help              Display this and other help dialogues
- -i, install     --install           Install munin-pihole-plugins
- -s, show        --show              Display GNU GPLv3 license information
- -u, uninstall   --uninstall         Uninstall munin-pihole-plugins
- -v, version     --version           Display current and latest versions
+Usage: munin-pihole-plugins {OPTION [PARAMETER]}
+
+Option             GNU long option      Function
+ -c, configure      --configure          Display or set environment variables
+ -h, help           --help               Display this and other help dialogues
+ -i, install        --install            Install munin-pihole-plugins
+ -r, restart        --restart            Restart munin-pihole-plugins services
+ -s, show           --show               Display GNU GPLv3 license information
+ -u, uninstall      --uninstall          Uninstall munin-pihole-plugins
+ -v, version        --version            Display current and latest versions
+
+Type "./munin-pihole-plugins --help {OPTION [PARAMETER]}" for more detailed
+explanations of each command.
+
+Example: "./munin-pihole-plugins --help --install --plugins"
 
 .SS -c, configure, --configure
+Usage: munin-pihole-plugins {--configure [RESET_ALL]|[VARIABLE [VALUE]]}
+
+Option             GNU long option      Function
+ -c, configure      --configure          Display or set environment variables
+
 Display a full list of environment variables used by the munin-pihole-plugins
 script, and their current values. These variables and this command can be used
 to customize various aspects of the munin-pihole-plugins script's operation.
@@ -29,7 +39,7 @@ to customize various aspects of the munin-pihole-plugins script's operation.
 Takes an optional parameter in the form of a munin-pihole-plugins environment
 variable to list the value of that variable alone.
 
-Example: "munin-pihole-plugins -c INSTALL_PLUGINS"
+Example: "munin-pihole-plugins --configure INSTALL_PLUGINS"
 
 Takes an optional value for a munin-pihole-plugins environment variable to
 set the value of that variable. If the optional value passed is 'RESET', the
@@ -37,24 +47,34 @@ corresponding environment variable will be reset to its default value. This
 functionality is only available if the munin-pihole-plugins script is found to
 exist within 'SCRIPT_DIR'.
 
-Examples: "munin-pihole-plugins --configure DNS_SERVER 127.0.0.1"
-          "munin-pihole-plugins --configure DNS_SERVER RESET"
+Examples: "./munin-pihole-plugins --configure DNS_SERVER 127.0.0.1"
+          "./munin-pihole-plugins --configure DNS_SERVER RESET"
 
 Takes an optional parameter in the form of 'RESET_ALL' to restore all
 munin-pihole-plugins environment variables to their default values. Again,
 this functionality is only available if the munin-pihole-plugins script is
 found to exist within 'SCRIPT_DIR', whereby it's considered "installed".
 
-Example: "munin-pihole-plugins --configure RESET_ALL"
+Example: "./munin-pihole-plugins --configure RESET_ALL"
 
 .SS -h, help, --help
+Usage: munin-pihole-plugins --help {OPTION[PARAMETER]}
+
+Option             GNU long option      Function
+ -h, help           --help               Display this and other help dialogues
+
 Display simple or detailed munin-pihole-plugins help information.
-Type "munin-pihole-plugins --help {OPTION [PARAMETER]}" for more detailed
+Type "./munin-pihole-plugins --help {OPTION [PARAMETER]}" for more detailed
 explanations of each command.
 
-Example: "munin-pihole-plugins --help --install --plugins"
+Example: "./munin-pihole-plugins --help --install --plugins"
 
 .SS -i, install, --install
+Usage: munin-pihole-plugins {--install [PARAMETER]}
+
+Option             GNU long option      Function
+ -i, install        --install            Install munin-pihole-plugins
+
 Install and configure Munin monitoring server software (default: true), client
 software (default: true), selected munin-pihole-plugins plugins (default: all)
 and install a copy of the munin-pihole-plugins script (default: true) to a
@@ -69,48 +89,85 @@ install using the PLUGIN_LIST variable.
 
 Takes an optional parameter to install just that component.
 
-Parameter                           Function
- -p, plugins        --plugins        Install and configure munin-node, and
-                                     munin-pihole-plugins plugins.
- -P, plugins-only   --plugins-only   As above, skipping dependency check
- -s, script         --script         Install the munin-pihole-plugins script.
- -S, script-only    --script-only    As above, skipping dependency check.
- -w, webserver      --webserver      Install and configure munin, lighttpd
-                                     and lighttpd-external-munin-proxy.
- -W, webserver-only --webserver-only As above, skipping dependency check.
+Parameter          GNU long parameter   Function
+ -p, plugins        --plugins            Install and configure munin-node, and
+                                         munin-pihole-plugins plugins
+ -P, plugins-only   --plugins-only       As above, skipping dependency check
+ -s, script         --script             Install the munin-pihole-plugins
+                                         script
+ -S, script-only    --script-only        As above, skipping dependency check
+ -w, webserver      --webserver          Install and configure munin, lighttpd
+                                         and lighttpd-external-munin-proxy
+ -W, webserver-only --webserver-only     As above, skipping dependency check
 
-Example: "munin-pihole-plugins --install --plugins"
+Example: "./munin-pihole-plugins --install --plugins"
+
+.SS -r, restart, --restart
+Usage: munin-pihole-plugins {--restart [PARAMETER]}
+
+Option             GNU long option      Function
+ -r, restart        --restart            Restart munin-pihole-plugins services
+
+Restart any/all services relevant to munin-pihole-plugins.
+
+The list of services to restart is governed by the states of the "INSTALL_*"
+environment/external configuration variables, all of which default "true".
+
+Takes an optional parameter to restart only those services involved with
+that munin-pihole-plugins component.
+
+Parameter          GNU long parameter   Function
+ -p, plugins        --plugins            Restart the munin-node service
+ -w, webserver      --webserver          Restart both the munin and lighttpd
+                                         services
+
+Example: "./munin-pihole-plugins --restart"
 
 .SS -s, show, --show
-Parameter                           Function
- -c, conditions  --conditions        Show GNU GPLv3 licensing conditions.
- -g, gnu-gpl     --gnu-gpl           Show full GNU GPL v3 license text.
-                                     (less/more terminal paginator required)
- -l, liability   --liability         Show liability definition.
- -w, warranty    --warranty          Show warranty information.
+Usage: munin-pihole-plugins {--show OPTION}
 
-Example: "munin-pihole-plugins --show --warranty"
+Option             GNU long option      Function
+ -s, show           --show               Display GNU GPLv3 license information
+
+Option             GNU long option      Function
+ -c, conditions     --conditions         Show GNU GPLv3 licensing conditions
+ -g, gnu-gpl        --gnu-gpl            Show full GNU GPL v3 license text
+                                         (less/more terminal paginator required)
+ -l, liability      --liability          Show liability definition
+ -w, warranty       --warranty           Show warranty information
+
+Example: "./munin-pihole-plugins --show --warranty"
 
 .SS -u, uninstall, --uninstall
+Usage: munin-pihole-plugins {--uninstall [PARAMETER]}
+
+Option             GNU long option      Function
+ -u, uninstall       --uninstall         Uninstall munin-pihole-plugins
+
 Completely uninstall munin-pihole-plugins, you will be asked if you want to
 uninstall any dependencies that munin-pihole-plugins may have installed.
 
 Takes an optional parameter to uninstall just that component.
 
-Parameter                           Function
- -p, plugins        --plugins        Uninstall munin-node, and
-                                     munin-pihole-plugins plugins.
- -P, plugins-only   --plugins-only   As above, skipping dependency removal.
- -s, script         --script         Uninstall the munin-pihole-plugins
-                                     script.
- -S, script-only    --script-only    As above, skipping dependency removal.
- -w, webserver      --webserver      Uninstall munin, lighttpd, and
-                                     lighttpd-external-munin-proxy.
- -W, webserver-only --webserver-only As above, skipping dependency removal.
+Parameter          GNU long parameter   Function
+ -p, plugins        --plugins            Uninstall munin-node, and
+                                         munin-pihole-plugins plugins
+ -P, plugins-only   --plugins-only       As above, skipping dependency removal
+ -s, script         --script             Uninstall the munin-pihole-plugins
+                                         script
+ -S, script-only    --script-only        As above, skipping dependency removal
+ -w, webserver      --webserver          Uninstall munin, lighttpd, and
+                                         lighttpd-external-munin-proxy
+ -W, webserver-only --webserver-only     As above, skipping dependency removal
 
-Example: "munin-pihole-plugins --uninstall --script-only"
+Example: "./munin-pihole-plugins --uninstall --script-only"
 
 .SS -v, version, --version
+Usage: munin-pihole-plugins {--version}
+
+Option             GNU long option      Function
+ -v, version        --version            Display current and latest versions
+
 Display the current munin-pihole-plugins script version, and compare it to
 the latest munin-pihole-plugins script version.
 
@@ -160,7 +217,8 @@ Variable                 Default Value
 munin(8), munin-node(1p)
 
 .SH BUGS
-No known bugs.
+ - Plugin not working with remote docker PiHole instance
+   https://github.com/saint-lascivious/munin-pihole-plugins/issues/6
 
 .SH LICENSE
 GNU GPL v3.0 (https://www.gnu.org/licenses/gpl-3.0-standalone.html)
