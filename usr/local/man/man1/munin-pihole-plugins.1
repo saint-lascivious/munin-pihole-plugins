@@ -1,10 +1,10 @@
-q.TH man 1 "2 August 2022" "07.20.00" "munin-pihole-plugins man page"
+q.TH man 1 "2 August 2022" "07.21.00" "munin-pihole-plugins man page"
 
 .SH NAME
 munin-pihole-plugins
 
 .SH VERSION
-07.20.00
+07.21.00
 
 .SH DESCRIPTION
 Munin plugins and management script for monitoring various Pi-hole® statistics. Transforms a server into a powerful monitoring platform.
@@ -173,16 +173,17 @@ the latest munin-pihole-plugins script version.
 
 An additional notification will be displayed if an update is available.
 
-.SH ENVIRONMENT
+.SH CONFIGURATION
 .SS PLUGIN CONFIGURATION
 Default /etc/munin/plugin-conf.d/pihole.conf plugin configuration.
 
 [pihole_*]
     user root
-    env.host 127.0.0.1
-    env.port 80
     env.api /admin/api.php
     env.cachesuffix ?getCacheInfo&auth=
+    env.host 127.0.0.1
+    env.port 80
+    env.setupvars /etc/pihole/setupVars.conf
     #env.webpassword PIHOLE_SETUPVARS_WEBPASSWORD_HERE
 
 .SS SCRIPT CONFIGURATION
@@ -212,6 +213,24 @@ Variable                 Default Value
  SKIP_DEPENDENCY_CHECK    "false"
  UPDATE_SELF              "true"
  VERBOSITY_LEVEL          "3"
+
+.SH PLUGINS
+Can be used to present various different graphs depending on the plugin's base or symbolic link name. Defaults to pihole_percent.
+
+Plugin name:             Plugin description
+ pihole_blocked          - Shows the number of domains blocked by Pi-hole.
+ pihole_cache            - Shows Pi-hole's cache.
+ pihole_cache_by_type    - Shows Pi-hole's cache by type.
+ pihole_clients          - Shows clients seen by Pi-hole.
+ pihole_percent          - Shows Pi-hole's blocked query percentage.
+ pihole_queries          - Shows queries seen by Pi-hole.
+ pihole_replies_by_type  - Shows Pi-hole replies by type.
+ pihole_status           - Shows Pi-hole's blocking status.
+ pihole_unique_domains   - Shows unique domains seen by Pi-hole.
+
+Note for cache_* plugins:
+Pi-hole API authentication required.
+Either a Pi-hole setupVars.conf path or webpassword value must be supplied.
 
 .SH SEE ALSO
 munin(8), munin-node(1p)

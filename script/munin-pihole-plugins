@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="07.20.00"
+VERSION="07.21.00"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -291,13 +291,13 @@ reverberate() {
                     if [[ "${terminal_height}" -ge "12" ]] && [[ "${terminal_width}" -ge "80" ]]; then
                         echo -e "${RED}  ${rfc3339_date}                 _           saint-lascivious ©2022  ${RESET}
 ${ORANGE}                   _ __ ___   _   _  _ __  (_) _ __                             ${RESET}
-${YELLOW}                  | '_ \` ${RED}_${RESET}${YELLOW} \\ | | | || '_ \\ | || '${RED}_${RESET}${YELLOW} \\  ${RED}_${ORANGE}_${YELLOW}_${GREEN}_${BLUE}_${INDIGO}_${YELLOW}                    ${RESET}
-${GREEN}                  | | | ${ORANGE}| ${RED}|${RESET}${GREEN} || |_| || | | || || ${ORANGE}| ${RED}|${RESET}${GREEN} |${RED}|${ORANGE}_${YELLOW}_${GREEN}_${BLUE}_${INDIGO}_${VIOLET}_|${GREEN}     v${VERSION}     ${RESET}
-${BLUE}        _  _      |_| |_${YELLOW}| ${ORANGE}|${RESET}${BLUE}_| \\__,_||_| |_||_||_${YELLOW}| ${ORANGE}|${RESET}${BLUE}_|             _             ${RESET}
-${INDIGO} _ __  (_)| |__    ___  ${GREEN}| ${YELLOW}|${RESET}${INDIGO}  ___          _ __  ${GREEN}| ${YELLOW}|${RESET}${INDIGO} _   _   __ _ (_) _ __   ___ ${RESET}
-${VIOLET}| '_ \\ | || '_ \\  / _ \\ ${BLUE}| ${GREEN}|${RESET}${VIOLET} / _ \\ ${RED}_${ORANGE}_${YELLOW}_${GREEN}_${BLUE}_${INDIGO}_ ${VIOLET}| '_ \\ ${BLUE}| ${GREEN}|${RESET}${VIOLET}| | | | / _\` || || '_ \\ / __|
-${RED}| |_) || || | | || (_) |${INDIGO}| ${BLUE}|${RESET}${RED}|  __/${RED}|${ORANGE}_${YELLOW}_${GREEN}_${BLUE}_${INDIGO}_${VIOLET}_|${RED}| |_) |${INDIGO}| ${BLUE}|${RESET}${RED}| |_| || (_| || || | | |\\__ \\
-${ORANGE}| .__/ |_||_| |_| \\___/ ${VIOLET}|_${INDIGO}|${RESET}${ORANGE} \\___|        | .__/ ${VIOLET}|_${INDIGO}|${RESET}${ORANGE} \\__,_| \\__, ||_||_| |_||___/${RESET}
+${YELLOW}                  | '_ \` ${RED}_${YELLOW} \\ | | | || '_ \\ | || '${RED}_${YELLOW} \\  ${RED}_${ORANGE}_${YELLOW}_${GREEN}_${BLUE}_${INDIGO}_${YELLOW}                    ${RESET}
+${GREEN}                  | | | ${ORANGE}|${ORANGE} ${RED}|${GREEN} || |_| || | | || || ${ORANGE}|${GREEN} ${RED}|${GREEN} |${RED}|${ORANGE}_${YELLOW}_${GREEN}_${BLUE}_${INDIGO}_${VIOLET}_|${GREEN}     v${VERSION}     ${RESET}
+${BLUE}        _  _      |_| |_${YELLOW}|${BLUE} ${ORANGE}|${BLUE}_| \\__,_||_| |_||_||_${YELLOW}|${BLUE} ${ORANGE}|${BLUE}_|             _             ${RESET}
+${INDIGO} _ __  (_)| |__    ___  ${GREEN}|${INDIGO} ${YELLOW}|${INDIGO}  ___          _ __  ${GREEN}|${INDIGO} ${YELLOW}|${INDIGO} _   _   __ _ (_) _ __   ___ ${RESET}
+${VIOLET}| '_ \\ | || '_ \\  / _ \\ ${BLUE}|${VIOLET} ${GREEN}|${VIOLET} / _ \\ ${RED}_${ORANGE}_${YELLOW}_${GREEN}_${BLUE}_${INDIGO}_${VIOLET} | '_ \\ ${BLUE}|${VIOLET} ${GREEN}|${VIOLET}| | | | / _\` || || '_ \\ / __|
+${RED}| |_) || || | | || (_) |${INDIGO}|${RED} ${BLUE}|${RED}|  __/${RED}|${ORANGE}_${YELLOW}_${GREEN}_${BLUE}_${INDIGO}_${VIOLET}_|${RED}| |_) |${INDIGO}|${RED} ${BLUE}|${RED}| |_| || (_| || || | | |\\__ \\
+${ORANGE}| .__/ |_||_| |_| \\___/ ${VIOLET}|_${INDIGO}|${ORANGE} \\___|        | .__/ ${VIOLET}|_${INDIGO}|${ORANGE} \\__,_| \\__, ||_||_| |_||___/${RESET}
 ${YELLOW}|_|                                      |_|               |___/                ${RESET}
 ${GREEN}                                                                                ${RESET}
 ${BLUE} ${RED}M${ORANGE}u${YELLOW}n${GREEN}i${BLUE}n${INDIGO} ${VIOLET}p${RED}l${ORANGE}u${YELLOW}g${GREEN}i${BLUE}n${INDIGO}s${VIOLET} ${RED}a${ORANGE}n${YELLOW}d${GREEN} ${BLUE}m${INDIGO}a${VIOLET}n${RED}a${ORANGE}g${YELLOW}e${GREEN}m${BLUE}e${INDIGO}n${VIOLET}t${RED} ${ORANGE}s${YELLOW}c${GREEN}r${BLUE}i${INDIGO}p${VIOLET}t${RED} ${ORANGE}f${YELLOW}o${GREEN}r${BLUE} ${INDIGO}m${VIOLET}o${RED}n${ORANGE}i${YELLOW}t${GREEN}o${BLUE}r${INDIGO}i${VIOLET}n${RED}g${ORANGE} ${YELLOW}v${GREEN}a${BLUE}r${INDIGO}i${VIOLET}o${RED}u${ORANGE}s${YELLOW} ${GREEN}P${BLUE}i${INDIGO}-${VIOLET}h${RED}o${ORANGE}l${YELLOW}e${GREEN}®${BLUE} ${INDIGO}s${VIOLET}t${RED}a${ORANGE}t${YELLOW}i${GREEN}s${BLUE}t${INDIGO}i${VIOLET}c${RED}s${BLUE} ${RESET}"
@@ -628,7 +628,8 @@ restart_services() {
                 if i_can_haz "service"; then
                     reverberate "info" "Restarting services"
                     for service_id in ${service_list}; do
-                        if [[ "$(service ${service_id} status | grep --ignore-case "active: active")" ]]; then
+                        # shellcheck disable=SC2143
+                        if [[ "$(service "${service_id}" status | grep --ignore-case "active: active")" ]]; then
                             service "${service_id}" "restart"
                             reverberate "success" "${service_id}"
                         fi
@@ -749,7 +750,7 @@ uninstall_now() {
     if [[ "$(ls -A "${man_dir}")" ]]; then
         reverberate "additional_info" "The munin-pihole-plugins manual directory is empty"
         reverberate "info" "Removing the munin-pihole-plugins manual directory"
-        rm -r "${man_dir}" || return
+        rmdir "${man_dir}" || return
         reverberate "success" "${man_dir} removed"
     fi
     if [[ -f "${external_config_dir}/${external_config_file}" ]]; then
@@ -760,7 +761,7 @@ uninstall_now() {
     if [[ "$(ls -A "${external_config_dir}")" ]]; then
         reverberate "additional_info" "The munin-pihole-plugins script external configuration directory is empty"
         reverberate "info" "Removing the munin-pihole-plugins script external configuration directory"
-        rm -r "${external_config_dir}" || return
+        rmdir "${external_config_dir}" || return
         reverberate "success" "${external_config_dir} removed"
     fi
     if [[ -f "$(script_dir)/munin-pihole-plugins" ]]; then

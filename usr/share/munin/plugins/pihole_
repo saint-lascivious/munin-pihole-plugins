@@ -17,24 +17,26 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="07.20.00"
+VERSION="07.21.00"
 
 # Environment variables for this script
 #
-#     host          - Pi-hole® host address
-#     port          - Pi-hole® web interface port
 #     api           - Pi-hole® API query path
 #     cachesuffix   - Pi-hole® API query cache info suffix
+#     host          - Pi-hole® host address
+#     port          - Pi-hole® web interface port
+#     setupvars     - Pi-hole® setupVars.conf location
 #     webpassword   - Pi-hole® setupVars.conf WEBPASSWORD value
 #
-# You can set them in your munin/plugin-conf.d/pihole.conf file with:
+# Set them in your munin/plugin-conf.d/pihole.conf file like:
 #
 # [pihole_*]
 #     user root
-#     env.host 127.0.0.1
-#     env.port 80
 #     env.api /admin/api.php
 #     env.cachesuffix ?getCacheInfo&auth=
+#     env.host 127.0.0.1
+#     env.port 80
+#     env.setupvars /etc/pihole/setupVars.conf
 #     env.webpassword PIHOLE_SETUPVARS_WEBPASSWORD_HERE
 
 # Magic markers
@@ -62,25 +64,11 @@ Systems with a default Pi-hole installation. If the Pi-hole install
 is non-standard or located on another host, additional configuration
 will be required.
 
-=head1 CONFIGURATION
+=head1 PLUGINS
 
-  [pihole_*]
-      user root
-      env.host 127.0.0.1
-      env.port 80
-      env.api /admin/api.php
-      env.cachesuffix ?getCacheInfo&auth=
-      env.webpassword PIHOLE_SETUPVARS_WEBPASSWORD_HERE
+The monolithic plugin can display various different graphs depending on the munin-pihole-plugin plugin's basename or symbolic link names.
 
-Use the relevant .env settings to override the defaults.
-
-=head1 USAGE
-
-Can be used to present various different graphs.
-Use ln -s for each desired plugin name within the
-plugins directory to enable that graph.
-
-Plugin name:	        Plugin description;
+Plugin name:             Plugin description
  pihole_blocked          - Shows the number of domains blocked by Pi-hole.
  pihole_cache            - Shows Pi-hole's cache.
  pihole_cache_by_type    - Shows Pi-hole's cache by type.
@@ -91,20 +79,44 @@ Plugin name:	        Plugin description;
  pihole_status           - Shows Pi-hole's blocking status.
  pihole_unique_domains   - Shows unique domains seen by Pi-hole.
 
+Note for cache_* plugins:
+Pi-hole API authentication required.
+Either a Pi-hole setupVars.conf path or webpassword value must be supplied.
+
+=head1 PLUGIN CONFIGURATION
+
+[pihole_*]
+    user root
+    env.api /admin/api.php
+    env.cachesuffix ?getCacheInfo&auth=
+    env.host 127.0.0.1
+    env.port 80
+    env.setupvars /etc/pihole/setupVars.conf
+    env.webpassword PIHOLE_SETUPVARS_WEBPASSWORD_HERE
+
+Define relevant env.* variables to override the default values to suit your requirement.
+
 =head1 AUTHOR
 
 Copyright saint-lascivious (Hayden Pearce) 2022
 
 =cut
 
-setupvars="/etc/pihole/setupVars.conf"
-get_webpassword="$(cat < "${setupvars}" | grep WEBPASSWORD | sed s/WEBPASSWORD=//g)"
-
-envhost="${host:-127.0.0.1}"
-envport="${port:-80}"
-envapi="${api:-/admin/api.php}"
-envcachesuffix="${cachesuffix:-?getCacheInfo&auth=}"
-envwebpassword="${webpassword:-${get_webpassword}}"
+api="${api:-/admin/api.php}"
+cachesuffix="${cachesuffix:-?getCacheInfo&auth=}"
+host="${host:-127.0.0.1}"
+port="${port:-80}"
+setupvars="${setupvars:-/etc/pihole/setupVars.conf}"
+if [ -f "${setupvars}" ]; then
+    get_webpassword="$(cat < "${setupvars}" | grep WEBPASSWORD | sed s/WEBPASSWORD=//g)"
+    webpassword="${webpassword:-${get_webpassword}}"
+else
+    webpassword="${webpassword:-}"
+fi
+apicall="$(curl -sL "${host}:${port}${api}" 2>/dev/null)"
+cache_apicall="$(curl -sL "${host}:${port}${api}${cachesuffix}${webpassword}" 2>/dev/null)"
+get_cachestats="$(echo "${cache_apicall}" | sed 's/[{}"]//g' | tr "," "\\n" | sort -u)"
+get_stats="$(echo "${apicall}" | sed 's/[{}"]//g' | tr "," "\\n" | sort -u)"
 
 # which plugin is this?
 # strip plugin_id from basename
@@ -112,19 +124,8 @@ plugin_id="$(echo "$0" | sed -e 's/^.*pihole_//')"
 
 # ensure a default plugin id is set in case this falls over
 if test "${plugin_id}"x = ""x; then
-	plugin_id="percent"
+    plugin_id="percent"
 fi
-
-case ${plugin_id} in
-    "cache" | "cache_by_type")
-        apicall="$(curl -sL "${envhost}:${envport}${envapi}${envcachesuffix}${envwebpassword}" 2>/dev/null)"
-    ;;
-    *)
-        apicall="$(curl -sL "${envhost}:${envport}${envapi}" 2>/dev/null)"
-    ;;
-esac
-
-get_stats="$(echo "${apicall}" | sed 's/[{}"]//g' | tr "," "\\n" | sort -u)"
 
 case $1 in
     "config")
@@ -153,7 +154,7 @@ case $1 in
                 echo "graph_scale no"
                 echo "graph_category dns"
                 echo "graph_info This graph shows Pi-hole's cache."
-                for stat_id in ${get_stats}; do
+                for stat_id in ${get_cachestats}; do
                     uid="$(echo "${stat_id}" | sed 's/:.*//')"
                     if [ "${uid}" = "cache-live-freed" ] || [ "${uid}" = "cache-inserted" ] || [ "${uid}" = "expired" ] || [ "${uid}" = "immortal" ]; then
                         echo "${uid}.label $(echo "${uid}" | sed 's/-/ /g')"
@@ -171,7 +172,7 @@ case $1 in
                 echo "graph_scale no"
                 echo "graph_category dns"
                 echo "graph_info This graph shows Pi-hole's cache by type."
-                for stat_id in ${get_stats}; do
+                for stat_id in ${get_cachestats}; do
                     uid="$(echo "${stat_id}" | sed 's/:.*//')"
                     if [ "${uid}" = "ipv4" ] || [ "${uid}" = "ipv6" ] || [ "${uid}" = "srv" ] || [ "${uid}" = "cname" ] || [ "${uid}" = "ds" ] || [ "${uid}" = "dnskey" ] || [ "${uid}" = "other" ]; then
                         echo "${uid}.label $(echo "${uid}" | sed 's/ipv4/A/; s/ipv6/AAAA/; s/srv/SRV/; s/cname/CNAME/; s/ds/DS/; s/dnskey/DNSKEY/')"
@@ -319,7 +320,7 @@ case $1 in
                 done
             ;;
             "cache")
-                for stat_id in ${get_stats}; do
+                for stat_id in ${get_cachestats}; do
                     uid="$(echo "${stat_id}" | sed 's/:.*//')"
                     if [ "${uid}" = "cache-live-freed" ] || [ "${uid}" = "cache-inserted" ] || [ "${uid}" = "expired" ] || [ "${uid}" = "immortal" ]; then
                         value="$(echo "${stat_id}" | sed 's/.*://')"
@@ -328,8 +329,8 @@ case $1 in
                 done
             ;;
             "cache_by_type")
-                for stat_id in ${get_stats}; do
-                    uid=$(echo "${stat_id}" | sed 's/:.*//')
+                for stat_id in ${get_cachestats}; do
+                    uid="$(echo "${stat_id}" | sed 's/:.*//')"
                     if [ "${uid}" = "ipv4" ] || [ "${uid}" = "ipv6" ] || [ "${uid}" = "srv" ] || [ "${uid}" = "cname" ] || [ "${uid}" = "ds" ] || [ "${uid}" = "dnskey" ] || [ "${uid}" = "other" ]; then
                         value="$(echo "${stat_id}" | sed 's/.*://')"
                         echo "${uid}.value ${value}"
@@ -338,7 +339,7 @@ case $1 in
             ;;
             "clients")
                 for stat_id in ${get_stats}; do
-                    uid=$(echo "${stat_id}" | sed 's/:.*//')
+                    uid="$(echo "${stat_id}" | sed 's/:.*//')"
                     if [ "${uid}" = "unique_clients" ] || [ "${uid}" = "clients_ever_seen" ]; then
                         value="$(echo "${stat_id}" | sed 's/.*://')"
                         echo "${uid}.value ${value}"
