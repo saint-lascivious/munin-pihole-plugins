@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="07.22.00"
+VERSION="07.22.01"
 
 # Environment variables for this script
 #
