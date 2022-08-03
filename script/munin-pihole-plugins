@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="07.21.00"
+VERSION="07.22.00"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -1655,14 +1655,32 @@ uninstall_function() {
 version_function() {
     check_version
     if [[ -n "${remote_version}" ]]; then
-        if [[ "${remote_version}" != "${VERSION}" ]]; then
-            if [[ -n "${BRANCH}" ]] && [[ "${BRANCH}" != "${branch}" ]]; then
-                branch_warning="  [${YELLOW}⚠${RESET}] ${YELLOW}Current and remote branches differ${RESET}\\n"
-            fi
-            some "${branch_warning}  [${WHITE}ℹ${RESET}] ${GREEN}An update for munin-pihole-plugins is available${RESET}\\n
+        if [[ -n "${BRANCH}" ]] && [[ "${BRANCH}" != "${branch}" ]]; then
+            branch_warning="  [${YELLOW}⚠${RESET}] ${YELLOW}Current and remote branches differ${RESET}\\n"
+            if [[ "${branch}" == "master" ]]; then
+                if [[ "${remote_version}" > "${VERSION}" ]]; then
+                    some "${branch_warning}  [${WHITE}ℹ${RESET}] ${GREEN}An update for munin-pihole-plugins is available${RESET}\\n
   munin-pihole-plugins version is v${RED}${VERSION}${RESET} (Latest: v${GREEN}${remote_version}${RESET})"
+                else
+                    some "  [${WHITE}ℹ${RESET}] munin-pihole-plugins version is v${GREEN}${VERSION}${RESET} (Latest: v${GREEN}${remote_version}${RESET})"
+                fi
+            else
+                if [[ "${branch}" == "development" ]]; then
+                    if [[ "${remote_version}" != "${VERSION}" ]]; then
+                        some "${branch_warning}  [${WHITE}ℹ${RESET}] ${GREEN}An update for munin-pihole-plugins is available${RESET}\\n
+  munin-pihole-plugins version is v${GREEN}${VERSION}${RESET} (Latest: v${RED}${remote_version}${RESET})"
+                    else
+                        some "  [${WHITE}ℹ${RESET}] munin-pihole-plugins version is v${GREEN}${VERSION}${RESET} (Latest: v${GREEN}${remote_version}${RESET})"
+                    fi
+                fi
+            fi
         else
-            some "  [${WHITE}ℹ${RESET}] munin-pihole-plugins version is v${GREEN}${VERSION}${RESET} (Latest: v${GREEN}${remote_version}${RESET})"
+            if [[ "${remote_version}" > "${VERSION}" ]]; then
+                    some "}  [${WHITE}ℹ${RESET}] ${GREEN}An update for munin-pihole-plugins is available${RESET}\\n
+  munin-pihole-plugins version is v${RED}${VERSION}${RESET} (Latest: v${GREEN}${remote_version}${RESET})"
+            else
+                    some "  [${WHITE}ℹ${RESET}] munin-pihole-plugins version is v${GREEN}${VERSION}${RESET} (Latest: v${GREEN}${remote_version}${RESET})"
+            fi
         fi
     else
         some "  [${YELLOW}⚠${RESET}] ${YELLOW}Unable to locate TXT record for ${plugin_domain}${RESET}
