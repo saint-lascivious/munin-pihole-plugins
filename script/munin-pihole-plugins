@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="07.22.01"
+VERSION="07.22.02"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -61,21 +61,33 @@ update_self="${UPDATE_SELF:-true}"
 verbosity_level="${VERBOSITY_LEVEL:-3}"
 
 # environment variables without
-# note: the spaces at the ends of the environment variable
-# values for *_dependencies and *_services are intentional
-# and must be retained for the sake of easy string concat
-current_dir="$(dirname "$(readlink -f "$0")")"
 gnu_gpl_v3="https://raw.githubusercontent.com/saint-lascivious/munin-pihole-plugins/development/LICENSE.md"
 man_dir="/usr/local/man/man1"
-plugin_dependencies="curl munin-node "
-plugin_services="munin-node "
 proxy_repo="https://raw.githubusercontent.com/saint-lascivious/lighttpd-external-munin-proxy"
-rfc3339_date="$(date --rfc-3339="seconds")"
+
+# munin-pihole-plugins dependency lists
+# basic dependencies assumed to exist with limited/no question:
+# cat, date, dirname, echo, grep, ln, ls, mv, rm, sed, tput
+# readlink
+# note: the spaces at the ends of the environment variable
+# values for *_dependencies are intentional and must be
+# retained for the sake of easy string concat
+plugin_dependencies="curl munin-node "
 script_dependencies="init-system-helpers wget "
+webserver_dependencies="lighttpd munin "
+
+# munin-pihole-plugins services lists
+# note: the spaces at the ends of the environment variable
+# values for *_services are intentional and must be
+# retained for the sake of easy string concat
+plugin_services="munin-node "
+webserver_services="lighttpd munin "
+
+# misc.
+current_dir="$(dirname "$(readlink -f "$0")")"
+rfc3339_date="$(date --rfc-3339="seconds")"
 terminal_height="$(stty size | cut -d " " -f1)"
 terminal_width="$(stty size | cut -d " " -f2)"
-webserver_dependencies="lighttpd munin "
-webserver_services="lighttpd munin "
 
 # we just won't talk about this
 temp_dir="${TMPDIR:-${TEMP:-${TMP:-/tmp}}}"
@@ -153,11 +165,11 @@ i_can_haz() {
     command_name="$1"
     if [[ ! -x "$(command -v "${command_name}")" ]]; then
         if [[ "$2" != "noncritical" ]]; then
-            reverberate "error" "The required command ${command_name} was not found"
+            reverberate "error" "The required command \"${command_name}\" was not found"
             reverberate "failure" "${command_name}"
             reverberate "exit" "1"
         else
-            reverberate "error" "${command_name} not found"
+            reverberate "error" "The command \"${command_name}\" was not found"
             reverberate "failure" "${command_name}"
             return "127"
         fi
@@ -167,9 +179,12 @@ i_can_haz() {
 # simple privilege check
 check_privilege() {
     if [[ ! "${EUID}" -eq "0" ]];then
-        if i_can_haz "sudo"; then
+        if i_can_haz "sudo" "noncritical"; then
             exec sudo -E bash "$0" "$@"
             exit "$?"
+        else
+            reverberate "info" "Install \"sudo\" (recommended), or run $0 as root"
+            reverberate "exit" "0"
         fi
     fi
 }
@@ -750,7 +765,12 @@ uninstall_now() {
     if [[ "$(ls -A "${man_dir}")" ]]; then
         reverberate "additional_info" "The munin-pihole-plugins manual directory is empty"
         reverberate "info" "Removing the munin-pihole-plugins manual directory"
-        rmdir "${man_dir}" || return
+        if i_can_haz "rmdir" "noncritical"; then
+            rmdir "${man_dir}" || return
+        else
+            reverberate "additional_info" "\"rmdir\" unavailable, falling back to \"rm\""
+            rm -r "${man_dir}" || return
+        fi
         reverberate "success" "${man_dir} removed"
     fi
     if [[ -f "${external_config_dir}/${external_config_file}" ]]; then
@@ -761,7 +781,12 @@ uninstall_now() {
     if [[ "$(ls -A "${external_config_dir}")" ]]; then
         reverberate "additional_info" "The munin-pihole-plugins script external configuration directory is empty"
         reverberate "info" "Removing the munin-pihole-plugins script external configuration directory"
-        rmdir "${external_config_dir}" || return
+        if i_can_haz "rmdir" "noncritical"; then
+            rmdir "${external_config_dir}" || return
+        else
+            reverberate "additional_info" "\"rmdir\" unavailable, falling back to \"rm\""
+            rm -r "${external_config_dir}" || return
+        fi
         reverberate "success" "${external_config_dir} removed"
     fi
     if [[ -f "$(script_dir)/munin-pihole-plugins" ]]; then
@@ -787,11 +812,12 @@ some() {
             if i_can_haz "less" "noncritical"; then
                 less --chop-long-lines --LONG-PROMPT --QUIT-AT-EOF --quit-if-one-screen --squeeze-blank-lines --tilde "$2"
             else
+                reverberate "additional_info" "\"less\" unavailable, falling back to \"more\""
                 if i_can_haz "more" "noncritical"; then
                     more -d "$2"
                 else
                     reverberate "error" "Unable to display the selected file reliably"
-                    reverberate "info" "Install either \"less\" (preferred) or \"more\" and try again"
+                    reverberate "info" "Install either \"less\" (recommended) or \"more\" and try again"
                 fi
             fi
         ;;
@@ -799,9 +825,11 @@ some() {
             if i_can_haz "less" "noncritical"; then
                 echo -e "$@" | less --chop-long-lines --LONG-PROMPT --QUIT-AT-EOF --quit-if-one-screen --RAW-CONTROL-CHARS --squeeze-blank-lines --tilde
             else
+                reverberate "additional_info" "\"less\" unavailable, falling back to \"more\""
                 if i_can_haz "more" "noncritical"; then
                     echo -e "$@" | more -d
                 else
+                    reverberate "additional_info" "\"more\" unavailable, falling back to \"echo\""
                     echo -e "$@"
                 fi
             fi
@@ -834,6 +862,7 @@ check_version() {
     if i_can_haz "dig" "noncritical"; then
         version_query="$(dig txt +short +timeout=5 +tries=2 "${plugin_domain}" @"${dns_server}" -p "${dns_port}" | sed s'/[^0-9.]//g')"
     else
+        reverberate "additional_info" "\"dig\" unavailable, falling back to \"nslookup\""
         if i_can_haz "nslookup"; then
             version_query="$(nslookup -port="${dns_port}" -retry=2 -timeout=5 -type=txt "${plugin_domain}" "${dns_server}" | grep '"version: [0-9].[0-9].[0-9]"' | sed s'/[^0-9.]//g' | tail -c 9)"
         fi
