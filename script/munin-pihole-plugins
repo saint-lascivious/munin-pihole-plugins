@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="07.22.02"
+VERSION="07.23.00"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -1065,16 +1065,16 @@ Type \"munin-pihole-plugins --install --script\" to install it now"
             ;;
             "PLUGIN_LIST")
                 some "PLUGIN_LIST: ${plugin_list}
-\\nPlugin\\t\\tDescription
- blocked\\t This plugin shows the number of domains blocked by Pi-hole®.
- cache\\t\\t This plugin shows Pi-hole®'s cache.
- cache_by_type\\t This plugin shows Pi-hole®'s cache by type.
- clients\\t This plugin shows clients seen by Pi-hole®.
- percent\\t This plugin shows Pi-hole®'s blocked query percentage.
- queries\\t This plugin shows queries seen by Pi-hole®.
+\\nPlugin          Description
+ blocked         This plugin shows the number of domains blocked by Pi-hole®.
+ cache           This plugin shows Pi-hole®'s cache.
+ cache_by_type   This plugin shows Pi-hole®'s cache by type.
+ clients         This plugin shows clients seen by Pi-hole®.
+ percent         This plugin shows Pi-hole®'s blocked query percentage.
+ queries         This plugin shows queries seen by Pi-hole®.
  replies_by_type This plugin shows Pi-hole®'s replies by type.
- status\\t\\t This plugin shows Pi-hole®'s blocking status.
- unique_domains\\t This plugin shows unique domains seen by Pi-hole®."
+ status          This plugin shows Pi-hole®'s blocking status.
+ unique_domains  This plugin shows unique domains seen by Pi-hole®."
             ;;
             "PROXY_CONFIG_DIR")
                 some "PROXY_CONFIG_DIR: ${proxy_config_dir}"
@@ -1153,8 +1153,8 @@ help_function() {
     case "${2}" in
         "-c" | "--configure" | "configure")
             some "Usage: munin-pihole-plugins {$2 [RESET_ALL]|[VARIABLE [VALUE]]}
-\\nOption\\t\\t   GNU long option\\tFunction
- -c, configure\\t    --configure\\t\\t Display or set environment variables
+\\nOption             GNU long option      Function
+ -c, configure      --configure          Display or set environment variables
 \\nDisplay a full list of environment variables used by the munin-pihole-plugins
 script, and their current values. These variables and this command can be used
 to customize various aspects of the munin-pihole-plugins script's operation.
@@ -1176,8 +1176,8 @@ found to exist within 'SCRIPT_DIR', whereby it's considered \"installed\".
         ;;
         "-h" | "--help" | "help")
             some "Usage: munin-pihole-plugins $2 {OPTION[PARAMETER]}
-\\nOption\\t\\t   GNU long option\\tFunction
- -h, help\\t    --help\\t\\t Display this and other help dialogues
+\\nOption             GNU long option      Function
+ -h, help           --help               Display this and other help dialogues
 \\nDisplay simple or detailed munin-pihole-plugins help information.
 Type \"${example_prefix} $2 {OPTION [PARAMETER]}\" for more detailed
 explanations of each command.
@@ -1187,49 +1187,49 @@ explanations of each command.
             case "${3}" in
                 "-p" | "--plugins" | "plugins")
                     some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
-\\nParameter\\t   GNU long parameter   Function
- -p, plugins\\t    --plugins\\t\\t Install and configure munin-node, and
-\\t\\t\\t\\t\\t munin-pihole-plugins plugins
+\\nParameter          GNU long parameter   Function
+ -p, plugins        --plugins            Install and configure munin-node, and
+                                         munin-pihole-plugins plugins
 \\nExample: \"${example_prefix} $2 $3\""
                 ;;
                 "-s" | "--script" | "script")
                     some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
-\\nParameter\\t   GNU long parameter   Function
- -s, script\\t    --script\\t\\t Install the munin-pihole-plugins
-\\t\\t\\t\\t\\t script
+\\nParameter          GNU long parameter   Function
+ -s, script         --script             Install the munin-pihole-plugins
+                                         script
 \\nExample: \"${example_prefix} $2 $3\""
                 ;;
                 "-w" | "--webserver" | "webserver")
                     some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
-\\nParameter\\t   GNU long parameter   Function
- -w, webserver\\t    --webserver\\t\\t Install and configure munin, lighttpd
-\\t\\t\\t\\t\\t and lighttpd-external-munin-proxy
+\\nParameter          GNU long parameter   Function
+ -w, webserver      --webserver          Install and configure munin, lighttpd
+                                         and lighttpd-external-munin-proxy
 \\nExample: \"${example_prefix} $2 $3\""
                 ;;
                 "-P" | "--plugins-only" | "plugins-only")
                     some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
-\\nParameter\\t   GNU long parameter   Function
- -P, plugins-only   --plugins-only\\t Install munin-pihole-plugins
-\\t\\t\\t\\t\\t plugins
+\\nParameter          GNU long parameter   Function
+ -P, plugins-only   --plugins-only       Install munin-pihole-plugins
+                                         plugins
 \\nExample: \"${example_prefix} $2 $3\""
                 ;;
                 "-S" | "--script-only" | "script-only")
                     some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
-\\nParameter\\t   GNU long parameter   Function
- -S, script-only    --script-only\\t Install the munin-pihole-plugins
-\\t\\t\\t\\t\\t script
+\\nParameter          GNU long parameter   Function
+ -S, script-only    --script-only        Install the munin-pihole-plugins
+                                         script
 \\nExample: \"${example_prefix} $2 $3\""
                 ;;
                 "-W" | "--webserver-only" | "webserver-only")
                     some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
-\\nParameter\\t   GNU long parameter   Function
- -W, webserver-only --webserver-only\\t Install lighttpd-external-munin-proxy
+\\nParameter          GNU long parameter   Function
+ -W, webserver-only --webserver-only     Install lighttpd-external-munin-proxy
 \\nExample: \"${example_prefix} $2 $3\""
                 ;;
                 *)
                     some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
-\\nOption\\t\\t   GNU long option\\tFunction
- -i, install\\t    --install\\t\\t Install munin-pihole-plugins
+\\nOption             GNU long option      Function
+ -i, install        --install            Install munin-pihole-plugins
 \\nInstall and configure Munin monitoring server software (default: true), client
 software (default: true), selected munin-pihole-plugins plugins (default: all)
 and install a copy of the munin-pihole-plugins script (default: true) to a
@@ -1240,16 +1240,16 @@ if a newer version of the munin-pihole-plugins script is available.
 munin-pihole-plugins script and plugins, optionally selecting which plugins to
 install using the PLUGIN_LIST variable.
 \\nTakes an optional parameter to install just that component.
-\\nParameter\\t   GNU long parameter   Function
- -p, plugins\\t    --plugins\\t\\t Install and configure munin-node, and
-\\t\\t\\t\\t\\t munin-pihole-plugins plugins
- -P, plugins-only   --plugins-only\\t As above, skipping dependency check
- -s, script\\t    --script\\t\\t Install the munin-pihole-plugins
-\\t\\t\\t\\t\\t script
- -S, script-only    --script-only\\t As above, skipping dependency check
- -w, webserver\\t    --webserver\\t\\t Install and configure munin, lighttpd
-\\t\\t\\t\\t\\t and lighttpd-external-munin-proxy
- -W, webserver-only --webserver-only\\t As above, skipping dependency check
+\\nParameter          GNU long parameter   Function
+ -p, plugins        --plugins            Install and configure munin-node, and
+                                         munin-pihole-plugins plugins
+ -P, plugins-only   --plugins-only       As above, skipping dependency check
+ -s, script         --script             Install the munin-pihole-plugins
+                                         script
+ -S, script-only    --script-only        As above, skipping dependency check
+ -w, webserver      --webserver          Install and configure munin, lighttpd
+                                         and lighttpd-external-munin-proxy
+ -W, webserver-only --webserver-only     As above, skipping dependency check
 \\nExample: \"${example_prefix} $2 --plugins\""
                 ;;
             esac
@@ -1258,30 +1258,30 @@ install using the PLUGIN_LIST variable.
             case "${3}" in
                 "-p" | "--plugins" | "plugins")
                     some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
-\\nParameter\\t   GNU long parameter   Function
- -p, plugins\\t    --plugins\\t\\t Restart the munin-node service
+\\nParameter          GNU long parameter   Function
+ -p, plugins        --plugins            Restart the munin-node service
 \\nExample: \"${example_prefix} $2 $3\""
                 ;;
                 "-w" | "--webserver" | "webserver")
                     some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
-\\nParameter\\t   GNU long parameter   Function
- -w, webserver\\t    --webserver\\t\\t Restart both the munin and lighttpd
-\\t\\t\\t\\t\\t services
+\\nParameter          GNU long parameter   Function
+ -w, webserver      --webserver          Restart both the munin and lighttpd
+                                         services
 \\nExample: \"${example_prefix} $2 $3\""
                 ;;
                 *)
                     some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
-\\nOption\\t\\t   GNU long option\\tFunction
- -r, restart\\t    --restart\\t\\t Restart munin-pihole-plugins services
+\\nOption             GNU long option      Function
+ -r, restart        --restart            Restart munin-pihole-plugins services
 \\nRestart any/all services relevant to munin-pihole-plugins.
 \\nThe list of services to restart is governed by the states of the \"INSTALL_*\"
 environment/external configuration variables, all of which default \"true\".
 \\nTakes an optional parameter to restart only those services involved with
 that munin-pihole-plugins component.
-\\nParameter\\t   GNU long parameter   Function
- -p, plugins\\t    --plugins\\t\\t Restart the munin-node service
- -w, webserver\\t    --webserver\\t\\t Restart both the munin and lighttpd
-\\t\\t\\t\\t\\t services
+\\nParameter          GNU long parameter   Function
+ -p, plugins        --plugins            Restart the munin-node service
+ -w, webserver      --webserver          Restart both the munin and lighttpd
+                                         services
 \\nExample: \"${example_prefix} $2\""
             esac
         ;;
@@ -1311,14 +1311,15 @@ packages.
                 ;;
                 *)
                     some "Usage: munin-pihole-plugins {$2 OPTION}
-\\nOption\\t\\t   GNU long option\\tFunction
- -s, show\\t    --show\\t\\t Display GNU GPLv3 license information
-\\nOption\\t\\t   GNU long option\\tFunction
- -c, conditions\\t    --conditions\\t Show GNU GPLv3 licensing conditions
- -g, gnu-gpl\\t    --gnu-gpl\\t\\t Show full GNU GPL v3 license text
-\\t\\t\\t\\t\\t (less/more terminal paginator required)
- -l, liability\\t    --liability\\t\\t Show liability definition
- -w, warranty\\t    --warranty\\t\\t Show warranty information
+\\nOption             GNU long option      Function
+ -s, show           --show               Display GNU GPLv3 license information
+
+Option             GNU long option      Function
+ -c, conditions     --conditions         Show GNU GPLv3 licensing conditions
+ -g, gnu-gpl        --gnu-gpl            Show full GNU GPL v3 license text
+                                         (less/more terminal paginator required)
+ -l, liability      --liability          Show liability definition
+ -w, warranty       --warranty           Show warranty information
 \\nExample: \"${example_prefix} $2 --warranty\""
                 ;;
             esac
@@ -1327,85 +1328,86 @@ packages.
             case "${3}" in
                 "-p" | "--plugins" | "plugins")
                     some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
-\\nParameter\\t   GNU long parameter   Function
- -p, plugins\\t    --plugins\\t\\t Uninstall muninin-pihole-plugins
-\\t\\t\\t\\t\\t plugins
+\\nParameter          GNU long parameter   Function
+ -p, plugins        --plugins            Uninstall muninin-pihole-plugins
+                                         plugins
 \\nExample: \"${example_prefix} $2 $3\""
                 ;;
                 "-s" | "--script" | "script")
                     some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
-\\nParameter\\t   GNU long parameter   Function
- -s, script\\t    --script\\t\\t Uninstall the munin-pihole-plugins
-\\t\\t\\t\\t\\t script
+\\nParameter          GNU long parameter   Function
+ -s, script         --script             Uninstall the munin-pihole-plugins
+                                         script
 \\nExample: \"${example_prefix} $2 $3\""
                 ;;
                 "-w" | "--webserver" | "webserver")
                     some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
-\\nParameter\\t   GNU long parameter   Function
- -w, webserver\\t    --webserver\\t\\t Uninstall munin, lighttpd, and
-\\t\\t\\t\\t\\t lighttpd-external-munin-proxy
+\\nParameter          GNU long parameter   Function
+ -w, webserver      --webserver          Uninstall munin, lighttpd, and
+                                         lighttpd-external-munin-proxy
 \\nExample: \"${example_prefix} $2 $3\""
                 ;;
                 "-P" | "--plugins-only" | "plugins-only")
                     some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
-\\nParameter\\t   GNU long parameter   Function
- -P, plugins-only   --plugins-only\\t Uninstall munin-pihole-plugins
-\\t\\t\\t\\t\\t plugins
+\\nParameter          GNU long parameter   Function
+ -P, plugins-only   --plugins-only       Uninstall munin-pihole-plugins
+                                         plugins
 \\nExample: \"${example_prefix} $2 $3\""
                 ;;
                 "-S" | "--script-only" | "script-only")
                     some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
-\\nParameter\\t   GNU long parameter   Function
- -S, script-only    --script-only\\t Uninstall the munin-pihole-plugins
-\\t\\t\\t\\t\\t script
+\\nParameter          GNU long parameter   Function
+ -S, script-only    --script-only        Uninstall the munin-pihole-plugins
+                                         script
 \\nExample: \"${example_prefix} $2 $3\""
                 ;;
                 "-W" | "--webserver-only" | "webserver-only")
                     some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
-\\nParameter\\t   GNU long parameter   Function
- -W, webserver-only --webserver-only\\t Uninstall lighttpd-external-munin-proxy
+\\nParameter          GNU long parameter   Function
+ -W, webserver-only --webserver-only     Uninstall lighttpd-external-munin-proxy
 \\nExample: \"${example_prefix} $2 $3\""
                 ;;
                 *)
                     some "Usage: munin-pihole-plugins {$2 [PARAMETER]}
-\\nOption\\t\\t   GNU long option\\tFunction
- -u, uninstall\\t     --uninstall\\t Uninstall munin-pihole-plugins
+\\nOption             GNU long option      Function
+ -u, uninstall       --uninstall         Uninstall munin-pihole-plugins
 \\nCompletely uninstall munin-pihole-plugins, you will be asked if you want to
 uninstall any dependencies that munin-pihole-plugins may have installed.
 \\nTakes an optional parameter to uninstall just that component.
-\\nParameter\\t   GNU long parameter   Function
- -p, plugins\\t    --plugins\\t\\t Uninstall munin-node, and
-\\t\\t\\t\\t\\t munin-pihole-plugins plugins
- -P, plugins-only   --plugins-only\\t As above, skipping dependency removal
- -s, script\\t    --script\\t\\t Uninstall the munin-pihole-plugins
-\\t\\t\\t\\t\\t script
- -S, script-only    --script-only\\t As above, skipping dependency removal
- -w, webserver\\t    --webserver\\t\\t Uninstall munin, lighttpd, and
-\\t\\t\\t\\t\\t lighttpd-external-munin-proxy
- -W, webserver-only --webserver-only\\t As above, skipping dependency removal
+\\nParameter          GNU long parameter   Function
+ -p, plugins        --plugins            Uninstall munin-node, and
+                                         munin-pihole-plugins plugins
+ -P, plugins-only   --plugins-only       As above, skipping dependency removal
+ -s, script         --script             Uninstall the munin-pihole-plugins
+                                         script
+ -S, script-only    --script-only        As above, skipping dependency removal
+ -w, webserver      --webserver          Uninstall munin, lighttpd, and
+                                         lighttpd-external-munin-proxy
+ -W, webserver-only --webserver-only     As above, skipping dependency removal
 \\nExample: \"${example_prefix} $2 --script-only\""
                 ;;
             esac
         ;;
         "-v" | "--version" | "version")
             some "Usage: munin-pihole-plugins {$2}
-\\nOption\\t\\t   GNU long option\\tFunction
- -v, version\\t    --version\\t\\t Display current and latest versions
+\\nOption             GNU long option      Function
+ -v, version        --version            Display current and latest versions
 \\nDisplay the current munin-pihole-plugins script version, and compare it to
 the latest munin-pihole-plugins script version.
 \\nAn additional notification will be displayed if an update is available."
         ;;
         "")
             some "Usage: munin-pihole-plugins {OPTION [PARAMETER]}
-\\nOption\\t\\t   GNU long option\\tFunction
- -c, configure\\t    --configure\\t\\t Display or set environment variables
- -h, help\\t    --help\\t\\t Display this and other help dialogues
- -i, install\\t    --install\\t\\t Install munin-pihole-plugins
- -r, restart\\t    --restart\\t\\t Restart munin-pihole-plugins services
- -s, show\\t    --show\\t\\t Display GNU GPLv3 license information
- -u, uninstall\\t    --uninstall\\t\\t Uninstall munin-pihole-plugins
- -v, version\\t    --version\\t\\t Display current and latest versions
-\\nType \"${example_prefix} $1 {OPTION [PARAMETER]}\" for more detailed
+Option             GNU long option      Function
+ -c, configure      --configure          Display or set environment variables
+ -h, help           --help               Display this and other help dialogues
+ -i, install        --install            Install munin-pihole-plugins
+ -r, restart        --restart            Restart munin-pihole-plugins services
+ -s, show           --show               Display GNU GPLv3 license information
+ -u, uninstall      --uninstall          Uninstall munin-pihole-plugins
+ -v, version        --version            Display current and latest versions
+
+Type \"${example_prefix} --help {OPTION [PARAMETER]}\" for more detailed
 explanations of each command.
 \\nExample: \"${example_prefix} $1 --install --plugins\""
         ;;

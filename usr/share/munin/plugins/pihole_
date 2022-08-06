@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="07.22.02"
+VERSION="07.23.00"
 
 # Environment variables for this script
 #
@@ -107,14 +107,18 @@ cachesuffix="${cachesuffix:-?getCacheInfo&auth=}"
 host="${host:-127.0.0.1}"
 port="${port:-80}"
 setupvars="${setupvars:-/etc/pihole/setupVars.conf}"
+# you can get neither blood nor webpasswd values from a stone
+# especially if that stone doesn't exist
 if [ -f "${setupvars}" ]; then
     get_webpassword="$(cat < "${setupvars}" | grep WEBPASSWORD | sed s/WEBPASSWORD=//g)"
     webpassword="${webpassword:-${get_webpassword}}"
 else
     webpassword="${webpassword:-}"
 fi
-apicall="$(curl -sL "${host}:${port}${api}" 2>/dev/null)"
-cache_apicall="$(curl -sL "${host}:${port}${api}${cachesuffix}${webpassword}" 2>/dev/null)"
+if [ -x "$(command -v "curl")" ]; then
+    apicall="$(curl -sL "${host}:${port}${api}" 2>/dev/null)"
+    cache_apicall="$(curl -sL "${host}:${port}${api}${cachesuffix}${webpassword}" 2>/dev/null)"
+fi
 get_cachestats="$(echo "${cache_apicall}" | sed 's/[{}"]//g' | tr "," "\\n" | sort -u)"
 get_stats="$(echo "${apicall}" | sed 's/[{}"]//g' | tr "," "\\n" | sort -u)"
 
