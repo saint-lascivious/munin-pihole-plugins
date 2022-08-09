@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="07.23.00"
+VERSION="07.24.00"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -158,28 +158,31 @@ else
     RESET=""
 fi
 
-# check for the existence of a required command
-# throw an error describing the command name when unsatisfied
-# then exit
-i_can_haz() {
-    command_name="$1"
-    if [[ ! -x "$(command -v "${command_name}")" ]]; then
-        if [[ "$2" != "noncritical" ]]; then
-            reverberate "error" "The required command \"${command_name}\" was not found"
-            reverberate "failure" "${command_name}"
-            reverberate "exit" "1"
-        else
-            reverberate "error" "The command \"${command_name}\" was not found"
-            reverberate "failure" "${command_name}"
-            return "127"
+# check for the existence of (a) required command(s)
+# throws an error describing the command name when unsatisfied
+# checks are considered critical (exit on failure) unless the
+# optional param "noncritical" is passed
+i_can_has() {
+    burgers="$1"
+    for cheezburger in ${burgers}; do
+        if [[ ! -x "$(command -v "${cheezburger}")" ]]; then
+            if [[ "$2" != "noncritical" ]]; then
+                reverberate "error" "The required command \"${cheezburger}\" was not found"
+                reverberate "failure" "${cheezburger}"
+                reverberate "exit" "1"
+            else
+                reverberate "error" "The command \"${cheezburger}\" was not found"
+                reverberate "failure" "${cheezburger}"
+                return "127"
+            fi
         fi
-    fi
+    done
 }
 
 # simple privilege check
 check_privilege() {
     if [[ ! "${EUID}" -eq "0" ]];then
-        if i_can_haz "sudo" "noncritical"; then
+        if i_can_has "sudo" "noncritical"; then
             exec sudo -E bash "$0" "$@"
             exit "$?"
         else
@@ -204,8 +207,6 @@ VERSION="${VERSION}"
 
 # source current munin-pihole-plugins script to re-use its functions
 # and environment
-# output squased because munin-pihole-plugins produces a small help output
-# when not given any additional input
 if [[ -f "${current_dir}/munin-pihole-plugins" ]]; then
     . "${current_dir}/munin-pihole-plugins"
 else
@@ -371,7 +372,7 @@ ${BLUE} ${RED}M${ORANGE}u${YELLOW}n${GREEN}i${BLUE}n${INDIGO} ${VIOLET}p${RED}l$
 # version output
 check_pihole() {
     reverberate "info" "Checking if this is a Pi-hole® host"
-    if i_can_haz "pihole" "noncritical"; then
+    if i_can_has "pihole" "noncritical"; then
         pihole_version="$(pihole -v | grep "Pi-hole" | sed 's/Pi-hole version is v//; s/[(][^)]*[)]//; s/[^.0-9]*//g')"
         # shellcheck disable=SC2071
         if [[ "${pihole_version}" > "6" ]]; then
@@ -405,8 +406,8 @@ install_dependencies() {
     if [[ "${install_webserver}" == "true" ]]; then
         dependency_list+="${webserver_dependencies}"
     fi
-    if i_can_haz "dpkg-query"; then
-        if i_can_haz "apt"; then
+    if i_can_has "dpkg-query"; then
+        if i_can_has "apt"; then
             reverberate "additional_info" "Checking for required dependencies"
             for dependency_id in ${dependency_list}; do
                 package_query="$(dpkg-query -W --showformat='${Status}\n' "${dependency_id}" | grep "install ok installed")"
@@ -429,7 +430,7 @@ install_dependencies() {
 
 # simple wget wrapper
 download() {
-    if i_can_haz "wget"; then
+    if i_can_has "wget"; then
         if [[ "${verbosity_level}" -ge "4" ]]; then
             wget -q --show-progress "$@" || return
             hold_up
@@ -640,7 +641,7 @@ restart_services() {
                 service_list+="${webserver_services}"
             fi
             if [[ -n "${service_list}" ]]; then
-                if i_can_haz "service"; then
+                if i_can_has "service"; then
                     reverberate "info" "Restarting services"
                     for service_id in ${service_list}; do
                         # shellcheck disable=SC2143
@@ -677,7 +678,7 @@ install_script() {
             fi
             reverberate "additional_info" "A copy of the munin-pihole-plugins manual was installed"
             reverberate "success" "${man_dir}/munin-pihole-plugins.1"
-            if i_can_haz "gzip" "noncritical"; then
+            if i_can_has "gzip" "noncritical"; then
                 reverberate "additional_info" "Compressing the munin-pihole-plugins manual"
                 gzip --force --quiet "${man_dir}/munin-pihole-plugins.1"
                 reverberate "success" "${man_dir}/munin-pihole-plugins.1.gz"
@@ -730,8 +731,6 @@ VERSION="${VERSION}"
 
 # source current munin-pihole-plugins script to re-use its functions
 # and environment
-# output squased because munin-pihole-plugins produces a small help output
-# when not given any additional input
 if [[ -f "${current_dir}/munin-pihole-plugins" ]]; then
     . "${current_dir}/munin-pihole-plugins"
 else
@@ -741,9 +740,6 @@ else
 fi
 
 # uninstalls a locally installed copy of the munin-pihole-plugins script
-# users may set external config dir/file to something mission critical,
-# hence the reasoning for leaving the hardcoded config dir/file path
-# intact here rather than following variables
 uninstall_now() {
     reverberate "header"
     reverberate "runtime_disclaimer"
@@ -765,7 +761,7 @@ uninstall_now() {
     if [[ "$(ls -A "${man_dir}")" ]]; then
         reverberate "additional_info" "The munin-pihole-plugins manual directory is empty"
         reverberate "info" "Removing the munin-pihole-plugins manual directory"
-        if i_can_haz "rmdir" "noncritical"; then
+        if i_can_has "rmdir" "noncritical"; then
             rmdir "${man_dir}" || return
         else
             reverberate "additional_info" "\"rmdir\" unavailable, falling back to \"rm\""
@@ -781,7 +777,7 @@ uninstall_now() {
     if [[ "$(ls -A "${external_config_dir}")" ]]; then
         reverberate "additional_info" "The munin-pihole-plugins script external configuration directory is empty"
         reverberate "info" "Removing the munin-pihole-plugins script external configuration directory"
-        if i_can_haz "rmdir" "noncritical"; then
+        if i_can_has "rmdir" "noncritical"; then
             rmdir "${external_config_dir}" || return
         else
             reverberate "additional_info" "\"rmdir\" unavailable, falling back to \"rm\""
@@ -809,11 +805,11 @@ EOF
 some() {
     case $1 in
         "file")
-            if i_can_haz "less" "noncritical"; then
+            if i_can_has "less" "noncritical"; then
                 less --chop-long-lines --LONG-PROMPT --QUIT-AT-EOF --quit-if-one-screen --squeeze-blank-lines --tilde "$2"
             else
                 reverberate "additional_info" "\"less\" unavailable, falling back to \"more\""
-                if i_can_haz "more" "noncritical"; then
+                if i_can_has "more" "noncritical"; then
                     more -d "$2"
                 else
                     reverberate "error" "Unable to display the selected file reliably"
@@ -822,11 +818,11 @@ some() {
             fi
         ;;
         *)
-            if i_can_haz "less" "noncritical"; then
+            if i_can_has "less" "noncritical"; then
                 echo -e "$@" | less --chop-long-lines --LONG-PROMPT --QUIT-AT-EOF --quit-if-one-screen --RAW-CONTROL-CHARS --squeeze-blank-lines --tilde
             else
                 reverberate "additional_info" "\"less\" unavailable, falling back to \"more\""
-                if i_can_haz "more" "noncritical"; then
+                if i_can_has "more" "noncritical"; then
                     echo -e "$@" | more -d
                 else
                     reverberate "additional_info" "\"more\" unavailable, falling back to \"echo\""
@@ -859,11 +855,11 @@ check_version() {
             reverberate "exit" "1"
         fi
     fi
-    if i_can_haz "dig" "noncritical"; then
+    if i_can_has "dig" "noncritical"; then
         version_query="$(dig txt +short +timeout=5 +tries=2 "${plugin_domain}" @"${dns_server}" -p "${dns_port}" | sed s'/[^0-9.]//g')"
     else
         reverberate "additional_info" "\"dig\" unavailable, falling back to \"nslookup\""
-        if i_can_haz "nslookup"; then
+        if i_can_has "nslookup"; then
             version_query="$(nslookup -port="${dns_port}" -retry=2 -timeout=5 -type=txt "${plugin_domain}" "${dns_server}" | grep '"version: [0-9].[0-9].[0-9]"' | sed s'/[^0-9.]//g' | tail -c 9)"
         fi
     fi
@@ -1645,8 +1641,8 @@ uninstall_function() {
                 fi
             fi
             if [[ "${skip_dependency_check}" == "false" ]]; then
-                if i_can_haz "dpkg-query"; then
-                    if i_can_haz "apt"; then
+                if i_can_has "dpkg-query"; then
+                    if i_can_has "apt"; then
                         for dependency_id in ${dependency_list}; do
                             package_query="$(dpkg-query -W --showformat='${Status}\n' "${dependency_id}" | grep "install ok installed")"
                             if [[ -n "${package_query}" ]]; then
@@ -1714,9 +1710,12 @@ version_function() {
             fi
         fi
     else
-        some "  [${YELLOW}⚠${RESET}] ${YELLOW}Unable to locate TXT record for ${plugin_domain}${RESET}
-  using the nameserver ${dns_server} on port ${dns_port}\\n
-  munin-pihole-plugins version is v${VERSION} (Latest: ${RED}unknown${RESET})"
+        if [[ "${verbosity_level}" -ge "4" ]]; then
+            authoritative_hint="  \\n[${WHITE}ℹ${RESET}] ${GREEN}Authoritative records available at \"dns.sainternet.xyz\"${RESET}"
+        fi
+        some "  [${YELLOW}⚠${RESET}] ${YELLOW}Unable to locate TXT record for \"${plugin_domain}\"${RESET}
+  using the nameserver \"${dns_server}\" on port \"${dns_port}\"${authoritative_hint}
+  \\nmunin-pihole-plugins version is v${VERSION} (Latest: ${RED}unknown${RESET})"
     fi
 }
 

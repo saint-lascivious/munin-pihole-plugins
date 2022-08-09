@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="07.23.00"
+VERSION="07.24.00"
 
 # Environment variables for this script
 #
@@ -118,6 +118,8 @@ fi
 if [ -x "$(command -v "curl")" ]; then
     apicall="$(curl -sL "${host}:${port}${api}" 2>/dev/null)"
     cache_apicall="$(curl -sL "${host}:${port}${api}${cachesuffix}${webpassword}" 2>/dev/null)"
+else
+    exit 1
 fi
 get_cachestats="$(echo "${cache_apicall}" | sed 's/[{}"]//g' | tr "," "\\n" | sort -u)"
 get_stats="$(echo "${apicall}" | sed 's/[{}"]//g' | tr "," "\\n" | sort -u)"
