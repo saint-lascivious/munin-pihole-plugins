@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="07.24.00"
+VERSION="07.24.01"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -1687,26 +1687,26 @@ version_function() {
             if [[ "${branch}" == "master" ]]; then
                 if [[ "${remote_version}" > "${VERSION}" ]]; then
                     some "${branch_warning}  [${WHITE}ℹ${RESET}] ${GREEN}An update for munin-pihole-plugins is available${RESET}\\n
-  munin-pihole-plugins version is v${RED}${VERSION}${RESET} (Latest: v${GREEN}${remote_version}${RESET})"
+  [${WHITE}ℹ${RESET}] ${GREEN}munin-pihole-plugins version is ${RED}v${VERSION}${GREEN} (Latest: v${remote_version})${RESET}"
                 else
-                    some "  [${WHITE}ℹ${RESET}] munin-pihole-plugins version is v${GREEN}${VERSION}${RESET} (Latest: v${GREEN}${remote_version}${RESET})"
+                    some "  [${WHITE}ℹ${RESET}] ${GREEN}munin-pihole-plugins version is v${VERSION} (Latest: v${remote_version})${RESET}"
                 fi
             else
                 if [[ "${branch}" == "development" ]]; then
                     if [[ "${remote_version}" != "${VERSION}" ]]; then
                         some "${branch_warning}  [${WHITE}ℹ${RESET}] ${GREEN}An update for munin-pihole-plugins is available${RESET}\\n
-  munin-pihole-plugins version is v${GREEN}${VERSION}${RESET} (Latest: v${RED}${remote_version}${RESET})"
+  [${WHITE}ℹ${RESET}] ${GREEN}munin-pihole-plugins version is v${VERSION} (Latest: ${RED}v${remote_version}${GREEN})${RESET}"
                     else
-                        some "  [${WHITE}ℹ${RESET}] munin-pihole-plugins version is v${GREEN}${VERSION}${RESET} (Latest: v${GREEN}${remote_version}${RESET})"
+                        some "  [${WHITE}ℹ${RESET}] ${GREEN}munin-pihole-plugins version is v${VERSION} (Latest: v${remote_version})${RESET}"
                     fi
                 fi
             fi
         else
             if [[ "${remote_version}" > "${VERSION}" ]]; then
                     some "  [${WHITE}ℹ${RESET}] ${GREEN}An update for munin-pihole-plugins is available${RESET}\\n
-  munin-pihole-plugins version is v${RED}${VERSION}${RESET} (Latest: v${GREEN}${remote_version}${RESET})"
+  [${WHITE}ℹ${RESET}] ${GREEN}munin-pihole-plugins version is ${RED}v${VERSION}${GREEN} (Latest: v${remote_version})${RESET}"
             else
-                    some "  [${WHITE}ℹ${RESET}] munin-pihole-plugins version is v${GREEN}${VERSION}${RESET} (Latest: v${GREEN}${remote_version}${RESET})"
+                    some "  [${WHITE}ℹ${RESET}] ${GREEN}munin-pihole-plugins version is v${VERSION} (Latest: v${remote_version})${RESET}"
             fi
         fi
     else
