@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="07.25.00"
+VERSION="07.26.00"
 
 # Environment variables for this script
 #
@@ -28,7 +28,7 @@ VERSION="07.25.00"
 #     setupvars     - Pi-hole® setupVars.conf location
 #     webpassword   - Pi-hole® setupVars.conf WEBPASSWORD value
 #
-# Set them in your munin/plugin-conf.d/pihole.conf file like:
+# Set them in your /etc/munin/plugin-conf.d/pihole.conf file like:
 #
 # [pihole_*]
 #     user root
@@ -313,6 +313,24 @@ case $1 in
                 exit 0
             ;;
         esac
+    ;;
+    "debug")
+        if [ -f "/etc/munin/plugin-conf.d/pihole.conf" ]; then
+            echo "environment:"
+            echo "/etc/munin/plugin-conf.d/pihole.conf"
+            # shellcheck source=/dev/null
+            . /etc/munin/plugin-conf.d/pihole.conf
+        fi
+        echo "plugin environment:"
+        echo "api = '${api}'"
+        echo "cachesuffix = '${cachesuffix}'"
+        echo "host = '${host}'"
+        echo "port = '${port}'"
+        echo "setupvars = '${setupvars}'"
+        echo "webpassword = '${webpassword}'"
+        echo "api calls constructed from environment:"
+        echo "apicall = '${apicall}'"
+        echo "cache_apicall = '${cache_apicall}'"
     ;;
     *)
         case ${plugin_id} in
