@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="07.26.00"
+VERSION="07.26.01"
 
 # Environment variables for this script
 #
@@ -314,24 +314,6 @@ case $1 in
             ;;
         esac
     ;;
-    "debug")
-        if [ -f "/etc/munin/plugin-conf.d/pihole.conf" ]; then
-            echo "environment:"
-            echo "/etc/munin/plugin-conf.d/pihole.conf"
-            # shellcheck source=/dev/null
-            . /etc/munin/plugin-conf.d/pihole.conf
-        fi
-        echo "plugin environment:"
-        echo "api = '${api}'"
-        echo "cachesuffix = '${cachesuffix}'"
-        echo "host = '${host}'"
-        echo "port = '${port}'"
-        echo "setupvars = '${setupvars}'"
-        echo "webpassword = '${webpassword}'"
-        echo "api calls constructed from environment:"
-        echo "apicall = '${apicall}'"
-        echo "cache_apicall = '${cache_apicall}'"
-    ;;
     *)
         case ${plugin_id} in
             "blocked")
@@ -420,6 +402,18 @@ case $1 in
                         echo "${uid}.value ${value}"
                     fi
                 done
+            ;;
+            "debug")
+                echo "plugin environment:"
+                echo "api=\"${api}\""
+                echo "cachesuffix=\"${cachesuffix}\""
+                echo "host=\"${host}\""
+                echo "port=\"${port}\""
+                echo "setupvars=\"${setupvars}\""
+                echo "webpassword=\"${webpassword}\""
+                echo "api calls constructed from environment:"
+                echo "apicall=\"curl -sL \"${host}:${port}${api}\""
+                echo "cache_apicall=\"curl -sL \"${host}:${port}${api}${cachesuffix}${webpassword}\"\""
             ;;
             *)
                 for stat_id in ${get_stats}; do
