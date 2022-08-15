@@ -47,8 +47,8 @@ corresponding environment variable will be reset to its default value. This
 functionality is only available if the munin-pihole-plugins script is found to
 exist within 'SCRIPT_DIR'.
 
-Examples: "./munin-pihole-plugins --configure DNS_SERVER 127.0.0.1"
-          "./munin-pihole-plugins --configure DNS_SERVER RESET"
+Examples: "munin-pihole-plugins --configure DNS_SERVER 127.0.0.1"
+          "munin-pihole-plugins --configure DNS_SERVER RESET"
 
 Takes an optional parameter in the form of 'RESET_ALL' to restore all
 munin-pihole-plugins environment variables to their default values. Again,
@@ -58,7 +58,7 @@ found to exist within 'SCRIPT_DIR', whereby it's considered "installed".
 Example: "munin-pihole-plugins --configure RESET_ALL"
 
 .SS -d, debug, --debug
-Usage: munin-pihole-plugins --debug
+Usage: munin-pihole-plugins {--debug}
 
 Option             GNU long option      Function
  -d, debug          --debug              Install and run the debug plugin

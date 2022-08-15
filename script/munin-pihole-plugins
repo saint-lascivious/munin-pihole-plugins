@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="07.27.00"
+VERSION="07.27.01"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -1215,7 +1215,7 @@ found to exist within 'SCRIPT_DIR', whereby it's considered \"installed\".
 \\nExample: \"${example_prefix} $2 RESET_ALL\""
         ;;
         "-d" | "--debug" | "debug")
-            some "Usage: munin-pihole-plugins $2
+            some "Usage: munin-pihole-plugins {$2}
 \\nOption             GNU long option      Function
  -d, debug          --debug              Install and run the debug plugin
 \\nInstall and run the debug plugin to examine the current plugin environment.
@@ -1557,7 +1557,7 @@ gnugpl_info_function() {
     case "${2}" in
         "-c" | "conditions" | "--conditions")
             some "munin-pihole-plugins saint-lascivious (Hayden Pearce) ©2022
-\\n  This program is ${GREEN}free software${RESET}: you can redistribute it and/or modify
+\\n  This program is ${GREEN}FREE SOFTWARE${RESET}: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation, either version 3 of the License, or
   (at your option) any later version.
