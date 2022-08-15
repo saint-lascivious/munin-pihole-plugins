@@ -1,10 +1,10 @@
-.TH man 1 "10 August 2022" "07.26.01" "munin-pihole-plugins man page"
+.TH man 1 "15 August 2022" "07.27.00" "munin-pihole-plugins man page"
 
 .SH NAME
 munin-pihole-plugins
 
 .SH VERSION
-07.26.01
+07.27.00
 
 .SH DESCRIPTION
 Munin plugins and management script for monitoring various Pi-hole® statistics. Transforms a server into a powerful monitoring platform.
@@ -24,7 +24,7 @@ Option             GNU long option      Function
 Type "./munin-pihole-plugins --help {OPTION [PARAMETER]}" for more detailed
 explanations of each command.
 
-Example: "./munin-pihole-plugins --help --install --plugins"
+Example: "munin-pihole-plugins --help --install --plugins"
 
 .SS -c, configure, --configure
 Usage: munin-pihole-plugins {--configure [RESET_ALL]|[VARIABLE [VALUE]]}
@@ -55,7 +55,20 @@ munin-pihole-plugins environment variables to their default values. Again,
 this functionality is only available if the munin-pihole-plugins script is
 found to exist within 'SCRIPT_DIR', whereby it's considered "installed".
 
-Example: "./munin-pihole-plugins --configure RESET_ALL"
+Example: "munin-pihole-plugins --configure RESET_ALL"
+
+.SS -d, debug, --debug
+Usage: munin-pihole-plugins --debug
+
+Option             GNU long option      Function
+ -d, debug          --debug              Install and run the debug plugin
+
+Install and run the debug plugin to examine the current plugin environment.
+The plugin is executed once using "munin-run" and then removed afterward.
+
+Note: This plugin does not configure or produce any graph.
+
+Example: "munin-pihole-plugins --debug"
 
 .SS -h, help, --help
 Usage: munin-pihole-plugins --help {OPTION[PARAMETER]}
@@ -67,7 +80,7 @@ Display simple or detailed munin-pihole-plugins help information.
 Type "./munin-pihole-plugins --help {OPTION [PARAMETER]}" for more detailed
 explanations of each command.
 
-Example: "./munin-pihole-plugins --help --install --plugins"
+Example: "munin-pihole-plugins --help --install --plugins"
 
 .SS -i, install, --install
 Usage: munin-pihole-plugins {--install [PARAMETER]}
@@ -100,7 +113,7 @@ Parameter          GNU long parameter   Function
                                          and lighttpd-external-munin-proxy
  -W, webserver-only --webserver-only     As above, skipping dependency check
 
-Example: "./munin-pihole-plugins --install --plugins"
+Example: "munin-pihole-plugins --install --plugins"
 
 .SS -r, restart, --restart
 Usage: munin-pihole-plugins {--restart [PARAMETER]}
@@ -121,7 +134,7 @@ Parameter          GNU long parameter   Function
  -w, webserver      --webserver          Restart both the munin and lighttpd
                                          services
 
-Example: "./munin-pihole-plugins --restart"
+Example: "munin-pihole-plugins --restart"
 
 .SS -s, show, --show
 Usage: munin-pihole-plugins {--show OPTION}
@@ -136,7 +149,7 @@ Option             GNU long option      Function
  -l, liability      --liability          Show liability definition
  -w, warranty       --warranty           Show warranty information
 
-Example: "./munin-pihole-plugins --show --warranty"
+Example: "munin-pihole-plugins --show --warranty"
 
 .SS -u, uninstall, --uninstall
 Usage: munin-pihole-plugins {--uninstall [PARAMETER]}
@@ -160,7 +173,7 @@ Parameter          GNU long parameter   Function
                                          lighttpd-external-munin-proxy
  -W, webserver-only --webserver-only     As above, skipping dependency removal
 
-Example: "./munin-pihole-plugins --uninstall --script-only"
+Example: "munin-pihole-plugins --uninstall --script-only"
 
 .SS -v, version, --version
 Usage: munin-pihole-plugins {--version}

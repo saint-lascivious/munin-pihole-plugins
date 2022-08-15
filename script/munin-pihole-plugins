@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="07.26.01"
+VERSION="07.27.00"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -527,7 +527,7 @@ configure_munin() {
 # behind from ancient versions of munin-pihole-plugins, and/or switching from
 # the individual plugins to the monolithic plugin
 uninstall_plugins() {
-    all_plugins="blocked blockrate cache cacheinfo cacherate cache_by_type cache_info clients hits percent queries reply replies_by_type status unique unique_domains"
+    all_plugins="blocked blockrate cache cacheinfo cacherate cache_by_type cache_info clients debug hits percent queries reply replies_by_type status unique unique_domains"
     if [[ -d "${munin_plugin_dir}" ]]; then
         reverberate "info" "Removing any existing munin-pihole-plugins plugin(s)"
         if [[ -f "${munin_plugin_dir}/pihole_" ]]; then
@@ -1137,6 +1137,50 @@ Type \"munin-pihole-plugins --configure\" for a list of available variables"
     fi
 }
 
+debug_function() {
+    if [[ ! "${install_plugins}" == "true" ]]; then
+        if i_can_has "munin-run"; then
+            check_privilege "$@"
+            plugin_id="debug"
+            if [[ -d "${munin_plugin_dir}" ]]; then
+                if [[ -d "${node_plugin_dir}" ]]; then
+                    reverberate "info" "Installing the munin-pihole-plugins debug plugin"
+                    if [[ -f "${munin_plugin_dir}/pihole_" ]]; then
+                        reverberate "additional_info" "Creating symbolic link pihole_${plugin_id}"
+                        ln -s "${munin_plugin_dir}/pihole_" "${node_plugin_dir}/pihole_${plugin_id}" || return
+                        reverberate "success" "${node_plugin_dir}/pihole_${plugin_id}"
+                    else
+                        reverberate "error" "No munin-pihole-plugins plugin found"
+                        reverberate "failure" "${node_plugin_dir}/pihole_${plugin_id}"
+                        reverberate "exit" "1"
+                    fi
+                else
+                    reverberate "error" "No Munin node plugin directory found"
+                    reverberate "failure" "${node_plugin_dir}"
+                    reverberate "additional_info" "If this directory is located at a different path try"
+                    reverberate "config" "NODE_PLUGIN_DIR"
+                    reverberate "exit" "1"
+                fi
+            else
+                reverberate "error" "No Munin plugin directory found"
+                reverberate "failure" "${munin_plugin_dir}"
+                reverberate "additional_info" "If this directory is located at a different path try"
+                reverberate "config" "MUNIN_PLUGIN_DIR"
+                reverberate "exit" "1"
+            fi
+            reverberate "info" "Executing debug plugin"
+            munin-run "pihole_${plugin_id}"
+            reverberate "additional_info" "Removing symbolic link pihole_${plugin_id}"
+            rm "${node_plugin_dir}/pihole_${plugin_id}" || return
+            reverberate "success" "${node_plugin_dir}/pihole_${plugin_id} removed"
+        fi
+    else
+        reverberate "error" "INSTALL_PLUGINS value must be \"true\""
+        reverberate "config" "INSTALL_PLUGINS"
+        reverberate "exit" "0"
+    fi
+}
+
 # display the munin-pihole-plugins script help text
 # its sprawling nature is actually a good thing i guess
 # interactive help is always better than a giant wall of text
@@ -1169,6 +1213,15 @@ munin-pihole-plugins environment variables to their default values. Again,
 this functionality is only available if the munin-pihole-plugins script is
 found to exist within 'SCRIPT_DIR', whereby it's considered \"installed\".
 \\nExample: \"${example_prefix} $2 RESET_ALL\""
+        ;;
+        "-d" | "--debug" | "debug")
+            some "Usage: munin-pihole-plugins $2
+\\nOption             GNU long option      Function
+ -d, debug          --debug              Install and run the debug plugin
+\\nInstall and run the debug plugin to examine the current plugin environment.
+The plugin is executed once using \"munin-run\" and then removed afterward.
+\\nNote: This plugin does not configure or produce any graph.
+\\nExample: \"${example_prefix} $2\""
         ;;
         "-h" | "--help" | "help")
             some "Usage: munin-pihole-plugins $2 {OPTION[PARAMETER]}
@@ -1396,6 +1449,7 @@ the latest munin-pihole-plugins script version.
             some "Usage: munin-pihole-plugins {OPTION [PARAMETER]}
 Option             GNU long option      Function
  -c, configure      --configure          Display or set environment variables
+ -d, debug          --debug              Install and run the debug plugin
  -h, help           --help               Display this and other help dialogues
  -i, install        --install            Install munin-pihole-plugins
  -r, restart        --restart            Restart munin-pihole-plugins services
@@ -1733,6 +1787,9 @@ function_handler() {
     case "${1}" in
         "-c" | "--configure" | "configure")
             config_function "$@"
+        ;;
+        "-d" | "debug" | "--debug")
+            debug_function "$@"
         ;;
         "-h" | "--help" | "help")
             help_function "$@"

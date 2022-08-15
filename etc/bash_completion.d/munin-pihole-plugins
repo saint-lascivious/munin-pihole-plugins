@@ -18,7 +18,7 @@
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
 # shellcheck disable=SC2034
-VERSION="07.26.01"
+VERSION="07.27.00"
 
 # shellcheck disable=SC2207
 _munin-pihole-plugins() {
@@ -30,16 +30,16 @@ _munin-pihole-plugins() {
         shortopts_show
     COMPREPLY=()
     cur="${COMP_WORDS[COMP_CWORD]}"
-    allopts="-c configure --configure -h help --help -i install --install -r
-        restart --restart -s show --show -u uninstall --uninstall -v version \
-        --version"
-    longopts="--configure --help --install --restart --show --uninstall \
-        --version"
+    allopts="-c configure --configure -d debug --debug -h help --help -i \
+        install --install -r restart --restart -s show --show -u uninstall \
+        --uninstall -v version --version"
+    longopts="--configure --debug --help --install --restart --show \
+        --uninstall --version"
     longopts_installuninstall="--plugins --plugins-only --script --script-only \
         --webserver --webserver-only"
     longopts_restart"--plugins --webserver"
     longopts_show="--conditions --gnu-gpl --liability --warranty"
-    opts="configure help install show uninstall version"
+    opts="configure debug help install show uninstall version"
     opts_branch="development master RESET"
     opts_holdduration="0 1 2 3 4 5 RESET"
     opts_installuninstall="plugins plugins-only script script-only webserver \
@@ -58,7 +58,7 @@ _munin-pihole-plugins() {
     opts_verbositylevel="0 1 2 3 4 RESET"
     prev="${COMP_WORDS[COMP_CWORD-1]}"
     prev2="${COMP_WORDS[COMP_CWORD-2]}"
-    shortopts="-c -h -i -r -s -u -v"
+    shortopts="-c -d -h -i -r -s -u -v"
     shortopts_installuninstall="-p -P -s -S -w -W"
     shortopts_restart"-p -w"
     shortopts_show="-c -g -l -w"
