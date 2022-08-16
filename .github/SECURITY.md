@@ -6,9 +6,9 @@ Your assistance is invaluable in helping to keep `munin-pihole-plugins` secure.
 
 | Version | Support status |
 | --- | --- |
+| 8.xx.xx | :white_check_mark:
 | 7.xx.xx | :white_check_mark:
-| 6.xx.xx | :white_check_mark:
-| < 6.xx.xx | :x: |
+| ≤ 6.xx.xx | :x: |
 
 ## Reporting a Vulnerability
 
