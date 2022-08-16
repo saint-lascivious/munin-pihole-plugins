@@ -18,7 +18,7 @@
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
 # shellcheck disable=SC2034
-VERSION="08.00.00"
+VERSION="08.00.01"
 
 # shellcheck disable=SC2207
 _munin-pihole-plugins() {
@@ -37,7 +37,7 @@ _munin-pihole-plugins() {
         --uninstall --version"
     longopts_installuninstall="--plugins --plugins-only --script --script-only \
         --webserver --webserver-only"
-    longopts_restart"--plugins --webserver"
+    longopts_restart="--plugins --webserver"
     longopts_show="--conditions --gnu-gpl --liability --warranty"
     opts="configure debug help install show uninstall version"
     opts_branch="development master RESET"
@@ -60,7 +60,7 @@ _munin-pihole-plugins() {
     prev2="${COMP_WORDS[COMP_CWORD-2]}"
     shortopts="-c -d -h -i -r -s -u -v"
     shortopts_installuninstall="-p -P -s -S -w -W"
-    shortopts_restart"-p -w"
+    shortopts_restart="-p -w"
     shortopts_show="-c -g -l -w"
     case "${prev}" in
         "munin-pihole-plugins")
