@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="08.00.01"
+VERSION="08.01.00"
 
 : <<=cut
 =head1 NAME
@@ -244,8 +244,8 @@ plugin_config() {
             echo "graph_info This graph shows Pi-hole replies by type."
             for stat_id in ${get_stats}; do
                 uid="$(echo "${stat_id}" | sed 's/:.*//')"
-                if [ "${uid}" = "reply_NODATA" ] || [ "${uid}" = "reply_NXDOMAIN" ] || [ "${uid}" = "reply_CNAME" ] || [ "${uid}" = "reply_IP" ]; then
-                    echo "${uid}.label $(echo "${uid}" | sed 's/dns_queries_all_types/all types/; s/reply_//')"
+                if [ "${uid}" = "reply_UNKNOWN" ] || [ "${uid}" = "reply_NODATA" ] || [ "${uid}" = "reply_NXDOMAIN" ] || [ "${uid}" = "reply_CNAME" ] || [ "${uid}" = "reply_IP" ] || [ "${uid}" = "reply_DOMAIN" ] || [ "${uid}" = "reply_RRNAME" ] || [ "${uid}" = "reply_SERVFAIL" ] || [ "${uid}" = "reply_REFUSED" ] || [ "${uid}" = "reply_NOTIMP" ] || [ "${uid}" = "reply_OTHER" ] || [ "${uid}" = "reply_DNSSEC" ] || [ "${uid}" = "reply_NONE" ] || [ "${uid}" = "reply_BLOB" ]; then
+                    echo "${uid}.label $(echo "${uid}" | sed 's/reply_//')"
                     echo "${uid}.type GAUGE"
                     echo "${uid}.min 0"
                 fi
@@ -349,23 +349,21 @@ plugin_data() {
             echo "host=\"${host}\""
             echo "port=\"${port}\""
             echo "setupvars=\"${setupvars}\""
-            if test ! -f "${setupvars}"; then
+            if [ -f "${setupvars}" ]; then
                 echo "${setupvars} exists"
             else
                 echo "${setupvars} does not exist"
             fi
             echo "webpassword=\"${webpassword}\""
             echo "api calls:"
-            echo "curl -sL \"${host}:${port}${api}\""
-            echo "curl -sL \"${host}:${port}${api}${cachesuffix}${webpassword}\""
+            echo "apicall=\"${apicall}\""
+            echo "cache_apicall=\"${cache_apicall}\""
             echo "plugin commands:"
             if [ -x "$(command -v "curl")" ]; then
                 echo "curl exists"
             else
                 echo "curl does not exist"
             fi
-            echo "contact:"
-            echo "munin-pihole-plugins.sainternet.xyz"
         ;;
         "percent")
             for stat_id in ${get_stats}; do
@@ -388,7 +386,7 @@ plugin_data() {
         "replies_by_type")
             for stat_id in ${get_stats}; do
                 uid="$(echo "${stat_id}" | sed 's/:.*//')"
-                if [ "${uid}" = "reply_NODATA" ] || [ "${uid}" = "reply_NXDOMAIN" ] || [ "${uid}" = "reply_CNAME" ] || [ "${uid}" = "reply_IP" ]; then
+                if [ "${uid}" = "reply_UNKNOWN" ] || [ "${uid}" = "reply_NODATA" ] || [ "${uid}" = "reply_NXDOMAIN" ] || [ "${uid}" = "reply_CNAME" ] || [ "${uid}" = "reply_IP" ] || [ "${uid}" = "reply_DOMAIN" ] || [ "${uid}" = "reply_RRNAME" ] || [ "${uid}" = "reply_SERVFAIL" ] || [ "${uid}" = "reply_REFUSED" ] || [ "${uid}" = "reply_NOTIMP" ] || [ "${uid}" = "reply_OTHER" ] || [ "${uid}" = "reply_DNSSEC" ] || [ "${uid}" = "reply_NONE" ] || [ "${uid}" = "reply_BLOB" ]; then
                     value="$(echo "${stat_id}" | sed 's/.*://')"
                     echo "${uid}.value ${value}"
                 fi
