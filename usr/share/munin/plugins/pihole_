@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="08.02.00"
+VERSION="08.02.01"
 
 : <<=cut
 =head1 NAME
@@ -102,8 +102,8 @@ else
 fi
 
 if [ "${host}" = "127.0.0.1" ] && [ -n "${ftlport}" ]; then
-    apicall="$(echo ">stats >quit" | nc "${host}" "${ftlport}")"
-    cache_apicall="$(echo ">cacheinfo >quit" | nc "${host}" "${ftlport}")"
+    apicall="$(echo ">stats >quit" | nc "${host}" "${ftlport}" 2>/dev/null)"
+    cache_apicall="$(echo ">cacheinfo >quit" | nc "${host}" "${ftlport}" 2>/dev/null)"
     get_stats="$(echo "${apicall}" | sed 's/ /:/' | sort -u)"
     get_cachestats="$(echo "${cache_apicall}" | sed 's/ /:/' | sort -u)"
 else
@@ -161,6 +161,7 @@ plugin_config() {
             echo "graph_scale no"
             echo "graph_category dns"
             echo "graph_info This graph shows the number of domains blocked by Pi-hole."
+            echo "update_rate 3600"
             for stat_id in ${get_stats}; do
                 uid="$(echo "${stat_id}" | sed 's/:.*//')"
                 if [ "${uid}" = "domains_being_blocked" ]; then
