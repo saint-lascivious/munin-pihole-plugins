@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="08.02.01"
+VERSION="08.03.00"
 
 : <<=cut
 =head1 NAME
@@ -102,15 +102,23 @@ else
 fi
 
 if [ "${host}" = "127.0.0.1" ] && [ -n "${ftlport}" ]; then
-    apicall="$(echo ">stats >quit" | nc "${host}" "${ftlport}" 2>/dev/null)"
-    cache_apicall="$(echo ">cacheinfo >quit" | nc "${host}" "${ftlport}" 2>/dev/null)"
-    get_stats="$(echo "${apicall}" | sed 's/ /:/' | sort -u)"
-    get_cachestats="$(echo "${cache_apicall}" | sed 's/ /:/' | sort -u)"
+    case ${plugin_id} in
+        "cache" | "cache_by_type")
+            get_stats="$(echo ">cacheinfo >quit" | nc "${host}" "${ftlport}" 2>/dev/null | sed 's/ /:/' | sort -u)"
+        ;;
+        *)
+            get_stats="$(echo ">stats >quit" | nc "${host}" "${ftlport}" 2>/dev/null | sed 's/ /:/' | sort -u)"
+        ;;
+    esac
 else
-    apicall="$(curl -sL "${host}:${port}${api}" 2>/dev/null)"
-    cache_apicall="$(curl -sL "${host}:${port}${api}${cachesuffix}${webpassword}" 2>/dev/null)"
-    get_cachestats="$(echo "${cache_apicall}" | sed 's/[{}"]//g; s/cacheinfo://' | tr "," "\\n" | sort -u)"
-    get_stats="$(echo "${apicall}" | sed 's/[{}"]//g' | tr "," "\\n" | sort -u)"
+    case ${plugin_id} in
+        "cache" | "cache_by_type")
+            get_stats="$(echo "curl -sL "${host}:${port}${api}${cachesuffix}${webpassword}" 2>/dev/null" | sed 's/[{}"]//g; s/cacheinfo://' | tr "," "\\n" | sort -u)"
+        ;;
+        *)
+            get_stats="$(echo "curl -sL "${host}:${port}${api}" 2>/dev/null" | sed 's/[{}"]//g' | tr "," "\\n" | sort -u)"
+        ;;
+    esac
 fi
 
 if [ "$1" = "autoconf" ]; then
@@ -178,7 +186,7 @@ plugin_config() {
             echo "graph_scale no"
             echo "graph_category dns"
             echo "graph_info This graph shows Pi-hole's cache."
-            for stat_id in ${get_cachestats}; do
+            for stat_id in ${get_stats}; do
                 uid="$(echo "${stat_id}" | sed 's/:.*//')"
                 if [ "${uid}" = "cache-live-freed" ] || [ "${uid}" = "cache-inserted" ] || [ "${uid}" = "expired" ] || [ "${uid}" = "immortal" ]; then
                     echo "${uid}.label $(echo "${uid}" | sed 's/-/ /g')"
@@ -195,7 +203,7 @@ plugin_config() {
             echo "graph_scale no"
             echo "graph_category dns"
             echo "graph_info This graph shows Pi-hole's cache by type."
-            for stat_id in ${get_cachestats}; do
+            for stat_id in ${get_stats}; do
                 uid="$(echo "${stat_id}" | sed 's/:.*//')"
                 if [ "${uid}" = "ipv4" ] || [ "${uid}" = "ipv6" ] || [ "${uid}" = "srv" ] || [ "${uid}" = "cname" ] || [ "${uid}" = "ds" ] || [ "${uid}" = "dnskey" ] || [ "${uid}" = "other" ]; then
                     echo "${uid}.label $(echo "${uid}" | sed 's/ipv4/A/; s/ipv6/AAAA/; s/srv/SRV/; s/cname/CNAME/; s/ds/DS/; s/dnskey/DNSKEY/')"
@@ -336,7 +344,7 @@ plugin_data() {
             done
         ;;
         "cache")
-            for stat_id in ${get_cachestats}; do
+            for stat_id in ${get_stats}; do
                 uid="$(echo "${stat_id}" | sed 's/:.*//')"
                 if [ "${uid}" = "cache-live-freed" ] || [ "${uid}" = "cache-inserted" ] || [ "${uid}" = "expired" ] || [ "${uid}" = "immortal" ]; then
                     value="$(echo "${stat_id}" | sed 's/.*://')"
@@ -345,7 +353,7 @@ plugin_data() {
             done
         ;;
         "cache_by_type")
-            for stat_id in ${get_cachestats}; do
+            for stat_id in ${get_stats}; do
                 uid="$(echo "${stat_id}" | sed 's/:.*//')"
                 if [ "${uid}" = "ipv4" ] || [ "${uid}" = "ipv6" ] || [ "${uid}" = "srv" ] || [ "${uid}" = "cname" ] || [ "${uid}" = "ds" ] || [ "${uid}" = "dnskey" ] || [ "${uid}" = "other" ]; then
                     value="$(echo "${stat_id}" | sed 's/.*://')"
