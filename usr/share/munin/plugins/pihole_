@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="08.01.00"
+VERSION="08.01.01"
 
 : <<=cut
 =head1 NAME
@@ -356,8 +356,8 @@ plugin_data() {
             fi
             echo "webpassword=\"${webpassword}\""
             echo "api calls:"
-            echo "apicall=\"${apicall}\""
-            echo "cache_apicall=\"${cache_apicall}\""
+            echo "apicall=\"curl -sL \"${host}:${port}${api}\"\""
+            echo "apicall=\"curl -sL \"${host}:${port}${api}${cachesuffix}${webpassword}\"\""
             echo "plugin commands:"
             if [ -x "$(command -v "curl")" ]; then
                 echo "curl exists"
