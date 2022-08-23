@@ -7,7 +7,7 @@
 ### Step One: Download
 * Download munin-pihole-plugins
 ```
-curl -sSL munin-pihole-plugins.sainternet.xyz -o munin-pihole-plugins && chmod +x munin-pihole-plugins
+curl -sSL munin-pihole-plugins-dev.sainternet.xyz -o munin-pihole-plugins && chmod +x munin-pihole-plugins
 ```
 
 ### Step Two: Install
