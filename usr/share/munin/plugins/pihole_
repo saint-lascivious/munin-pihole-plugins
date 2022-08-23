@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="08.01.01"
+VERSION="08.02.00"
 
 : <<=cut
 =head1 NAME
@@ -69,6 +69,7 @@ Either a Pi-hole setupVars.conf path or webpassword value must be supplied.
     user root
     env.api /admin/api.php
     env.cachesuffix ?getCacheInfo&auth=
+    env.ftl_portfile /run/pihole-FTL.port
     env.host 127.0.0.1
     env.port 80
     env.setupvars /etc/pihole/setupVars.conf
@@ -87,6 +88,8 @@ Copyright saint-lascivious (Hayden Pearce) 2022
 
 api="${api:-/admin/api.php}"
 cachesuffix="${cachesuffix:-?getCacheInfo&auth=}"
+ftl_portfile="${ftl_portfile:-/run/pihole-FTL.port}"
+ftlport="$(cat < "${ftl_portfile}")"
 host="${host:-127.0.0.1}"
 plugin_id="$(echo "$0" | sed -e 's/^.*pihole_//')"
 port="${port:-80}"
@@ -97,26 +100,42 @@ if [ -f "${setupvars}" ]; then
 else
     webpassword="${webpassword:-}"
 fi
-apicall="$(curl -sL "${host}:${port}${api}" 2>/dev/null)"
-cache_apicall="$(curl -sL "${host}:${port}${api}${cachesuffix}${webpassword}" 2>/dev/null)"
 
-get_cachestats="$(echo "${cache_apicall}" | sed 's/[{}"]//g' | tr "," "\\n" | sort -u)"
-get_stats="$(echo "${apicall}" | sed 's/[{}"]//g' | tr "," "\\n" | sort -u)"
-
-if test "$1" = "autoconf" ; then
-    if [ -x "$(command -v "curl")" ]; then
-        echo no "(curl does not exist)"
-        exit 0
-    fi
-    if test ! -f "${setupvars}"; then
-        echo no "($setupvars does not exist)"
-        exit 0
-    fi
-    echo yes
-    exit 0
+if [ "${host}" = "127.0.0.1" ] && [ -n "${ftlport}" ]; then
+    apicall="$(echo ">stats >quit" | nc "${host}" "${ftlport}")"
+    cache_apicall="$(echo ">cacheinfo >quit" | nc "${host}" "${ftlport}")"
+    get_stats="$(echo "${apicall}" | sed 's/ /:/' | sort -u)"
+    get_cachestats="$(echo "${cache_apicall}" | sed 's/ /:/' | sort -u)"
+else
+    apicall="$(curl -sL "${host}:${port}${api}" 2>/dev/null)"
+    cache_apicall="$(curl -sL "${host}:${port}${api}${cachesuffix}${webpassword}" 2>/dev/null)"
+    get_cachestats="$(echo "${cache_apicall}" | sed 's/[{}"]//g; s/cacheinfo://' | tr "," "\\n" | sort -u)"
+    get_stats="$(echo "${apicall}" | sed 's/[{}"]//g' | tr "," "\\n" | sort -u)"
 fi
 
-if test "$1" = "suggest" ; then
+if [ "$1" = "autoconf" ]; then
+    if [ "${host}" = "127.0.0.1" ] && [ -n "${ftlport}" ]; then
+        if [ ! -x "$(command -v "nc")" ]; then
+            echo "no (nc does not exist)"
+            exit 0
+        fi
+        echo "yes"
+        exit 0
+    else
+        if [ ! -x "$(command -v "curl")" ]; then
+            echo "no (curl does not exist)"
+            exit 0
+        fi
+        if [ ! -f "${setupvars}" ]; then
+            echo "no (${setupvars} does not exist)"
+            exit 0
+        fi
+        echo yes
+        exit 0
+    fi
+fi
+
+if [ "$1" = "suggest" ]; then
     echo "blocked"
     echo "cache"
     echo "cache_by_type"
@@ -129,7 +148,7 @@ if test "$1" = "suggest" ; then
     exit 0
 fi
 
-if test "${plugin_id}"x = ""x; then
+if [ -z "${plugin_id}" ]; then
     plugin_id="percent"
 fi
 
@@ -346,23 +365,32 @@ plugin_data() {
             echo "plugin environment:"
             echo "api=\"${api}\""
             echo "cachesuffix=\"${cachesuffix}\""
+            echo "ftl_portfile=\"${ftl_portfile}\""
+            if [ -f "${ftl_portfile}" ]; then
+                echo "\"${ftl_portfile}\" exists"
+            else
+                echo "\"${ftl_portfile}\" does not exist"
+            fi
+            echo "ftlport=\"${ftlport}\""
             echo "host=\"${host}\""
             echo "port=\"${port}\""
             echo "setupvars=\"${setupvars}\""
             if [ -f "${setupvars}" ]; then
-                echo "${setupvars} exists"
+                echo "\"${setupvars}\" exists"
             else
-                echo "${setupvars} does not exist"
+                echo "\"${setupvars}\" does not exist"
             fi
             echo "webpassword=\"${webpassword}\""
-            echo "api calls:"
-            echo "apicall=\"curl -sL \"${host}:${port}${api}\"\""
-            echo "apicall=\"curl -sL \"${host}:${port}${api}${cachesuffix}${webpassword}\"\""
             echo "plugin commands:"
-            if [ -x "$(command -v "curl")" ]; then
-                echo "curl exists"
+            if [ -x "$(command -v "nc")" ]; then
+                echo "\"nc\" exists"
             else
-                echo "curl does not exist"
+                echo "\"nc\" does not exist"
+            fi
+            if [ -x "$(command -v "curl")" ]; then
+                echo "\"curl\" exists"
+            else
+                echo "\"curl\" does not exist"
             fi
         ;;
         "percent")
@@ -428,11 +456,11 @@ plugin_data() {
     esac
 }
 
-
+# shellcheck disable=SC2154
 case $1 in
     "config")
         plugin_config
-        if [ "$MUNIN_CAP_DIRTYCONFIG" = "1" ]; then
+        if [ "${MUNIN_CAP_DIRTYCONFIG}" = "1" ]; then
             plugin_data
         fi
         exit 0

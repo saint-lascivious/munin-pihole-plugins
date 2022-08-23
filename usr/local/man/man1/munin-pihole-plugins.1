@@ -1,10 +1,10 @@
-.TH man 1 "22 August 2022" "08.01.01" "munin-pihole-plugins man page"
+.TH man 1 "24 August 2022" "08.02.00" "munin-pihole-plugins man page"
 
 .SH NAME
 munin-pihole-plugins
 
 .SH VERSION
-08.01.01
+08.02.00
 
 .SH BRANCH
 development
@@ -218,6 +218,7 @@ Default /etc/munin/plugin-conf.d/pihole.conf plugin configuration.
     user root
     env.api /admin/api.php
     env.cachesuffix ?getCacheInfo&auth=
+    env.ftl_portfile /run/pihole-FTL.port
     env.host 127.0.0.1
     env.port 80
     env.setupvars /etc/pihole/setupVars.conf
