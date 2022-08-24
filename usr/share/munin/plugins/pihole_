@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="08.03.01"
+VERSION="08.03.02"
 
 : <<=cut
 =head1 NAME
@@ -173,9 +173,11 @@ plugin_config() {
             for stat_id in ${get_stats}; do
                 uid="$(echo "${stat_id}" | sed 's/:.*//')"
                 if [ "${uid}" = "domains_being_blocked" ]; then
+                    echo "${uid}.critical 10000000"
                     echo "${uid}.label domains being blocked"
                     echo "${uid}.type GAUGE"
                     echo "${uid}.min 0"
+                    echo "${uid}.warning 5000000"
                 fi
             done
         ;;
@@ -239,10 +241,12 @@ plugin_config() {
             for stat_id in ${get_stats}; do
                 uid="$(echo "${stat_id}" | sed 's/:.*//')"
                 if [ "${uid}" = "ads_percentage_today" ]; then
+                    echo "${uid}.critical 100"
                     echo "${uid}.label percentage blocked"
                     echo "${uid}.type GAUGE"
                     echo "${uid}.max 100"
-                     echo "${uid}.min 0"
+                    echo "${uid}.min 0"
+                    echo "${uid}.warning 90"
                 fi
             done
         ;;
@@ -371,7 +375,6 @@ plugin_data() {
             done
         ;;
         "debug")
-            echo "plugin environment:"
             echo "api=\"${api}\""
             echo "cachesuffix=\"${cachesuffix}\""
             echo "ftl_portfile=\"${ftl_portfile}\""
@@ -390,7 +393,6 @@ plugin_data() {
                 echo "\"${setupvars}\" does not exist"
             fi
             echo "webpassword=\"${webpassword}\""
-            echo "plugin commands:"
             if [ -x "$(command -v "nc")" ]; then
                 echo "\"nc\" exists"
             else
