@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="08.03.00"
+VERSION="08.03.01"
 
 : <<=cut
 =head1 NAME
@@ -113,10 +113,10 @@ if [ "${host}" = "127.0.0.1" ] && [ -n "${ftlport}" ]; then
 else
     case ${plugin_id} in
         "cache" | "cache_by_type")
-            get_stats="$(echo "curl -sL "${host}:${port}${api}${cachesuffix}${webpassword}" 2>/dev/null" | sed 's/[{}"]//g; s/cacheinfo://' | tr "," "\\n" | sort -u)"
+            get_stats="$(echo "curl -sL ${host}:${port}${api}${cachesuffix}${webpassword} 2>/dev/null" | sed 's/[{}"]//g; s/cacheinfo://' | tr "," "\\n" | sort -u)"
         ;;
         *)
-            get_stats="$(echo "curl -sL "${host}:${port}${api}" 2>/dev/null" | sed 's/[{}"]//g' | tr "," "\\n" | sort -u)"
+            get_stats="$(echo "curl -sL ${host}:${port}${api} 2>/dev/null" | sed 's/[{}"]//g' | tr "," "\\n" | sort -u)"
         ;;
     esac
 fi
@@ -281,8 +281,8 @@ plugin_config() {
         ;;
         "status")
             echo "graph_title Pi-hole blocking status"
-            echo "graph_args --base 1000 -l 0 -u 1"
-            echo "graph_vlabel disabled / enabled"
+            echo "graph_args --base 1000 -l -1 -u 1"
+            echo "graph_vlabel unknown / disabled / enabled"
             echo "graph_scale no"
             echo "graph_category dns"
             echo "graph_info This graph shows Pi-hole's blocking status."
@@ -292,7 +292,7 @@ plugin_config() {
                     echo "${uid}.label blocking status"
                     echo "${uid}.type GAUGE"
                     echo "${uid}.max 1"
-                    echo "${uid}.min 0"
+                    echo "${uid}.min -1"
                 fi
             done
         ;;
@@ -439,6 +439,8 @@ plugin_data() {
                     else
                         if [ "${value}" = "disabled" ]; then
                             echo "${uid}.value 0"
+                        else
+                            echo "${uid}.value -1"
                         fi
                     fi
                 fi
