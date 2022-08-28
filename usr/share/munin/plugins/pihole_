@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="08.03.02"
+VERSION="08.04.00"
 
 : <<=cut
 =head1 NAME
@@ -102,6 +102,7 @@ else
 fi
 
 if [ "${host}" = "127.0.0.1" ] && [ -n "${ftlport}" ]; then
+    api_method="telnet"
     case ${plugin_id} in
         "cache" | "cache_by_type")
             get_stats="$(echo ">cacheinfo >quit" | nc "${host}" "${ftlport}" 2>/dev/null | sed 's/ /:/' | sort -u)"
@@ -111,6 +112,7 @@ if [ "${host}" = "127.0.0.1" ] && [ -n "${ftlport}" ]; then
         ;;
     esac
 else
+    api_method="json"
     case ${plugin_id} in
         "cache" | "cache_by_type")
             get_stats="$(echo "curl -sL ${host}:${port}${api}${cachesuffix}${webpassword} 2>/dev/null" | sed 's/[{}"]//g; s/cacheinfo://' | tr "," "\\n" | sort -u)"
@@ -173,11 +175,10 @@ plugin_config() {
             for stat_id in ${get_stats}; do
                 uid="$(echo "${stat_id}" | sed 's/:.*//')"
                 if [ "${uid}" = "domains_being_blocked" ]; then
-                    echo "${uid}.critical 10000000"
                     echo "${uid}.label domains being blocked"
                     echo "${uid}.type GAUGE"
                     echo "${uid}.min 0"
-                    echo "${uid}.warning 5000000"
+                    echo "${uid}.warning 0:"
                 fi
             done
         ;;
@@ -223,11 +224,15 @@ plugin_config() {
             echo "graph_info This graph shows clients seen by Pi-hole."
             for stat_id in ${get_stats}; do
                 uid="$(echo "${stat_id}" | sed 's/:.*//')"
-                if [ "${uid}" = "unique_clients" ] || [ "${uid}" = "clients_ever_seen" ]; then
+                if [ "${uid}" = "clients_ever_seen" ]; then
+                    echo "${uid}.label $(echo "${uid}" | sed 's/_/ /g')"
+                    echo "${uid}.min 0"
+                fi
+                if [ "${uid}" = "unique_clients" ]; then
                     echo "${uid}.critical 100"
                     echo "${uid}.label $(echo "${uid}" | sed 's/_/ /g')"
                     echo "${uid}.min 0"
-                    echo "${uid}.warning 50"
+                    echo "${uid}.warning 1:80"
                 fi
             done
         ;;
@@ -241,12 +246,12 @@ plugin_config() {
             for stat_id in ${get_stats}; do
                 uid="$(echo "${stat_id}" | sed 's/:.*//')"
                 if [ "${uid}" = "ads_percentage_today" ]; then
-                    echo "${uid}.critical 100"
+                    echo "${uid}.critical 98"
                     echo "${uid}.label percentage blocked"
                     echo "${uid}.type GAUGE"
                     echo "${uid}.max 100"
                     echo "${uid}.min 0"
-                    echo "${uid}.warning 90"
+                    echo "${uid}.warning 1:80"
                 fi
             done
         ;;
@@ -293,10 +298,12 @@ plugin_config() {
             for stat_id in ${get_stats}; do
                 uid="$(echo "${stat_id}" | sed 's/:.*//')"
                 if [ "${uid}" = "status" ]; then
+                    echo "${uid}.critical 0:"
                     echo "${uid}.label blocking status"
                     echo "${uid}.type GAUGE"
                     echo "${uid}.max 1"
                     echo "${uid}.min -1"
+                    echo "${uid}.warning 1:"
                 fi
             done
         ;;
@@ -326,10 +333,12 @@ plugin_config() {
             for stat_id in ${get_stats}; do
                 uid="$(echo "${stat_id}" | sed 's/:.*//')"
                 if [ "${uid}" = "ads_percentage_today" ]; then
+                    echo "${uid}.critical 98"
                     echo "${uid}.label percentage blocked"
                     echo "${uid}.type GAUGE"
                     echo "${uid}.max 100"
                     echo "${uid}.min 0"
+                    echo "${uid}.warning 1:80"
                 fi
             done
         ;;
@@ -337,6 +346,7 @@ plugin_config() {
 }
 
 plugin_data() {
+    # shellcheck disable=SC2154
     case ${plugin_id} in
         "blocked")
             for stat_id in ${get_stats}; do
@@ -402,6 +412,20 @@ plugin_data() {
                 echo "\"curl\" exists"
             else
                 echo "\"curl\" does not exist"
+            fi
+            echo "plugin capabilities:"
+            if [ "${MUNIN_CAP_DIRTYCONFIG}" = "1" ]; then
+                echo "dirtyconf capability supported"
+            else
+                echo "dirtyconf capability unsupported"
+            fi
+            echo "api method:"
+            echo "${api_method}"
+            echo "testing api:"
+            if [ -n "${get_stats}" ]; then
+                echo "response received"
+            else
+                echo "no response received"
             fi
         ;;
         "percent")
@@ -469,9 +493,9 @@ plugin_data() {
     esac
 }
 
-# shellcheck disable=SC2154
 case $1 in
     "config")
+        # shellcheck disable=SC2154
         plugin_config
         if [ "${MUNIN_CAP_DIRTYCONFIG}" = "1" ]; then
             plugin_data
