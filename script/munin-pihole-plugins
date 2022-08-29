@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="08.04.00"
+VERSION="08.04.01"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -239,10 +239,8 @@ EOF
 # many actions are near instantaneous, add some dwell time (default 0) after
 # output
 hold_up() {
-    if [[ "${verbosity_level}" -ge "1" ]]; then
-        if [[ "${hold_duration}" -gt "0" ]]; then
-            sleep "${hold_duration}"
-        fi
+    if [[ "${verbosity_level}" -ge "1" ]] && [[ "${hold_duration}" -gt "0" ]]; then
+        sleep "${hold_duration}"
     fi
 }
 
@@ -258,7 +256,7 @@ reverberate() {
     case "$1" in
         "additional_info")
             if [[ "${verbosity_level}" -ge "4" ]]; then
-                echo -e "\\n  [${WHITE}ℹ${RESET}] ${GREEN}$2${RESET}"
+                echo -e "    ${WHITE}…${RESET} $2"
                 hold_up
             fi
         ;;
@@ -644,8 +642,7 @@ restart_services() {
                 if i_can_has "service"; then
                     reverberate "info" "Restarting services"
                     for service_id in ${service_list}; do
-                        # shellcheck disable=SC2143
-                        if [[ "$(service "${service_id}" status | grep --ignore-case "active: active")" ]]; then
+                        if "$(service "${service_id}" status | grep --ignore-case "active: active")"; then
                             service "${service_id}" "restart"
                             reverberate "success" "${service_id}"
                         fi

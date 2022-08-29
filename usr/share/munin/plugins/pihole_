@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="08.04.00"
+VERSION="08.04.01"
 
 : <<=cut
 =head1 NAME
@@ -175,10 +175,11 @@ plugin_config() {
             for stat_id in ${get_stats}; do
                 uid="$(echo "${stat_id}" | sed 's/:.*//')"
                 if [ "${uid}" = "domains_being_blocked" ]; then
+                    echo "${uid}.critical 1:5000000"
                     echo "${uid}.label domains being blocked"
                     echo "${uid}.type GAUGE"
                     echo "${uid}.min 0"
-                    echo "${uid}.warning 0:"
+                    echo "${uid}.warning 0:3000000"
                 fi
             done
         ;;
@@ -232,7 +233,7 @@ plugin_config() {
                     echo "${uid}.critical 100"
                     echo "${uid}.label $(echo "${uid}" | sed 's/_/ /g')"
                     echo "${uid}.min 0"
-                    echo "${uid}.warning 1:80"
+                    echo "${uid}.warning 1:50"
                 fi
             done
         ;;
@@ -251,7 +252,7 @@ plugin_config() {
                     echo "${uid}.type GAUGE"
                     echo "${uid}.max 100"
                     echo "${uid}.min 0"
-                    echo "${uid}.warning 1:80"
+                    echo "${uid}.warning 1:85"
                 fi
             done
         ;;
@@ -298,7 +299,7 @@ plugin_config() {
             for stat_id in ${get_stats}; do
                 uid="$(echo "${stat_id}" | sed 's/:.*//')"
                 if [ "${uid}" = "status" ]; then
-                    echo "${uid}.critical 0:"
+                    echo "${uid}.critical 0:1"
                     echo "${uid}.label blocking status"
                     echo "${uid}.type GAUGE"
                     echo "${uid}.max 1"
@@ -317,9 +318,11 @@ plugin_config() {
             for stat_id in ${get_stats}; do
                 uid="$(echo "${stat_id}" | sed 's/:.*//')"
                 if [ "${uid}" = "unique_domains" ]; then
+                    echo "${uid}.critical 1:20000"
                     echo "${uid}.label unique domains"
                     echo "${uid}.type GAUGE"
                     echo "${uid}.min 0"
+                    echo "${uid}.warning 0:10000"
                 fi
             done
         ;;
