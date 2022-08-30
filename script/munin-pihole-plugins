@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="08.04.03"
+VERSION="08.04.04"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -642,7 +642,8 @@ restart_services() {
                 if i_can_has "service"; then
                     reverberate "info" "Restarting services"
                     for service_id in ${service_list}; do
-                        if "$(service "${service_id}" status | grep --ignore-case "active: active")"; then
+                        # shellcheck disable=SC2143
+                        if [[ -n "$(service "${service_id}" status | grep --ignore-case "active: active")" ]]; then
                             service "${service_id}" "restart"
                             reverberate "success" "${service_id}"
                         fi
