@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="08.04.02"
+VERSION="08.04.03"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -256,7 +256,7 @@ reverberate() {
     case "$1" in
         "additional_info")
             if [[ "${verbosity_level}" -ge "4" ]]; then
-                echo -e "    ${WHITE}…${RESET} $2"
+                echo -e "\\n  [${WHITE}ℹ${RESET}] ${GREEN}$2${RESET}"
                 hold_up
             fi
         ;;
