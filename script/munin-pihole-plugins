@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="08.04.08"
+VERSION="08.04.09"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -597,8 +597,9 @@ install_plugins() {
 configure_plugins() {
     if [[ -d "${plugin_config_dir}" ]]; then
         if [[ ! -f  "${plugin_config_dir}/pihole.conf" ]]; then
+            reverberate "info" "Installing the default plugin configuration"
             download "${plugin_repo}/etc/munin/plugin-conf.d/pihole.conf" -P "${plugin_config_dir}"
-            reverberate "info" "Default munin-pihole-plugins plugin configuration saved"
+            reverberate "additional_info" "A copy of the default plugin configuration was installed"
             reverberate "success" "${plugin_config_dir}/pihole.conf"
         fi
     else
