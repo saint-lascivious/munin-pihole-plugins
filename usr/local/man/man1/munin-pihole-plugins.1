@@ -1,10 +1,10 @@
-.TH man 1 "29 August 2022" "08.04.01" "munin-pihole-plugins man page"
+.TH man 1 "30 August 2022" "08.04.02" "munin-pihole-plugins man page"
 
 .SH NAME
 munin-pihole-plugins
 
 .SH VERSION
-08.04.01
+08.04.02
 
 .SH BRANCH
 development
@@ -223,6 +223,17 @@ Default /etc/munin/plugin-conf.d/pihole.conf plugin configuration.
     env.port 80
     env.setupvars /etc/pihole/setupVars.conf
     #env.webpassword PIHOLE_SETUPVARS_WEBPASSWORD_HERE
+
+    env.blocked_crit 1:5000000
+    env.blocked_warn 0:3000000
+    env.clients_crit 100
+    env.clients_warn 1:50
+    env.percent_crit 98
+    env.percent_warn 1:85
+    env.status_crit 0:1
+    env.status_warn 1:
+    env.unique_domains_crit 1:20000
+    env.unique_domains_warn 0:10000
 
 .SS SCRIPT CONFIGURATION
 Variable                 Default Value
