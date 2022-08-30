@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="08.04.07"
+VERSION="08.04.08"
 
 : <<=cut
 =head1 NAME
@@ -70,6 +70,7 @@ Either a Pi-hole setupVars.conf path or webpassword value must be supplied.
     env.api /admin/api.php
     env.cachesuffix ?getCacheInfo&auth=
     env.ftl_portfile /run/pihole-FTL.port
+    #env.ftlport 4711
     env.host 127.0.0.1
     env.port 80
     env.setupvars /etc/pihole/setupVars.conf
@@ -77,18 +78,18 @@ Either a Pi-hole setupVars.conf path or webpassword value must be supplied.
 
     env.blocked_crit 1:5000000
     env.blocked_warn 0:3000000
-    #env.cache_crit
-    #env.cache_warn
-    #env.cache_by_type_crit
-    #env.cache_by_type_warn
+    env.cache_crit
+    env.cache_warn
+    env.cache_by_type_crit
+    env.cache_by_type_warn
     env.clients_crit 100
     env.clients_warn 1:50
     env.percent_crit 95
     env.percent_warn 1:85
-    #env.queries_crit
-    #env.queries_warn
-    #env.replies_by_type_crit
-    #env.replies_by_type_warn
+    env.queries_crit
+    env.queries_warn
+    env.replies_by_type_crit
+    env.replies_by_type_warn
     env.status_crit 0:1
     env.status_warn 1:
     env.unique_domains_crit 1:20000
@@ -115,8 +116,13 @@ cachesuffix="${cachesuffix:-?getCacheInfo&auth=}"
 cache_warn="${cache_warn:-}"
 clients_crit="${clients_crit:-100}"
 clients_warn="${clients_warn:-1:50}"
-ftlport="$(cat < "${ftl_portfile}")"
 ftl_portfile="${ftl_portfile:-/run/pihole-FTL.port}"
+if [ -f "${ftl_portfile}" ]; then
+    get_ftlport="$(cat < "${ftl_portfile}")"
+    ftlport="${ftlport:-${get_ftlport}}"
+else
+    ftlport="${ftlport:-}"
+fi
 host="${host:-127.0.0.1}"
 percent_crit="${percent_crit:-98}"
 percent_warn="${percent_warn:-1:85}"
@@ -429,6 +435,7 @@ plugin_data() {
             done
         ;;
         "debug")
+            echo "plugin variables:"
             echo "api=\"${api}\""
             echo "cachesuffix=\"${cachesuffix}\""
             echo "ftl_portfile=\"${ftl_portfile}\""
@@ -447,6 +454,25 @@ plugin_data() {
                 echo "\"${setupvars}\" does not exist"
             fi
             echo "webpassword=\"${webpassword}\""
+            echo "blocked_crit=\"${blocked_crit}\""
+            echo "blocked_warn=\"${blocked_warn}\""
+            echo "cache_crit=\"${cache_crit}\""
+            echo "cache_warn=\"${cache_warn}\""
+            echo "cache_by_type_crit=\"${cache_by_type_crit}\""
+            echo "cache_by_type_warn=\"${cache_by_type_warn}\""
+            echo "clients_crit=\"${clients_crit}\""
+            echo "clients_warn=\"${clients_warn}\""
+            echo "percent_crit=\"${percent_crit}\""
+            echo "percent_warn=\"${percent_warn}\""
+            echo "queries_crit=\"${queries_crit}\""
+            echo "queries_warn=\"${queries_warn}\""
+            echo "replies_by_type_crit=\"${replies_by_type_crit}\""
+            echo "replies_by_type_warn=\"${replies_by_type_warn}\""
+            echo "status_crit=\"${status_crit}\""
+            echo "status_warn=\"${status_warn}\""
+            echo "unique_domains_crit=\"${unique_domains_crit}\""
+            echo "unique_domains_warn=\"${unique_domains_warn}\""
+            echo "plugin commands:"
             if [ -x "$(command -v "nc")" ]; then
                 echo "\"nc\" exists"
             else
@@ -465,12 +491,6 @@ plugin_data() {
             fi
             echo "api method:"
             echo "${api_method}"
-            echo "testing api:"
-            if [ -n "${get_stats}" ]; then
-                echo "response received"
-            else
-                echo "no response received"
-            fi
         ;;
         "percent")
             for stat_id in ${get_stats}; do
