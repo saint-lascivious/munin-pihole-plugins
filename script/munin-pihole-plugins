@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="08.04.09"
+VERSION="08.04.10"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -467,6 +467,7 @@ configure_proxy() {
                 reverberate "exit" "1"
             fi
         fi
+        reverberate "info" "A copy of lighttpd-external-munin-proxy was installed"
         reverberate "success" "${proxy_config}"
     else
         reverberate "error" "No lighttpd configuration directory found"
