@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="08.04.04"
+VERSION="08.04.05"
 
 : <<=cut
 =head1 NAME
@@ -73,14 +73,22 @@ Either a Pi-hole setupVars.conf path or webpassword value must be supplied.
     env.host 127.0.0.1
     env.port 80
     env.setupvars /etc/pihole/setupVars.conf
-    env.webpassword PIHOLE_SETUPVARS_WEBPASSWORD_HERE
+    #env.webpassword PIHOLE_SETUPVARS_WEBPASSWORD_HERE
 
     env.blocked_crit 1:5000000
     env.blocked_warn 0:3000000
+    #env.cache_crit
+    #env.cache_warn
+    #env.cache_by_type_crit
+    #env.cache_by_type_warn
     env.clients_crit 100
     env.clients_warn 1:50
-    env.percent_crit 98
+    env.percent_crit 95
     env.percent_warn 1:85
+    #env.queries_crit
+    #env.queries_warn
+    #env.replies_by_type_crit
+    #env.replies_by_type_warn
     env.status_crit 0:1
     env.status_warn 1:
     env.unique_domains_crit 1:20000
@@ -100,16 +108,24 @@ Copyright saint-lascivious (Hayden Pearce) 2022
 api="${api:-/admin/api.php}"
 blocked_crit="${blocked_crit:-1:5000000}"
 blocked_warn="${blocked_warn:-0:3000000}"
+cache_by_type_crit="${cache_by_type_crit:-}"
+cache_by_type_warn="${cache_by_type_warn:-}"
+cache_crit="${cache_crit:-}"
 cachesuffix="${cachesuffix:-?getCacheInfo&auth=}"
+cache_warn="${cache_warn:-}"
 clients_crit="${clients_crit:-100}"
 clients_warn="${clients_warn:-1:50}"
-ftl_portfile="${ftl_portfile:-/run/pihole-FTL.port}"
 ftlport="$(cat < "${ftl_portfile}")"
+ftl_portfile="${ftl_portfile:-/run/pihole-FTL.port}"
 host="${host:-127.0.0.1}"
 percent_crit="${percent_crit:-98}"
 percent_warn="${percent_warn:-1:85}"
 plugin_id="$(echo "$0" | sed -e 's/^.*pihole_//')"
 port="${port:-80}"
+queries_crit="${queries_crit:-}"
+queries_warn="${queries_warn:-}"
+replies_by_type_crit="${replies_by_type_crit:-}"
+replies_by_type_warn="${replies_by_type_warn:-}"
 setupvars="${setupvars:-/etc/pihole/setupVars.conf}"
 status_crit="${status_crit:-0:1}"
 status_warn="${status_warn:-1:}"
@@ -214,9 +230,11 @@ plugin_config() {
             for stat_id in ${get_stats}; do
                 stat="$(echo "${stat_id}" | sed 's/:.*//')"
                 if [ "${stat}" = "cache-live-freed" ] || [ "${stat}" = "cache-inserted" ] || [ "${stat}" = "expired" ] || [ "${stat}" = "immortal" ]; then
+                    echo "${stat}.critical ${cache_crit}"
                     echo "${stat}.label $(echo "${stat}" | sed 's/-/ /g')"
                     echo "${stat}.type GAUGE"
                     echo "${stat}.min 0"
+                    echo "${stat}.warning ${cache_warn}"
                 fi
             done
         ;;
@@ -231,9 +249,11 @@ plugin_config() {
             for stat_id in ${get_stats}; do
                 stat="$(echo "${stat_id}" | sed 's/:.*//')"
                 if [ "${stat}" = "ipv4" ] || [ "${stat}" = "ipv6" ] || [ "${stat}" = "srv" ] || [ "${stat}" = "cname" ] || [ "${stat}" = "ds" ] || [ "${stat}" = "dnskey" ] || [ "${stat}" = "other" ]; then
+                    echo "${stat}.critical ${cache_by_type_crit}"
                     echo "${stat}.label $(echo "${stat}" | sed 's/ipv4/A/; s/ipv6/AAAA/; s/srv/SRV/; s/cname/CNAME/; s/ds/DS/; s/dnskey/DNSKEY/')"
                     echo "${stat}.type GAUGE"
                     echo "${stat}.min 0"
+                    echo "${stat}.warning ${cache_by_type_warn}"
                 fi
             done
         ;;
@@ -246,11 +266,7 @@ plugin_config() {
             echo "graph_info This graph shows clients seen by Pi-hole."
             for stat_id in ${get_stats}; do
                 stat="$(echo "${stat_id}" | sed 's/:.*//')"
-                if [ "${stat}" = "clients_ever_seen" ]; then
-                    echo "${stat}.label $(echo "${stat}" | sed 's/_/ /g')"
-                    echo "${stat}.min 0"
-                fi
-                if [ "${stat}" = "unique_clients" ]; then
+                if [ "${stat}" = "clients_ever_seen" ] || [ "${stat}" = "unique_clients" ]; then
                     echo "${stat}.critical ${clients_crit}"
                     echo "${stat}.label $(echo "${stat}" | sed 's/_/ /g')"
                     echo "${stat}.min 0"
@@ -287,9 +303,11 @@ plugin_config() {
             for stat_id in ${get_stats}; do
                 stat="$(echo "${stat_id}" | sed 's/:.*//')"
                 if [ "${stat}" = "dns_queries_today" ] || [ "${stat}" = "ads_blocked_today" ] || [ "${stat}" = "queries_forwarded" ] || [ "${stat}" = "queries_cached" ]; then
+                    echo "${stat}.critical ${queries_crit}"
                     echo "${stat}.label $(echo "${stat}" | sed 's/dns_queries_today/queries/; s/ads_blocked_today/blocked queries/; s/queries_//')"
                     echo "${stat}.type GAUGE"
                     echo "${stat}.min 0"
+                    echo "${stat}.warning ${queries_warn}"
                 fi
             done
         ;;
@@ -304,9 +322,11 @@ plugin_config() {
             for stat_id in ${get_stats}; do
                 stat="$(echo "${stat_id}" | sed 's/:.*//')"
                 if [ "${stat}" = "reply_UNKNOWN" ] || [ "${stat}" = "reply_NODATA" ] || [ "${stat}" = "reply_NXDOMAIN" ] || [ "${stat}" = "reply_CNAME" ] || [ "${stat}" = "reply_IP" ] || [ "${stat}" = "reply_DOMAIN" ] || [ "${stat}" = "reply_RRNAME" ] || [ "${stat}" = "reply_SERVFAIL" ] || [ "${stat}" = "reply_REFUSED" ] || [ "${stat}" = "reply_NOTIMP" ] || [ "${stat}" = "reply_OTHER" ] || [ "${stat}" = "reply_DNSSEC" ] || [ "${stat}" = "reply_NONE" ] || [ "${stat}" = "reply_BLOB" ]; then
+                    echo "${stat}.critical ${replies_by_type_crit}"
                     echo "${stat}.label $(echo "${stat}" | sed 's/reply_//')"
                     echo "${stat}.type GAUGE"
                     echo "${stat}.min 0"
+                    echo "${stat}.warning ${replies_by_type_warn}"
                 fi
             done
         ;;
@@ -357,12 +377,12 @@ plugin_config() {
             for stat_id in ${get_stats}; do
                 stat="$(echo "${stat_id}" | sed 's/:.*//')"
                 if [ "${stat}" = "ads_percentage_today" ]; then
-                    echo "${stat}.critical 98"
+                    echo "${stat}.critical ${percent_crit}"
                     echo "${stat}.label percentage blocked"
                     echo "${stat}.type GAUGE"
                     echo "${stat}.max 100"
                     echo "${stat}.min 0"
-                    echo "${stat}.warning 1:80"
+                    echo "${stat}.warning ${percent_warn}"
                 fi
             done
         ;;
