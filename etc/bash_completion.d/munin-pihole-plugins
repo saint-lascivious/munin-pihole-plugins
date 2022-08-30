@@ -18,7 +18,7 @@
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
 # shellcheck disable=SC2034
-VERSION="07.01.01"
+VERSION="07.02.00"
 
 # shellcheck disable=SC2207
 _munin-pihole-plugins() {
@@ -53,7 +53,7 @@ _munin-pihole-plugins() {
         IGNORE_PIHOLE_ON_HOST INSTALL_PLUGINS INSTALL_SCRIPT LIGHTTPD_WEBROOT \
         INSTALL_WEBSERVER MUNIN_BRANCH MUNIN_DIR MUNIN_CONFIG_DIR \
         MUNIN_PLUGIN_DIR NODE_PLUGIN_DIR PLUGIN_CONFIG_DIR PLUGIN_LIST \
-        PROXY_CONFIG_DIR SCRIPT_DIR SHOW_COLOUR SHOW_HEADER \
+        PROXY_CONFIG_DIR RESET_ALL SCRIPT_DIR SHOW_COLOUR SHOW_HEADER \
         SKIP_DEPENDENCY_CHECK UPDATE_SELF VERBOSITY_LEVEL"
     opts_verbositylevel="0 1 2 3 4 RESET"
     prev="${COMP_WORDS[COMP_CWORD-1]}"

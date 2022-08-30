@@ -1,10 +1,10 @@
-.TH man 1 "24 August 2022" "07.01.01" "munin-pihole-plugins man page"
+.TH man 1 "31 August 2022" "07.02.00" "munin-pihole-plugins man page"
 
 .SH NAME
 munin-pihole-plugins
 
 .SH VERSION
-07.01.01
+07.02.00
 
 .SH BRANCH
 master
@@ -219,10 +219,30 @@ Default /etc/munin/plugin-conf.d/pihole.conf plugin configuration.
     env.api /admin/api.php
     env.cachesuffix ?getCacheInfo&auth=
     env.ftl_portfile /run/pihole-FTL.port
+    #env.ftlport
     env.host 127.0.0.1
     env.port 80
     env.setupvars /etc/pihole/setupVars.conf
     #env.webpassword PIHOLE_SETUPVARS_WEBPASSWORD_HERE
+
+    env.blocked_crit 1:5000000
+    env.blocked_warn 0:3000000
+    env.cache_crit
+    env.cache_warn
+    env.cache_by_type_crit
+    env.cache_by_type_warn
+    env.clients_crit 100
+    env.clients_warn 1:50
+    env.percent_crit 95
+    env.percent_warn 1:85
+    env.queries_crit
+    env.queries_warn
+    env.replies_by_type_crit
+    env.replies_by_type_warn
+    env.status_crit 0:1
+    env.status_warn 1:
+    env.unique_domains_crit 1:20000
+    env.unique_domains_warn 0:10000
 
 .SS SCRIPT CONFIGURATION
 Variable                 Default Value

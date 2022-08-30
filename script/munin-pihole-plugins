@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="07.01.01"
+VERSION="07.02.00"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -239,10 +239,8 @@ EOF
 # many actions are near instantaneous, add some dwell time (default 0) after
 # output
 hold_up() {
-    if [[ "${verbosity_level}" -ge "1" ]]; then
-        if [[ "${hold_duration}" -gt "0" ]]; then
-            sleep "${hold_duration}"
-        fi
+    if [[ "${verbosity_level}" -ge "1" ]] && [[ "${hold_duration}" -gt "0" ]]; then
+        sleep "${hold_duration}"
     fi
 }
 
@@ -469,6 +467,7 @@ configure_proxy() {
                 reverberate "exit" "1"
             fi
         fi
+        reverberate "info" "A copy of lighttpd-external-munin-proxy was installed"
         reverberate "success" "${proxy_config}"
     else
         reverberate "error" "No lighttpd configuration directory found"
@@ -599,8 +598,9 @@ install_plugins() {
 configure_plugins() {
     if [[ -d "${plugin_config_dir}" ]]; then
         if [[ ! -f  "${plugin_config_dir}/pihole.conf" ]]; then
+            reverberate "info" "Installing the default plugin configuration"
             download "${plugin_repo}/etc/munin/plugin-conf.d/pihole.conf" -P "${plugin_config_dir}"
-            reverberate "info" "Default munin-pihole-plugins plugin configuration saved"
+            reverberate "additional_info" "A copy of the default plugin configuration was installed"
             reverberate "success" "${plugin_config_dir}/pihole.conf"
         fi
     else
@@ -645,7 +645,7 @@ restart_services() {
                     reverberate "info" "Restarting services"
                     for service_id in ${service_list}; do
                         # shellcheck disable=SC2143
-                        if [[ "$(service "${service_id}" status | grep --ignore-case "active: active")" ]]; then
+                        if [[ -n "$(service "${service_id}" status | grep --ignore-case "active: active")" ]]; then
                             service "${service_id}" "restart"
                             reverberate "success" "${service_id}"
                         fi
@@ -927,7 +927,7 @@ EOF
 # - quad9      9.9.9.9
 config_function() {
     if [[ -n "$3" ]]; then
-        external_var_list="BRANCH DNS_PORT DNS_SERVER EXTERNAL_CONFIG_DIR EXTERNAL_CONFIG_FILE IGNORE_PIHOLE_ON_HOST INSTALL_PLUGINS INSTALL_SCRIPT INSTALL_WEBSERVER LIGHTTPD_WEBROOT MUNIN_BRANCH MUNIN_DIR MUNIN_CONFIG_DIR MUNIN_PLUGIN_DIR NODE_PLUGIN_DIR PLUGIN_CONFIG_DIR PLUGIN_LIST PROXY_CONFIG_DIR SCRIPT_DIR SHOW_COLOUR SHOW_HEADER SKIP_DEPENDENCY_CHECK UPDATE_SELF VERBOSITY_LEVEL"
+        external_var_list="BRANCH DNS_PORT DNS_SERVER EXTERNAL_CONFIG_DIR EXTERNAL_CONFIG_FILE IGNORE_PIHOLE_ON_HOST INSTALL_PLUGINS INSTALL_SCRIPT INSTALL_WEBSERVER LIGHTTPD_WEBROOT MUNIN_BRANCH MUNIN_DIR MUNIN_CONFIG_DIR MUNIN_PLUGIN_DIR NODE_PLUGIN_DIR PLUGIN_CONFIG_DIR PLUGIN_LIST PROXY_CONFIG_DIR RESET_ALL SCRIPT_DIR SHOW_COLOUR SHOW_HEADER SKIP_DEPENDENCY_CHECK UPDATE_SELF VERBOSITY_LEVEL"
         for external_var_id in ${external_var_list}; do
             if [[ "$2" == "${external_var_id}" ]]; then
                 if [[ -f "${script_dir}/munin-pihole-plugins" ]]; then
