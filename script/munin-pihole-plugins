@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="08.04.06"
+VERSION="08.04.07"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -925,7 +925,7 @@ EOF
 # - quad9      9.9.9.9
 config_function() {
     if [[ -n "$3" ]]; then
-        external_var_list="BRANCH DNS_PORT DNS_SERVER EXTERNAL_CONFIG_DIR EXTERNAL_CONFIG_FILE IGNORE_PIHOLE_ON_HOST INSTALL_PLUGINS INSTALL_SCRIPT INSTALL_WEBSERVER LIGHTTPD_WEBROOT MUNIN_BRANCH MUNIN_DIR MUNIN_CONFIG_DIR MUNIN_PLUGIN_DIR NODE_PLUGIN_DIR PLUGIN_CONFIG_DIR PLUGIN_LIST PROXY_CONFIG_DIR SCRIPT_DIR SHOW_COLOUR SHOW_HEADER SKIP_DEPENDENCY_CHECK UPDATE_SELF VERBOSITY_LEVEL"
+        external_var_list="BRANCH DNS_PORT DNS_SERVER EXTERNAL_CONFIG_DIR EXTERNAL_CONFIG_FILE IGNORE_PIHOLE_ON_HOST INSTALL_PLUGINS INSTALL_SCRIPT INSTALL_WEBSERVER LIGHTTPD_WEBROOT MUNIN_BRANCH MUNIN_DIR MUNIN_CONFIG_DIR MUNIN_PLUGIN_DIR NODE_PLUGIN_DIR PLUGIN_CONFIG_DIR PLUGIN_LIST PROXY_CONFIG_DIR RESET_ALL SCRIPT_DIR SHOW_COLOUR SHOW_HEADER SKIP_DEPENDENCY_CHECK UPDATE_SELF VERBOSITY_LEVEL"
         for external_var_id in ${external_var_list}; do
             if [[ "$2" == "${external_var_id}" ]]; then
                 if [[ -f "${script_dir}/munin-pihole-plugins" ]]; then
