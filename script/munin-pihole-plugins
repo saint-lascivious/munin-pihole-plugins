@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="08.05.00"
+VERSION="08.05.01"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -613,7 +613,7 @@ configure_plugins() {
                     reverberate "success" "${external_config_dir}/pihole.conf.save"
                 fi
                 reverberate "info" "Updating the default plugin configuration"
-                download "${plugin_repo}/etc/munin/plugin-conf.d/pihole.conf" -O "${plugin_config_dir}"
+                download "${plugin_repo}/etc/munin/plugin-conf.d/pihole.conf" -O "${plugin_config_dir}/pihole.conf"
                 reverberate "additional_info" "The default plugin configuration was updated"
                 reverberate "success" "${plugin_config_dir}/pihole.conf"
             fi
