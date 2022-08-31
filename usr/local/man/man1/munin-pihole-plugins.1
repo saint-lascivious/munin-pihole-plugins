@@ -1,10 +1,10 @@
-.TH man 1 "31 August 2022" "08.04.10" "munin-pihole-plugins man page"
+.TH man 1 "31 August 2022" "08.05.00" "munin-pihole-plugins man page"
 
 .SH NAME
 munin-pihole-plugins
 
 .SH VERSION
-08.04.10
+08.05.00
 
 .SH BRANCH
 development
@@ -245,32 +245,33 @@ Default /etc/munin/plugin-conf.d/pihole.conf plugin configuration.
     env.unique_domains_warn 0:10000
 
 .SS SCRIPT CONFIGURATION
-Variable                 Default Value
- BRANCH                   "development"
- DNS_PORT                 "53"
- DNS_SERVER               "208.67.222.222" (OPENDNS)
- EXTERNAL_CONFIG_DIR      "/etc/munin-pihole-plugins"
- EXTERNAL_CONFIG_FILE     "munin-pihole-plugins.conf"
- HOLD_DURATION            "0"
- IGNORE_PIHOLE_ON_HOST    "false"
- INSTALL_PLUGINS          "true"
- INSTALL_SCRIPT           "true"
- INSTALL_WEBSERVER        "true"
- LIGHTTPD_WEBROOT         "/var/www/html"
- MUNIN_BRANCH             "stable"
- MUNIN_DIR                "/etc/munin"
- MUNIN_CONFIG_DIR         "/etc/munin/munin-conf.d"
- MUNIN_PLUGIN_DIR         "/usr/share/munin/plugins"
- NODE_PLUGIN_DIR          "/etc/munin/plugins"
- PLUGIN_CONFIG_DIR        "/etc/munin/plugin-conf.d"
- PLUGIN_LIST              "blocked cache cache_by_type clients percent queries replies_by_type status unique_domains"
- PROXY_CONFIG_DIR         "/etc/lighttpd"
- SCRIPT_DIR               "/usr/local/bin"
- SHOW_COLOUR              "true"
- SHOW_HEADER              "true"
- SKIP_DEPENDENCY_CHECK    "false"
- UPDATE_SELF              "true"
- VERBOSITY_LEVEL          "3"
+Variable                       Default Value
+ BRANCH                         "development"
+ DNS_PORT                       "53"
+ DNS_SERVER                     "208.67.222.222" (OPENDNS)
+ EXTERNAL_CONFIG_DIR            "/etc/munin-pihole-plugins"
+ EXTERNAL_CONFIG_FILE           "munin-pihole-plugins.conf"
+ FORCE_UPDATE_PLUGIN_CONFIG     "false"
+ HOLD_DURATION                  "0"
+ IGNORE_PIHOLE_ON_HOST          "false"
+ INSTALL_PLUGINS                "true"
+ INSTALL_SCRIPT                 "true"
+ INSTALL_WEBSERVER              "true"
+ LIGHTTPD_WEBROOT               "/var/www/html"
+ MUNIN_BRANCH                   "stable"
+ MUNIN_DIR                      "/etc/munin"
+ MUNIN_CONFIG_DIR               "/etc/munin/munin-conf.d"
+ MUNIN_PLUGIN_DIR               "/usr/share/munin/plugins"
+ NODE_PLUGIN_DIR                "/etc/munin/plugins"
+ PLUGIN_CONFIG_DIR              "/etc/munin/plugin-conf.d"
+ PLUGIN_LIST                    "blocked cache cache_by_type clients percent queries replies_by_type status unique_domains"
+ PROXY_CONFIG_DIR               "/etc/lighttpd"
+ SCRIPT_DIR                     "/usr/local/bin"
+ SHOW_COLOUR                    "true"
+ SHOW_HEADER                    "true"
+ SKIP_DEPENDENCY_CHECK          "false"
+ UPDATE_SELF                    "true"
+ VERBOSITY_LEVEL                "3"
 
 .SS Munin Node Configuration
 Example /etc/munin/munin-node.conf multi-server, multi-node access control configuration
