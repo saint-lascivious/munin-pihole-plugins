@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="08.06.02"
+VERSION="08.06.03"
 
 : <<=cut
 =head1 NAME
@@ -79,20 +79,20 @@ Either a Pi-hole setupVars.conf path or webpassword value must be supplied.
 
     env.blocked_crit 1:5000000
     env.blocked_warn 0:3000000
-    env.cache_crit
-    env.cache_warn
-    env.cache_by_type_crit
-    env.cache_by_type_warn
+    #env.cache_crit
+    #env.cache_warn
+    #env.cache_by_type_crit
+    #env.cache_by_type_warn
     env.clients_crit 100
     env.clients_warn 1:50
     env.percent_crit 95
     env.percent_warn 1:85
-    env.privacy_crit
-    env.privacy_warn
-    env.queries_crit
-    env.queries_warn
-    env.replies_by_type_crit
-    env.replies_by_type_warn
+    #env.privacy_crit
+    #env.privacy_warn
+    #env.queries_crit
+    #env.queries_warn
+    #env.replies_by_type_crit
+    #env.replies_by_type_warn
     env.status_crit 0:1
     env.status_warn 1:
     env.unique_domains_crit 1:20000
@@ -153,10 +153,10 @@ if [ "${host}" = "127.0.0.1" ] || [ "${host}" = "::1" ] && [ -n "${ftlport}" ]; 
     api_method="telnet"
     case ${plugin_id} in
         "cache" | "cache_by_type")
-            get_stats="$(echo ">cacheinfo >quit" | nc "${host}" "${ftlport}" 2>/dev/null | sed 's/ /:/' | sort -u)"
+            get_stats="$(echo ">cacheinfo >quit" | nc "${host}" "${ftlport}" 2>/dev/null | sed 's/ //' | sort -u)"
         ;;
         *)
-            get_stats="$(echo ">stats >quit" | nc "${host}" "${ftlport}" 2>/dev/null | sed 's/ //' | sort -u)"
+            get_stats="$(echo ">stats >quit" | nc "${host}" "${ftlport}" 2>/dev/null | sed 's/ /:/' | sort -u)"
         ;;
     esac
 else

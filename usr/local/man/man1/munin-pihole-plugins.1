@@ -1,10 +1,10 @@
-.TH man 1 "1 September 2022" "08.06.02" "munin-pihole-plugins man page"
+.TH man 1 "1 September 2022" "08.06.03" "munin-pihole-plugins man page"
 
 .SH NAME
 munin-pihole-plugins
 
 .SH VERSION
-08.06.02
+08.06.03
 
 .SH BRANCH
 development
@@ -220,7 +220,7 @@ Default /etc/munin/plugin-conf.d/pihole.conf plugin configuration.
     env.api /admin/api.php
     env.cachesuffix ?getCacheInfo&auth=
     env.ftl_portfile /run/pihole-FTL.port
-    #env.ftlport
+    #env.ftlport 4711
     env.host 127.0.0.1
     env.port 80
     env.setupvars /etc/pihole/setupVars.conf
@@ -228,18 +228,20 @@ Default /etc/munin/plugin-conf.d/pihole.conf plugin configuration.
 
     env.blocked_crit 1:5000000
     env.blocked_warn 0:3000000
-    env.cache_crit
-    env.cache_warn
-    env.cache_by_type_crit
-    env.cache_by_type_warn
+    #env.cache_crit
+    #env.cache_warn
+    #env.cache_by_type_crit
+    #env.cache_by_type_warn
     env.clients_crit 100
     env.clients_warn 1:50
     env.percent_crit 95
     env.percent_warn 1:85
-    env.queries_crit
-    env.queries_warn
-    env.replies_by_type_crit
-    env.replies_by_type_warn
+    #env.privacy_crit
+    #env.privacy_warn
+    #env.queries_crit
+    #env.queries_warn
+    #env.replies_by_type_crit
+    #env.replies_by_type_warn
     env.status_crit 0:1
     env.status_warn 1:
     env.unique_domains_crit 1:20000
