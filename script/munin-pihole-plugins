@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="08.06.01"
+VERSION="08.06.02"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -528,7 +528,7 @@ configure_munin() {
 # behind from ancient versions of munin-pihole-plugins, and/or switching from
 # the individual plugins to the monolithic plugin
 uninstall_plugins() {
-    all_plugins="blocked blockrate cache cacheinfo cacherate cache_by_type cache_info clients debug hits percent queries reply replies_by_type status unique unique_domains"
+    all_plugins="blocked blockrate cache cacheinfo cacherate cache_by_type cache_info clients debug hits percent privacy queries reply replies_by_type status unique unique_domains"
     if [[ -d "${munin_plugin_dir}" ]]; then
         reverberate "info" "Removing any existing munin-pihole-plugins plugin(s)"
         if [[ -f "${munin_plugin_dir}/pihole_" ]]; then
