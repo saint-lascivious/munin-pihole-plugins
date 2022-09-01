@@ -1,10 +1,10 @@
-.TH man 1 "31 August 2022" "08.05.01" "munin-pihole-plugins man page"
+.TH man 1 "1 September 2022" "08.06.00" "munin-pihole-plugins man page"
 
 .SH NAME
 munin-pihole-plugins
 
 .SH VERSION
-08.05.01
+08.06.00
 
 .SH BRANCH
 development
@@ -201,6 +201,7 @@ Plugin name:             Plugin description
  pihole_cache_by_type    - Shows Pi-hole's cache by type.
  pihole_clients          - Shows clients seen by Pi-hole.
  pihole_percent          - Shows Pi-hole's blocked query percentage.
+ pihole_privacy          - Shows Pi-hole's privacy level.
  pihole_queries          - Shows queries seen by Pi-hole.
  pihole_replies_by_type  - Shows Pi-hole replies by type.
  pihole_status           - Shows Pi-hole's blocking status.
@@ -264,7 +265,7 @@ Variable                       Default Value
  MUNIN_PLUGIN_DIR               "/usr/share/munin/plugins"
  NODE_PLUGIN_DIR                "/etc/munin/plugins"
  PLUGIN_CONFIG_DIR              "/etc/munin/plugin-conf.d"
- PLUGIN_LIST                    "blocked cache cache_by_type clients percent queries replies_by_type status unique_domains"
+ PLUGIN_LIST                    "blocked cache cache_by_type clients percent privacy queries replies_by_type status unique_domains"
  PROXY_CONFIG_DIR               "/etc/lighttpd"
  SCRIPT_DIR                     "/usr/local/bin"
  SHOW_COLOUR                    "true"

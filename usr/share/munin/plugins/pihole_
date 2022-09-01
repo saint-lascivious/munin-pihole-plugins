@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="08.05.01"
+VERSION="08.06.00"
 
 : <<=cut
 =head1 NAME
@@ -54,6 +54,7 @@ Plugin name:             Plugin description
  pihole_clients          - Shows clients seen by Pi-hole.
  pihole_debug            - Shows plugin debug information via commandline.
  pihole_percent          - Shows Pi-hole's blocked query percentage.
+ pihole_privacy          - Shows Pi-hole's privacy level.
  pihole_queries          - Shows queries seen by Pi-hole.
  pihole_replies_by_type  - Shows Pi-hole replies by type.
  pihole_status           - Shows Pi-hole's blocking status.
@@ -86,6 +87,8 @@ Either a Pi-hole setupVars.conf path or webpassword value must be supplied.
     env.clients_warn 1:50
     env.percent_crit 95
     env.percent_warn 1:85
+    env.privacy_crit
+    env.privacy_warn
     env.queries_crit
     env.queries_warn
     env.replies_by_type_crit
@@ -144,14 +147,14 @@ else
     webpassword="${webpassword:-}"
 fi
 
-if [ "${host}" = "127.0.0.1" ] && [ -n "${ftlport}" ]; then
+if [ "${host}" = "127.0.0.1" ] || [ "${host]" = "::1" ] && [ -n "${ftlport}" ]; then
     api_method="telnet"
     case ${plugin_id} in
         "cache" | "cache_by_type")
             get_stats="$(echo ">cacheinfo >quit" | nc "${host}" "${ftlport}" 2>/dev/null | sed 's/ /:/' | sort -u)"
         ;;
         *)
-            get_stats="$(echo ">stats >quit" | nc "${host}" "${ftlport}" 2>/dev/null | sed 's/ /:/' | sort -u)"
+            get_stats="$(echo ">stats >quit" | nc "${host}" "${ftlport}" 2>/dev/null | sed 's/ //' | sort -u)"
         ;;
     esac
 else
@@ -194,6 +197,7 @@ if [ "$1" = "suggest" ]; then
     echo "cache_by_type"
     echo "clients"
     echo "percent"
+    echo "privacy"
     echo "queries"
     echo "replies_by_type"
     echo "status"
@@ -296,6 +300,25 @@ plugin_config() {
                     echo "${stat}.max 100"
                     echo "${stat}.min 0"
                     echo "${stat}.warning ${percent_warn}"
+                fi
+            done
+        ;;
+        "privacy")
+            echo "graph_title Pi-hole privacy level"
+            echo "graph_args --base 1000 -l 0 -u 3"
+            echo "graph_vlabel privacy level"
+            echo "graph_scale no"
+            echo "graph_category dns"
+            echo "graph_info This graph shows Pi-hole's privacy level."
+            for stat_id in ${get_stats}; do
+                stat="$(echo "${stat_id}" | sed 's/:.*//')"
+                if [ "${stat}" = "privacy_level" ]; then
+                    echo "${stat}.critical ${privacy_crit}"
+                    echo "${stat}.label privacy level"
+                    echo "${stat}.type GAUGE"
+                    echo "${stat}.max 3"
+                    echo "${stat}.min 0"
+                    echo "${stat}.warning ${privacy_warn}"
                 fi
             done
         ;;
@@ -496,6 +519,15 @@ plugin_data() {
             for stat_id in ${get_stats}; do
                 stat="$(echo "${stat_id}" | sed 's/:.*//')"
                 if [ "${stat}" = "ads_percentage_today" ]; then
+                    value="$(echo "${stat_id}" | sed 's/.*://')"
+                    echo "${stat}.value ${value}"
+                fi
+            done
+        ;;
+        "privacy")
+            for stat_id in ${get_stats}; do
+                stat="$(echo "${stat_id}" | sed 's/:.*//')"
+                if [ "${stat}" = "privacy_level" ]; then
                     value="$(echo "${stat_id}" | sed 's/.*://')"
                     echo "${stat}.value ${value}"
                 fi
