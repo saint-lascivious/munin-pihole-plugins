@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="08.06.00"
+VERSION="08.06.01"
 
 : <<=cut
 =head1 NAME
@@ -129,6 +129,8 @@ fi
 host="${host:-127.0.0.1}"
 percent_crit="${percent_crit:-98}"
 percent_warn="${percent_warn:-1:85}"
+privacy_crit="${privacy_crit:-}"
+privacy_warn="${privacy_warn:-}"
 plugin_id="$(echo "$0" | sed -e 's/^.*pihole_//')"
 port="${port:-80}"
 queries_crit="${queries_crit:-}"
@@ -147,7 +149,7 @@ else
     webpassword="${webpassword:-}"
 fi
 
-if [ "${host}" = "127.0.0.1" ] || [ "${host]" = "::1" ] && [ -n "${ftlport}" ]; then
+if [ "${host}" = "127.0.0.1" ] || [ "${host}" = "::1" ] && [ -n "${ftlport}" ]; then
     api_method="telnet"
     case ${plugin_id} in
         "cache" | "cache_by_type")
