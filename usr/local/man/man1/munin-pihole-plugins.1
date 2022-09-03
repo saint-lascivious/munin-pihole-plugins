@@ -1,10 +1,10 @@
-.TH man 1 "1 September 2022" "08.06.03" "munin-pihole-plugins man page"
+.TH man 1 "3 September 2022" "08.07.00" "munin-pihole-plugins man page"
 
 .SH NAME
 munin-pihole-plugins
 
 .SH VERSION
-08.06.03
+08.07.00
 
 .SH BRANCH
 development
@@ -226,24 +226,76 @@ Default /etc/munin/plugin-conf.d/pihole.conf plugin configuration.
     env.setupvars /etc/pihole/setupVars.conf
     #env.webpassword PIHOLE_SETUPVARS_WEBPASSWORD_HERE
 
-    env.blocked_crit 1:5000000
-    env.blocked_warn 0:3000000
-    #env.cache_crit
-    #env.cache_warn
-    #env.cache_by_type_crit
-    #env.cache_by_type_warn
-    env.clients_crit 100
-    env.clients_warn 1:50
-    env.percent_crit 95
-    env.percent_warn 1:85
-    #env.privacy_crit
-    #env.privacy_warn
-    #env.queries_crit
-    #env.queries_warn
-    #env.replies_by_type_crit
-    #env.replies_by_type_warn
-    env.status_crit 0:1
-    env.status_warn 1:
+    env.domains_being_blocked_crit 1:5000000
+    env.domains_being_blocked_warn 0:3000000
+    #env.cache-live-freed_crit
+    #env.cache-live-freed_warn
+    #env.cache-inserted_crit
+    #env.cache-inserted_warn
+    #env.expired_crit
+    #env.expired_warn
+    #env.immortal_crit
+    #env.immortal_warn
+    #env.ipv4_crit
+    #env.ipv4_warn
+    #env.ipv6_crit
+    #env.ipv6_warn
+    #env.srv_crit
+    #env.srv_warn
+    #env.cname_crit
+    #env.cname_warn
+    #env.ds_crit
+    #env.ds_warn
+    #env.dnskey_crit
+    #env.dnskey_warn
+    #env.other_crit
+    #env.other_warn
+    #env.clients_ever_seen_crit
+    #env.clients_ever_seen_warn
+    env.unique_clients_crit 100
+    env.unique_clients_warn 1:50
+    env.ads_percentage_today_crit 98
+    env.ads_percentage_today_warn 1:85
+    #env.privacy_level_crit
+    #env.privacy_level_warn
+    #env.dns_queries_today_crit
+    #env.dns_queries_today_warn
+    #env.ads_blocked_today_crit
+    #env.ads_blocked_today_warn
+    #env.queries_forwarded_crit
+    #env.queries_forwarded_warn
+    #env.queries_cached_crit
+    #env.queries_cached_warn
+    #env.reply_UNKNOWN_crit
+    #env.reply_UNKNOWN_warn
+    #env.reply_NODATA_crit
+    #env.reply_NODATA_warn
+    #env.reply_NXDOMAIN_crit
+    #env.reply_NXDOMAIN_warn
+    #env.reply_CNAME_crit
+    #env.reply_CNAME_warn
+    #env.reply_IP_crit
+    #env.reply_IP_warn
+    #env.reply_DOMAIN_crit
+    #env.reply_DOMAIN_warn
+    #env.reply_RRNAME_crit
+    #env.reply_RRNAME_warn
+    #env.reply_SERVFAIL_crit
+    #env.reply_SERVFAIL_warn
+    #env.reply_REFUSED_crit
+    #env.reply_REFUSED_warn
+    #env.reply_NOTIMP_crit
+    #env.reply_NOTIMP_warn
+    #env.reply_OTHER_crit
+    #env.reply_OTHER_warn
+    #env.reply_DNSSEC_crit
+    #env.reply_DNSSEC_warn
+    #env.reply_NONE_crit
+    #env.reply_NONE_warn
+    #env.reply_BLOB_crit
+    #env.reply_BLOB_warn
+    #env.status_crit
+    #env.status_warn
     env.unique_domains_crit 1:20000
     env.unique_domains_warn 0:10000
 

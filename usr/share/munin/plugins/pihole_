@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="08.06.03"
+VERSION="08.07.00"
 
 : <<=cut
 =head1 NAME
@@ -77,28 +77,80 @@ Either a Pi-hole setupVars.conf path or webpassword value must be supplied.
     env.setupvars /etc/pihole/setupVars.conf
     #env.webpassword PIHOLE_SETUPVARS_WEBPASSWORD_HERE
 
-    env.blocked_crit 1:5000000
-    env.blocked_warn 0:3000000
-    #env.cache_crit
-    #env.cache_warn
-    #env.cache_by_type_crit
-    #env.cache_by_type_warn
-    env.clients_crit 100
-    env.clients_warn 1:50
-    env.percent_crit 95
-    env.percent_warn 1:85
-    #env.privacy_crit
-    #env.privacy_warn
-    #env.queries_crit
-    #env.queries_warn
-    #env.replies_by_type_crit
-    #env.replies_by_type_warn
-    env.status_crit 0:1
-    env.status_warn 1:
+    env.domains_being_blocked_crit 1:5000000
+    env.domains_being_blocked_warn 0:3000000
+    #env.cache-live-freed_crit
+    #env.cache-live-freed_warn
+    #env.cache-inserted_crit
+    #env.cache-inserted_warn
+    #env.expired_crit
+    #env.expired_warn
+    #env.immortal_crit
+    #env.immortal_warn
+    #env.ipv4_crit
+    #env.ipv4_warn
+    #env.ipv6_crit
+    #env.ipv6_warn
+    #env.srv_crit
+    #env.srv_warn
+    #env.cname_crit
+    #env.cname_warn
+    #env.ds_crit
+    #env.ds_warn
+    #env.dnskey_crit
+    #env.dnskey_warn
+    #env.other_crit
+    #env.other_warn
+    #env.clients_ever_seen_crit
+    #env.clients_ever_seen_warn
+    env.unique_clients_crit 100
+    env.unique_clients_warn 1:50
+    env.ads_percentage_today_crit 98
+    env.ads_percentage_today_warn 1:85
+    #env.privacy_level_crit
+    #env.privacy_level_warn
+    #env.dns_queries_today_crit
+    #env.dns_queries_today_warn
+    #env.ads_blocked_today_crit
+    #env.ads_blocked_today_warn
+    #env.queries_forwarded_crit
+    #env.queries_forwarded_warn
+    #env.queries_cached_crit
+    #env.queries_cached_warn
+    #env.reply_UNKNOWN_crit
+    #env.reply_UNKNOWN_warn
+    #env.reply_NODATA_crit
+    #env.reply_NODATA_warn
+    #env.reply_NXDOMAIN_crit
+    #env.reply_NXDOMAIN_warn
+    #env.reply_CNAME_crit
+    #env.reply_CNAME_warn
+    #env.reply_IP_crit
+    #env.reply_IP_warn
+    #env.reply_DOMAIN_crit
+    #env.reply_DOMAIN_warn
+    #env.reply_RRNAME_crit
+    #env.reply_RRNAME_warn
+    #env.reply_SERVFAIL_crit
+    #env.reply_SERVFAIL_warn
+    #env.reply_REFUSED_crit
+    #env.reply_REFUSED_warn
+    #env.reply_NOTIMP_crit
+    #env.reply_NOTIMP_warn
+    #env.reply_OTHER_crit
+    #env.reply_OTHER_warn
+    #env.reply_DNSSEC_crit
+    #env.reply_DNSSEC_warn
+    #env.reply_NONE_crit
+    #env.reply_NONE_warn
+    #env.reply_BLOB_crit
+    #env.reply_BLOB_warn
+    #env.status_crit
+    #env.status_warn
     env.unique_domains_crit 1:20000
     env.unique_domains_warn 0:10000
 
-Define relevant env.* variables to override the default values to suit your requirement.
+Uncomment and/or (re)define any relevant env.* variables as required to suit your requirement.
 
 =head1 AUTHOR
 
@@ -110,15 +162,7 @@ Copyright saint-lascivious (Hayden Pearce) 2022
 #%# capabilities=autoconf suggest
 
 api="${api:-/admin/api.php}"
-blocked_crit="${blocked_crit:-1:5000000}"
-blocked_warn="${blocked_warn:-0:3000000}"
-cache_by_type_crit="${cache_by_type_crit:-}"
-cache_by_type_warn="${cache_by_type_warn:-}"
-cache_crit="${cache_crit:-}"
 cachesuffix="${cachesuffix:-?getCacheInfo&auth=}"
-cache_warn="${cache_warn:-}"
-clients_crit="${clients_crit:-100}"
-clients_warn="${clients_warn:-1:50}"
 ftl_portfile="${ftl_portfile:-/run/pihole-FTL.port}"
 if [ -f "${ftl_portfile}" ]; then
     get_ftlport="$(cat < "${ftl_portfile}")"
@@ -127,27 +171,87 @@ else
     ftlport="${ftlport:-}"
 fi
 host="${host:-127.0.0.1}"
-percent_crit="${percent_crit:-98}"
-percent_warn="${percent_warn:-1:85}"
-privacy_crit="${privacy_crit:-}"
-privacy_warn="${privacy_warn:-}"
 plugin_id="$(echo "$0" | sed -e 's/^.*pihole_//')"
 port="${port:-80}"
-queries_crit="${queries_crit:-}"
-queries_warn="${queries_warn:-}"
-replies_by_type_crit="${replies_by_type_crit:-}"
-replies_by_type_warn="${replies_by_type_warn:-}"
 setupvars="${setupvars:-/etc/pihole/setupVars.conf}"
-status_crit="${status_crit:-0:1}"
-status_warn="${status_warn:-1:}"
-unique_domains_crit="${unique_domains_crit:-1:20000}"
-unique_domains_warn="${unique_domains_warn:-0:10000}"
 if [ -f "${setupvars}" ]; then
     get_webpassword="$(cat < "${setupvars}" | grep WEBPASSWORD | sed s/WEBPASSWORD=//g)"
     webpassword="${webpassword:-${get_webpassword}}"
 else
     webpassword="${webpassword:-}"
 fi
+domains_being_blocked_crit="${domains_being_blocked_crit:-1:5000000}"
+domains_being_blocked_warn="${domains_being_blocked_warn:-0:3000000}"
+cache-live-freed_crit="${cache-live-freed_crit:-}"
+cache-live-freed_warn="${cache-live-freed_warn:-}"
+cache-inserted_crit="${cache-inserted_crit:-}"
+cache-inserted_warn="${cache-inserted_warn:-}"
+expired_crit="${expired_crit:-}"
+expired_warn="${expired_warn:-}"
+immortal_crit="${immortal_crit:-}"
+immortal_warn="${immortal_warn:-}"
+ipv4_crit="${ipv4_crit:-}"
+ipv4_warn="${ipv4_warn:-}"
+ipv6_crit="${ipv6_crit:-}"
+ipv6_warn="${ipv6_warn:-}"
+srv_crit="${srv_crit:-}"
+srv_warn="${srv_warn:-}"
+cname_crit="${cname_crit:-}"
+cname_warn="${cname_warn:-}"
+ds_crit="${ds_crit:-}"
+ds_warn="${ds_warn:-}"
+dnskey_crit="${dnskey_crit:-}"
+dnskey_warn="${dnskey_warn:-}"
+other_crit="${other_crit:-}"
+other_warn="${other_warn:-}"
+clients_ever_seen_crit="${clients_ever_seen_crit:-}"
+clients_ever_seen_warn="${clients_ever_seen_warn:-}"
+unique_clients_crit="${unique_clients_crit:-100}"
+unique_clients_warn="${unique_clients_warn:-1:50}"
+ads_percentage_today_crit="${ads_percentage_today_crit:-98}"
+ads_percentage_today_warn="${ads_percentage_today_warn:-1:85}"
+privacy_level_crit="${privacy_level_crit:-}"
+privacy_level_warn="${privacy_level_warn:-}"
+dns_queries_today_crit="${dns_queries_today_crit:-}"
+dns_queries_today_warn="${dns_queries_today_warn:-}"
+ads_blocked_today_crit="${ads_blocked_today_crit:-}"
+ads_blocked_today_warn="${ads_blocked_today_warn:-}"
+queries_forwarded_crit="${queries_forwarded_crit:-}"
+queries_forwarded_warn="${queries_forwarded_warn:-}"
+queries_cached_crit="${queries_cached_crit:-}"
+queries_cached_warn="${queries_cached_warn:-}"
+reply_UNKNOWN_crit="${reply_UNKNOWN_crit:-}"
+reply_UNKNOWN_warn="${reply_UNKNOWN_warn:-}"
+reply_NODATA_crit="${reply_NODATA_crit:-}"
+reply_NODATA_warn="${reply_NODATA_warn:-}"
+reply_NXDOMAIN_crit="${reply_NXDOMAIN_crit:-}"
+reply_NXDOMAIN_warn="${reply_NXDOMAIN_warn:-}"
+reply_CNAME_crit="${reply_CNAME_crit:-}"
+reply_CNAME_warn="${reply_CNAME_warn:-}"
+reply_IP_crit="${reply_IP_crit:-}"
+reply_IP_warn="${reply_IP_warn:-}"
+reply_DOMAIN_crit="${reply_DOMAIN_crit:-}"
+reply_DOMAIN_warn="${reply_DOMAIN_warn:-}"
+reply_RRNAME_crit="${reply_RRNAME_crit:-}"
+reply_RRNAME_warn="${reply_RRNAME_warn:-}"
+reply_SERVFAIL_crit="${reply_SERVFAIL_crit:-}"
+reply_SERVFAIL_warn="${reply_SERVFAIL_warn:-}"
+reply_REFUSED_crit="${reply_REFUSED_crit:-}"
+reply_REFUSED_warn="${reply_REFUSED_warn:-}"
+reply_NOTIMP_crit="${reply_NOTIMP_crit:-}"
+reply_NOTIMP_warn="${reply_NOTIMP_warn:-}"
+reply_OTHER_crit="${reply_OTHER_crit:-}"
+reply_OTHER_warn="${reply_OTHER_warn:-}"
+reply_DNSSEC_crit="${reply_DNSSEC_crit:-}"
+reply_DNSSEC_warn="${reply_DNSSEC_warn:-}"
+reply_NONE_crit="${reply_NONE_crit:-}"
+reply_NONE_warn="${reply_NONE_warn:-}"
+reply_BLOB_crit="${reply_BLOB_crit:-}"
+reply_BLOB_warn="${reply_BLOB_warn:-}"
+status_crit="${status_crit:-0:1}"
+status_warn="${status_warn:-1:}"
+unique_domains_crit="${unique_domains_crit:-1:20000}"
+unique_domains_warn="${unique_domains_warn:-0:10000}"
 
 if [ "${host}" = "127.0.0.1" ] || [ "${host}" = "::1" ] && [ -n "${ftlport}" ]; then
     api_method="telnet"
@@ -172,7 +276,7 @@ else
 fi
 
 if [ "$1" = "autoconf" ]; then
-    if [ "${host}" = "127.0.0.1" ] && [ -n "${ftlport}" ]; then
+    if [ "${host}" = "127.0.0.1" ] || [ "${host}" = "::1" ] && [ -n "${ftlport}" ]; then
         if [ ! -x "$(command -v "nc")" ]; then
             echo "no (nc does not exist)"
             exit 0
@@ -224,11 +328,11 @@ plugin_config() {
             for stat_id in ${get_stats}; do
                 stat="$(echo "${stat_id}" | sed 's/:.*//')"
                 if [ "${stat}" = "domains_being_blocked" ]; then
-                    echo "${stat}.critical ${blocked_crit}"
+                    echo "${stat}.critical ${stat}_crit"
                     echo "${stat}.label domains being blocked"
-                    echo "${stat}.type GAUGE"
                     echo "${stat}.min 0"
-                    echo "${stat}.warning ${blocked_warn}"
+                    echo "${stat}.type GAUGE"
+                    echo "${stat}.warning ${stat}_warn"
                 fi
             done
         ;;
@@ -242,11 +346,11 @@ plugin_config() {
             for stat_id in ${get_stats}; do
                 stat="$(echo "${stat_id}" | sed 's/:.*//')"
                 if [ "${stat}" = "cache-live-freed" ] || [ "${stat}" = "cache-inserted" ] || [ "${stat}" = "expired" ] || [ "${stat}" = "immortal" ]; then
-                    echo "${stat}.critical ${cache_crit}"
+                    echo "${stat}.critical ${stat}_crit"
                     echo "${stat}.label $(echo "${stat}" | sed 's/-/ /g')"
-                    echo "${stat}.type GAUGE"
                     echo "${stat}.min 0"
-                    echo "${stat}.warning ${cache_warn}"
+                    echo "${stat}.type GAUGE"
+                    echo "${stat}.warning ${stat}_warn"
                 fi
             done
         ;;
@@ -261,11 +365,11 @@ plugin_config() {
             for stat_id in ${get_stats}; do
                 stat="$(echo "${stat_id}" | sed 's/:.*//')"
                 if [ "${stat}" = "ipv4" ] || [ "${stat}" = "ipv6" ] || [ "${stat}" = "srv" ] || [ "${stat}" = "cname" ] || [ "${stat}" = "ds" ] || [ "${stat}" = "dnskey" ] || [ "${stat}" = "other" ]; then
-                    echo "${stat}.critical ${cache_by_type_crit}"
+                    echo "${stat}.critical ${stat}_crit"
                     echo "${stat}.label $(echo "${stat}" | sed 's/ipv4/A/; s/ipv6/AAAA/; s/srv/SRV/; s/cname/CNAME/; s/ds/DS/; s/dnskey/DNSKEY/')"
-                    echo "${stat}.type GAUGE"
                     echo "${stat}.min 0"
-                    echo "${stat}.warning ${cache_by_type_warn}"
+                    echo "${stat}.type GAUGE"
+                    echo "${stat}.warning ${stat}_warn"
                 fi
             done
         ;;
@@ -279,10 +383,11 @@ plugin_config() {
             for stat_id in ${get_stats}; do
                 stat="$(echo "${stat_id}" | sed 's/:.*//')"
                 if [ "${stat}" = "clients_ever_seen" ] || [ "${stat}" = "unique_clients" ]; then
-                    echo "${stat}.critical ${clients_crit}"
+                    echo "${stat}.critical ${stat}_crit"
                     echo "${stat}.label $(echo "${stat}" | sed 's/_/ /g')"
                     echo "${stat}.min 0"
-                    echo "${stat}.warning ${clients_warn}"
+                    echo "${stat}.type GAUGE"
+                    echo "${stat}.warning ${stat}_warn"
                 fi
             done
         ;;
@@ -296,12 +401,12 @@ plugin_config() {
             for stat_id in ${get_stats}; do
                 stat="$(echo "${stat_id}" | sed 's/:.*//')"
                 if [ "${stat}" = "ads_percentage_today" ]; then
-                    echo "${stat}.critical ${percent_crit}"
+                    echo "${stat}.critical ${stat}_crit"
                     echo "${stat}.label percentage blocked"
-                    echo "${stat}.type GAUGE"
                     echo "${stat}.max 100"
                     echo "${stat}.min 0"
-                    echo "${stat}.warning ${percent_warn}"
+                    echo "${stat}.type GAUGE"
+                    echo "${stat}.warning ${stat}_warn"
                 fi
             done
         ;;
@@ -315,12 +420,12 @@ plugin_config() {
             for stat_id in ${get_stats}; do
                 stat="$(echo "${stat_id}" | sed 's/:.*//')"
                 if [ "${stat}" = "privacy_level" ]; then
-                    echo "${stat}.critical ${privacy_crit}"
+                    echo "${stat}.critical ${stat}_crit"
                     echo "${stat}.label privacy level"
-                    echo "${stat}.type GAUGE"
                     echo "${stat}.max 3"
                     echo "${stat}.min 0"
-                    echo "${stat}.warning ${privacy_warn}"
+                    echo "${stat}.type GAUGE"
+                    echo "${stat}.warning ${stat}_warn"
                 fi
             done
         ;;
@@ -334,11 +439,11 @@ plugin_config() {
             for stat_id in ${get_stats}; do
                 stat="$(echo "${stat_id}" | sed 's/:.*//')"
                 if [ "${stat}" = "dns_queries_today" ] || [ "${stat}" = "ads_blocked_today" ] || [ "${stat}" = "queries_forwarded" ] || [ "${stat}" = "queries_cached" ]; then
-                    echo "${stat}.critical ${queries_crit}"
+                    echo "${stat}.critical ${stat}_crit"
                     echo "${stat}.label $(echo "${stat}" | sed 's/dns_queries_today/queries/; s/ads_blocked_today/blocked queries/; s/queries_//')"
-                    echo "${stat}.type GAUGE"
                     echo "${stat}.min 0"
-                    echo "${stat}.warning ${queries_warn}"
+                    echo "${stat}.type GAUGE"
+                    echo "${stat}.warning ${stat}_warn"
                 fi
             done
         ;;
@@ -353,11 +458,11 @@ plugin_config() {
             for stat_id in ${get_stats}; do
                 stat="$(echo "${stat_id}" | sed 's/:.*//')"
                 if [ "${stat}" = "reply_UNKNOWN" ] || [ "${stat}" = "reply_NODATA" ] || [ "${stat}" = "reply_NXDOMAIN" ] || [ "${stat}" = "reply_CNAME" ] || [ "${stat}" = "reply_IP" ] || [ "${stat}" = "reply_DOMAIN" ] || [ "${stat}" = "reply_RRNAME" ] || [ "${stat}" = "reply_SERVFAIL" ] || [ "${stat}" = "reply_REFUSED" ] || [ "${stat}" = "reply_NOTIMP" ] || [ "${stat}" = "reply_OTHER" ] || [ "${stat}" = "reply_DNSSEC" ] || [ "${stat}" = "reply_NONE" ] || [ "${stat}" = "reply_BLOB" ]; then
-                    echo "${stat}.critical ${replies_by_type_crit}"
+                    echo "${stat}.critical ${stat}_crit"
                     echo "${stat}.label $(echo "${stat}" | sed 's/reply_//')"
-                    echo "${stat}.type GAUGE"
                     echo "${stat}.min 0"
-                    echo "${stat}.warning ${replies_by_type_warn}"
+                    echo "${stat}.type GAUGE"
+                    echo "${stat}.warning ${stat}_warn"
                 fi
             done
         ;;
@@ -371,12 +476,12 @@ plugin_config() {
             for stat_id in ${get_stats}; do
                 stat="$(echo "${stat_id}" | sed 's/:.*//')"
                 if [ "${stat}" = "status" ]; then
-                    echo "${stat}.critical ${status_crit}"
+                    echo "${stat}.critical ${stat}_crit"
                     echo "${stat}.label blocking status"
-                    echo "${stat}.type GAUGE"
                     echo "${stat}.max 1"
                     echo "${stat}.min -1"
-                    echo "${stat}.warning ${status_warn}"
+                    echo "${stat}.type GAUGE"
+                    echo "${stat}.warning ${stat}_warn"
                 fi
             done
         ;;
@@ -390,11 +495,11 @@ plugin_config() {
             for stat_id in ${get_stats}; do
                 stat="$(echo "${stat_id}" | sed 's/:.*//')"
                 if [ "${stat}" = "unique_domains" ]; then
-                    echo "${stat}.critical ${unique_domains_crit}"
+                    echo "${stat}.critical ${stat}_crit"
                     echo "${stat}.label unique domains"
-                    echo "${stat}.type GAUGE"
                     echo "${stat}.min 0"
-                    echo "${stat}.warning ${unique_domains_warn}"
+                    echo "${stat}.type GAUGE"
+                    echo "${stat}.warning ${stat}_warn"
                 fi
             done
         ;;
@@ -408,12 +513,12 @@ plugin_config() {
             for stat_id in ${get_stats}; do
                 stat="$(echo "${stat_id}" | sed 's/:.*//')"
                 if [ "${stat}" = "ads_percentage_today" ]; then
-                    echo "${stat}.critical ${percent_crit}"
+                    echo "${stat}.critical ${stat}_crit"
                     echo "${stat}.label percentage blocked"
-                    echo "${stat}.type GAUGE"
                     echo "${stat}.max 100"
                     echo "${stat}.min 0"
-                    echo "${stat}.warning ${percent_warn}"
+                    echo "${stat}.type GAUGE"
+                    echo "${stat}.warning ${stat}_warn"
                 fi
             done
         ;;
