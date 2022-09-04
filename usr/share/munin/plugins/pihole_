@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="08.08.00"
+VERSION="08.08.01"
 
 : <<=cut
 =head1 NAME
@@ -226,8 +226,8 @@ plugin_config() {
                 if [ "${stat}" = "domains_being_blocked" ]; then
                     echo "${stat}.critical ${blocked_crit}"
                     echo "${stat}.label domains being blocked"
-                    echo "${stat}.type GAUGE"
                     echo "${stat}.min 0"
+                    echo "${stat}.type GAUGE"
                     echo "${stat}.warning ${blocked_warn}"
                 fi
             done
@@ -244,8 +244,8 @@ plugin_config() {
                 if [ "${stat}" = "cache-live-freed" ] || [ "${stat}" = "cache-inserted" ] || [ "${stat}" = "expired" ] || [ "${stat}" = "immortal" ]; then
                     echo "${stat}.critical ${cache_crit}"
                     echo "${stat}.label $(echo "${stat}" | sed 's/-/ /g')"
-                    echo "${stat}.type GAUGE"
                     echo "${stat}.min 0"
+                    echo "${stat}.type GAUGE"
                     echo "${stat}.warning ${cache_warn}"
                 fi
             done
@@ -263,8 +263,8 @@ plugin_config() {
                 if [ "${stat}" = "ipv4" ] || [ "${stat}" = "ipv6" ] || [ "${stat}" = "srv" ] || [ "${stat}" = "cname" ] || [ "${stat}" = "ds" ] || [ "${stat}" = "dnskey" ] || [ "${stat}" = "other" ]; then
                     echo "${stat}.critical ${cache_by_type_crit}"
                     echo "${stat}.label $(echo "${stat}" | sed 's/ipv4/A/; s/ipv6/AAAA/; s/srv/SRV/; s/cname/CNAME/; s/ds/DS/; s/dnskey/DNSKEY/')"
-                    echo "${stat}.type GAUGE"
                     echo "${stat}.min 0"
+                    echo "${stat}.type GAUGE"
                     echo "${stat}.warning ${cache_by_type_warn}"
                 fi
             done
@@ -282,6 +282,7 @@ plugin_config() {
                     echo "${stat}.critical ${clients_crit}"
                     echo "${stat}.label $(echo "${stat}" | sed 's/_/ /g')"
                     echo "${stat}.min 0"
+                    echo "${stat}.type GAUGE"
                     echo "${stat}.warning ${clients_warn}"
                 fi
             done
@@ -298,9 +299,9 @@ plugin_config() {
                 if [ "${stat}" = "ads_percentage_today" ]; then
                     echo "${stat}.critical ${percent_crit}"
                     echo "${stat}.label percentage blocked"
-                    echo "${stat}.type GAUGE"
                     echo "${stat}.max 100"
                     echo "${stat}.min 0"
+                    echo "${stat}.type GAUGE"
                     echo "${stat}.warning ${percent_warn}"
                 fi
             done
@@ -317,9 +318,9 @@ plugin_config() {
                 if [ "${stat}" = "privacy_level" ]; then
                     echo "${stat}.critical ${privacy_crit}"
                     echo "${stat}.label privacy level"
-                    echo "${stat}.type GAUGE"
                     echo "${stat}.max 3"
                     echo "${stat}.min 0"
+                    echo "${stat}.type GAUGE"
                     echo "${stat}.warning ${privacy_warn}"
                 fi
             done
@@ -336,8 +337,8 @@ plugin_config() {
                 if [ "${stat}" = "dns_queries_today" ] || [ "${stat}" = "ads_blocked_today" ] || [ "${stat}" = "queries_forwarded" ] || [ "${stat}" = "queries_cached" ]; then
                     echo "${stat}.critical ${queries_crit}"
                     echo "${stat}.label $(echo "${stat}" | sed 's/dns_queries_today/queries/; s/ads_blocked_today/blocked queries/; s/queries_//')"
-                    echo "${stat}.type GAUGE"
                     echo "${stat}.min 0"
+                    echo "${stat}.type GAUGE"
                     echo "${stat}.warning ${queries_warn}"
                 fi
             done
@@ -355,8 +356,8 @@ plugin_config() {
                 if [ "${stat}" = "reply_UNKNOWN" ] || [ "${stat}" = "reply_NODATA" ] || [ "${stat}" = "reply_NXDOMAIN" ] || [ "${stat}" = "reply_CNAME" ] || [ "${stat}" = "reply_IP" ] || [ "${stat}" = "reply_DOMAIN" ] || [ "${stat}" = "reply_RRNAME" ] || [ "${stat}" = "reply_SERVFAIL" ] || [ "${stat}" = "reply_REFUSED" ] || [ "${stat}" = "reply_NOTIMP" ] || [ "${stat}" = "reply_OTHER" ] || [ "${stat}" = "reply_DNSSEC" ] || [ "${stat}" = "reply_NONE" ] || [ "${stat}" = "reply_BLOB" ]; then
                     echo "${stat}.critical ${replies_by_type_crit}"
                     echo "${stat}.label $(echo "${stat}" | sed 's/reply_//')"
-                    echo "${stat}.type GAUGE"
                     echo "${stat}.min 0"
+                    echo "${stat}.type GAUGE"
                     echo "${stat}.warning ${replies_by_type_warn}"
                 fi
             done
@@ -373,9 +374,9 @@ plugin_config() {
                 if [ "${stat}" = "status" ]; then
                     echo "${stat}.critical ${status_crit}"
                     echo "${stat}.label blocking status"
-                    echo "${stat}.type GAUGE"
                     echo "${stat}.max 1"
                     echo "${stat}.min -1"
+                    echo "${stat}.type GAUGE"
                     echo "${stat}.warning ${status_warn}"
                 fi
             done
@@ -392,8 +393,8 @@ plugin_config() {
                 if [ "${stat}" = "unique_domains" ]; then
                     echo "${stat}.critical ${unique_domains_crit}"
                     echo "${stat}.label unique domains"
-                    echo "${stat}.type GAUGE"
                     echo "${stat}.min 0"
+                    echo "${stat}.type GAUGE"
                     echo "${stat}.warning ${unique_domains_warn}"
                 fi
             done
@@ -410,9 +411,9 @@ plugin_config() {
                 if [ "${stat}" = "ads_percentage_today" ]; then
                     echo "${stat}.critical ${percent_crit}"
                     echo "${stat}.label percentage blocked"
-                    echo "${stat}.type GAUGE"
                     echo "${stat}.max 100"
                     echo "${stat}.min 0"
+                    echo "${stat}.type GAUGE"
                     echo "${stat}.warning ${percent_warn}"
                 fi
             done

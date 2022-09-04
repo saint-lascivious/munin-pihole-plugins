@@ -1158,7 +1158,7 @@ Type \"munin-pihole-plugins --configure\" for a list of available variables"
 }
 
 debug_function() {
-    if [[ ! "${install_plugins}" == "true" ]]; then
+    if [[ "${install_plugins}" == "true" ]]; then
         if i_can_has "munin-run"; then
             check_privilege "$@"
             plugin_id="debug"
