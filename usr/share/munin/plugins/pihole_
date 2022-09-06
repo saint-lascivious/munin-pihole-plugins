@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="08.09.00"
+VERSION="08.10.00"
 
 : <<=cut
 =head1 NAME
@@ -258,6 +258,10 @@ status_warn="${status_warn:-1:}"
 unique_domains_crit="${unique_domains_crit:-1:20000}"
 unique_domains_warn="${unique_domains_warn:-0:10000}"
 
+if [ -z "${plugin_id}" ]; then
+    plugin_id="percent"
+fi
+
 if [ "${host}" = "127.0.0.1" ] || [ "${host}" = "::1" ] && [ -n "${ftlport}" ]; then
     api_method="telnet"
     case ${plugin_id} in
@@ -280,7 +284,7 @@ else
     esac
 fi
 
-if [ "$1" = "autoconf" ]; then
+plugin_autoconf() {
     if [ "${host}" = "127.0.0.1" ] || [ "${host}" = "::1" ] && [ -n "${ftlport}" ]; then
         if [ ! -x "$(command -v "nc")" ]; then
             echo "no (nc does not exist)"
@@ -300,25 +304,7 @@ if [ "$1" = "autoconf" ]; then
         echo yes
         exit 0
     fi
-fi
-
-if [ "$1" = "suggest" ]; then
-    echo "blocked"
-    echo "cache"
-    echo "cache_by_type"
-    echo "clients"
-    echo "percent"
-    echo "privacy"
-    echo "queries"
-    echo "replies_by_type"
-    echo "status"
-    echo "unique_domains"
-    exit 0
-fi
-
-if [ -z "${plugin_id}" ]; then
-    plugin_id="percent"
-fi
+}
 
 plugin_config() {
     case ${plugin_id} in
@@ -763,6 +749,8 @@ plugin_data() {
         "debug")
             echo "plugin version:"
             echo "\"${VERSION}\""
+            echo "plugin api method:"
+            echo "${api_method}"
             echo "plugin variables:"
             echo "api=\"${api}\""
             echo "cachesuffix=\"${cachesuffix}\""
@@ -782,6 +770,17 @@ plugin_data() {
                 echo "\"${setupvars}\" does not exist"
             fi
             echo "webpassword=\"${webpassword}\""
+            echo "plugin commands:"
+            if [ -x "$(command -v "nc")" ]; then
+                echo "\"nc\" exists"
+            else
+                echo "\"nc\" does not exist"
+            fi
+            if [ -x "$(command -v "curl")" ]; then
+                echo "\"curl\" exists"
+            else
+                echo "\"curl\" does not exist"
+            fi
             echo "plugin critical/warning values:"
             echo "domains_being_blocked_crit=\"${domains_being_blocked_crit}\""
             echo "domains_being_blocked_warn=\"${domains_being_blocked_warn}\""
@@ -855,25 +854,6 @@ plugin_data() {
             echo "status_warn=\"${status_warn}\""
             echo "unique_domains_crit=\"${unique_domains_crit}\""
             echo "unique_domains_warn=\"${unique_domains_warn}\""
-            echo "plugin commands:"
-            if [ -x "$(command -v "nc")" ]; then
-                echo "\"nc\" exists"
-            else
-                echo "\"nc\" does not exist"
-            fi
-            if [ -x "$(command -v "curl")" ]; then
-                echo "\"curl\" exists"
-            else
-                echo "\"curl\" does not exist"
-            fi
-            echo "plugin capabilities:"
-            if [ "${MUNIN_CAP_DIRTYCONFIG}" = "1" ]; then
-                echo "dirtyconf capability supported"
-            else
-                echo "dirtyconf capability unsupported"
-            fi
-            echo "api method:"
-            echo "${api_method}"
         ;;
         "percent")
             for stat_id in ${get_stats}; do
@@ -949,7 +929,24 @@ plugin_data() {
     esac
 }
 
+plugin_suggest() {
+    echo "blocked"
+    echo "cache"
+    echo "cache_by_type"
+    echo "clients"
+    echo "percent"
+    echo "privacy"
+    echo "queries"
+    echo "replies_by_type"
+    echo "status"
+    echo "unique_domains"
+    exit 0
+}
+
 case $1 in
+    "autoconf")
+        plugin_autoconf
+    ;;
     "config")
         # shellcheck disable=SC2154
         plugin_config
@@ -957,6 +954,9 @@ case $1 in
             plugin_data
         fi
         exit 0
+    ;;
+    "suggest")
+        plugin_suggest
     ;;
     *)
         plugin_data
