@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="08.10.00"
+VERSION="08.11.00"
 
 : <<=cut
 =head1 NAME
@@ -56,6 +56,7 @@ Plugin name:             Plugin description
  pihole_percent          - Shows Pi-hole's blocked query percentage.
  pihole_privacy          - Shows Pi-hole's privacy level.
  pihole_queries          - Shows queries seen by Pi-hole.
+ pihole_queries_by_type  - Shows Pi-hole queries by type.
  pihole_replies_by_type  - Shows Pi-hole replies by type.
  pihole_status           - Shows Pi-hole's blocking status.
  pihole_unique_domains   - Shows unique domains seen by Pi-hole.
@@ -72,6 +73,7 @@ Default munin-pihole-plugins pihole_ plugin configuration (default: /etc/munin/p
     user root
     env.api /admin/api.php
     env.cachesuffix ?getCacheInfo&auth=
+    env.querysuffix ?getQueryTypes&auth=
     env.ftl_portfile /run/pihole-FTL.port
     #env.ftlport 4711
     env.host 127.0.0.1
@@ -79,8 +81,11 @@ Default munin-pihole-plugins pihole_ plugin configuration (default: /etc/munin/p
     env.setupvars /etc/pihole/setupVars.conf
     #env.webpassword PIHOLE_SETUPVARS_WEBPASSWORD_HERE
 
+    # pihole_blocked
     env.domains_being_blocked_crit 1:5000000
     env.domains_being_blocked_warn 0:3000000
+
+    # pihole_cache
     #env.cache_live_freed_crit
     #env.cache_live_freed_warn
     #env.cache_inserted_crit
@@ -89,28 +94,38 @@ Default munin-pihole-plugins pihole_ plugin configuration (default: /etc/munin/p
     #env.expired_warn
     #env.immortal_crit
     #env.immortal_warn
-    #env.ipv4_crit
-    #env.ipv4_warn
-    #env.ipv6_crit
-    #env.ipv6_warn
-    #env.srv_crit
-    #env.srv_warn
-    #env.cname_crit
-    #env.cname_warn
-    #env.ds_crit
-    #env.ds_warn
-    #env.dnskey_crit
-    #env.dnskey_warn
-    #env.other_crit
-    #env.other_warn
+
+    # pihole_cache_by_type
+    #env.cache_A_crit
+    #env.cache_A_warn
+    #env.cache_AAAA_crit
+    #env.cache_AAAA_warn
+    #env.cache_SRV_crit
+    #env.cache_SRV_warn
+    #env.cache_CNAME_crit
+    #env.cache_CNAME_warn
+    #env.cache_DS_crit
+    #env.cache_DS_warn
+    #env.cache_DNSKEY_crit
+    #env.cache_DNSKEY_warn
+    #env.cache_OTHER_crit
+    #env.cache_OTHER_warn
+
+    # pihole_clients
     #env.clients_ever_seen_crit
     #env.clients_ever_seen_warn
     env.unique_clients_crit 100
     env.unique_clients_warn 1:50
-    env.ads_percentage_today_crit 98
+
+    # pihole_percent
+    env.ads_percentage_today_crit 95
     env.ads_percentage_today_warn 1:85
+
+    # pihole_privacy
     #env.privacy_level_crit
     #env.privacy_level_warn
+
+    # pihole_queries
     #env.dns_queries_today_crit
     #env.dns_queries_today_warn
     #env.ads_blocked_today_crit
@@ -119,6 +134,40 @@ Default munin-pihole-plugins pihole_ plugin configuration (default: /etc/munin/p
     #env.queries_forwarded_warn
     #env.queries_cached_crit
     #env.queries_cached_warn
+
+    # pihole_queries_by_type
+    #env.query_A_crit
+    #env.query_AAAA_warn
+    #env.query_ANY_crit
+    #env.query_ANY_warn
+    #env.query_DNSKEY_crit
+    #env.query_DNSKEY_warn
+    #env.query_DS_crit
+    #env.query_DS_warn
+    #env.query_HTTPS_crit
+    #env.query_HTTPS_warn
+    #env.query_MX_crit
+    #env.query_MX_warn
+    #env.query_NAPTR_crit
+    #env.query_NAPTR_warn
+    #env.query_NS_crit
+    #env.query_NS_warn
+    #env.query_OTHER_crit
+    #env.query_OTHER_warn
+    #env.query_PTR_crit
+    #env.query_PTR_warn
+    #env.query_RRSIG_crit
+    #env.query_RRSIG_warn
+    #env.query_SOA_crit
+    #env.query_SOA_warn
+    #env.query_SRV_crit
+    #env.query_SRV_warn
+    #env.query_SVCB_crit
+    #env.query_SVCB_warn
+    #env.query_TXT_crit
+    #env.query_TXT_warn
+
+    # pihole_replies_by_type
     #env.reply_UNKNOWN_crit
     #env.reply_UNKNOWN_warn
     #env.reply_NODATA_crit
@@ -147,8 +196,12 @@ Default munin-pihole-plugins pihole_ plugin configuration (default: /etc/munin/p
     #env.reply_NONE_warn
     #env.reply_BLOB_crit
     #env.reply_BLOB_warn
-    #env.status_crit
-    #env.status_warn
+
+    # pihole_status
+    env.status_crit 0:1
+    env.status_warn 1:1
+
+    # pihole_unique_domains
     env.unique_domains_crit 1:20000
     env.unique_domains_warn 0:10000
 
@@ -167,6 +220,7 @@ Copyright saint-lascivious (Hayden Pearce) 2022
 
 api="${api:-/admin/api.php}"
 cachesuffix="${cachesuffix:-?getCacheInfo&auth=}"
+querysuffix="${querysuffix:-?getQueryTypes&auth=}"
 ftl_portfile="${ftl_portfile:-/run/pihole-FTL.port}"
 if [ -f "${ftl_portfile}" ]; then
     get_ftlport="$(cat < "${ftl_portfile}")"
@@ -195,20 +249,20 @@ expired_crit="${expired_crit:-}"
 expired_warn="${expired_warn:-}"
 immortal_crit="${immortal_crit:-}"
 immortal_warn="${immortal_warn:-}"
-ipv4_crit="${ipv4_crit:-}"
-ipv4_warn="${ipv4_warn:-}"
-ipv6_crit="${ipv6_crit:-}"
-ipv6_warn="${ipv6_warn:-}"
-srv_crit="${srv_crit:-}"
-srv_warn="${srv_warn:-}"
-cname_crit="${cname_crit:-}"
-cname_warn="${cname_warn:-}"
-ds_crit="${ds_crit:-}"
-ds_warn="${ds_warn:-}"
-dnskey_crit="${dnskey_crit:-}"
-dnskey_warn="${dnskey_warn:-}"
-other_crit="${other_crit:-}"
-other_warn="${other_warn:-}"
+cache_A_crit="${cache_A_crit:-}"
+cache_A_warn="${cache_A_warn:-}"
+cache_AAAA_crit="${cache_AAAA_crit:-}"
+cache_AAAA_warn="${cache_AAAA_warn:-}"
+cache_SRV_crit="${cache_SRV_crit:-}"
+cache_SRV_warn="${cache_SRV_warn:-}"
+cache_CNAME_crit="${cache_CNAME_crit:-}"
+cache_CNAME_warn="${cache_CNAME_warn:-}"
+cache_DS_crit="${cache_DS_crit:-}"
+cache_DS_warn="${cache_DS_warn:-}"
+cache_DNSKEY_crit="${cache_DNSKEY_crit:-}"
+cache_DNSKEY_warn="${cache_DNSKEY_warn:-}"
+cache_OTHER_crit="${cache_OTHER_crit:-}"
+cache_OTHER_warn="${cache_OTHER_warn:-}"
 clients_ever_seen_crit="${clients_ever_seen_crit:-}"
 clients_ever_seen_warn="${clients_ever_seen_warn:-}"
 unique_clients_crit="${unique_clients_crit:-100}"
@@ -225,6 +279,38 @@ queries_forwarded_crit="${queries_forwarded_crit:-}"
 queries_forwarded_warn="${queries_forwarded_warn:-}"
 queries_cached_crit="${queries_cached_crit:-}"
 queries_cached_warn="${queries_cached_warn:-}"
+query_A_crit="${query_A_crit:-}"
+query_A_warn="${query_A_warn:-}"
+query_AAAA_crit="${query_AAAA_crit:-}"
+query_AAAA_warn="${query_AAAA_warn:-}"
+query_ANY_crit="${query_ANY_crit:-}"
+query_ANY_warn="${query_ANY_warn:-}"
+query_DNSKEY_crit="${query_DNSKEY_crit:-}"
+query_DNSKEY_warn="${query_DNSKEY_warn:-}"
+query_DS_crit="${query_DS_crit:-}"
+query_DS_warn="${query_DS_warn:-}"
+query_HTTPS_crit="${query_HTTPS_crit:-}"
+query_HTTPS_warn="${query_HTTPS_warn:-}"
+query_MX_crit="${query_MX_crit:-}"
+query_MX_warn="${query_MX_warn:-}"
+query_NAPTR_crit="${query_NAPTR_crit:-}"
+query_NAPTR_warn="${query_NAPTR_warn:-}"
+query_NS_crit="${query_NS_crit:-}"
+query_NS_warn="${query_NS_warn:-}"
+query_OTHER_crit="${query_OTHER_crit:-}"
+query_OTHER_warn="${query_OTHER_warn:-}"
+query_PTR_crit="${query_PTR_crit:-}"
+query_PTR_warn="${query_PTR_warn:-}"
+query_RRSIG_crit="${query_RRSIG_crit:-}"
+query_RRSIG_warn="${query_RRSIG_warn:-}"
+query_SOA_crit="${query_SOA_crit:-}"
+query_SOA_warn="${query_SOA_warn:-}"
+query_SRV_crit="${query_SRV_crit:-}"
+query_SRV_warn="${query_SRV_warn:-}"
+query_SVCB_crit="${query_SVCB_crit:-}"
+query_SVCB_warn="${query_SVCB_warn:-}"
+query_TXT_crit="${query_TXT_crit:-}"
+query_TXT_warn="${query_TXT_warn:-}"
 reply_UNKNOWN_crit="${reply_UNKNOWN_crit:-}"
 reply_UNKNOWN_warn="${reply_UNKNOWN_warn:-}"
 reply_NODATA_crit="${reply_NODATA_crit:-}"
@@ -268,6 +354,9 @@ if [ "${host}" = "127.0.0.1" ] || [ "${host}" = "::1" ] && [ -n "${ftlport}" ]; 
         "cache" | "cache_by_type")
             get_stats="$(echo ">cacheinfo >quit" | nc "${host}" "${ftlport}" 2>/dev/null | sed 's/ //' | sort -u)"
         ;;
+        "queries_by_type")
+            get_stats="$(echo ">querytypes >quit" | nc "${host}" "${ftlport}" 2>/dev/null | sed 's/ (IPv4)//; s/ (IPv6)//; s/ //' | sort -u)"
+        ;;
         *)
             get_stats="$(echo ">stats >quit" | nc "${host}" "${ftlport}" 2>/dev/null | sed 's/ /:/' | sort -u)"
         ;;
@@ -277,6 +366,9 @@ else
     case ${plugin_id} in
         "cache" | "cache_by_type")
             get_stats="$(echo "curl -sL ${host}:${port}${api}${cachesuffix}${webpassword} 2>/dev/null" | sed 's/[{}"]//g; s/cacheinfo://' | tr "," "\\n" | sort -u)"
+        ;;
+        "queries_by_type")
+            get_stats="$(echo "curl -sL ${host}:${port}${api}${querysuffix}${webpassword} 2>/dev/null" | sed 's/[{}"]//g; s/querytypes://; s/ (IPv4)//; s/ (IPv6)//' | tr "," "\\n" | sort -u)"
         ;;
         *)
             get_stats="$(echo "curl -sL ${host}:${port}${api} 2>/dev/null" | sed 's/[{}"]//g' | tr "," "\\n" | sort -u)"
@@ -293,16 +385,14 @@ plugin_autoconf() {
         echo "yes"
         exit 0
     else
-        if [ ! -x "$(command -v "curl")" ]; then
-            echo "no (curl does not exist)"
+        if [ -n "${webpassword}" ]; then
+            if [ ! -x "$(command -v "curl")" ]; then
+                echo "no (curl does not exist)"
+                exit 0
+            fi
+            echo "yes"
             exit 0
         fi
-        if [ ! -f "${setupvars}" ]; then
-            echo "no (${setupvars} does not exist)"
-            exit 0
-        fi
-        echo yes
-        exit 0
     fi
 }
 
@@ -380,53 +470,53 @@ plugin_config() {
                 stat="$(echo "${stat_id}" | sed 's/:.*//')"
                 case "${stat}" in
                     "ipv4")
-                        echo "${stat}.critical ${ipv4_crit}"
+                        echo "${stat}.critical ${cache_A_crit}"
                         echo "${stat}.label A"
                         echo "${stat}.min 0"
                         echo "${stat}.type GAUGE"
-                        echo "${stat}.warning ${ipv4_warn}"
+                        echo "${stat}.warning ${cache_A_warn}"
                     ;;
                     "ipv6")
-                        echo "${stat}.critical ${ipv6_crit}"
+                        echo "${stat}.critical ${cache_AAAA_crit}"
                         echo "${stat}.label AAAA"
                         echo "${stat}.min 0"
                         echo "${stat}.type GAUGE"
-                        echo "${stat}.warning ${ipv6_warn}"
+                        echo "${stat}.warning ${cache_AAAA_warn}"
                     ;;
                     "srv")
-                        echo "${stat}.critical ${srv_crit}"
+                        echo "${stat}.critical ${cache_SRV_crit}"
                         echo "${stat}.label SRV"
                         echo "${stat}.min 0"
                         echo "${stat}.type GAUGE"
-                        echo "${stat}.warning ${srv_warn}"
+                        echo "${stat}.warning ${cache_SRV_warn}"
                     ;;
                     "cname")
-                        echo "${stat}.critical ${cname_crit}"
+                        echo "${stat}.critical ${cache_CNAME_crit}"
                         echo "${stat}.label CNAME"
                         echo "${stat}.min 0"
                         echo "${stat}.type GAUGE"
-                        echo "${stat}.warning ${cname_warn}"
+                        echo "${stat}.warning ${cache_CNAME_warn}"
                     ;;
                     "ds")
-                        echo "${stat}.critical ${ds_crit}"
+                        echo "${stat}.critical ${cache_DS_crit}"
                         echo "${stat}.label DS"
                         echo "${stat}.min 0"
                         echo "${stat}.type GAUGE"
-                        echo "${stat}.warning ${ds_warn}"
+                        echo "${stat}.warning ${cache_DS_warn}"
                     ;;
                     "dnskey")
-                        echo "${stat}.critical ${dnskey_crit}"
+                        echo "${stat}.critical ${cache_DNSKEY_crit}"
                         echo "${stat}.label DNSKEY"
                         echo "${stat}.min 0"
                         echo "${stat}.type GAUGE"
-                        echo "${stat}.warning ${dnskey_warn}"
+                        echo "${stat}.warning ${cache_DNSKEY_warn}"
                     ;;
                     "other")
-                        echo "${stat}.critical ${other_crit}"
+                        echo "${stat}.critical ${cache_OTHER_crit}"
                         echo "${stat}.label OTHER"
                         echo "${stat}.min 0"
                         echo "${stat}.type GAUGE"
-                        echo "${stat}.warning ${other_warn}"
+                        echo "${stat}.warning ${cache_OTHER_warn}"
                     ;;
                 esac
             done
@@ -533,6 +623,133 @@ plugin_config() {
                         echo "${stat}.min 0"
                         echo "${stat}.type GAUGE"
                         echo "${stat}.warning ${queries_cached_warn}"
+                    ;;
+                esac
+            done
+        ;;
+
+
+        "queries_by_type")
+            echo "graph_title Pi-hole queries by type"
+            echo "graph_args --base 1000 -l 0 -u 100"
+            echo "graph_vlabel percent queries by type"
+            echo "graph_scale no"
+            echo "graph_category dns"
+            echo "graph_info This graph shows Pi-hole queries by type."
+            for stat_id in ${get_stats}; do
+                stat="$(echo "${stat_id}" | sed 's/:.*//')"
+                case "${stat}" in
+                    "A")
+                        echo "${stat}.critical ${query_A_crit}"
+                        echo "${stat}.label A"
+                        echo "${stat}.min 0"
+                        echo "${stat}.type GAUGE"
+                        echo "${stat}.warning ${query_A_warn}"
+                    ;;
+                    "AAAA")
+                        echo "${stat}.critical ${query_AAAA_crit}"
+                        echo "${stat}.label AAAA"
+                        echo "${stat}.min 0"
+                        echo "${stat}.type GAUGE"
+                        echo "${stat}.warning ${query_A_warn}"
+                    ;;
+                    "ANY")
+                        echo "${stat}.critical ${query_ANY_crit}"
+                        echo "${stat}.label ANY"
+                        echo "${stat}.min 0"
+                        echo "${stat}.type GAUGE"
+                        echo "${stat}.warning ${query_ANY_warn}"
+                    ;;
+                    "DNSKEY")
+                        echo "${stat}.critical ${query_DNSKEY_crit}"
+                        echo "${stat}.label DNSKEY"
+                        echo "${stat}.min 0"
+                        echo "${stat}.type GAUGE"
+                        echo "${stat}.warning ${query_DNSKEY_warn}"
+                    ;;
+                    "DS")
+                        echo "${stat}.critical ${query_DS_crit}"
+                        echo "${stat}.label DS"
+                        echo "${stat}.min 0"
+                        echo "${stat}.type GAUGE"
+                        echo "${stat}.warning ${query_DS_warn}"
+                    ;;
+                    "HTTPS")
+                        echo "${stat}.critical ${query_HTTPS_crit}"
+                        echo "${stat}.label HTTPS"
+                        echo "${stat}.min 0"
+                        echo "${stat}.type GAUGE"
+                        echo "${stat}.warning ${query_HTTPS_warn}"
+                    ;;
+                    "MX")
+                        echo "${stat}.critical ${query_MX_crit}"
+                        echo "${stat}.label MX"
+                        echo "${stat}.min 0"
+                        echo "${stat}.type GAUGE"
+                        echo "${stat}.warning ${query_MX_warn}"
+                    ;;
+                    "NAPTR")
+                        echo "${stat}.critical ${query_NAPTR_crit}"
+                        echo "${stat}.label NAPTR"
+                        echo "${stat}.min 0"
+                        echo "${stat}.type GAUGE"
+                        echo "${stat}.warning ${query_NAPTR_warn}"
+                    ;;
+                    "NS")
+                        echo "${stat}.critical ${query_NS_crit}"
+                        echo "${stat}.label NS"
+                        echo "${stat}.min 0"
+                        echo "${stat}.type GAUGE"
+                        echo "${stat}.warning ${query_NS_warn}"
+                    ;;
+                    "OTHER")
+                        echo "${stat}.critical ${query_OTHER_crit}"
+                        echo "${stat}.label OTHER"
+                        echo "${stat}.min 0"
+                        echo "${stat}.type GAUGE"
+                        echo "${stat}.warning ${query_OTHER_warn}"
+                    ;;
+                    "PTR")
+                        echo "${stat}.critical ${query_PTR_crit}"
+                        echo "${stat}.label PTR"
+                        echo "${stat}.min 0"
+                        echo "${stat}.type GAUGE"
+                        echo "${stat}.warning ${query_PTR_warn}"
+                    ;;
+                    "RRSIG")
+                        echo "${stat}.critical ${query_RRSIG_crit}"
+                        echo "${stat}.label RRSIG"
+                        echo "${stat}.min 0"
+                        echo "${stat}.type GAUGE"
+                        echo "${stat}.warning ${query_RRSIG_warn}"
+                    ;;
+                    "SOA")
+                        echo "${stat}.critical ${query_SOA_crit}"
+                        echo "${stat}.label SOA"
+                        echo "${stat}.min 0"
+                        echo "${stat}.type GAUGE"
+                        echo "${stat}.warning ${query_SOA_warn}"
+                    ;;
+                    "SRV")
+                        echo "${stat}.critical ${query_SRV_crit}"
+                        echo "${stat}.label SRV"
+                        echo "${stat}.min 0"
+                        echo "${stat}.type GAUGE"
+                        echo "${stat}.warning ${query_SRV_warn}"
+                    ;;
+                    "SVCB")
+                        echo "${stat}.critical ${query_SVCB_crit}"
+                        echo "${stat}.label SVCB"
+                        echo "${stat}.min 0"
+                        echo "${stat}.type GAUGE"
+                        echo "${stat}.warning ${query_SVCB_warn}"
+                    ;;
+                    "TXT")
+                        echo "${stat}.critical ${query_TXT_crit}"
+                        echo "${stat}.label TXT"
+                        echo "${stat}.min 0"
+                        echo "${stat}.type GAUGE"
+                        echo "${stat}.warning ${query_TXT_warn}"
                     ;;
                 esac
             done
@@ -792,20 +1009,20 @@ plugin_data() {
             echo "expired_warn=\"${expired_warn}\""
             echo "immortal_crit=\"${immortal_crit}\""
             echo "immortal_warn=\"${immortal_warn}\""
-            echo "ipv4_crit=\"${ipv4_crit}\""
-            echo "ipv4_warn=\"${ipv4_warn}\""
-            echo "ipv6_crit=\"${ipv6_crit}\""
-            echo "ipv6_warn=\"${ipv6_warn}\""
-            echo "srv_crit=\"${srv_crit}\""
-            echo "srv_warn=\"${srv_warn}\""
-            echo "cname_crit=\"${cname_crit}\""
-            echo "cname_warn=\"${cname_warn}\""
-            echo "ds_crit=\"${ds_crit}\""
-            echo "ds_warn=\"${ds_warn}\""
-            echo "dnskey_crit=\"${dnskey_crit}\""
-            echo "dnskey_warn=\"${dnskey_warn}\""
-            echo "other_crit=\"${other_crit}\""
-            echo "other_warn=\"${other_warn}\""
+            echo "cache_A_crit=\"${cache_A_crit}\""
+            echo "cache_A_warn=\"${cache_A_warn}\""
+            echo "cache_AAAA_crit=\"${cache_AAAA_crit}\""
+            echo "cache_AAAA_warn=\"${cache_AAAA_warn}\""
+            echo "cache_SRV_crit=\"${cache_SRV_crit}\""
+            echo "cache_SRV_warn=\"${cache_SRV_warn}\""
+            echo "cache_CNAME_crit=\"${cache_CNAME_crit}\""
+            echo "cache_CNAME_warn=\"${cache_CNAME_warn}\""
+            echo "cache_DS_crit=\"${cache_DS_crit}\""
+            echo "cache_DS_warn=\"${cache_DS_warn}\""
+            echo "cache_DNSKEY_crit=\"${cache_DNSKEY_crit}\""
+            echo "cache_DNSKEY_warn=\"${cache_DNSKEY_warn}\""
+            echo "cache_OTHER_crit=\"${cache_OTHER_crit}\""
+            echo "cache_OTHER_warn=\"${cache_OTHER_warn}\""
             echo "clients_ever_seen_crit=\"${clients_ever_seen_crit}\""
             echo "clients_ever_seen_warn=\"${clients_ever_seen_warn}\""
             echo "unique_clients_crit=\"${unique_clients_crit}\""
@@ -822,6 +1039,38 @@ plugin_data() {
             echo "queries_forwarded_warn=\"${queries_forwarded_warn}\""
             echo "queries_cached_crit=\"${queries_cached_crit}\""
             echo "queries_cached_warn=\"${queries_cached_warn}\""
+            echo "query_A_crit=\"${query_A_crit}\""
+            echo "query_A_warn=\"${query_A_warn}\""
+            echo "query_AAAA_crit=\"${query_AAAA_crit}\""
+            echo "query_AAAA_warn=\"${query_AAAA_warn}\""
+            echo "query_ANY_crit=\"${query_ANY_crit}\""
+            echo "query_ANY_warn=\"${query_ANY_warn}\""
+            echo "query_DNSKEY_crit=\"${query_DNSKEY_crit}\""
+            echo "query_DNSKEY_warn=\"${query_DNSKEY_warn}\""
+            echo "query_DS_crit=\"${query_DS_crit}\""
+            echo "query_DS_warn=\"${query_DS_warn}\""
+            echo "query_HTTPS_crit=\"${query_HTTPS_crit}\""
+            echo "query_HTTPS_warn=\"${query_HTTPS_warn}\""
+            echo "query_MX_crit=\"${query_MX_crit}\""
+            echo "query_MX_warn=\"${query_MX_warn}\""
+            echo "query_NAPTR_crit=\"${query_NAPTR_crit}\""
+            echo "query_NAPTR_warn=\"${query_NAPTR_warn}\""
+            echo "query_NS_crit=\"${query_NS_crit}\""
+            echo "query_NS_warn=\"${query_NS_warn}\""
+            echo "query_OTHER_crit=\"${query_OTHER_crit}\""
+            echo "query_OTHER_warn=\"${query_OTHER_warn}\""
+            echo "query_PTR_crit=\"${query_PTR_crit}\""
+            echo "query_PTR_warn=\"${query_PTR_warn}\""
+            echo "query_RRSIG_crit=\"${query_RRSIG_crit}\""
+            echo "query_RRSIG_warn=\"${query_RRSIG_warn}\""
+            echo "query_SOA_crit=\"${query_SOA_crit}\""
+            echo "query_SOA_warn=\"${query_SOA_warn}\""
+            echo "query_SRV_crit=\"${query_SRV_crit}\""
+            echo "query_SRV_warn=\"${query_SRV_warn}\""
+            echo "query_SVCB_crit=\"${query_SVCB_crit}\""
+            echo "query_SVCB_warn=\"${query_SVCB_warn}\""
+            echo "query_TXT_crit=\"${query_TXT_crit}\""
+            echo "query_TXT_warn=\"${query_TXT_warn}\""
             echo "reply_UNKNOWN_crit=\"${reply_UNKNOWN_crit}\""
             echo "reply_UNKNOWN_warn=\"${reply_UNKNOWN_warn}\""
             echo "reply_NODATA_crit=\"${reply_NODATA_crit}\""
@@ -882,6 +1131,15 @@ plugin_data() {
                 fi
             done
         ;;
+        "queries_by_type")
+            for stat_id in ${get_stats}; do
+                stat="$(echo "${stat_id}" | sed 's/:.*//')"
+                if [ "${stat}" = "A" ] || [ "${stat}" = "AAAA" ] || [ "${stat}" = "ANY" ] || [ "${stat}" = "DNSKEY" ] || [ "${stat}" = "DS" ] || [ "${stat}" = "HTTPS" ] || [ "${stat}" = "MX" ] || [ "${stat}" = "NAPTR" ] || [ "${stat}" = "NS" ] || [ "${stat}" = "OTHER" ] || [ "${stat}" = "PTR" ] || [ "${stat}" = "RRSIG" ] || [ "${stat}" = "SOA" ] || [ "${stat}" = "SRV" ] || [ "${stat}" = "SVCB" ] || [ "${stat}" = "TXT" ]; then
+                    value="$(echo "${stat_id}" | sed 's/.*://')"
+                    echo "${stat}.value ${value}"
+                fi
+            done
+        ;;
         "replies_by_type")
             for stat_id in ${get_stats}; do
                 stat="$(echo "${stat_id}" | sed 's/:.*//')"
@@ -937,6 +1195,7 @@ plugin_suggest() {
     echo "percent"
     echo "privacy"
     echo "queries"
+    echo "queries_by_type"
     echo "replies_by_type"
     echo "status"
     echo "unique_domains"

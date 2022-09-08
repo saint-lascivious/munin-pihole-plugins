@@ -1,10 +1,10 @@
-.TH man 1 "7 September 2022" "08.10.00" "munin-pihole-plugins man page"
+.TH man 1 "8 September 2022" "08.11.00" "munin-pihole-plugins man page"
 
 .SH NAME
 munin-pihole-plugins
 
 .SH VERSION
-08.10.00
+08.11.00
 
 .SH BRANCH
 development
@@ -241,20 +241,20 @@ Default /etc/munin/plugin-conf.d/pihole.conf plugin configuration.
     #env.immortal_warn
 
     # pihole_cache_by_type
-    #env.ipv4_crit
-    #env.ipv4_warn
-    #env.ipv6_crit
-    #env.ipv6_warn
-    #env.srv_crit
-    #env.srv_warn
-    #env.cname_crit
-    #env.cname_warn
-    #env.ds_crit
-    #env.ds_warn
-    #env.dnskey_crit
-    #env.dnskey_warn
-    #env.other_crit
-    #env.other_warn
+    #env.cache_A_crit
+    #env.cache_A_warn
+    #env.cache_AAAA_crit
+    #env.cache_AAAA_warn
+    #env.cache_SRV_crit
+    #env.cache_SRV_warn
+    #env.cache_CNAME_crit
+    #env.cache_CNAME_warn
+    #env.cache_DS_crit
+    #env.cache_DS_warn
+    #env.cache_DNSKEY_crit
+    #env.cache_DNSKEY_warn
+    #env.cache_OTHER_crit
+    #env.cache_OTHER_warn
 
     # pihole_clients
     #env.clients_ever_seen_crit
@@ -263,7 +263,7 @@ Default /etc/munin/plugin-conf.d/pihole.conf plugin configuration.
     env.unique_clients_warn 1:50
 
     # pihole_percent
-    env.ads_percentage_today_crit 98
+    env.ads_percentage_today_crit 95
     env.ads_percentage_today_warn 1:85
 
     # pihole_privacy
@@ -279,6 +279,38 @@ Default /etc/munin/plugin-conf.d/pihole.conf plugin configuration.
     #env.queries_forwarded_warn
     #env.queries_cached_crit
     #env.queries_cached_warn
+
+    # pihole_queries_by_type
+    #env.query_A_crit
+    #env.query_AAAA_warn
+    #env.query_ANY_crit
+    #env.query_ANY_warn
+    #env.query_DNSKEY_crit
+    #env.query_DNSKEY_warn
+    #env.query_DS_crit
+    #env.query_DS_warn
+    #env.query_HTTPS_crit
+    #env.query_HTTPS_warn
+    #env.query_MX_crit
+    #env.query_MX_warn
+    #env.query_NAPTR_crit
+    #env.query_NAPTR_warn
+    #env.query_NS_crit
+    #env.query_NS_warn
+    #env.query_OTHER_crit
+    #env.query_OTHER_warn
+    #env.query_PTR_crit
+    #env.query_PTR_warn
+    #env.query_RRSIG_crit
+    #env.query_RRSIG_warn
+    #env.query_SOA_crit
+    #env.query_SOA_warn
+    #env.query_SRV_crit
+    #env.query_SRV_warn
+    #env.query_SVCB_crit
+    #env.query_SVCB_warn
+    #env.query_TXT_crit
+    #env.query_TXT_warn
 
     # pihole_replies_by_type
     #env.reply_UNKNOWN_crit
@@ -312,7 +344,7 @@ Default /etc/munin/plugin-conf.d/pihole.conf plugin configuration.
 
     # pihole_status
     env.status_crit 0:1
-    env.status_warn 1:
+    env.status_warn 1:1
 
     # pihole_unique_domains
     env.unique_domains_crit 1:20000
