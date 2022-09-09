@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="08.11.01"
+VERSION="08.11.02"
 
 : <<=cut
 =head1 NAME
@@ -352,7 +352,7 @@ if [ "${host}" = "127.0.0.1" ] || [ "${host}" = "::1" ] && [ -n "${ftlport}" ]; 
     api_method="telnet"
     case ${plugin_id} in
         "cache" | "cache_by_type")
-            get_stats="$(echo ">cacheinfo >quit" | nc "${host}" "${ftlport}" 2>/dev/null | sed 's/ //' | sort -u)"
+            get_stats="$(echo ">cacheinfo >quit" | nc "${host}" "${ftlport}" 2>/dev/null | sed 's/ipv4/a/; s/ipv6/aaaa/; s/ //' | sort -u)"
         ;;
         "queries_by_type")
             get_stats="$(echo ">querytypes >quit" | nc "${host}" "${ftlport}" 2>/dev/null | sed 's/ (IPv4)//; s/ (IPv6)//; s/ //' | sort -u)"
@@ -365,7 +365,7 @@ else
     api_method="json"
     case ${plugin_id} in
         "cache" | "cache_by_type")
-            get_stats="$(echo "curl -sL ${host}:${port}${api}${cachesuffix}${webpassword} 2>/dev/null" | sed 's/[{}"]//g; s/cacheinfo://' | tr "," "\\n" | sort -u)"
+            get_stats="$(echo "curl -sL ${host}:${port}${api}${cachesuffix}${webpassword} 2>/dev/null" | sed 's/[{}"]//g; s/cacheinfo://; s/ipv4/a/; s/ipv6/aaaa/' | tr "," "\\n" | sort -u)"
         ;;
         "queries_by_type")
             get_stats="$(echo "curl -sL ${host}:${port}${api}${querysuffix}${webpassword} 2>/dev/null" | sed 's/[{}"]//g; s/querytypes://; s/ (IPv4)//; s/ (IPv6)//' | tr "," "\\n" | sort -u)"
@@ -469,14 +469,14 @@ plugin_config() {
             for stat_id in ${get_stats}; do
                 stat="$(echo "${stat_id}" | sed 's/:.*//')"
                 case "${stat}" in
-                    "ipv4")
+                    "a")
                         echo "${stat}.critical ${cache_A_crit}"
                         echo "${stat}.label A"
                         echo "${stat}.min 0"
                         echo "${stat}.type GAUGE"
                         echo "${stat}.warning ${cache_A_warn}"
                     ;;
-                    "ipv6")
+                    "aaaa")
                         echo "${stat}.critical ${cache_AAAA_crit}"
                         echo "${stat}.label AAAA"
                         echo "${stat}.min 0"
@@ -948,7 +948,7 @@ plugin_data() {
         "cache_by_type")
             for stat_id in ${get_stats}; do
                 stat="$(echo "${stat_id}" | sed 's/:.*//')"
-                if [ "${stat}" = "ipv4" ] || [ "${stat}" = "ipv6" ] || [ "${stat}" = "cname" ] || [ "${stat}" = "ds" ] || [ "${stat}" = "dnskey" ] || [ "${stat}" = "other" ] || [ "${stat}" = "srv" ]; then
+                if [ "${stat}" = "a" ] || [ "${stat}" = "aaaa" ] || [ "${stat}" = "cname" ] || [ "${stat}" = "ds" ] || [ "${stat}" = "dnskey" ] || [ "${stat}" = "other" ] || [ "${stat}" = "srv" ]; then
                     value="$(echo "${stat_id}" | sed 's/.*://')"
                     echo "${stat}.value ${value}"
                 fi
