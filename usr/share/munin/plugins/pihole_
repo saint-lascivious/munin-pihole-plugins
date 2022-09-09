@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="08.11.00"
+VERSION="08.11.01"
 
 : <<=cut
 =head1 NAME
@@ -86,10 +86,10 @@ Default munin-pihole-plugins pihole_ plugin configuration (default: /etc/munin/p
     env.domains_being_blocked_warn 0:3000000
 
     # pihole_cache
-    #env.cache_live_freed_crit
-    #env.cache_live_freed_warn
     #env.cache_inserted_crit
     #env.cache_inserted_warn
+    #env.cache_live_freed_crit
+    #env.cache_live_freed_warn
     #env.expired_crit
     #env.expired_warn
     #env.immortal_crit
@@ -100,16 +100,16 @@ Default munin-pihole-plugins pihole_ plugin configuration (default: /etc/munin/p
     #env.cache_A_warn
     #env.cache_AAAA_crit
     #env.cache_AAAA_warn
-    #env.cache_SRV_crit
-    #env.cache_SRV_warn
     #env.cache_CNAME_crit
     #env.cache_CNAME_warn
-    #env.cache_DS_crit
-    #env.cache_DS_warn
     #env.cache_DNSKEY_crit
     #env.cache_DNSKEY_warn
+    #env.cache_DS_crit
+    #env.cache_DS_warn
     #env.cache_OTHER_crit
     #env.cache_OTHER_warn
+    #env.cache_SRV_crit
+    #env.cache_SRV_warn
 
     # pihole_clients
     #env.clients_ever_seen_crit
@@ -168,34 +168,34 @@ Default munin-pihole-plugins pihole_ plugin configuration (default: /etc/munin/p
     #env.query_TXT_warn
 
     # pihole_replies_by_type
-    #env.reply_UNKNOWN_crit
-    #env.reply_UNKNOWN_warn
-    #env.reply_NODATA_crit
-    #env.reply_NODATA_warn
-    #env.reply_NXDOMAIN_crit
-    #env.reply_NXDOMAIN_warn
+    #env.reply_BLOB_crit
+    #env.reply_BLOB_warn
     #env.reply_CNAME_crit
     #env.reply_CNAME_warn
-    #env.reply_IP_crit
-    #env.reply_IP_warn
+    #env.reply_DNSSEC_crit
+    #env.reply_DNSSEC_warn
     #env.reply_DOMAIN_crit
     #env.reply_DOMAIN_warn
+    #env.reply_IP_crit
+    #env.reply_IP_warn
+    #env.reply_NOTIMP_crit
+    #env.reply_NOTIMP_warn
+    #env.reply_NODATA_crit
+    #env.reply_NODATA_warn
+    #env.reply_NONE_crit
+    #env.reply_NONE_warn
+    #env.reply_NXDOMAIN_crit
+    #env.reply_NXDOMAIN_warn
+    #env.reply_OTHER_crit
+    #env.reply_OTHER_warn
+    #env.reply_REFUSED_crit
+    #env.reply_REFUSED_warn
     #env.reply_RRNAME_crit
     #env.reply_RRNAME_warn
     #env.reply_SERVFAIL_crit
     #env.reply_SERVFAIL_warn
-    #env.reply_REFUSED_crit
-    #env.reply_REFUSED_warn
-    #env.reply_NOTIMP_crit
-    #env.reply_NOTIMP_warn
-    #env.reply_OTHER_crit
-    #env.reply_OTHER_warn
-    #env.reply_DNSSEC_crit
-    #env.reply_DNSSEC_warn
-    #env.reply_NONE_crit
-    #env.reply_NONE_warn
-    #env.reply_BLOB_crit
-    #env.reply_BLOB_warn
+    #env.reply_UNKNOWN_crit
+    #env.reply_UNKNOWN_warn
 
     # pihole_status
     env.status_crit 0:1
@@ -410,7 +410,7 @@ plugin_config() {
                 stat="$(echo "${stat_id}" | sed 's/:.*//')"
                 if [ "${stat}" = "domains_being_blocked" ]; then
                     echo "${stat}.critical ${domains_being_blocked_crit}"
-                    echo "${stat}.label domains being blocked"
+                    echo "${stat}.label blocked domains"
                     echo "${stat}.min 0"
                     echo "${stat}.type GAUGE"
                     echo "${stat}.warning ${domains_being_blocked_warn}"
@@ -427,19 +427,19 @@ plugin_config() {
             for stat_id in ${get_stats}; do
                 stat="$(echo "${stat_id}" | sed 's/:.*//')"
                 case "${stat}" in
-                    "cache-live-freed")
-                        echo "${stat}.critical ${cache_live_freed_crit}"
-                        echo "${stat}.label cache live freed"
-                        echo "${stat}.min 0"
-                        echo "${stat}.type GAUGE"
-                        echo "${stat}.warning ${cache_live_freed_warn}"
-                    ;;
                     "cache-inserted")
                         echo "${stat}.critical ${cache_inserted_crit}"
                         echo "${stat}.label cache inserted"
                         echo "${stat}.min 0"
                         echo "${stat}.type GAUGE"
                         echo "${stat}.warning ${cache_inserted_warn}"
+                    ;;
+                    "cache-live-freed")
+                        echo "${stat}.critical ${cache_live_freed_crit}"
+                        echo "${stat}.label cache live freed"
+                        echo "${stat}.min 0"
+                        echo "${stat}.type GAUGE"
+                        echo "${stat}.warning ${cache_live_freed_warn}"
                     ;;
                     "expired")
                         echo "${stat}.critical ${expired_crit}"
@@ -483,13 +483,6 @@ plugin_config() {
                         echo "${stat}.type GAUGE"
                         echo "${stat}.warning ${cache_AAAA_warn}"
                     ;;
-                    "srv")
-                        echo "${stat}.critical ${cache_SRV_crit}"
-                        echo "${stat}.label SRV"
-                        echo "${stat}.min 0"
-                        echo "${stat}.type GAUGE"
-                        echo "${stat}.warning ${cache_SRV_warn}"
-                    ;;
                     "cname")
                         echo "${stat}.critical ${cache_CNAME_crit}"
                         echo "${stat}.label CNAME"
@@ -517,6 +510,13 @@ plugin_config() {
                         echo "${stat}.min 0"
                         echo "${stat}.type GAUGE"
                         echo "${stat}.warning ${cache_OTHER_warn}"
+                    ;;
+                    "srv")
+                        echo "${stat}.critical ${cache_SRV_crit}"
+                        echo "${stat}.label SRV"
+                        echo "${stat}.min 0"
+                        echo "${stat}.type GAUGE"
+                        echo "${stat}.warning ${cache_SRV_warn}"
                     ;;
                 esac
             done
@@ -596,19 +596,19 @@ plugin_config() {
             for stat_id in ${get_stats}; do
                 stat="$(echo "${stat_id}" | sed 's/:.*//')"
                 case "${stat}" in
-                    "dns_queries_today")
-                        echo "${stat}.critical ${dns_queries_today_crit}"
-                        echo "${stat}.label queries"
-                        echo "${stat}.min 0"
-                        echo "${stat}.type GAUGE"
-                        echo "${stat}.warning ${dns_queries_today_warn}"
-                    ;;
                     "ads_blocked_today")
                         echo "${stat}.critical ${ads_blocked_today_crit}"
                         echo "${stat}.label blocked queries"
                         echo "${stat}.min 0"
                         echo "${stat}.type GAUGE"
                         echo "${stat}.warning ${ads_blocked_today_warn}"
+                    ;;
+                    "queries_cached")
+                        echo "${stat}.critical ${queries_cached_crit}"
+                        echo "${stat}.label cached queries"
+                        echo "${stat}.min 0"
+                        echo "${stat}.type GAUGE"
+                        echo "${stat}.warning ${queries_cached_warn}"
                     ;;
                     "queries_forwarded")
                         echo "${stat}.critical ${queries_forwarded_crit}"
@@ -617,12 +617,12 @@ plugin_config() {
                         echo "${stat}.type GAUGE"
                         echo "${stat}.warning ${queries_forwarded_warn}"
                     ;;
-                    "queries_cached")
-                        echo "${stat}.critical ${queries_cached_crit}"
-                        echo "${stat}.label cached queries"
+                    "dns_queries_today")
+                        echo "${stat}.critical ${dns_queries_today_crit}"
+                        echo "${stat}.label queries"
                         echo "${stat}.min 0"
                         echo "${stat}.type GAUGE"
-                        echo "${stat}.warning ${queries_cached_warn}"
+                        echo "${stat}.warning ${dns_queries_today_warn}"
                     ;;
                 esac
             done
@@ -765,12 +765,40 @@ plugin_config() {
             for stat_id in ${get_stats}; do
                 stat="$(echo "${stat_id}" | sed 's/:.*//')"
                 case "${stat}" in
-                    "reply_UNKNOWN")
-                        echo "${stat}.critical ${reply_UNKNOWN_crit}"
-                        echo "${stat}.label UNKNOWN"
+                    "reply_BLOB")
+                        echo "${stat}.critical ${reply_BLOB_crit}"
+                        echo "${stat}.label BLOB"
                         echo "${stat}.min 0"
                         echo "${stat}.type GAUGE"
-                        echo "${stat}.warning ${reply_UNKNOWN_warn}"
+                        echo "${stat}.warning ${reply_BLOB_warn}"
+                    ;;
+                    "reply_CNAME")
+                        echo "${stat}.critical ${reply_CNAME_crit}"
+                        echo "${stat}.label CNAME"
+                        echo "${stat}.min 0"
+                        echo "${stat}.type GAUGE"
+                        echo "${stat}.warning ${reply_CNAME_warn}"
+                    ;;
+                    "reply_DNSSEC")
+                        echo "${stat}.critical ${reply_DNSSEC_crit}"
+                        echo "${stat}.label DNSSEC"
+                        echo "${stat}.min 0"
+                        echo "${stat}.type GAUGE"
+                        echo "${stat}.warning ${reply_DNSSEC_warn}"
+                    ;;
+                    "reply_DOMAIN")
+                        echo "${stat}.critical ${reply_DOMAIN_crit}"
+                        echo "${stat}.label DOMAIN"
+                        echo "${stat}.min 0"
+                        echo "${stat}.type GAUGE"
+                        echo "${stat}.warning ${reply_DOMAIN_warn}"
+                    ;;
+                    "reply_IP")
+                        echo "${stat}.critical ${reply_IP_crit}"
+                        echo "${stat}.label IP"
+                        echo "${stat}.min 0"
+                        echo "${stat}.type GAUGE"
+                        echo "${stat}.warning ${reply_IP_warn}"
                     ;;
                     "reply_NODATA")
                         echo "${stat}.critical ${reply_NODATA_crit}"
@@ -786,26 +814,12 @@ plugin_config() {
                         echo "${stat}.type GAUGE"
                         echo "${stat}.warning ${reply_NXDOMAIN_warn}"
                     ;;
-                    "reply_CNAME")
-                        echo "${stat}.critical ${reply_CNAME_crit}"
-                        echo "${stat}.label CNAME"
+                    "reply_REFUSED")
+                        echo "${stat}.critical ${reply_REFUSED_crit}"
+                        echo "${stat}.label REFUSED"
                         echo "${stat}.min 0"
                         echo "${stat}.type GAUGE"
-                        echo "${stat}.warning ${reply_CNAME_warn}"
-                    ;;
-                    "reply_IP")
-                        echo "${stat}.critical ${reply_IP_crit}"
-                        echo "${stat}.label IP"
-                        echo "${stat}.min 0"
-                        echo "${stat}.type GAUGE"
-                        echo "${stat}.warning ${reply_IP_warn}"
-                    ;;
-                    "reply_DOMAIN")
-                        echo "${stat}.critical ${reply_DOMAIN_crit}"
-                        echo "${stat}.label DOMAIN"
-                        echo "${stat}.min 0"
-                        echo "${stat}.type GAUGE"
-                        echo "${stat}.warning ${reply_DOMAIN_warn}"
+                        echo "${stat}.warning ${reply_REFUSED_warn}"
                     ;;
                     "reply_RRNAME")
                         echo "${stat}.critical ${reply_RRNAME_crit}"
@@ -821,12 +835,12 @@ plugin_config() {
                         echo "${stat}.type GAUGE"
                         echo "${stat}.warning ${reply_SERVFAIL_warn}"
                     ;;
-                    "reply_REFUSED")
-                        echo "${stat}.critical ${reply_REFUSED_crit}"
-                        echo "${stat}.label REFUSED"
+                    "reply_NONE")
+                        echo "${stat}.critical ${reply_NONE_crit}"
+                        echo "${stat}.label NONE"
                         echo "${stat}.min 0"
                         echo "${stat}.type GAUGE"
-                        echo "${stat}.warning ${reply_REFUSED_warn}"
+                        echo "${stat}.warning ${reply_NONE_warn}"
                     ;;
                     "reply_NOTIMP")
                         echo "${stat}.critical ${reply_NOTIMP_crit}"
@@ -842,26 +856,12 @@ plugin_config() {
                         echo "${stat}.type GAUGE"
                         echo "${stat}.warning ${reply_OTHER_warn}"
                     ;;
-                    "reply_DNSSEC")
-                        echo "${stat}.critical ${reply_DNSSEC_crit}"
-                        echo "${stat}.label DNSSEC"
+                    "reply_UNKNOWN")
+                        echo "${stat}.critical ${reply_UNKNOWN_crit}"
+                        echo "${stat}.label UNKNOWN"
                         echo "${stat}.min 0"
                         echo "${stat}.type GAUGE"
-                        echo "${stat}.warning ${reply_DNSSEC_warn}"
-                    ;;
-                    "reply_NONE")
-                        echo "${stat}.critical ${reply_NONE_crit}"
-                        echo "${stat}.label NONE"
-                        echo "${stat}.min 0"
-                        echo "${stat}.type GAUGE"
-                        echo "${stat}.warning ${reply_NONE_warn}"
-                    ;;
-                    "reply_BLOB")
-                        echo "${stat}.critical ${reply_BLOB_crit}"
-                        echo "${stat}.label BLOB"
-                        echo "${stat}.min 0"
-                        echo "${stat}.type GAUGE"
-                        echo "${stat}.warning ${reply_BLOB_warn}"
+                        echo "${stat}.warning ${reply_UNKNOWN_warn}"
                     ;;
                 esac
             done
@@ -939,7 +939,7 @@ plugin_data() {
         "cache")
             for stat_id in ${get_stats}; do
                 stat="$(echo "${stat_id}" | sed 's/:.*//')"
-                if [ "${stat}" = "cache-live-freed" ] || [ "${stat}" = "cache-inserted" ] || [ "${stat}" = "expired" ] || [ "${stat}" = "immortal" ]; then
+                if [ "${stat}" = "cache-inserted" ] || [ "${stat}" = "cache-live-freed" ] || [ "${stat}" = "expired" ] || [ "${stat}" = "immortal" ]; then
                     value="$(echo "${stat_id}" | sed 's/.*://')"
                     echo "${stat}.value ${value}"
                 fi
@@ -948,7 +948,7 @@ plugin_data() {
         "cache_by_type")
             for stat_id in ${get_stats}; do
                 stat="$(echo "${stat_id}" | sed 's/:.*//')"
-                if [ "${stat}" = "ipv4" ] || [ "${stat}" = "ipv6" ] || [ "${stat}" = "srv" ] || [ "${stat}" = "cname" ] || [ "${stat}" = "ds" ] || [ "${stat}" = "dnskey" ] || [ "${stat}" = "other" ]; then
+                if [ "${stat}" = "ipv4" ] || [ "${stat}" = "ipv6" ] || [ "${stat}" = "cname" ] || [ "${stat}" = "ds" ] || [ "${stat}" = "dnskey" ] || [ "${stat}" = "other" ] || [ "${stat}" = "srv" ]; then
                     value="$(echo "${stat_id}" | sed 's/.*://')"
                     echo "${stat}.value ${value}"
                 fi
@@ -1125,7 +1125,7 @@ plugin_data() {
         "queries")
             for stat_id in ${get_stats}; do
                 stat="$(echo "${stat_id}" | sed 's/:.*//')"
-                if [ "${stat}" = "dns_queries_today" ] || [ "${stat}" = "ads_blocked_today" ] || [ "${stat}" = "queries_forwarded" ] || [ "${stat}" = "queries_cached" ]; then
+                if [ "${stat}" = "ads_blocked_today" ] || [ "${stat}" = "queries_cached" ] || [ "${stat}" = "queries_forwarded" ] || [ "${stat}" = "dns_queries_today" ]; then
                     value="$(echo "${stat_id}" | sed 's/.*://')"
                     echo "${stat}.value ${value}"
                 fi
@@ -1143,7 +1143,7 @@ plugin_data() {
         "replies_by_type")
             for stat_id in ${get_stats}; do
                 stat="$(echo "${stat_id}" | sed 's/:.*//')"
-                if [ "${stat}" = "reply_UNKNOWN" ] || [ "${stat}" = "reply_NODATA" ] || [ "${stat}" = "reply_NXDOMAIN" ] || [ "${stat}" = "reply_CNAME" ] || [ "${stat}" = "reply_IP" ] || [ "${stat}" = "reply_DOMAIN" ] || [ "${stat}" = "reply_RRNAME" ] || [ "${stat}" = "reply_SERVFAIL" ] || [ "${stat}" = "reply_REFUSED" ] || [ "${stat}" = "reply_NOTIMP" ] || [ "${stat}" = "reply_OTHER" ] || [ "${stat}" = "reply_DNSSEC" ] || [ "${stat}" = "reply_NONE" ] || [ "${stat}" = "reply_BLOB" ]; then
+                if [ "${stat}" = "reply_BLOB" ] || [ "${stat}" = "reply_CNAME" ] || [ "${stat}" = "reply_DNSSEC" ] || [ "${stat}" = "reply_DOMAIN" ] || [ "${stat}" = "reply_IP" ] || [ "${stat}" = "reply_NODATA" ] || [ "${stat}" = "reply_NXDOMAIN" ] || [ "${stat}" = "reply_REFUSED" ] || [ "${stat}" = "reply_RRNAME" ] || [ "${stat}" = "reply_SERVFAIL" ] || [ "${stat}" = "reply_NONE" ] || [ "${stat}" = "reply_NOTIMP" ] || [ "${stat}" = "reply_OTHER" ] || [ "${stat}" = "reply_UNKNOWN" ]; then
                     value="$(echo "${stat_id}" | sed 's/.*://')"
                     echo "${stat}.value ${value}"
                 fi
