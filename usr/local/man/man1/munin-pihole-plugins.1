@@ -1,10 +1,10 @@
-.TH man 1 "10 September 2022" "08.11.02" "munin-pihole-plugins man page"
+.TH man 1 "11 September 2022" "08.12.00" "munin-pihole-plugins man page"
 
 .SH NAME
 munin-pihole-plugins
 
 .SH VERSION
-08.11.02
+08.12.00
 
 .SH BRANCH
 development
@@ -227,10 +227,12 @@ Default /etc/munin/plugin-conf.d/pihole.conf plugin configuration.
     #env.webpassword PIHOLE_SETUPVARS_WEBPASSWORD_HERE
 
     # pihole_blocked
+    env.blocked_rate 3600
     env.domains_being_blocked_crit 1:5000000
     env.domains_being_blocked_warn 0:3000000
 
     # pihole_cache
+    #env.cache_rate
     #env.cache_inserted_crit
     #env.cache_inserted_warn
     #env.cache_live_freed_crit
@@ -241,6 +243,7 @@ Default /etc/munin/plugin-conf.d/pihole.conf plugin configuration.
     #env.immortal_warn
 
     # pihole_cache_by_type
+    #env.cache_by_type_rate
     #env.cache_A_crit
     #env.cache_A_warn
     #env.cache_AAAA_crit
@@ -257,20 +260,24 @@ Default /etc/munin/plugin-conf.d/pihole.conf plugin configuration.
     #env.cache_SRV_warn
 
     # pihole_clients
+    env.clients_rate 60
     #env.clients_ever_seen_crit
     #env.clients_ever_seen_warn
     env.unique_clients_crit 100
     env.unique_clients_warn 1:50
 
     # pihole_percent
+    #env.percent_rate
     env.ads_percentage_today_crit 95
     env.ads_percentage_today_warn 1:85
 
     # pihole_privacy
+    #env.privacy_rate
     #env.privacy_level_crit
     #env.privacy_level_warn
 
     # pihole_queries
+    #env.queries_rate
     #env.dns_queries_today_crit
     #env.dns_queries_today_warn
     #env.ads_blocked_today_crit
@@ -281,6 +288,7 @@ Default /etc/munin/plugin-conf.d/pihole.conf plugin configuration.
     #env.queries_cached_warn
 
     # pihole_queries_by_type
+    #env.queries_by_type_rate
     #env.query_A_crit
     #env.query_AAAA_warn
     #env.query_ANY_crit
@@ -313,6 +321,7 @@ Default /etc/munin/plugin-conf.d/pihole.conf plugin configuration.
     #env.query_TXT_warn
 
     # pihole_replies_by_type
+    #env.replies_by_type_rate
     #env.reply_BLOB_crit
     #env.reply_BLOB_warn
     #env.reply_CNAME_crit
@@ -343,10 +352,12 @@ Default /etc/munin/plugin-conf.d/pihole.conf plugin configuration.
     #env.reply_UNKNOWN_warn
 
     # pihole_status
+    env.status_rate 60
     env.status_crit 0:1
     env.status_warn 1:1
 
     # pihole_unique_domains
+    #env.unique_domains_rate
     env.unique_domains_crit 1:20000
     env.unique_domains_warn 0:10000
 
