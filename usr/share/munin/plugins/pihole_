@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="08.12.01"
+VERSION="08.12.02"
 
 : <<=cut
 =head1 NAME
@@ -81,6 +81,9 @@ Default munin-pihole-plugins pihole_ plugin configuration (default: /etc/munin/p
     env.setupvars /etc/pihole/setupVars.conf
     #env.webpassword PIHOLE_SETUPVARS_WEBPASSWORD_HERE
 
+    # graph category
+    env.graph_category dns
+
     # pihole_blocked
     env.blocked_rate 3600
     env.domains_being_blocked_crit 1:5000000
@@ -88,14 +91,16 @@ Default munin-pihole-plugins pihole_ plugin configuration (default: /etc/munin/p
 
     # pihole_cache
     #env.cache_rate
+    #env.cache_expired_crit
+    #env.cache_expired_warn
+    #env.cache_immortal_crit
+    #env.cache_immortal_warn
     #env.cache_inserted_crit
     #env.cache_inserted_warn
     #env.cache_live_freed_crit
     #env.cache_live_freed_warn
-    #env.expired_crit
-    #env.expired_warn
-    #env.immortal_crit
-    #env.immortal_warn
+    env.cache_size_crit 1:10000
+    env.cache_size_warn 10000:10000
 
     # pihole_cache_by_type
     #env.cache_by_type_rate
@@ -218,6 +223,10 @@ Default munin-pihole-plugins pihole_ plugin configuration (default: /etc/munin/p
 
 Uncomment and/or (re-)define relevant env.* variables to override the default values to suit your requirement.
 
+The graph_category value determines which category munin-pihole-plugins graphs will appear in Munin's interface.
+
+The values for *_rate is a value in seconds. E.g. "60", "300", "3600".
+
 The values for *_crit and *_warn can be a max value or a range separated by colon. E.g. "min:", ":max", "min:max", "max".
 
 =head1 AUTHOR
@@ -262,16 +271,20 @@ replies_by_type_rate="${replies_by_type_rate:-}"
 status_rate="${status_rate:-60}"
 unique_domains_rate="${unique_domains_rate:-}"
 
+graph_category="${graph_category:-dns}"
+
 domains_being_blocked_crit="${domains_being_blocked_crit:-1:5000000}"
 domains_being_blocked_warn="${domains_being_blocked_warn:-0:3000000}"
-cache_live_freed_crit="${cache_live_freed_crit:-}"
-cache_live_freed_warn="${cache_live_freed_warn:-}"
+cache_expired_crit="${cache_expired_crit:-}"
+cache_expired_warn="${cache_expired_warn:-}"
 cache_inserted_crit="${cache_inserted_crit:-}"
 cache_inserted_warn="${cache_inserted_warn:-}"
-expired_crit="${expired_crit:-}"
-expired_warn="${expired_warn:-}"
-immortal_crit="${immortal_crit:-}"
-immortal_warn="${immortal_warn:-}"
+cache_immortal_crit="${cache_immortal_crit:-}"
+cache_immortal_warn="${cache_immortal_warn:-}"
+cache_live_freed_crit="${cache_live_freed_crit:-}"
+cache_live_freed_warn="${cache_live_freed_warn:-}"
+cache_size_crit="${cache_size_crit:-1:10000}"
+cache_size_warn="${cache_size_warn:-10000:10000}"
 cache_A_crit="${cache_A_crit:-}"
 cache_A_warn="${cache_A_warn:-}"
 cache_AAAA_crit="${cache_AAAA_crit:-}"
@@ -422,12 +435,12 @@ plugin_autoconf() {
 plugin_config() {
     case ${plugin_id} in
         "blocked")
-            echo "graph_title Pi-hole domains being blocked"
             echo "graph_args --base 1000 --lower-limit 0"
-            echo "graph_vlabel domains being blocked"
-            echo "graph_scale no"
-            echo "graph_category dns"
+            echo "graph_category ${graph_category}"
             echo "graph_info This graph shows the number of domains blocked by Pi-hole."
+            echo "graph_scale no"
+            echo "graph_title Pi-hole domains being blocked"
+            echo "graph_vlabel domains being blocked"
             if [ -n "${blocked_rate}" ]; then
                 echo "update_rate ${blocked_rate}"
             fi
@@ -443,18 +456,32 @@ plugin_config() {
             done
         ;;
         "cache")
-            echo "graph_title Pi-hole cache"
             echo "graph_args --base 1000 --lower-limit 0"
-            echo "graph_vlabel cache packets"
-            echo "graph_scale no"
-            echo "graph_category dns"
+            echo "graph_category ${graph_category}"
             echo "graph_info This graph shows Pi-hole's cache."
+            echo "graph_scale no"
+            echo "graph_title Pi-hole cache"
+            echo "graph_vlabel cache packets"
             if [ -n "${cache_rate}" ]; then
                 echo "update_rate ${cache_rate}"
             fi
             for stat_id in ${get_stats}; do
                 stat="$(echo "${stat_id}" | sed 's/:.*//')"
                 case "${stat}" in
+                    "expired")
+                        echo "${stat}.critical ${cache_expired_crit}"
+                        echo "${stat}.label cache expired"
+                        echo "${stat}.min 0"
+                        echo "${stat}.type GAUGE"
+                        echo "${stat}.warning ${cache_expired_warn}"
+                    ;;
+                    "immortal")
+                        echo "${stat}.critical ${cache_immortal_crit}"
+                        echo "${stat}.label cache immortal"
+                        echo "${stat}.min 0"
+                        echo "${stat}.type GAUGE"
+                        echo "${stat}.warning ${cache_immortal_warn}"
+                    ;;
                     "cache-inserted")
                         echo "${stat}.critical ${cache_inserted_crit}"
                         echo "${stat}.label cache inserted"
@@ -469,31 +496,24 @@ plugin_config() {
                         echo "${stat}.type GAUGE"
                         echo "${stat}.warning ${cache_live_freed_warn}"
                     ;;
-                    "expired")
-                        echo "${stat}.critical ${expired_crit}"
-                        echo "${stat}.label expired"
+                    "cache-size")
+                        echo "${stat}.critical ${cache_size_crit}"
+                        echo "${stat}.label cache size"
                         echo "${stat}.min 0"
                         echo "${stat}.type GAUGE"
-                        echo "${stat}.warning ${expired_warn}"
-                    ;;
-                    "immortal")
-                        echo "${stat}.critical ${immortal_crit}"
-                        echo "${stat}.label immortal"
-                        echo "${stat}.min 0"
-                        echo "${stat}.type GAUGE"
-                        echo "${stat}.warning ${immortal_warn}"
+                        echo "${stat}.warning ${cache_size_warn}"
                     ;;
                 esac
             done
         ;;
         "cache_by_type")
-            echo "graph_title Pi-hole cache by type"
             echo "graph_args --base 1000 --lower-limit 0"
-            echo "graph_vlabel cache packets"
-            echo "graph_total total"
-            echo "graph_scale no"
-            echo "graph_category dns"
+            echo "graph_category ${graph_category}"
             echo "graph_info This graph shows Pi-hole's cache by type."
+            echo "graph_scale no"
+            echo "graph_title Pi-hole cache by type"
+            echo "graph_total total"
+            echo "graph_vlabel cache packets"
             if [ -n "${cache_by_type_rate}" ]; then
                 echo "update_rate ${cache_by_type_rate}"
             fi
@@ -553,12 +573,12 @@ plugin_config() {
             done
         ;;
         "clients")
-            echo "graph_title Pi-hole clients"
             echo "graph_args --base 1000 --lower-limit 0 --units-exponent 0"
-            echo "graph_vlabel number of clients"
-            echo "graph_scale no"
-            echo "graph_category dns"
+            echo "graph_category ${graph_category}"
             echo "graph_info This graph shows clients seen by Pi-hole."
+            echo "graph_scale no"
+            echo "graph_title Pi-hole clients"
+            echo "graph_vlabel number of clients"
             if [ -n "${clients_rate}" ]; then
                 echo "update_rate ${clients_rate}"
             fi
@@ -583,12 +603,12 @@ plugin_config() {
             done
         ;;
         "percent")
-            echo "graph_title Pi-hole blocked query percent"
             echo "graph_args --base 1000 --lower-limit 0 --rigid --upper-limit 100"
-            echo "graph_vlabel percent blocked"
-            echo "graph_scale no"
-            echo "graph_category dns"
+            echo "graph_category ${graph_category}"
             echo "graph_info This graph shows Pi-hole's blocked query percentage."
+            echo "graph_scale no"
+            echo "graph_title Pi-hole blocked query percent"
+            echo "graph_vlabel blocked query percent"
             if [ -n "${percent_rate}" ]; then
                 echo "update_rate ${percent_rate}"
             fi
@@ -605,12 +625,12 @@ plugin_config() {
             done
         ;;
         "privacy")
-            echo "graph_title Pi-hole privacy level"
             echo "graph_args --base 1000 --lower-limit 0 --rigid --upper-limit 3 --units-exponent 0"
-            echo "graph_vlabel privacy level"
-            echo "graph_scale no"
-            echo "graph_category dns"
+            echo "graph_category ${graph_category}"
             echo "graph_info This graph shows Pi-hole's privacy level."
+            echo "graph_scale no"
+            echo "graph_title Pi-hole privacy level"
+            echo "graph_vlabel privacy level"
             if [ -n "${privacy_rate}" ]; then
                 echo "update_rate ${privacy_rate}"
             fi
@@ -627,12 +647,12 @@ plugin_config() {
             done
         ;;
         "queries")
-            echo "graph_title Pi-hole queries"
             echo "graph_args --base 1000 --lower-limit 0"
-            echo "graph_vlabel queries"
-            echo "graph_scale no"
-            echo "graph_category dns"
+            echo "graph_category ${graph_category}"
             echo "graph_info This graph shows queries seen by Pi-hole."
+            echo "graph_scale no"
+            echo "graph_title Pi-hole queries"
+            echo "graph_vlabel queries"
             if [ -n "${queries_rate}" ]; then
                 echo "update_rate ${queries_rate}"
             fi
@@ -671,12 +691,12 @@ plugin_config() {
             done
         ;;
         "queries_by_type")
-            echo "graph_title Pi-hole queries by type"
             echo "graph_args --base 1000 --lower-limit 0 --rigid --upper-limit 100"
-            echo "graph_vlabel percent queries by type"
-            echo "graph_scale no"
-            echo "graph_category dns"
+            echo "graph_category ${graph_category}"
             echo "graph_info This graph shows Pi-hole queries by type."
+            echo "graph_scale no"
+            echo "graph_title Pi-hole queries by type"
+            echo "graph_vlabel percent queries by type"
             if [ -n "${queries_by_type_rate}" ]; then
                 echo "update_rate ${queries_by_type_rate}"
             fi
@@ -799,13 +819,13 @@ plugin_config() {
             done
         ;;
         "replies_by_type")
-            echo "graph_title Pi-hole replies by type"
             echo "graph_args --base 1000 --lower-limit 0"
-            echo "graph_vlabel answer packets"
-            echo "graph_total total"
-            echo "graph_scale no"
-            echo "graph_category dns"
+            echo "graph_category ${graph_category}"
             echo "graph_info This graph shows Pi-hole replies by type."
+            echo "graph_scale no"
+            echo "graph_title Pi-hole replies by type"
+            echo "graph_total total"
+            echo "graph_vlabel answer packets"
             if [ -n "${replies_by_type_rate}" ]; then
                 echo "update_rate ${replies_by_type_rate}"
             fi
@@ -914,12 +934,12 @@ plugin_config() {
             done
         ;;
         "status")
-            echo "graph_title Pi-hole blocking status"
             echo "graph_args --base 1000 --lower-limit -1 --rigid --upper-limit 1 --units-exponent 0"
-            echo "graph_vlabel unknown / disabled / enabled"
-            echo "graph_scale no"
-            echo "graph_category dns"
+            echo "graph_category ${graph_category}"
             echo "graph_info This graph shows Pi-hole's blocking status."
+            echo "graph_scale no"
+            echo "graph_title Pi-hole blocking status"
+            echo "graph_vlabel unknown / disabled / enabled"
             if [ -n "${status_rate}" ]; then
                 echo "update_rate ${status_rate}"
             fi
@@ -936,12 +956,12 @@ plugin_config() {
             done
         ;;
         "unique_domains")
-            echo "graph_title Pi-hole unique domains"
             echo "graph_args --base 1000 --lower-limit 0"
-            echo "graph_vlabel unique domains"
-            echo "graph_scale no"
-            echo "graph_category dns"
+            echo "graph_category ${graph_category}"
             echo "graph_info This graph shows the unique domains seen by Pi-hole."
+            echo "graph_scale no"
+            echo "graph_title Pi-hole unique domains"
+            echo "graph_vlabel unique domains"
             if [ -n "${unique_domains_rate}" ]; then
                 echo "update_rate ${unique_domains_rate}"
             fi
@@ -957,12 +977,12 @@ plugin_config() {
             done
         ;;
         *)
-            echo "graph_title Pi-hole blocked query percent"
             echo "graph_args --base 1000 --lower-limit 0 --rigid --upper-limit 100"
-            echo "graph_vlabel percent blocked"
-            echo "graph_scale no"
-            echo "graph_category dns"
+            echo "graph_category ${graph_category}"
             echo "graph_info This graph shows Pi-hole's blocked query percentage."
+            echo "graph_scale no"
+            echo "graph_title Pi-hole blocked query percent"
+            echo "graph_vlabel blocked query percent"
             if [ -n "${percent_rate}" ]; then
                 echo "update_rate ${percent_rate}"
             fi
@@ -995,7 +1015,7 @@ plugin_data() {
         "cache")
             for stat_id in ${get_stats}; do
                 stat="$(echo "${stat_id}" | sed 's/:.*//')"
-                if [ "${stat}" = "cache-inserted" ] || [ "${stat}" = "cache-live-freed" ] || [ "${stat}" = "expired" ] || [ "${stat}" = "immortal" ]; then
+                if [ "${stat}" = "expired" ] || [ "${stat}" = "immortal" ] || [ "${stat}" = "cache-inserted" ] || [ "${stat}" = "cache-live-freed" ] || [ "${stat}" = "cache-size" ]; then
                     value="$(echo "${stat_id}" | sed 's/.*://')"
                     echo "${stat}.value ${value}"
                 fi
@@ -1020,6 +1040,8 @@ plugin_data() {
             done
         ;;
         "debug")
+            echo "plugin category:"
+            echo "graph_category=\"${graph_category}\""
             echo "plugin update rate values:"
             echo "blocked_rate=\"${blocked_rate}\""
             echo "cache_rate=\"${cache_rate}\""
@@ -1035,14 +1057,16 @@ plugin_data() {
             echo "plugin critical/warning values:"
             echo "domains_being_blocked_crit=\"${domains_being_blocked_crit}\""
             echo "domains_being_blocked_warn=\"${domains_being_blocked_warn}\""
-            echo "cache_live_freed_crit=\"${cache_live_freed_crit}\""
-            echo "cache_live_freed_warn=\"${cache_live_freed_warn}\""
+            echo "cache_expired_crit=\"${cache_expired_crit}\""
+            echo "cache_expired_warn=\"${cache_expired_warn}\""
+            echo "cache_immortal_crit=\"${cache_immortal_crit}\""
+            echo "cache_immortal_warn=\"${cache_immortal_warn}\""
             echo "cache_inserted_crit=\"${cache_inserted_crit}\""
             echo "cache_inserted_warn=\"${cache_inserted_warn}\""
-            echo "expired_crit=\"${expired_crit}\""
-            echo "expired_warn=\"${expired_warn}\""
-            echo "immortal_crit=\"${immortal_crit}\""
-            echo "immortal_warn=\"${immortal_warn}\""
+            echo "cache_live_freed_crit=\"${cache_live_freed_crit}\""
+            echo "cache_live_freed_warn=\"${cache_live_freed_warn}\""
+            echo "cache_size_crit=\"${cache_size_crit}\""
+            echo "cache_size_warn=\"${cache_size_warn}\""
             echo "cache_A_crit=\"${cache_A_crit}\""
             echo "cache_A_warn=\"${cache_A_warn}\""
             echo "cache_AAAA_crit=\"${cache_AAAA_crit}\""
