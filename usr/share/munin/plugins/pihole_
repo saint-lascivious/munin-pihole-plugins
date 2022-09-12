@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="08.12.00"
+VERSION="08.12.01"
 
 : <<=cut
 =head1 NAME
@@ -423,7 +423,7 @@ plugin_config() {
     case ${plugin_id} in
         "blocked")
             echo "graph_title Pi-hole domains being blocked"
-            echo "graph_args --base 1000 -l 0"
+            echo "graph_args --base 1000 --lower-limit 0"
             echo "graph_vlabel domains being blocked"
             echo "graph_scale no"
             echo "graph_category dns"
@@ -444,7 +444,7 @@ plugin_config() {
         ;;
         "cache")
             echo "graph_title Pi-hole cache"
-            echo "graph_args --base 1000 -l 0"
+            echo "graph_args --base 1000 --lower-limit 0"
             echo "graph_vlabel cache packets"
             echo "graph_scale no"
             echo "graph_category dns"
@@ -488,7 +488,7 @@ plugin_config() {
         ;;
         "cache_by_type")
             echo "graph_title Pi-hole cache by type"
-            echo "graph_args --base 1000 -l 0"
+            echo "graph_args --base 1000 --lower-limit 0"
             echo "graph_vlabel cache packets"
             echo "graph_total total"
             echo "graph_scale no"
@@ -554,7 +554,7 @@ plugin_config() {
         ;;
         "clients")
             echo "graph_title Pi-hole clients"
-            echo "graph_args --base 1000 -l 0"
+            echo "graph_args --base 1000 --lower-limit 0 --units-exponent 0"
             echo "graph_vlabel number of clients"
             echo "graph_scale no"
             echo "graph_category dns"
@@ -584,7 +584,7 @@ plugin_config() {
         ;;
         "percent")
             echo "graph_title Pi-hole blocked query percent"
-            echo "graph_args --base 1000 -l 0 -u 100"
+            echo "graph_args --base 1000 --lower-limit 0 --rigid --upper-limit 100"
             echo "graph_vlabel percent blocked"
             echo "graph_scale no"
             echo "graph_category dns"
@@ -606,7 +606,7 @@ plugin_config() {
         ;;
         "privacy")
             echo "graph_title Pi-hole privacy level"
-            echo "graph_args --base 1000 -l 0 -u 3"
+            echo "graph_args --base 1000 --lower-limit 0 --rigid --upper-limit 3 --units-exponent 0"
             echo "graph_vlabel privacy level"
             echo "graph_scale no"
             echo "graph_category dns"
@@ -628,7 +628,7 @@ plugin_config() {
         ;;
         "queries")
             echo "graph_title Pi-hole queries"
-            echo "graph_args --base 1000 -l 0"
+            echo "graph_args --base 1000 --lower-limit 0"
             echo "graph_vlabel queries"
             echo "graph_scale no"
             echo "graph_category dns"
@@ -641,21 +641,21 @@ plugin_config() {
                 case "${stat}" in
                     "ads_blocked_today")
                         echo "${stat}.critical ${ads_blocked_today_crit}"
-                        echo "${stat}.label blocked queries"
+                        echo "${stat}.label queries blocked"
                         echo "${stat}.min 0"
                         echo "${stat}.type GAUGE"
                         echo "${stat}.warning ${ads_blocked_today_warn}"
                     ;;
                     "queries_cached")
                         echo "${stat}.critical ${queries_cached_crit}"
-                        echo "${stat}.label cached queries"
+                        echo "${stat}.label queries cached"
                         echo "${stat}.min 0"
                         echo "${stat}.type GAUGE"
                         echo "${stat}.warning ${queries_cached_warn}"
                     ;;
                     "queries_forwarded")
                         echo "${stat}.critical ${queries_forwarded_crit}"
-                        echo "${stat}.label forwarded queries"
+                        echo "${stat}.label queries forwarded"
                         echo "${stat}.min 0"
                         echo "${stat}.type GAUGE"
                         echo "${stat}.warning ${queries_forwarded_warn}"
@@ -672,7 +672,7 @@ plugin_config() {
         ;;
         "queries_by_type")
             echo "graph_title Pi-hole queries by type"
-            echo "graph_args --base 1000 -l 0 -u 100"
+            echo "graph_args --base 1000 --lower-limit 0 --rigid --upper-limit 100"
             echo "graph_vlabel percent queries by type"
             echo "graph_scale no"
             echo "graph_category dns"
@@ -800,7 +800,7 @@ plugin_config() {
         ;;
         "replies_by_type")
             echo "graph_title Pi-hole replies by type"
-            echo "graph_args --base 1000 -l 0"
+            echo "graph_args --base 1000 --lower-limit 0"
             echo "graph_vlabel answer packets"
             echo "graph_total total"
             echo "graph_scale no"
@@ -915,7 +915,7 @@ plugin_config() {
         ;;
         "status")
             echo "graph_title Pi-hole blocking status"
-            echo "graph_args --base 1000 -l -1 -u 1"
+            echo "graph_args --base 1000 --lower-limit -1 --rigid --upper-limit 1 --units-exponent 0"
             echo "graph_vlabel unknown / disabled / enabled"
             echo "graph_scale no"
             echo "graph_category dns"
@@ -937,7 +937,7 @@ plugin_config() {
         ;;
         "unique_domains")
             echo "graph_title Pi-hole unique domains"
-            echo "graph_args --base 1000 -l 0"
+            echo "graph_args --base 1000 --lower-limit 0"
             echo "graph_vlabel unique domains"
             echo "graph_scale no"
             echo "graph_category dns"
@@ -958,7 +958,7 @@ plugin_config() {
         ;;
         *)
             echo "graph_title Pi-hole blocked query percent"
-            echo "graph_args --base 1000 -l 0 -u 100"
+            echo "graph_args --base 1000 --lower-limit 0 --rigid --upper-limit 100"
             echo "graph_vlabel percent blocked"
             echo "graph_scale no"
             echo "graph_category dns"
