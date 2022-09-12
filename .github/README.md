@@ -35,3 +35,9 @@ Full documentation for `munin-pihole-plugins` can now be found in [the munin-pih
 [mascot]:https://raw.githubusercontent.com/wiki/saint-lascivious/munin-pihole-plugins/images/mascot/Wurmple.png "Using the spikes on its rear end, Wurmple peels the bark off trees and feeds on the sap that oozes out. This Pokémon's feet are tipped with suction pads that allow it to cling to glass without slipping."
 
 <p align="right"><sup><sub>munin-pihole-plugins - saint-lascivious (Hayden Pearce), ©2022</sub></sup></p>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/wiki/saint-lascivious/munin-pihole-plugins/images/mascot/Shiny_Wurmple.png">
+  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/wiki/saint-lascivious/munin-pihole-plugins/images/mascot/Wurmple.png">
+  <img alt="Using the spikes on its rear end, Wurmple peels the bark off trees and feeds on the sap that oozes out. This Pokémon's feet are tipped with suction pads that allow it to cling to glass without slipping." src="https://raw.githubusercontent.com/wiki/saint-lascivious/munin-pihole-plugins/images/mascot/Wurmple.png">
+</picture>
