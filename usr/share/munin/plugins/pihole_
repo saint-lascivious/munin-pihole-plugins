@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="07.03.00"
+VERSION="07.04.00"
 
 : <<=cut
 =head1 NAME
@@ -82,10 +82,12 @@ Default munin-pihole-plugins pihole_ plugin configuration (default: /etc/munin/p
     #env.webpassword PIHOLE_SETUPVARS_WEBPASSWORD_HERE
 
     # pihole_blocked
+    env.blocked_rate 3600
     env.domains_being_blocked_crit 1:5000000
     env.domains_being_blocked_warn 0:3000000
 
     # pihole_cache
+    #env.cache_rate
     #env.cache_inserted_crit
     #env.cache_inserted_warn
     #env.cache_live_freed_crit
@@ -96,6 +98,7 @@ Default munin-pihole-plugins pihole_ plugin configuration (default: /etc/munin/p
     #env.immortal_warn
 
     # pihole_cache_by_type
+    #env.cache_by_type_rate
     #env.cache_A_crit
     #env.cache_A_warn
     #env.cache_AAAA_crit
@@ -112,20 +115,24 @@ Default munin-pihole-plugins pihole_ plugin configuration (default: /etc/munin/p
     #env.cache_SRV_warn
 
     # pihole_clients
+    env.clients_rate 60
     #env.clients_ever_seen_crit
     #env.clients_ever_seen_warn
     env.unique_clients_crit 100
     env.unique_clients_warn 1:50
 
     # pihole_percent
+    #env.percent_rate
     env.ads_percentage_today_crit 95
     env.ads_percentage_today_warn 1:85
 
     # pihole_privacy
+    #env.privacy_rate
     #env.privacy_level_crit
     #env.privacy_level_warn
 
     # pihole_queries
+    #env.queries_rate
     #env.dns_queries_today_crit
     #env.dns_queries_today_warn
     #env.ads_blocked_today_crit
@@ -136,6 +143,7 @@ Default munin-pihole-plugins pihole_ plugin configuration (default: /etc/munin/p
     #env.queries_cached_warn
 
     # pihole_queries_by_type
+    #env.queries_by_type_rate
     #env.query_A_crit
     #env.query_AAAA_warn
     #env.query_ANY_crit
@@ -168,6 +176,7 @@ Default munin-pihole-plugins pihole_ plugin configuration (default: /etc/munin/p
     #env.query_TXT_warn
 
     # pihole_replies_by_type
+    #env.replies_by_type_rate
     #env.reply_BLOB_crit
     #env.reply_BLOB_warn
     #env.reply_CNAME_crit
@@ -198,10 +207,12 @@ Default munin-pihole-plugins pihole_ plugin configuration (default: /etc/munin/p
     #env.reply_UNKNOWN_warn
 
     # pihole_status
+    env.status_rate 60
     env.status_crit 0:1
     env.status_warn 1:1
 
     # pihole_unique_domains
+    #env.unique_domains_rate
     env.unique_domains_crit 1:20000
     env.unique_domains_warn 0:10000
 
@@ -238,6 +249,18 @@ if [ -f "${setupvars}" ]; then
 else
     webpassword="${webpassword:-}"
 fi
+
+blocked_rate="${blocked_rate:-3600}"
+cache_rate="${cache_rate:-}"
+cache_by_type_rate="${cache_by_type_rate:-}"
+clients_rate="${clients_rate:-60}"
+percent_rate="${percent_rate:-}"
+privacy_rate="${privacy_rate:-}"
+queries_rate="${queries_rate:-}"
+queries_by_type_rate="${queries_by_type_rate:-}"
+replies_by_type_rate="${replies_by_type_rate:-}"
+status_rate="${status_rate:-60}"
+unique_domains_rate="${unique_domains_rate:-}"
 
 domains_being_blocked_crit="${domains_being_blocked_crit:-1:5000000}"
 domains_being_blocked_warn="${domains_being_blocked_warn:-0:3000000}"
@@ -352,7 +375,7 @@ if [ "${host}" = "127.0.0.1" ] || [ "${host}" = "::1" ] && [ -n "${ftlport}" ]; 
     api_method="telnet"
     case ${plugin_id} in
         "cache" | "cache_by_type")
-            get_stats="$(echo ">cacheinfo >quit" | nc "${host}" "${ftlport}" 2>/dev/null | sed 's/ //' | sort -u)"
+            get_stats="$(echo ">cacheinfo >quit" | nc "${host}" "${ftlport}" 2>/dev/null | sed 's/ipv4/a/; s/ipv6/aaaa/; s/ //' | sort -u)"
         ;;
         "queries_by_type")
             get_stats="$(echo ">querytypes >quit" | nc "${host}" "${ftlport}" 2>/dev/null | sed 's/ (IPv4)//; s/ (IPv6)//; s/ //' | sort -u)"
@@ -365,7 +388,7 @@ else
     api_method="json"
     case ${plugin_id} in
         "cache" | "cache_by_type")
-            get_stats="$(echo "curl -sL ${host}:${port}${api}${cachesuffix}${webpassword} 2>/dev/null" | sed 's/[{}"]//g; s/cacheinfo://' | tr "," "\\n" | sort -u)"
+            get_stats="$(echo "curl -sL ${host}:${port}${api}${cachesuffix}${webpassword} 2>/dev/null" | sed 's/[{}"]//g; s/cacheinfo://; s/ipv4/a/; s/ipv6/aaaa/' | tr "," "\\n" | sort -u)"
         ;;
         "queries_by_type")
             get_stats="$(echo "curl -sL ${host}:${port}${api}${querysuffix}${webpassword} 2>/dev/null" | sed 's/[{}"]//g; s/querytypes://; s/ (IPv4)//; s/ (IPv6)//' | tr "," "\\n" | sort -u)"
@@ -400,12 +423,14 @@ plugin_config() {
     case ${plugin_id} in
         "blocked")
             echo "graph_title Pi-hole domains being blocked"
-            echo "graph_args --base 1000 -l 0"
+            echo "graph_args --base 1000 --lower-limit 0"
             echo "graph_vlabel domains being blocked"
             echo "graph_scale no"
             echo "graph_category dns"
             echo "graph_info This graph shows the number of domains blocked by Pi-hole."
-            echo "update_rate 3600"
+            if [ -n "${blocked_rate}" ]; then
+                echo "update_rate ${blocked_rate}"
+            fi
             for stat_id in ${get_stats}; do
                 stat="$(echo "${stat_id}" | sed 's/:.*//')"
                 if [ "${stat}" = "domains_being_blocked" ]; then
@@ -419,11 +444,14 @@ plugin_config() {
         ;;
         "cache")
             echo "graph_title Pi-hole cache"
-            echo "graph_args --base 1000 -l 0"
+            echo "graph_args --base 1000 --lower-limit 0"
             echo "graph_vlabel cache packets"
             echo "graph_scale no"
             echo "graph_category dns"
             echo "graph_info This graph shows Pi-hole's cache."
+            if [ -n "${cache_rate}" ]; then
+                echo "update_rate ${cache_rate}"
+            fi
             for stat_id in ${get_stats}; do
                 stat="$(echo "${stat_id}" | sed 's/:.*//')"
                 case "${stat}" in
@@ -460,23 +488,26 @@ plugin_config() {
         ;;
         "cache_by_type")
             echo "graph_title Pi-hole cache by type"
-            echo "graph_args --base 1000 -l 0"
+            echo "graph_args --base 1000 --lower-limit 0"
             echo "graph_vlabel cache packets"
             echo "graph_total total"
             echo "graph_scale no"
             echo "graph_category dns"
             echo "graph_info This graph shows Pi-hole's cache by type."
+            if [ -n "${cache_by_type_rate}" ]; then
+                echo "update_rate ${cache_by_type_rate}"
+            fi
             for stat_id in ${get_stats}; do
                 stat="$(echo "${stat_id}" | sed 's/:.*//')"
                 case "${stat}" in
-                    "ipv4")
+                    "a")
                         echo "${stat}.critical ${cache_A_crit}"
                         echo "${stat}.label A"
                         echo "${stat}.min 0"
                         echo "${stat}.type GAUGE"
                         echo "${stat}.warning ${cache_A_warn}"
                     ;;
-                    "ipv6")
+                    "aaaa")
                         echo "${stat}.critical ${cache_AAAA_crit}"
                         echo "${stat}.label AAAA"
                         echo "${stat}.min 0"
@@ -523,11 +554,14 @@ plugin_config() {
         ;;
         "clients")
             echo "graph_title Pi-hole clients"
-            echo "graph_args --base 1000 -l 0"
+            echo "graph_args --base 1000 --lower-limit 0 --units-exponent 0"
             echo "graph_vlabel number of clients"
             echo "graph_scale no"
             echo "graph_category dns"
             echo "graph_info This graph shows clients seen by Pi-hole."
+            if [ -n "${clients_rate}" ]; then
+                echo "update_rate ${clients_rate}"
+            fi
             for stat_id in ${get_stats}; do
                 stat="$(echo "${stat_id}" | sed 's/:.*//')"
                 case "${stat}" in
@@ -550,11 +584,14 @@ plugin_config() {
         ;;
         "percent")
             echo "graph_title Pi-hole blocked query percent"
-            echo "graph_args --base 1000 -l 0 -u 100"
+            echo "graph_args --base 1000 --lower-limit 0 --rigid --upper-limit 100"
             echo "graph_vlabel percent blocked"
             echo "graph_scale no"
             echo "graph_category dns"
             echo "graph_info This graph shows Pi-hole's blocked query percentage."
+            if [ -n "${percent_rate}" ]; then
+                echo "update_rate ${percent_rate}"
+            fi
             for stat_id in ${get_stats}; do
                 stat="$(echo "${stat_id}" | sed 's/:.*//')"
                 if [ "${stat}" = "ads_percentage_today" ]; then
@@ -569,11 +606,14 @@ plugin_config() {
         ;;
         "privacy")
             echo "graph_title Pi-hole privacy level"
-            echo "graph_args --base 1000 -l 0 -u 3"
+            echo "graph_args --base 1000 --lower-limit 0 --rigid --upper-limit 3 --units-exponent 0"
             echo "graph_vlabel privacy level"
             echo "graph_scale no"
             echo "graph_category dns"
             echo "graph_info This graph shows Pi-hole's privacy level."
+            if [ -n "${privacy_rate}" ]; then
+                echo "update_rate ${privacy_rate}"
+            fi
             for stat_id in ${get_stats}; do
                 stat="$(echo "${stat_id}" | sed 's/:.*//')"
                 if [ "${stat}" = "privacy_level" ]; then
@@ -588,31 +628,34 @@ plugin_config() {
         ;;
         "queries")
             echo "graph_title Pi-hole queries"
-            echo "graph_args --base 1000 -l 0"
+            echo "graph_args --base 1000 --lower-limit 0"
             echo "graph_vlabel queries"
             echo "graph_scale no"
             echo "graph_category dns"
             echo "graph_info This graph shows queries seen by Pi-hole."
+            if [ -n "${queries_rate}" ]; then
+                echo "update_rate ${queries_rate}"
+            fi
             for stat_id in ${get_stats}; do
                 stat="$(echo "${stat_id}" | sed 's/:.*//')"
                 case "${stat}" in
                     "ads_blocked_today")
                         echo "${stat}.critical ${ads_blocked_today_crit}"
-                        echo "${stat}.label blocked queries"
+                        echo "${stat}.label queries blocked"
                         echo "${stat}.min 0"
                         echo "${stat}.type GAUGE"
                         echo "${stat}.warning ${ads_blocked_today_warn}"
                     ;;
                     "queries_cached")
                         echo "${stat}.critical ${queries_cached_crit}"
-                        echo "${stat}.label cached queries"
+                        echo "${stat}.label queries cached"
                         echo "${stat}.min 0"
                         echo "${stat}.type GAUGE"
                         echo "${stat}.warning ${queries_cached_warn}"
                     ;;
                     "queries_forwarded")
                         echo "${stat}.critical ${queries_forwarded_crit}"
-                        echo "${stat}.label forwarded queries"
+                        echo "${stat}.label queries forwarded"
                         echo "${stat}.min 0"
                         echo "${stat}.type GAUGE"
                         echo "${stat}.warning ${queries_forwarded_warn}"
@@ -627,15 +670,16 @@ plugin_config() {
                 esac
             done
         ;;
-
-
         "queries_by_type")
             echo "graph_title Pi-hole queries by type"
-            echo "graph_args --base 1000 -l 0 -u 100"
+            echo "graph_args --base 1000 --lower-limit 0 --rigid --upper-limit 100"
             echo "graph_vlabel percent queries by type"
             echo "graph_scale no"
             echo "graph_category dns"
             echo "graph_info This graph shows Pi-hole queries by type."
+            if [ -n "${queries_by_type_rate}" ]; then
+                echo "update_rate ${queries_by_type_rate}"
+            fi
             for stat_id in ${get_stats}; do
                 stat="$(echo "${stat_id}" | sed 's/:.*//')"
                 case "${stat}" in
@@ -756,12 +800,15 @@ plugin_config() {
         ;;
         "replies_by_type")
             echo "graph_title Pi-hole replies by type"
-            echo "graph_args --base 1000 -l 0"
+            echo "graph_args --base 1000 --lower-limit 0"
             echo "graph_vlabel answer packets"
             echo "graph_total total"
             echo "graph_scale no"
             echo "graph_category dns"
             echo "graph_info This graph shows Pi-hole replies by type."
+            if [ -n "${replies_by_type_rate}" ]; then
+                echo "update_rate ${replies_by_type_rate}"
+            fi
             for stat_id in ${get_stats}; do
                 stat="$(echo "${stat_id}" | sed 's/:.*//')"
                 case "${stat}" in
@@ -868,11 +915,14 @@ plugin_config() {
         ;;
         "status")
             echo "graph_title Pi-hole blocking status"
-            echo "graph_args --base 1000 -l -1 -u 1"
+            echo "graph_args --base 1000 --lower-limit -1 --rigid --upper-limit 1 --units-exponent 0"
             echo "graph_vlabel unknown / disabled / enabled"
             echo "graph_scale no"
             echo "graph_category dns"
             echo "graph_info This graph shows Pi-hole's blocking status."
+            if [ -n "${status_rate}" ]; then
+                echo "update_rate ${status_rate}"
+            fi
             for stat_id in ${get_stats}; do
                 stat="$(echo "${stat_id}" | sed 's/:.*//')"
                 if [ "${stat}" = "status" ]; then
@@ -887,11 +937,14 @@ plugin_config() {
         ;;
         "unique_domains")
             echo "graph_title Pi-hole unique domains"
-            echo "graph_args --base 1000 -l 0"
+            echo "graph_args --base 1000 --lower-limit 0"
             echo "graph_vlabel unique domains"
             echo "graph_scale no"
             echo "graph_category dns"
             echo "graph_info This graph shows the unique domains seen by Pi-hole."
+            if [ -n "${unique_domains_rate}" ]; then
+                echo "update_rate ${unique_domains_rate}"
+            fi
             for stat_id in ${get_stats}; do
                 stat="$(echo "${stat_id}" | sed 's/:.*//')"
                 if [ "${stat}" = "unique_domains" ]; then
@@ -905,11 +958,14 @@ plugin_config() {
         ;;
         *)
             echo "graph_title Pi-hole blocked query percent"
-            echo "graph_args --base 1000 -l 0 -u 100"
+            echo "graph_args --base 1000 --lower-limit 0 --rigid --upper-limit 100"
             echo "graph_vlabel percent blocked"
             echo "graph_scale no"
             echo "graph_category dns"
             echo "graph_info This graph shows Pi-hole's blocked query percentage."
+            if [ -n "${percent_rate}" ]; then
+                echo "update_rate ${percent_rate}"
+            fi
             for stat_id in ${get_stats}; do
                 stat="$(echo "${stat_id}" | sed 's/:.*//')"
                 if [ "${stat}" = "ads_percentage_today" ]; then
@@ -948,7 +1004,7 @@ plugin_data() {
         "cache_by_type")
             for stat_id in ${get_stats}; do
                 stat="$(echo "${stat_id}" | sed 's/:.*//')"
-                if [ "${stat}" = "ipv4" ] || [ "${stat}" = "ipv6" ] || [ "${stat}" = "cname" ] || [ "${stat}" = "ds" ] || [ "${stat}" = "dnskey" ] || [ "${stat}" = "other" ] || [ "${stat}" = "srv" ]; then
+                if [ "${stat}" = "a" ] || [ "${stat}" = "aaaa" ] || [ "${stat}" = "cname" ] || [ "${stat}" = "ds" ] || [ "${stat}" = "dnskey" ] || [ "${stat}" = "other" ] || [ "${stat}" = "srv" ]; then
                     value="$(echo "${stat_id}" | sed 's/.*://')"
                     echo "${stat}.value ${value}"
                 fi
@@ -964,40 +1020,18 @@ plugin_data() {
             done
         ;;
         "debug")
-            echo "plugin version:"
-            echo "\"${VERSION}\""
-            echo "plugin api method:"
-            echo "${api_method}"
-            echo "plugin variables:"
-            echo "api=\"${api}\""
-            echo "cachesuffix=\"${cachesuffix}\""
-            echo "ftl_portfile=\"${ftl_portfile}\""
-            if [ -f "${ftl_portfile}" ]; then
-                echo "\"${ftl_portfile}\" exists"
-            else
-                echo "\"${ftl_portfile}\" does not exist"
-            fi
-            echo "ftlport=\"${ftlport}\""
-            echo "host=\"${host}\""
-            echo "port=\"${port}\""
-            echo "setupvars=\"${setupvars}\""
-            if [ -f "${setupvars}" ]; then
-                echo "\"${setupvars}\" exists"
-            else
-                echo "\"${setupvars}\" does not exist"
-            fi
-            echo "webpassword=\"${webpassword}\""
-            echo "plugin commands:"
-            if [ -x "$(command -v "nc")" ]; then
-                echo "\"nc\" exists"
-            else
-                echo "\"nc\" does not exist"
-            fi
-            if [ -x "$(command -v "curl")" ]; then
-                echo "\"curl\" exists"
-            else
-                echo "\"curl\" does not exist"
-            fi
+            echo "plugin update rate values:"
+            echo "blocked_rate=\"${blocked_rate}\""
+            echo "cache_rate=\"${cache_rate}\""
+            echo "cache_by_type_rate=\"${cache_by_type_rate}\""
+            echo "clients_rate=\"${clients_rate}\""
+            echo "percent_rate=\"${percent_rate}\""
+            echo "privacy_rate=\"${privacy_rate}\""
+            echo "queries_rate=\"${queries_rate}\""
+            echo "queries_by_type_rate=\"${queries_by_type_rate}\""
+            echo "replies_by_type_rate=\"${replies_by_type_rate}\""
+            echo "status_rate=\"${status_rate}\""
+            echo "unique_domains_rate=\"${unique_domains_rate}\""
             echo "plugin critical/warning values:"
             echo "domains_being_blocked_crit=\"${domains_being_blocked_crit}\""
             echo "domains_being_blocked_warn=\"${domains_being_blocked_warn}\""
@@ -1103,6 +1137,40 @@ plugin_data() {
             echo "status_warn=\"${status_warn}\""
             echo "unique_domains_crit=\"${unique_domains_crit}\""
             echo "unique_domains_warn=\"${unique_domains_warn}\""
+            echo "plugin version:"
+            echo "\"${VERSION}\""
+            echo "plugin api method:"
+            echo "${api_method}"
+            echo "plugin variables:"
+            echo "api=\"${api}\""
+            echo "cachesuffix=\"${cachesuffix}\""
+            echo "ftl_portfile=\"${ftl_portfile}\""
+            if [ -f "${ftl_portfile}" ]; then
+                echo "\"${ftl_portfile}\" exists"
+            else
+                echo "\"${ftl_portfile}\" does not exist"
+            fi
+            echo "ftlport=\"${ftlport}\""
+            echo "host=\"${host}\""
+            echo "port=\"${port}\""
+            echo "setupvars=\"${setupvars}\""
+            if [ -f "${setupvars}" ]; then
+                echo "\"${setupvars}\" exists"
+            else
+                echo "\"${setupvars}\" does not exist"
+            fi
+            echo "webpassword=\"${webpassword}\""
+            echo "plugin commands:"
+            if [ -x "$(command -v "nc")" ]; then
+                echo "\"nc\" exists"
+            else
+                echo "\"nc\" does not exist"
+            fi
+            if [ -x "$(command -v "curl")" ]; then
+                echo "\"curl\" exists"
+            else
+                echo "\"curl\" does not exist"
+            fi
         ;;
         "percent")
             for stat_id in ${get_stats}; do
