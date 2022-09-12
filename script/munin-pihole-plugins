@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="08.12.02"
+VERSION="08.12.03"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -291,7 +291,7 @@ reverberate() {
         ;;
         "failure")
             if [[ "${verbosity_level}" -ge "4" ]]; then
-                echo -e "  [${RED}✗${RESET}] $2"
+                echo -e "     [${RED}✗${RESET}] $2"
                 hold_up
             fi
         ;;
@@ -345,7 +345,7 @@ ${BLUE} ${RED}M${ORANGE}u${YELLOW}n${GREEN}i${BLUE}n${INDIGO} ${VIOLET}p${RED}l$
         ;;
         "success")
             if [[ "${verbosity_level}" -ge "4" ]]; then
-                echo -e "  [${GREEN}✓${RESET}] $2"
+                echo -e "     [${GREEN}✓${RESET}] $2"
                 hold_up
             fi
         ;;
@@ -1190,7 +1190,16 @@ debug_function() {
                 reverberate "exit" "1"
             fi
             reverberate "info" "Executing debug plugin"
-            munin-run "pihole_${plugin_id}"
+            if i_can_has "less" "noncritical"; then
+                munin-run "pihole_${plugin_id}" | less --chop-long-lines --LONG-PROMPT --QUIT-AT-EOF --quit-if-one-screen --RAW-CONTROL-CHARS --squeeze-blank-lines --tilde
+            else
+                reverberate "additional_info" "\"less\" unavailable, falling back to \"more\""
+                if i_can_has "more" "noncritical"; then
+                    munin-run "pihole_${plugin_id}" | more -d
+                else
+                    munin-run "pihole_${plugin_id}"
+                fi
+            fi
             reverberate "additional_info" "Removing symbolic link pihole_${plugin_id}"
             rm "${node_plugin_dir}/pihole_${plugin_id}" || return
             reverberate "success" "${node_plugin_dir}/pihole_${plugin_id} removed"
