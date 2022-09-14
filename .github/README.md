@@ -1,8 +1,6 @@
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/wiki/saint-lascivious/munin-pihole-plugins/images/header/munin-pihole-plugins-dark.png">
-  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/wiki/saint-lascivious/munin-pihole-plugins/images/header/munin-pihole-plugins-light.png">
-  <img alt="Munin plugins and management script for monitoring various Pi-hole® statistics." src="https://raw.githubusercontent.com/wiki/saint-lascivious/munin-pihole-plugins/images/header/munin-pihole-plugins-light.png">
-</picture>
+![alt text][ascii_header]
+
+[ascii_header]:https://raw.githubusercontent.com/wiki/saint-lascivious/munin-pihole-plugins/images/header/munin-pihole-plugins.png "Munin plugins and management script for monitoring various Pi-hole® statistics."
 
 # Quick Start
 
