@@ -1,10 +1,10 @@
-.TH man 1 "13 September 2022" "08.12.03" "munin-pihole-plugins man page"
+.TH man 1 "15 September 2022" "08.12.04" "munin-pihole-plugins man page"
 
 .SH NAME
 munin-pihole-plugins
 
 .SH VERSION
-08.12.03
+08.12.04
 
 .SH BRANCH
 development
@@ -232,6 +232,9 @@ Default /etc/munin/plugin-conf.d/pihole.conf plugin configuration.
     # graph scale
     env.graph_scale no
 
+    # graph type
+    env.graph_type GAUGE
+
     # pihole_blocked
     env.blocked_rate 3600
     env.domains_being_blocked_crit 1:5000000
@@ -371,11 +374,26 @@ Default /etc/munin/plugin-conf.d/pihole.conf plugin configuration.
 
 Uncomment and/or (re-)define relevant env.* variables to override the default values to suit your requirement.
 
-The graph_category value determines which category munin-pihole-plugins graphs will appear in Munin's interface.
+The graph_category value determines which category munin-pihole-plugins graphs will appear in Munin's interface. This value MUST be lower case, allowed characters [a-z0-9].
+
+The graph_scale value determines graph y axis value scaling and may be either "no" or "yes".
+
+The graph_type value determines the graph data type, and can be one of "ABSOLUTE", "COUNTER", "DERIVE", or "GAUGE". This value MUST be upper case.
 
 The values for *_rate is a value in seconds. E.g. "60", "300", "3600".
 
 The values for *_crit and *_warn can be a max value or a range separated by colon. E.g. "min:", ":max", "min:max", "max".
+
+More specific definitions will override less specific definitions, allowing for a very high degree of customisation on a per-plugin basis. For example:
+
+[pihole_*]
+    env.graph_category pihole
+
+[pihole_clients]
+    env.graph_type COUNTER
+
+[pihole_replies_by_type]
+    env.graph_type DERIVE
 
 .SS SCRIPT CONFIGURATION
 Variable                       Default Value
