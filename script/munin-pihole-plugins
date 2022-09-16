@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="08.12.04"
+VERSION="08.12.05"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -257,18 +257,18 @@ reverberate() {
     case "$1" in
         "additional_info")
             if [[ "${verbosity_level}" -ge "4" ]]; then
-                echo -e "\\n  [${WHITE}ℹ${RESET}] ${GREEN}$2${RESET}"
+                echo -e "\\n     [${WHITE}ℹ${RESET}] ${GREEN}$2${RESET}"
                 hold_up
             fi
         ;;
         "config")
             if [[ "${verbosity_level}" -ge "4" ]]; then
                 if [[ -f "${script_dir}/munin-pihole-plugins" ]]; then
-                    config_text="  ${WHITE}munin-pihole-plugins --configure $2${RESET} VALUE"
+                    config_text="${WHITE}munin-pihole-plugins --configure $2${RESET} VALUE"
                 else
-                    config_text="  ${WHITE}export $2=\"VALUE\"${RESET}"
+                    config_text="${WHITE}export $2=\"VALUE\"${RESET}"
                 fi
-                echo -e "${config_text}"
+                echo -e "     ${config_text}"
                 hold_up
             fi
         ;;
@@ -372,9 +372,8 @@ ${BLUE} ${RED}M${ORANGE}u${YELLOW}n${GREEN}i${BLUE}n${INDIGO} ${VIOLET}p${RED}l$
 check_pihole() {
     reverberate "info" "Checking if this is a Pi-hole® host"
     if i_can_has "pihole" "noncritical"; then
-        pihole_version="$(pihole -v | grep "Pi-hole" | sed 's/Pi-hole version is v//; s/[(][^)]*[)]//; s/[^.0-9]*//g')"
-        # shellcheck disable=SC2071
-        if [[ "${pihole_version}" > "6" ]]; then
+        pihole_version="echo $(pihole -v | grep "Pi-hole" | sed 's/Pi-hole version is v//; s/[(][^)]*[)]//; s/[^.0-9]*//g')"
+        if [[ "${pihole_version}" -ge "6" ]]; then
             if [[ "${ignore_pihole_on_host}" != "false" ]]; then
                 reverberate "error" "Incompatible Pi-hole® version v${pihole_version}"
                 reverberate "info" "Supported Pi-hole® versions ≤ v5.*"
@@ -496,9 +495,9 @@ configure_munin() {
         if [[ -d "${munin_dir}" ]]; then
             if [[ -f "${munin_dir}/munin.conf" ]]; then
                 reverberate "info" "Attempting fallback configuration editing munin.conf directly"
-                sed -i "s/^#graph_strategy cron/graph_strategy cgi/g" "${munin_dir}/munin.conf" || return
+                transmogrify "graph_strategy" "cgi" "${munin_dir}/munin.conf" " "
                 reverberate "success" "graph_strategy cgi"
-                sed -i "s/^#html_strategy cron/html_strategy cgi/g" "${munin_dir}/munin.conf" || return
+                transmogrify "html_strategy" "cgi" "${munin_dir}/munin.conf" " "
                 reverberate "success" "html_strategy cgi"
             else
                 reverberate "error" "No munin.conf file found"
@@ -699,7 +698,7 @@ install_script() {
                 reverberate "success" "${man_dir}/munin-pihole-plugins.1.gz"
             fi
             reverberate "additional_info" "To access the munin-pihole-plugins manual, type"
-            reverberate "man munin-pihole-plugins"
+            reverberate "     man munin-pihole-plugins"
         fi
         if [[ -d "/etc/bash_completion.d" ]]; then
             reverberate "info" "Installing the munin-pihole-plugins bash completion script"
@@ -711,13 +710,13 @@ install_script() {
             reverberate "additional_info" "A copy of the munin-pihole-plugins bash-completion script was installed"
             reverberate "success" "/etc/bash_completion.d/munin-pihole-plugins"
             reverberate "additional_info" "To begin using it immediately, open a new terminal or type"
-            reverberate ". /etc/bash_completion"
+            reverberate "     . /etc/bash_completion"
         fi
         if [[ ":${PATH}:" != *":${script_dir}:"* ]]; then
             reverberate "warning" "The munin-pihole-plugins script directory is not in your \$PATH"
             reverberate "failure" "\$PATH"
             reverberate "additional_info" "To add the munin-pihole-plugins script directory to your \$PATH try"
-            reverberate "export PATH=\"\$PATH:${script_dir}\""
+            reverberate "     export PATH=\"\$PATH:${script_dir}\""
         else
             reverberate "additional_info" "The munin-pihole-plugins script directory is in your \$PATH"
             reverberate "success" "\$PATH"
@@ -1718,8 +1717,8 @@ uninstall_function() {
                 else
                     if [[ -d "${munin_dir}" ]]; then
                         if [[ -f "${munin_dir}/munin.conf" ]]; then
-                            sed -i "s/^html_strategy cli/#html_strategy cron/g" "${munin_dir}/munin.conf" || return
-                            sed -i "s/^graph_strategy cli/#graph_strategy cron/g" "${munin_dir}/munin.conf" || return
+                            transmogrify "graph_strategy" "RESET" "${munin_dir}/munin.conf" " "
+                            transmogrify "html_strategy" "RESET" "${munin_dir}/munin.conf" " "
                         fi
                     fi
                 fi
