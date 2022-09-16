@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="07.05.00"
+VERSION="07.06.00"
 
 : <<=cut
 =head1 NAME
@@ -86,6 +86,9 @@ Default munin-pihole-plugins pihole_ plugin configuration (default: /etc/munin/p
 
     # graph scale
     env.graph_scale no
+
+    # graph type
+    env.graph_type GAUGE
 
     # pihole_blocked
     env.blocked_rate 3600
@@ -276,6 +279,7 @@ unique_domains_rate="${unique_domains_rate:-}"
 
 graph_category="${graph_category:-dns}"
 graph_scale="${graph_scale:-no}"
+graph_type="${graph_type:-GAUGE}"
 
 domains_being_blocked_crit="${domains_being_blocked_crit:-1:5000000}"
 domains_being_blocked_warn="${domains_being_blocked_warn:-0:3000000}"
@@ -454,7 +458,7 @@ plugin_config() {
                     echo "${stat}.critical ${domains_being_blocked_crit}"
                     echo "${stat}.label blocked domains"
                     echo "${stat}.min 0"
-                    echo "${stat}.type GAUGE"
+                    echo "${stat}.type ${graph_type}"
                     echo "${stat}.warning ${domains_being_blocked_warn}"
                 fi
             done
@@ -476,35 +480,35 @@ plugin_config() {
                         echo "${stat}.critical ${cache_expired_crit}"
                         echo "${stat}.label cache expired"
                         echo "${stat}.min 0"
-                        echo "${stat}.type GAUGE"
+                        echo "${stat}.type ${graph_type}"
                         echo "${stat}.warning ${cache_expired_warn}"
                     ;;
                     "immortal")
                         echo "${stat}.critical ${cache_immortal_crit}"
                         echo "${stat}.label cache immortal"
                         echo "${stat}.min 0"
-                        echo "${stat}.type GAUGE"
+                        echo "${stat}.type ${graph_type}"
                         echo "${stat}.warning ${cache_immortal_warn}"
                     ;;
                     "cache-inserted")
                         echo "${stat}.critical ${cache_inserted_crit}"
                         echo "${stat}.label cache inserted"
                         echo "${stat}.min 0"
-                        echo "${stat}.type GAUGE"
+                        echo "${stat}.type ${graph_type}"
                         echo "${stat}.warning ${cache_inserted_warn}"
                     ;;
                     "cache-live-freed")
                         echo "${stat}.critical ${cache_live_freed_crit}"
                         echo "${stat}.label cache live freed"
                         echo "${stat}.min 0"
-                        echo "${stat}.type GAUGE"
+                        echo "${stat}.type ${graph_type}"
                         echo "${stat}.warning ${cache_live_freed_warn}"
                     ;;
                     "cache-size")
                         echo "${stat}.critical ${cache_size_crit}"
                         echo "${stat}.label cache size"
                         echo "${stat}.min 0"
-                        echo "${stat}.type GAUGE"
+                        echo "${stat}.type ${graph_type}"
                         echo "${stat}.warning ${cache_size_warn}"
                     ;;
                 esac
@@ -528,49 +532,49 @@ plugin_config() {
                         echo "${stat}.critical ${cache_A_crit}"
                         echo "${stat}.label A"
                         echo "${stat}.min 0"
-                        echo "${stat}.type GAUGE"
+                        echo "${stat}.type ${graph_type}"
                         echo "${stat}.warning ${cache_A_warn}"
                     ;;
                     "aaaa")
                         echo "${stat}.critical ${cache_AAAA_crit}"
                         echo "${stat}.label AAAA"
                         echo "${stat}.min 0"
-                        echo "${stat}.type GAUGE"
+                        echo "${stat}.type ${graph_type}"
                         echo "${stat}.warning ${cache_AAAA_warn}"
                     ;;
                     "cname")
                         echo "${stat}.critical ${cache_CNAME_crit}"
                         echo "${stat}.label CNAME"
                         echo "${stat}.min 0"
-                        echo "${stat}.type GAUGE"
+                        echo "${stat}.type ${graph_type}"
                         echo "${stat}.warning ${cache_CNAME_warn}"
                     ;;
                     "ds")
                         echo "${stat}.critical ${cache_DS_crit}"
                         echo "${stat}.label DS"
                         echo "${stat}.min 0"
-                        echo "${stat}.type GAUGE"
+                        echo "${stat}.type ${graph_type}"
                         echo "${stat}.warning ${cache_DS_warn}"
                     ;;
                     "dnskey")
                         echo "${stat}.critical ${cache_DNSKEY_crit}"
                         echo "${stat}.label DNSKEY"
                         echo "${stat}.min 0"
-                        echo "${stat}.type GAUGE"
+                        echo "${stat}.type ${graph_type}"
                         echo "${stat}.warning ${cache_DNSKEY_warn}"
                     ;;
                     "other")
                         echo "${stat}.critical ${cache_OTHER_crit}"
                         echo "${stat}.label OTHER"
                         echo "${stat}.min 0"
-                        echo "${stat}.type GAUGE"
+                        echo "${stat}.type ${graph_type}"
                         echo "${stat}.warning ${cache_OTHER_warn}"
                     ;;
                     "srv")
                         echo "${stat}.critical ${cache_SRV_crit}"
                         echo "${stat}.label SRV"
                         echo "${stat}.min 0"
-                        echo "${stat}.type GAUGE"
+                        echo "${stat}.type ${graph_type}"
                         echo "${stat}.warning ${cache_SRV_warn}"
                     ;;
                 esac
@@ -593,14 +597,14 @@ plugin_config() {
                         echo "${stat}.critical ${clients_ever_seen_crit}"
                         echo "${stat}.label clients ever seen"
                         echo "${stat}.min 0"
-                        echo "${stat}.type GAUGE"
+                        echo "${stat}.type ${graph_type}"
                         echo "${stat}.warning ${clients_ever_seen_warn}"
                     ;;
                     "unique_clients")
                         echo "${stat}.critical ${unique_clients_crit}"
                         echo "${stat}.label unique clients"
                         echo "${stat}.min 0"
-                        echo "${stat}.type GAUGE"
+                        echo "${stat}.type ${graph_type}"
                         echo "${stat}.warning ${unique_clients_warn}"
                     ;;
                 esac
@@ -623,7 +627,7 @@ plugin_config() {
                     echo "${stat}.label percentage blocked"
                     echo "${stat}.max 100"
                     echo "${stat}.min 0"
-                    echo "${stat}.type GAUGE"
+                    echo "${stat}.type ${graph_type}"
                     echo "${stat}.warning ${ads_percentage_today_warn}"
                 fi
             done
@@ -645,7 +649,7 @@ plugin_config() {
                     echo "${stat}.label privacy level"
                     echo "${stat}.max 3"
                     echo "${stat}.min 0"
-                    echo "${stat}.type GAUGE"
+                    echo "${stat}.type ${graph_type}"
                     echo "${stat}.warning ${privacy_level_warn}"
                 fi
             done
@@ -667,28 +671,28 @@ plugin_config() {
                         echo "${stat}.critical ${ads_blocked_today_crit}"
                         echo "${stat}.label queries blocked"
                         echo "${stat}.min 0"
-                        echo "${stat}.type GAUGE"
+                        echo "${stat}.type ${graph_type}"
                         echo "${stat}.warning ${ads_blocked_today_warn}"
                     ;;
                     "queries_cached")
                         echo "${stat}.critical ${queries_cached_crit}"
                         echo "${stat}.label queries cached"
                         echo "${stat}.min 0"
-                        echo "${stat}.type GAUGE"
+                        echo "${stat}.type ${graph_type}"
                         echo "${stat}.warning ${queries_cached_warn}"
                     ;;
                     "queries_forwarded")
                         echo "${stat}.critical ${queries_forwarded_crit}"
                         echo "${stat}.label queries forwarded"
                         echo "${stat}.min 0"
-                        echo "${stat}.type GAUGE"
+                        echo "${stat}.type ${graph_type}"
                         echo "${stat}.warning ${queries_forwarded_warn}"
                     ;;
                     "dns_queries_today")
                         echo "${stat}.critical ${dns_queries_today_crit}"
                         echo "${stat}.label queries"
                         echo "${stat}.min 0"
-                        echo "${stat}.type GAUGE"
+                        echo "${stat}.type ${graph_type}"
                         echo "${stat}.warning ${dns_queries_today_warn}"
                     ;;
                 esac
@@ -711,112 +715,112 @@ plugin_config() {
                         echo "${stat}.critical ${query_A_crit}"
                         echo "${stat}.label A"
                         echo "${stat}.min 0"
-                        echo "${stat}.type GAUGE"
+                        echo "${stat}.type ${graph_type}"
                         echo "${stat}.warning ${query_A_warn}"
                     ;;
                     "AAAA")
                         echo "${stat}.critical ${query_AAAA_crit}"
                         echo "${stat}.label AAAA"
                         echo "${stat}.min 0"
-                        echo "${stat}.type GAUGE"
+                        echo "${stat}.type ${graph_type}"
                         echo "${stat}.warning ${query_A_warn}"
                     ;;
                     "ANY")
                         echo "${stat}.critical ${query_ANY_crit}"
                         echo "${stat}.label ANY"
                         echo "${stat}.min 0"
-                        echo "${stat}.type GAUGE"
+                        echo "${stat}.type ${graph_type}"
                         echo "${stat}.warning ${query_ANY_warn}"
                     ;;
                     "DNSKEY")
                         echo "${stat}.critical ${query_DNSKEY_crit}"
                         echo "${stat}.label DNSKEY"
                         echo "${stat}.min 0"
-                        echo "${stat}.type GAUGE"
+                        echo "${stat}.type ${graph_type}"
                         echo "${stat}.warning ${query_DNSKEY_warn}"
                     ;;
                     "DS")
                         echo "${stat}.critical ${query_DS_crit}"
                         echo "${stat}.label DS"
                         echo "${stat}.min 0"
-                        echo "${stat}.type GAUGE"
+                        echo "${stat}.type ${graph_type}"
                         echo "${stat}.warning ${query_DS_warn}"
                     ;;
                     "HTTPS")
                         echo "${stat}.critical ${query_HTTPS_crit}"
                         echo "${stat}.label HTTPS"
                         echo "${stat}.min 0"
-                        echo "${stat}.type GAUGE"
+                        echo "${stat}.type ${graph_type}"
                         echo "${stat}.warning ${query_HTTPS_warn}"
                     ;;
                     "MX")
                         echo "${stat}.critical ${query_MX_crit}"
                         echo "${stat}.label MX"
                         echo "${stat}.min 0"
-                        echo "${stat}.type GAUGE"
+                        echo "${stat}.type ${graph_type}"
                         echo "${stat}.warning ${query_MX_warn}"
                     ;;
                     "NAPTR")
                         echo "${stat}.critical ${query_NAPTR_crit}"
                         echo "${stat}.label NAPTR"
                         echo "${stat}.min 0"
-                        echo "${stat}.type GAUGE"
+                        echo "${stat}.type ${graph_type}"
                         echo "${stat}.warning ${query_NAPTR_warn}"
                     ;;
                     "NS")
                         echo "${stat}.critical ${query_NS_crit}"
                         echo "${stat}.label NS"
                         echo "${stat}.min 0"
-                        echo "${stat}.type GAUGE"
+                        echo "${stat}.type ${graph_type}"
                         echo "${stat}.warning ${query_NS_warn}"
                     ;;
                     "OTHER")
                         echo "${stat}.critical ${query_OTHER_crit}"
                         echo "${stat}.label OTHER"
                         echo "${stat}.min 0"
-                        echo "${stat}.type GAUGE"
+                        echo "${stat}.type ${graph_type}"
                         echo "${stat}.warning ${query_OTHER_warn}"
                     ;;
                     "PTR")
                         echo "${stat}.critical ${query_PTR_crit}"
                         echo "${stat}.label PTR"
                         echo "${stat}.min 0"
-                        echo "${stat}.type GAUGE"
+                        echo "${stat}.type ${graph_type}"
                         echo "${stat}.warning ${query_PTR_warn}"
                     ;;
                     "RRSIG")
                         echo "${stat}.critical ${query_RRSIG_crit}"
                         echo "${stat}.label RRSIG"
                         echo "${stat}.min 0"
-                        echo "${stat}.type GAUGE"
+                        echo "${stat}.type ${graph_type}"
                         echo "${stat}.warning ${query_RRSIG_warn}"
                     ;;
                     "SOA")
                         echo "${stat}.critical ${query_SOA_crit}"
                         echo "${stat}.label SOA"
                         echo "${stat}.min 0"
-                        echo "${stat}.type GAUGE"
+                        echo "${stat}.type ${graph_type}"
                         echo "${stat}.warning ${query_SOA_warn}"
                     ;;
                     "SRV")
                         echo "${stat}.critical ${query_SRV_crit}"
                         echo "${stat}.label SRV"
                         echo "${stat}.min 0"
-                        echo "${stat}.type GAUGE"
+                        echo "${stat}.type ${graph_type}"
                         echo "${stat}.warning ${query_SRV_warn}"
                     ;;
                     "SVCB")
                         echo "${stat}.critical ${query_SVCB_crit}"
                         echo "${stat}.label SVCB"
                         echo "${stat}.min 0"
-                        echo "${stat}.type GAUGE"
+                        echo "${stat}.type ${graph_type}"
                         echo "${stat}.warning ${query_SVCB_warn}"
                     ;;
                     "TXT")
                         echo "${stat}.critical ${query_TXT_crit}"
                         echo "${stat}.label TXT"
                         echo "${stat}.min 0"
-                        echo "${stat}.type GAUGE"
+                        echo "${stat}.type ${graph_type}"
                         echo "${stat}.warning ${query_TXT_warn}"
                     ;;
                 esac
@@ -840,98 +844,98 @@ plugin_config() {
                         echo "${stat}.critical ${reply_BLOB_crit}"
                         echo "${stat}.label BLOB"
                         echo "${stat}.min 0"
-                        echo "${stat}.type GAUGE"
+                        echo "${stat}.type ${graph_type}"
                         echo "${stat}.warning ${reply_BLOB_warn}"
                     ;;
                     "reply_CNAME")
                         echo "${stat}.critical ${reply_CNAME_crit}"
                         echo "${stat}.label CNAME"
                         echo "${stat}.min 0"
-                        echo "${stat}.type GAUGE"
+                        echo "${stat}.type ${graph_type}"
                         echo "${stat}.warning ${reply_CNAME_warn}"
                     ;;
                     "reply_DNSSEC")
                         echo "${stat}.critical ${reply_DNSSEC_crit}"
                         echo "${stat}.label DNSSEC"
                         echo "${stat}.min 0"
-                        echo "${stat}.type GAUGE"
+                        echo "${stat}.type ${graph_type}"
                         echo "${stat}.warning ${reply_DNSSEC_warn}"
                     ;;
                     "reply_DOMAIN")
                         echo "${stat}.critical ${reply_DOMAIN_crit}"
                         echo "${stat}.label DOMAIN"
                         echo "${stat}.min 0"
-                        echo "${stat}.type GAUGE"
+                        echo "${stat}.type ${graph_type}"
                         echo "${stat}.warning ${reply_DOMAIN_warn}"
                     ;;
                     "reply_IP")
                         echo "${stat}.critical ${reply_IP_crit}"
                         echo "${stat}.label IP"
                         echo "${stat}.min 0"
-                        echo "${stat}.type GAUGE"
+                        echo "${stat}.type ${graph_type}"
                         echo "${stat}.warning ${reply_IP_warn}"
                     ;;
                     "reply_NODATA")
                         echo "${stat}.critical ${reply_NODATA_crit}"
                         echo "${stat}.label NODATA"
                         echo "${stat}.min 0"
-                        echo "${stat}.type GAUGE"
+                        echo "${stat}.type ${graph_type}"
                         echo "${stat}.warning ${reply_NODATA_warn}"
                     ;;
                     "reply_NXDOMAIN")
                         echo "${stat}.critical ${reply_NXDOMAIN_crit}"
                         echo "${stat}.label NXDOMAIN"
                         echo "${stat}.min 0"
-                        echo "${stat}.type GAUGE"
+                        echo "${stat}.type ${graph_type}"
                         echo "${stat}.warning ${reply_NXDOMAIN_warn}"
                     ;;
                     "reply_REFUSED")
                         echo "${stat}.critical ${reply_REFUSED_crit}"
                         echo "${stat}.label REFUSED"
                         echo "${stat}.min 0"
-                        echo "${stat}.type GAUGE"
+                        echo "${stat}.type ${graph_type}"
                         echo "${stat}.warning ${reply_REFUSED_warn}"
                     ;;
                     "reply_RRNAME")
                         echo "${stat}.critical ${reply_RRNAME_crit}"
                         echo "${stat}.label RRNAME"
                         echo "${stat}.min 0"
-                        echo "${stat}.type GAUGE"
+                        echo "${stat}.type ${graph_type}"
                         echo "${stat}.warning ${reply_RRNAME_warn}"
                     ;;
                     "reply_SERVFAIL")
                         echo "${stat}.critical ${reply_SERVFAIL_crit}"
                         echo "${stat}.label SERVFAIL"
                         echo "${stat}.min 0"
-                        echo "${stat}.type GAUGE"
+                        echo "${stat}.type ${graph_type}"
                         echo "${stat}.warning ${reply_SERVFAIL_warn}"
                     ;;
                     "reply_NONE")
                         echo "${stat}.critical ${reply_NONE_crit}"
                         echo "${stat}.label NONE"
                         echo "${stat}.min 0"
-                        echo "${stat}.type GAUGE"
+                        echo "${stat}.type ${graph_type}"
                         echo "${stat}.warning ${reply_NONE_warn}"
                     ;;
                     "reply_NOTIMP")
                         echo "${stat}.critical ${reply_NOTIMP_crit}"
                         echo "${stat}.label NOTIMP"
                         echo "${stat}.min 0"
-                        echo "${stat}.type GAUGE"
+                        echo "${stat}.type ${graph_type}"
                         echo "${stat}.warning ${reply_NOTIMP_warn}"
                     ;;
                     "reply_OTHER")
                         echo "${stat}.critical ${reply_OTHER_crit}"
                         echo "${stat}.label OTHER"
                         echo "${stat}.min 0"
-                        echo "${stat}.type GAUGE"
+                        echo "${stat}.type ${graph_type}"
                         echo "${stat}.warning ${reply_OTHER_warn}"
                     ;;
                     "reply_UNKNOWN")
                         echo "${stat}.critical ${reply_UNKNOWN_crit}"
                         echo "${stat}.label UNKNOWN"
                         echo "${stat}.min 0"
-                        echo "${stat}.type GAUGE"
+                        echo "${stat}.type ${graph_type}"
                         echo "${stat}.warning ${reply_UNKNOWN_warn}"
                     ;;
                 esac
@@ -954,7 +958,7 @@ plugin_config() {
                     echo "${stat}.label blocking status"
                     echo "${stat}.max 1"
                     echo "${stat}.min -1"
-                    echo "${stat}.type GAUGE"
+                    echo "${stat}.type ${graph_type}"
                     echo "${stat}.warning ${status_warn}"
                 fi
             done
@@ -975,7 +979,7 @@ plugin_config() {
                     echo "${stat}.critical ${unique_domains_crit}"
                     echo "${stat}.label unique domains"
                     echo "${stat}.min 0"
-                    echo "${stat}.type GAUGE"
+                    echo "${stat}.type ${graph_type}"
                     echo "${stat}.warning ${unique_domains_warn}"
                 fi
             done
@@ -997,7 +1001,7 @@ plugin_config() {
                     echo "${stat}.label percentage blocked"
                     echo "${stat}.max 100"
                     echo "${stat}.min 0"
-                    echo "${stat}.type GAUGE"
+                    echo "${stat}.type ${graph_type}"
                     echo "${stat}.warning ${ads_percentage_today_warn}"
                 fi
             done
@@ -1083,6 +1087,8 @@ plugin_data() {
                 echo "graph_category=\"${graph_category}\""
                 echo "plugin graph scale:"
                 echo "graph_scale=\"${graph_scale}\""
+                echo "plugin graph type:"
+                echo "graph_type=\"${graph_type}\""
                 echo "plugin update rate values:"
                 echo "blocked_rate=\"${blocked_rate}\""
                 echo "cache_rate=\"${cache_rate}\""
