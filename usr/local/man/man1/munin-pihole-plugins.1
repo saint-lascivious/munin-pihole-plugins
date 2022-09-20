@@ -1,10 +1,10 @@
-.TH man 1 "16 September 2022" "08.12.05" "munin-pihole-plugins man page"
+.TH man 1 "21 September 2022" "08.13.00" "munin-pihole-plugins man page"
 
 .SH NAME
 munin-pihole-plugins
 
 .SH VERSION
-08.12.05
+08.13.00
 
 .SH BRANCH
 development
@@ -226,14 +226,11 @@ Default /etc/munin/plugin-conf.d/pihole.conf plugin configuration.
     env.setupvars /etc/pihole/setupVars.conf
     #env.webpassword PIHOLE_SETUPVARS_WEBPASSWORD_HERE
 
-    # graph category
     env.graph_category dns
-
-    # graph scale
+    env.graph_height 200
     env.graph_scale no
-
-    # graph type
     env.graph_type GAUGE
+    env.graph_width 400
 
     # pihole_blocked
     env.blocked_rate 3600
@@ -284,8 +281,8 @@ Default /etc/munin/plugin-conf.d/pihole.conf plugin configuration.
 
     # pihole_privacy
     #env.privacy_rate
-    #env.privacy_level_crit
-    #env.privacy_level_warn
+    env.privacy_level_crit 1:3
+    env.privacy_level_warn 3:3
 
     # pihole_queries
     #env.queries_rate
@@ -383,6 +380,8 @@ The graph_type value determines the graph data type, and can be one of "ABSOLUTE
 The values for *_rate is a value in seconds. E.g. "60", "300", "3600".
 
 The values for *_crit and *_warn can be a max value or a range separated by colon. E.g. "min:", ":max", "min:max", "max".
+
+The values for graph_height and graph_width specify the dimensions of the graph in pixels, not including the graph legend.
 
 More specific definitions will override less specific definitions, allowing for a very high degree of customisation on a per-plugin basis. For example:
 

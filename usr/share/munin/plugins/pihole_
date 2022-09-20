@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="08.12.05"
+VERSION="08.13.00"
 
 : <<=cut
 =head1 NAME
@@ -81,14 +81,11 @@ Default munin-pihole-plugins pihole_ plugin configuration (default: /etc/munin/p
     env.setupvars /etc/pihole/setupVars.conf
     #env.webpassword PIHOLE_SETUPVARS_WEBPASSWORD_HERE
 
-    # graph category
     env.graph_category dns
-
-    # graph scale
+    env.graph_height 200
     env.graph_scale no
-
-    # graph type
     env.graph_type GAUGE
+    env.graph_width 400
 
     # pihole_blocked
     env.blocked_rate 3600
@@ -139,8 +136,8 @@ Default munin-pihole-plugins pihole_ plugin configuration (default: /etc/munin/p
 
     # pihole_privacy
     #env.privacy_rate
-    #env.privacy_level_crit
-    #env.privacy_level_warn
+    env.privacy_level_crit 1:3
+    env.privacy_level_warn 3:3
 
     # pihole_queries
     #env.queries_rate
@@ -278,8 +275,10 @@ status_rate="${status_rate:-60}"
 unique_domains_rate="${unique_domains_rate:-}"
 
 graph_category="${graph_category:-dns}"
+graph_height="${graph_height:-200}"
 graph_scale="${graph_scale:-no}"
 graph_type="${graph_type:-GAUGE}"
+graph_width="${graph_width:-400}"
 
 domains_being_blocked_crit="${domains_being_blocked_crit:-1:5000000}"
 domains_being_blocked_warn="${domains_being_blocked_warn:-0:3000000}"
@@ -445,10 +444,12 @@ plugin_config() {
         "blocked")
             echo "graph_args --base 1000 --lower-limit 0"
             echo "graph_category ${graph_category}"
+            echo "graph_height ${graph_height}"
             echo "graph_info This graph shows the number of domains blocked by Pi-hole."
             echo "graph_scale ${graph_scale}"
             echo "graph_title Pi-hole domains being blocked"
             echo "graph_vlabel domains being blocked"
+            echo "graph_width ${graph_width}"
             if [ -n "${blocked_rate}" ]; then
                 echo "update_rate ${blocked_rate}"
             fi
@@ -466,10 +467,12 @@ plugin_config() {
         "cache")
             echo "graph_args --base 1000 --lower-limit 0"
             echo "graph_category ${graph_category}"
+            echo "graph_height ${graph_height}"
             echo "graph_info This graph shows Pi-hole's cache."
             echo "graph_scale ${graph_scale}"
             echo "graph_title Pi-hole cache"
             echo "graph_vlabel cache packets"
+            echo "graph_width ${graph_width}"
             if [ -n "${cache_rate}" ]; then
                 echo "update_rate ${cache_rate}"
             fi
@@ -517,11 +520,13 @@ plugin_config() {
         "cache_by_type")
             echo "graph_args --base 1000 --lower-limit 0"
             echo "graph_category ${graph_category}"
+            echo "graph_height ${graph_height}"
             echo "graph_info This graph shows Pi-hole's cache by type."
             echo "graph_scale ${graph_scale}"
             echo "graph_title Pi-hole cache by type"
             echo "graph_total total"
             echo "graph_vlabel cache packets"
+            echo "graph_width ${graph_width}"
             if [ -n "${cache_by_type_rate}" ]; then
                 echo "update_rate ${cache_by_type_rate}"
             fi
@@ -583,10 +588,12 @@ plugin_config() {
         "clients")
             echo "graph_args --base 1000 --lower-limit 0 --units-exponent 0"
             echo "graph_category ${graph_category}"
+            echo "graph_height ${graph_height}"
             echo "graph_info This graph shows clients seen by Pi-hole."
             echo "graph_scale ${graph_scale}"
             echo "graph_title Pi-hole clients"
             echo "graph_vlabel number of clients"
+            echo "graph_width ${graph_width}"
             if [ -n "${clients_rate}" ]; then
                 echo "update_rate ${clients_rate}"
             fi
@@ -613,10 +620,12 @@ plugin_config() {
         "percent")
             echo "graph_args --base 1000 --lower-limit 0 --rigid --upper-limit 100"
             echo "graph_category ${graph_category}"
+            echo "graph_height ${graph_height}"
             echo "graph_info This graph shows Pi-hole's blocked query percentage."
             echo "graph_scale ${graph_scale}"
             echo "graph_title Pi-hole blocked query percent"
             echo "graph_vlabel blocked query percent"
+            echo "graph_width ${graph_width}"
             if [ -n "${percent_rate}" ]; then
                 echo "update_rate ${percent_rate}"
             fi
@@ -635,10 +644,12 @@ plugin_config() {
         "privacy")
             echo "graph_args --base 1000 --lower-limit 0 --rigid --upper-limit 3 --units-exponent 0"
             echo "graph_category ${graph_category}"
+            echo "graph_height ${graph_height}"
             echo "graph_info This graph shows Pi-hole's privacy level."
             echo "graph_scale ${graph_scale}"
             echo "graph_title Pi-hole privacy level"
             echo "graph_vlabel privacy level"
+            echo "graph_width ${graph_width}"
             if [ -n "${privacy_rate}" ]; then
                 echo "update_rate ${privacy_rate}"
             fi
@@ -657,10 +668,12 @@ plugin_config() {
         "queries")
             echo "graph_args --base 1000 --lower-limit 0"
             echo "graph_category ${graph_category}"
+            echo "graph_height ${graph_height}"
             echo "graph_info This graph shows queries seen by Pi-hole."
             echo "graph_scale ${graph_scale}"
             echo "graph_title Pi-hole queries"
             echo "graph_vlabel queries"
+            echo "graph_width ${graph_width}"
             if [ -n "${queries_rate}" ]; then
                 echo "update_rate ${queries_rate}"
             fi
@@ -701,10 +714,12 @@ plugin_config() {
         "queries_by_type")
             echo "graph_args --base 1000 --lower-limit 0 --rigid --upper-limit 100"
             echo "graph_category ${graph_category}"
+            echo "graph_height ${graph_height}"
             echo "graph_info This graph shows Pi-hole queries by type."
             echo "graph_scale ${graph_scale}"
             echo "graph_title Pi-hole queries by type"
             echo "graph_vlabel percent queries by type"
+            echo "graph_width ${graph_width}"
             if [ -n "${queries_by_type_rate}" ]; then
                 echo "update_rate ${queries_by_type_rate}"
             fi
@@ -829,11 +844,13 @@ plugin_config() {
         "replies_by_type")
             echo "graph_args --base 1000 --lower-limit 0"
             echo "graph_category ${graph_category}"
+            echo "graph_height ${graph_height}"
             echo "graph_info This graph shows Pi-hole replies by type."
             echo "graph_scale ${graph_scale}"
             echo "graph_title Pi-hole replies by type"
             echo "graph_total total"
             echo "graph_vlabel answer packets"
+            echo "graph_width ${graph_width}"
             if [ -n "${replies_by_type_rate}" ]; then
                 echo "update_rate ${replies_by_type_rate}"
             fi
@@ -944,10 +961,12 @@ plugin_config() {
         "status")
             echo "graph_args --base 1000 --lower-limit -1 --rigid --upper-limit 1 --units-exponent 0"
             echo "graph_category ${graph_category}"
+            echo "graph_height ${graph_height}"
             echo "graph_info This graph shows Pi-hole's blocking status."
             echo "graph_scale ${graph_scale}"
             echo "graph_title Pi-hole blocking status"
             echo "graph_vlabel unknown / disabled / enabled"
+            echo "graph_width ${graph_width}"
             if [ -n "${status_rate}" ]; then
                 echo "update_rate ${status_rate}"
             fi
@@ -966,10 +985,12 @@ plugin_config() {
         "unique_domains")
             echo "graph_args --base 1000 --lower-limit 0"
             echo "graph_category ${graph_category}"
+            echo "graph_height ${graph_height}"
             echo "graph_info This graph shows the unique domains seen by Pi-hole."
             echo "graph_scale ${graph_scale}"
             echo "graph_title Pi-hole unique domains"
             echo "graph_vlabel unique domains"
+            echo "graph_width ${graph_width}"
             if [ -n "${unique_domains_rate}" ]; then
                 echo "update_rate ${unique_domains_rate}"
             fi
@@ -987,10 +1008,12 @@ plugin_config() {
         *)
             echo "graph_args --base 1000 --lower-limit 0 --rigid --upper-limit 100"
             echo "graph_category ${graph_category}"
+            echo "graph_height ${graph_height}"
             echo "graph_info This graph shows Pi-hole's blocked query percentage."
             echo "graph_scale ${graph_scale}"
             echo "graph_title Pi-hole blocked query percent"
             echo "graph_vlabel blocked query percent"
+            echo "graph_width ${graph_width}"
             if [ -n "${percent_rate}" ]; then
                 echo "update_rate ${percent_rate}"
             fi
@@ -1085,10 +1108,14 @@ plugin_data() {
             if [ -x "$(command -v "less")" ] || [ -x "$(command -v "more")" ]; then
                 echo "plugin graph category:"
                 echo "graph_category=\"${graph_category}\""
+                echo "plugin graph height:"
+                echo "graph_height=\"${graph_height}\""
                 echo "plugin graph scale:"
                 echo "graph_scale=\"${graph_scale}\""
                 echo "plugin graph type:"
                 echo "graph_type=\"${graph_type}\""
+                echo "plugin graph width:"
+                echo "graph_width=\"${graph_width}\""
                 echo "plugin update rate values:"
                 echo "blocked_rate=\"${blocked_rate}\""
                 echo "cache_rate=\"${cache_rate}\""
