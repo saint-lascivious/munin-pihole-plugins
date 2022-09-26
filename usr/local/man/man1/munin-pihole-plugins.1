@@ -1,10 +1,10 @@
-.TH man 1 "21 September 2022" "08.13.00" "munin-pihole-plugins man page"
+.TH man 1 "27 September 2022" "08.14.00" "munin-pihole-plugins man page"
 
 .SH NAME
 munin-pihole-plugins
 
 .SH VERSION
-08.13.00
+08.14.00
 
 .SH BRANCH
 development
@@ -215,10 +215,12 @@ Either a Pi-hole setupVars.conf path or webpassword value must be supplied.
 .SS PLUGIN CONFIGURATION
 Default /etc/munin/plugin-conf.d/pihole.conf plugin configuration.
 
+---
 [pihole_*]
     user root
     env.api /admin/api.php
     env.cachesuffix ?getCacheInfo&auth=
+    env.querysuffix ?getQueryTypes&auth=
     env.ftl_portfile /run/pihole-FTL.port
     #env.ftlport 4711
     env.host 127.0.0.1
@@ -268,7 +270,7 @@ Default /etc/munin/plugin-conf.d/pihole.conf plugin configuration.
     #env.cache_SRV_warn
 
     # pihole_clients
-    env.clients_rate 60
+    #env.clients_rate
     #env.clients_ever_seen_crit
     #env.clients_ever_seen_warn
     env.unique_clients_crit 100
@@ -360,7 +362,7 @@ Default /etc/munin/plugin-conf.d/pihole.conf plugin configuration.
     #env.reply_UNKNOWN_warn
 
     # pihole_status
-    env.status_rate 60
+    #env.status_rate
     env.status_crit 0:1
     env.status_warn 1:1
 
@@ -368,6 +370,7 @@ Default /etc/munin/plugin-conf.d/pihole.conf plugin configuration.
     #env.unique_domains_rate
     env.unique_domains_crit 1:20000
     env.unique_domains_warn 0:10000
+---
 
 Uncomment and/or (re-)define relevant env.* variables to override the default values to suit your requirement.
 

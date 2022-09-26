@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="08.13.00"
+VERSION="08.14.00"
 
 : <<=cut
 =head1 NAME
@@ -123,7 +123,7 @@ Default munin-pihole-plugins pihole_ plugin configuration (default: /etc/munin/p
     #env.cache_SRV_warn
 
     # pihole_clients
-    env.clients_rate 60
+    #env.clients_rate
     #env.clients_ever_seen_crit
     #env.clients_ever_seen_warn
     env.unique_clients_crit 100
@@ -215,7 +215,7 @@ Default munin-pihole-plugins pihole_ plugin configuration (default: /etc/munin/p
     #env.reply_UNKNOWN_warn
 
     # pihole_status
-    env.status_rate 60
+    #env.status_rate
     env.status_crit 0:1
     env.status_warn 1:1
 
@@ -457,6 +457,7 @@ plugin_config() {
                 stat="$(echo "${stat_id}" | sed 's/:.*//')"
                 if [ "${stat}" = "domains_being_blocked" ]; then
                     echo "${stat}.critical ${domains_being_blocked_crit}"
+                    echo "${stat}.info Pi-hole blocked domains"
                     echo "${stat}.label blocked domains"
                     echo "${stat}.min 0"
                     echo "${stat}.type ${graph_type}"
@@ -481,6 +482,7 @@ plugin_config() {
                 case "${stat}" in
                     "expired")
                         echo "${stat}.critical ${cache_expired_crit}"
+                        echo "${stat}.info Pi-hole cache expired"
                         echo "${stat}.label cache expired"
                         echo "${stat}.min 0"
                         echo "${stat}.type ${graph_type}"
@@ -488,6 +490,7 @@ plugin_config() {
                     ;;
                     "immortal")
                         echo "${stat}.critical ${cache_immortal_crit}"
+                        echo "${stat}.info Pi-hole cache immortal"
                         echo "${stat}.label cache immortal"
                         echo "${stat}.min 0"
                         echo "${stat}.type ${graph_type}"
@@ -495,6 +498,7 @@ plugin_config() {
                     ;;
                     "cache-inserted")
                         echo "${stat}.critical ${cache_inserted_crit}"
+                        echo "${stat}.info Pi-hole cache inserted"
                         echo "${stat}.label cache inserted"
                         echo "${stat}.min 0"
                         echo "${stat}.type ${graph_type}"
@@ -502,6 +506,7 @@ plugin_config() {
                     ;;
                     "cache-live-freed")
                         echo "${stat}.critical ${cache_live_freed_crit}"
+                        echo "${stat}.info Pi-hole cache live freed"
                         echo "${stat}.label cache live freed"
                         echo "${stat}.min 0"
                         echo "${stat}.type ${graph_type}"
@@ -509,6 +514,7 @@ plugin_config() {
                     ;;
                     "cache-size")
                         echo "${stat}.critical ${cache_size_crit}"
+                        echo "${stat}.info Pi-hole cache size"
                         echo "${stat}.label cache size"
                         echo "${stat}.min 0"
                         echo "${stat}.type ${graph_type}"
@@ -535,6 +541,7 @@ plugin_config() {
                 case "${stat}" in
                     "a")
                         echo "${stat}.critical ${cache_A_crit}"
+                        echo "${stat}.info Pi-hole cache type A"
                         echo "${stat}.label A"
                         echo "${stat}.min 0"
                         echo "${stat}.type ${graph_type}"
@@ -542,6 +549,7 @@ plugin_config() {
                     ;;
                     "aaaa")
                         echo "${stat}.critical ${cache_AAAA_crit}"
+                        echo "${stat}.info Pi-hole cache type AAAA"
                         echo "${stat}.label AAAA"
                         echo "${stat}.min 0"
                         echo "${stat}.type ${graph_type}"
@@ -549,6 +557,7 @@ plugin_config() {
                     ;;
                     "cname")
                         echo "${stat}.critical ${cache_CNAME_crit}"
+                        echo "${stat}.info Pi-hole cache type CNAME"
                         echo "${stat}.label CNAME"
                         echo "${stat}.min 0"
                         echo "${stat}.type ${graph_type}"
@@ -556,6 +565,7 @@ plugin_config() {
                     ;;
                     "ds")
                         echo "${stat}.critical ${cache_DS_crit}"
+                        echo "${stat}.info Pi-hole cache type DS"
                         echo "${stat}.label DS"
                         echo "${stat}.min 0"
                         echo "${stat}.type ${graph_type}"
@@ -563,6 +573,7 @@ plugin_config() {
                     ;;
                     "dnskey")
                         echo "${stat}.critical ${cache_DNSKEY_crit}"
+                        echo "${stat}.info Pi-hole cache type DNSKEY"
                         echo "${stat}.label DNSKEY"
                         echo "${stat}.min 0"
                         echo "${stat}.type ${graph_type}"
@@ -570,6 +581,7 @@ plugin_config() {
                     ;;
                     "other")
                         echo "${stat}.critical ${cache_OTHER_crit}"
+                        echo "${stat}.info Pi-hole cache type OTHER"
                         echo "${stat}.label OTHER"
                         echo "${stat}.min 0"
                         echo "${stat}.type ${graph_type}"
@@ -577,6 +589,7 @@ plugin_config() {
                     ;;
                     "srv")
                         echo "${stat}.critical ${cache_SRV_crit}"
+                        echo "${stat}.info Pi-hole cache type SRV"
                         echo "${stat}.label SRV"
                         echo "${stat}.min 0"
                         echo "${stat}.type ${graph_type}"
@@ -602,6 +615,7 @@ plugin_config() {
                 case "${stat}" in
                     "clients_ever_seen")
                         echo "${stat}.critical ${clients_ever_seen_crit}"
+                        echo "${stat}.info Pi-hole clients ever seen"
                         echo "${stat}.label clients ever seen"
                         echo "${stat}.min 0"
                         echo "${stat}.type ${graph_type}"
@@ -609,6 +623,7 @@ plugin_config() {
                     ;;
                     "unique_clients")
                         echo "${stat}.critical ${unique_clients_crit}"
+                        echo "${stat}.info Pi-hole unique clients"
                         echo "${stat}.label unique clients"
                         echo "${stat}.min 0"
                         echo "${stat}.type ${graph_type}"
@@ -633,6 +648,7 @@ plugin_config() {
                 stat="$(echo "${stat_id}" | sed 's/:.*//')"
                 if [ "${stat}" = "ads_percentage_today" ]; then
                     echo "${stat}.critical ${ads_percentage_today_crit}"
+                    echo "${stat}.info Pi-hole percentage blocked"
                     echo "${stat}.label percentage blocked"
                     echo "${stat}.max 100"
                     echo "${stat}.min 0"
@@ -657,6 +673,7 @@ plugin_config() {
                 stat="$(echo "${stat_id}" | sed 's/:.*//')"
                 if [ "${stat}" = "privacy_level" ]; then
                     echo "${stat}.critical ${privacy_level_crit}"
+                    echo "${stat}.info Pi-hole privacy level"
                     echo "${stat}.label privacy level"
                     echo "${stat}.max 3"
                     echo "${stat}.min 0"
@@ -682,6 +699,7 @@ plugin_config() {
                 case "${stat}" in
                     "ads_blocked_today")
                         echo "${stat}.critical ${ads_blocked_today_crit}"
+                        echo "${stat}.info Pi-hole queries blocked"
                         echo "${stat}.label queries blocked"
                         echo "${stat}.min 0"
                         echo "${stat}.type ${graph_type}"
@@ -689,6 +707,7 @@ plugin_config() {
                     ;;
                     "queries_cached")
                         echo "${stat}.critical ${queries_cached_crit}"
+                        echo "${stat}.info Pi-hole queries cached"
                         echo "${stat}.label queries cached"
                         echo "${stat}.min 0"
                         echo "${stat}.type ${graph_type}"
@@ -696,6 +715,7 @@ plugin_config() {
                     ;;
                     "queries_forwarded")
                         echo "${stat}.critical ${queries_forwarded_crit}"
+                        echo "${stat}.info Pi-hole queries forwarded"
                         echo "${stat}.label queries forwarded"
                         echo "${stat}.min 0"
                         echo "${stat}.type ${graph_type}"
@@ -703,6 +723,7 @@ plugin_config() {
                     ;;
                     "dns_queries_today")
                         echo "${stat}.critical ${dns_queries_today_crit}"
+                        echo "${stat}.info Pi-hole queries"
                         echo "${stat}.label queries"
                         echo "${stat}.min 0"
                         echo "${stat}.type ${graph_type}"
@@ -728,6 +749,7 @@ plugin_config() {
                 case "${stat}" in
                     "A")
                         echo "${stat}.critical ${query_A_crit}"
+                        echo "${stat}.info Pi-hole query type A"
                         echo "${stat}.label A"
                         echo "${stat}.min 0"
                         echo "${stat}.type ${graph_type}"
@@ -735,6 +757,7 @@ plugin_config() {
                     ;;
                     "AAAA")
                         echo "${stat}.critical ${query_AAAA_crit}"
+                        echo "${stat}.info Pi-hole query type AAAA"
                         echo "${stat}.label AAAA"
                         echo "${stat}.min 0"
                         echo "${stat}.type ${graph_type}"
@@ -742,6 +765,7 @@ plugin_config() {
                     ;;
                     "ANY")
                         echo "${stat}.critical ${query_ANY_crit}"
+                        echo "${stat}.info Pi-hole query type ANY"
                         echo "${stat}.label ANY"
                         echo "${stat}.min 0"
                         echo "${stat}.type ${graph_type}"
@@ -749,6 +773,7 @@ plugin_config() {
                     ;;
                     "DNSKEY")
                         echo "${stat}.critical ${query_DNSKEY_crit}"
+                        echo "${stat}.info Pi-hole query type DNSKEY"
                         echo "${stat}.label DNSKEY"
                         echo "${stat}.min 0"
                         echo "${stat}.type ${graph_type}"
@@ -756,6 +781,7 @@ plugin_config() {
                     ;;
                     "DS")
                         echo "${stat}.critical ${query_DS_crit}"
+                        echo "${stat}.info Pi-hole query type DS"
                         echo "${stat}.label DS"
                         echo "${stat}.min 0"
                         echo "${stat}.type ${graph_type}"
@@ -763,6 +789,7 @@ plugin_config() {
                     ;;
                     "HTTPS")
                         echo "${stat}.critical ${query_HTTPS_crit}"
+                        echo "${stat}.info Pi-hole query type HTTPS"
                         echo "${stat}.label HTTPS"
                         echo "${stat}.min 0"
                         echo "${stat}.type ${graph_type}"
@@ -770,6 +797,7 @@ plugin_config() {
                     ;;
                     "MX")
                         echo "${stat}.critical ${query_MX_crit}"
+                        echo "${stat}.info Pi-hole query type MX"
                         echo "${stat}.label MX"
                         echo "${stat}.min 0"
                         echo "${stat}.type ${graph_type}"
@@ -777,6 +805,7 @@ plugin_config() {
                     ;;
                     "NAPTR")
                         echo "${stat}.critical ${query_NAPTR_crit}"
+                        echo "${stat}.info Pi-hole query type NAPTR"
                         echo "${stat}.label NAPTR"
                         echo "${stat}.min 0"
                         echo "${stat}.type ${graph_type}"
@@ -784,6 +813,7 @@ plugin_config() {
                     ;;
                     "NS")
                         echo "${stat}.critical ${query_NS_crit}"
+                        echo "${stat}.info Pi-hole query type NS"
                         echo "${stat}.label NS"
                         echo "${stat}.min 0"
                         echo "${stat}.type ${graph_type}"
@@ -791,6 +821,7 @@ plugin_config() {
                     ;;
                     "OTHER")
                         echo "${stat}.critical ${query_OTHER_crit}"
+                        echo "${stat}.info Pi-hole query type OTHER"
                         echo "${stat}.label OTHER"
                         echo "${stat}.min 0"
                         echo "${stat}.type ${graph_type}"
@@ -798,6 +829,7 @@ plugin_config() {
                     ;;
                     "PTR")
                         echo "${stat}.critical ${query_PTR_crit}"
+                        echo "${stat}.info Pi-hole query type PTR"
                         echo "${stat}.label PTR"
                         echo "${stat}.min 0"
                         echo "${stat}.type ${graph_type}"
@@ -805,6 +837,7 @@ plugin_config() {
                     ;;
                     "RRSIG")
                         echo "${stat}.critical ${query_RRSIG_crit}"
+                        echo "${stat}.info Pi-hole query type RRSIG"
                         echo "${stat}.label RRSIG"
                         echo "${stat}.min 0"
                         echo "${stat}.type ${graph_type}"
@@ -812,6 +845,7 @@ plugin_config() {
                     ;;
                     "SOA")
                         echo "${stat}.critical ${query_SOA_crit}"
+                        echo "${stat}.info Pi-hole query type SOA"
                         echo "${stat}.label SOA"
                         echo "${stat}.min 0"
                         echo "${stat}.type ${graph_type}"
@@ -819,6 +853,7 @@ plugin_config() {
                     ;;
                     "SRV")
                         echo "${stat}.critical ${query_SRV_crit}"
+                        echo "${stat}.info Pi-hole query type SRV"
                         echo "${stat}.label SRV"
                         echo "${stat}.min 0"
                         echo "${stat}.type ${graph_type}"
@@ -826,6 +861,7 @@ plugin_config() {
                     ;;
                     "SVCB")
                         echo "${stat}.critical ${query_SVCB_crit}"
+                        echo "${stat}.info Pi-hole query type SVCB"
                         echo "${stat}.label SVCB"
                         echo "${stat}.min 0"
                         echo "${stat}.type ${graph_type}"
@@ -833,6 +869,7 @@ plugin_config() {
                     ;;
                     "TXT")
                         echo "${stat}.critical ${query_TXT_crit}"
+                        echo "${stat}.info Pi-hole query type TXT"
                         echo "${stat}.label TXT"
                         echo "${stat}.min 0"
                         echo "${stat}.type ${graph_type}"
@@ -859,6 +896,7 @@ plugin_config() {
                 case "${stat}" in
                     "reply_BLOB")
                         echo "${stat}.critical ${reply_BLOB_crit}"
+                        echo "${stat}.info Pi-hole reply type BLOB"
                         echo "${stat}.label BLOB"
                         echo "${stat}.min 0"
                         echo "${stat}.type ${graph_type}"
@@ -866,6 +904,7 @@ plugin_config() {
                     ;;
                     "reply_CNAME")
                         echo "${stat}.critical ${reply_CNAME_crit}"
+                        echo "${stat}.info Pi-hole reply type CNAME"
                         echo "${stat}.label CNAME"
                         echo "${stat}.min 0"
                         echo "${stat}.type ${graph_type}"
@@ -873,6 +912,7 @@ plugin_config() {
                     ;;
                     "reply_DNSSEC")
                         echo "${stat}.critical ${reply_DNSSEC_crit}"
+                        echo "${stat}.info Pi-hole reply type DNSSEC"
                         echo "${stat}.label DNSSEC"
                         echo "${stat}.min 0"
                         echo "${stat}.type ${graph_type}"
@@ -880,6 +920,7 @@ plugin_config() {
                     ;;
                     "reply_DOMAIN")
                         echo "${stat}.critical ${reply_DOMAIN_crit}"
+                        echo "${stat}.info Pi-hole reply type DOMAIN"
                         echo "${stat}.label DOMAIN"
                         echo "${stat}.min 0"
                         echo "${stat}.type ${graph_type}"
@@ -887,6 +928,7 @@ plugin_config() {
                     ;;
                     "reply_IP")
                         echo "${stat}.critical ${reply_IP_crit}"
+                        echo "${stat}.info Pi-hole reply type IP"
                         echo "${stat}.label IP"
                         echo "${stat}.min 0"
                         echo "${stat}.type ${graph_type}"
@@ -894,6 +936,7 @@ plugin_config() {
                     ;;
                     "reply_NODATA")
                         echo "${stat}.critical ${reply_NODATA_crit}"
+                        echo "${stat}.info Pi-hole reply type NODATA"
                         echo "${stat}.label NODATA"
                         echo "${stat}.min 0"
                         echo "${stat}.type ${graph_type}"
@@ -901,6 +944,7 @@ plugin_config() {
                     ;;
                     "reply_NXDOMAIN")
                         echo "${stat}.critical ${reply_NXDOMAIN_crit}"
+                        echo "${stat}.info Pi-hole reply type NXDOMAIN"
                         echo "${stat}.label NXDOMAIN"
                         echo "${stat}.min 0"
                         echo "${stat}.type ${graph_type}"
@@ -908,6 +952,7 @@ plugin_config() {
                     ;;
                     "reply_REFUSED")
                         echo "${stat}.critical ${reply_REFUSED_crit}"
+                        echo "${stat}.info Pi-hole reply type REFUSED"
                         echo "${stat}.label REFUSED"
                         echo "${stat}.min 0"
                         echo "${stat}.type ${graph_type}"
@@ -915,6 +960,7 @@ plugin_config() {
                     ;;
                     "reply_RRNAME")
                         echo "${stat}.critical ${reply_RRNAME_crit}"
+                        echo "${stat}.info Pi-hole reply type RRNAME"
                         echo "${stat}.label RRNAME"
                         echo "${stat}.min 0"
                         echo "${stat}.type ${graph_type}"
@@ -922,6 +968,7 @@ plugin_config() {
                     ;;
                     "reply_SERVFAIL")
                         echo "${stat}.critical ${reply_SERVFAIL_crit}"
+                        echo "${stat}.info Pi-hole reply type SERVFAIL"
                         echo "${stat}.label SERVFAIL"
                         echo "${stat}.min 0"
                         echo "${stat}.type ${graph_type}"
@@ -929,6 +976,7 @@ plugin_config() {
                     ;;
                     "reply_NONE")
                         echo "${stat}.critical ${reply_NONE_crit}"
+                        echo "${stat}.info Pi-hole reply type NONE"
                         echo "${stat}.label NONE"
                         echo "${stat}.min 0"
                         echo "${stat}.type ${graph_type}"
@@ -936,6 +984,7 @@ plugin_config() {
                     ;;
                     "reply_NOTIMP")
                         echo "${stat}.critical ${reply_NOTIMP_crit}"
+                        echo "${stat}.info Pi-hole reply type NOTIMP"
                         echo "${stat}.label NOTIMP"
                         echo "${stat}.min 0"
                         echo "${stat}.type ${graph_type}"
@@ -943,6 +992,7 @@ plugin_config() {
                     ;;
                     "reply_OTHER")
                         echo "${stat}.critical ${reply_OTHER_crit}"
+                        echo "${stat}.info Pi-hole reply type OTHER"
                         echo "${stat}.label OTHER"
                         echo "${stat}.min 0"
                         echo "${stat}.type ${graph_type}"
@@ -950,6 +1000,7 @@ plugin_config() {
                     ;;
                     "reply_UNKNOWN")
                         echo "${stat}.critical ${reply_UNKNOWN_crit}"
+                        echo "${stat}.info Pi-hole reply type UNKNOWN"
                         echo "${stat}.label UNKNOWN"
                         echo "${stat}.min 0"
                         echo "${stat}.type ${graph_type}"
@@ -974,6 +1025,7 @@ plugin_config() {
                 stat="$(echo "${stat_id}" | sed 's/:.*//')"
                 if [ "${stat}" = "status" ]; then
                     echo "${stat}.critical ${status_crit}"
+                    echo "${stat}.info Pi-hole blocking status"
                     echo "${stat}.label blocking status"
                     echo "${stat}.max 1"
                     echo "${stat}.min -1"
@@ -998,6 +1050,7 @@ plugin_config() {
                 stat="$(echo "${stat_id}" | sed 's/:.*//')"
                 if [ "${stat}" = "unique_domains" ]; then
                     echo "${stat}.critical ${unique_domains_crit}"
+                    echo "${stat}.info Pi-hole unique domains"
                     echo "${stat}.label unique domains"
                     echo "${stat}.min 0"
                     echo "${stat}.type ${graph_type}"
@@ -1021,6 +1074,7 @@ plugin_config() {
                 stat="$(echo "${stat_id}" | sed 's/:.*//')"
                 if [ "${stat}" = "ads_percentage_today" ]; then
                     echo "${stat}.critical ${ads_percentage_today_crit}"
+                    echo "${stat}.info Pi-hole percentage blocked"
                     echo "${stat}.label percentage blocked"
                     echo "${stat}.max 100"
                     echo "${stat}.min 0"
@@ -1028,7 +1082,6 @@ plugin_config() {
                     echo "${stat}.warning ${ads_percentage_today_warn}"
                 fi
             done
-        ;;
     esac
 }
 
