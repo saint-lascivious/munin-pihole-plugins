@@ -18,7 +18,7 @@
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
 # shellcheck disable=SC2034
-VERSION="08.14.00"
+VERSION="08.15.00"
 
 # shellcheck disable=SC2207
 _munin-pihole-plugins() {
@@ -44,7 +44,7 @@ _munin-pihole-plugins() {
     opts_holdduration="0 1 2 3 4 5 RESET"
     opts_installuninstall="plugins plugins-only script script-only webserver \
         webserver-only"
-    opts_dnsserver="CLOUDFLARE COMODO GOOGLE LOCALHOST QUAD9 RESET"
+    opts_dnsserver="CLOUDFLARE COMODO GOOGLE LOCALHOST QUAD9 RESET SAINTERNET"
     opts_muninbranch="latest stable"
     opts_restart="plugins webserver"
     opts_show="conditions gnu-gpl liability warranty"

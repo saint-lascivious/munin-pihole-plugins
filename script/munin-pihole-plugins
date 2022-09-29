@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="08.14.00"
+VERSION="08.15.00"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -223,7 +223,11 @@ update_now() {
     reverberate "info" "Updating the munin-pihole-plugins script"
     download "${plugin_domain}" -O "${current_dir}/munin-pihole-plugins"
     reverberate "success" "${current_dir}/munin-pihole-plugins installed"
-    chmod +x "${current_dir}/munin-pihole-plugins" || return
+    if ! chmod +x "${current_dir}/munin-pihole-plugins"; then
+        reverberate "error" "${current_dir}/munin-pihole-plugins not executable"
+        reverberate "failure" "${current_dir}/munin-pihole-plugins"
+        reverberate "exit" "1"
+    fi
     reverberate "footer"
     reverberate "info" "Restarting munin-pihole-plugins after update"
     clear
@@ -232,7 +236,11 @@ update_now() {
 
 update_now
 EOF
-    chmod +x "${temp_dir}/.munin-pihole-plugins_update"
+    if ! chmod +x "${temp_dir}/.munin-pihole-plugins_update"; then
+        reverberate "error" "Script not executable"
+        reverberate "failure" "${temp_dir}/.munin-pihole-plugins_update"
+        reverberate "exit" "1"
+    fi
     exec /bin/bash "${temp_dir}/.munin-pihole-plugins_update"
 }
 
@@ -257,7 +265,7 @@ reverberate() {
     case "$1" in
         "additional_info")
             if [[ "${verbosity_level}" -ge "4" ]]; then
-                echo -e "\\n     [${WHITE}ℹ${RESET}] ${GREEN}$2${RESET}"
+                echo -e "\\n  [${WHITE}ℹ${RESET}] ${GREEN}$2${RESET}"
                 hold_up
             fi
         ;;
@@ -268,7 +276,7 @@ reverberate() {
                 else
                     config_text="${WHITE}export $2=\"VALUE\"${RESET}"
                 fi
-                echo -e "     ${config_text}"
+                echo -e "  ${config_text}"
                 hold_up
             fi
         ;;
@@ -291,7 +299,7 @@ reverberate() {
         ;;
         "failure")
             if [[ "${verbosity_level}" -ge "4" ]]; then
-                echo -e "     [${RED}✗${RESET}] $2"
+                echo -e "  [${RED}✗${RESET}] $2"
                 hold_up
             fi
         ;;
@@ -345,7 +353,7 @@ ${BLUE} ${RED}M${ORANGE}u${YELLOW}n${GREEN}i${BLUE}n${INDIGO} ${VIOLET}p${RED}l$
         ;;
         "success")
             if [[ "${verbosity_level}" -ge "4" ]]; then
-                echo -e "     [${GREEN}✓${RESET}] $2"
+                echo -e "  [${GREEN}✓${RESET}] $2"
                 hold_up
             fi
         ;;
@@ -372,8 +380,9 @@ ${BLUE} ${RED}M${ORANGE}u${YELLOW}n${GREEN}i${BLUE}n${INDIGO} ${VIOLET}p${RED}l$
 check_pihole() {
     reverberate "info" "Checking if this is a Pi-hole® host"
     if i_can_has "pihole" "noncritical"; then
-        pihole_version="echo $(pihole -v | grep "Pi-hole" | sed 's/Pi-hole version is v//; s/[(][^)]*[)]//; s/[^.0-9]*//g')"
-        if [[ "${pihole_version}" -ge "6" ]]; then
+        pihole_version="$(pihole -v | grep "Pi-hole" | sed 's/Pi-hole version is v//; s/[(][^)]*[)]//; s/[^.0-9]*//g')"
+        # shellcheck disable=SC2071
+        if [[ ! "${pihole_version}" < "6" ]]; then
             if [[ "${ignore_pihole_on_host}" != "false" ]]; then
                 reverberate "error" "Incompatible Pi-hole® version v${pihole_version}"
                 reverberate "info" "Supported Pi-hole® versions ≤ v5.*"
@@ -430,10 +439,18 @@ install_dependencies() {
 download() {
     if i_can_has "wget"; then
         if [[ "${verbosity_level}" -ge "4" ]]; then
-            wget -q --show-progress "$@" || return
+            if ! wget -q --show-progress "$@"; then
+                reverberate "error" "Download failed"
+                reverberate "failure" "$1"
+                reverberate "exit" "1"
+            fi
             hold_up
         else
-            wget -q "$@" || return
+            if ! wget -q "$@"; then
+                reverberate "error" "Download failed"
+                reverberate "failure" "$1"
+                reverberate "exit" "1"
+            fi
         fi
     fi
 }
@@ -449,13 +466,17 @@ configure_proxy() {
         if [[ -s "${proxy_config}" ]]; then
             if [[ ! -f "${proxy_config}.orig" ]]; then
                 reverberate "info" "Saving the original lighttpd external.conf file"
-                mv "${proxy_config}" "${proxy_config}.orig" || return
+                if ! mv "${proxy_config}" "${proxy_config}.orig"; then
+                    reverberate "error" "Configuration not saved"
+                    reverberate "failure" "${proxy_config}.orig"
+                    reverberate "exit" "1"
+                fi
                 reverberate "additional_info" "The original lighttpd external.conf file was saved to"
                 reverberate "success" "${proxy_config}.orig"
             fi
         fi
         if [[ "${munin_branch}" == "stable" ]]; then
-            download "${proxy_repo}/master/etc/lighttpd/external.conf" -O "${proxy_config}"
+            download "${proxy_repo}/stable/etc/lighttpd/external.conf" -O "${proxy_config}"
         else
             if [[ "${munin_branch}" == "latest" ]]; then
                 download "${proxy_repo}/latest/etc/lighttpd/external.conf" -O "${proxy_config}"
@@ -531,12 +552,20 @@ uninstall_plugins() {
     if [[ -d "${munin_plugin_dir}" ]]; then
         reverberate "info" "Removing any existing munin-pihole-plugins plugin(s)"
         if [[ -f "${munin_plugin_dir}/pihole_" ]]; then
-            rm "${munin_plugin_dir}/pihole_" || return
+            if ! rm "${munin_plugin_dir}/pihole_"; then
+                reverberate "error" "Plugin not removed"
+                reverberate "failure" "${munin_plugin_dir}/pihole_"
+                reverberate "exit" "1"
+            fi
             reverberate "success" "${munin_plugin_dir}/pihole_ removed"
         fi
         for plugin_id in ${all_plugins}; do
             if [[ -f "${munin_plugin_dir}/pihole_${plugin_id}" ]]; then
-                rm "${munin_plugin_dir}/pihole_${plugin_id}" || return
+                if ! rm "${munin_plugin_dir}/pihole_${plugin_id}"; then
+                    reverberate "error" "Plugin not removed"
+                    reverberate "failure" "${munin_plugin_dir}/pihole_${plugin_id}"
+                    reverberate "exit" "1"
+                fi
                 reverberate "success" "${munin_plugin_dir}pihole_${plugin_id} removed"
             fi
         done
@@ -550,7 +579,11 @@ uninstall_plugins() {
         reverberate "info" "Removing any existing munin-pihole-plugins symbolic links"
         for plugin_id in ${all_plugins}; do
             if [[ -h "${node_plugin_dir}/pihole_${plugin_id}" ]]; then
-                rm "${node_plugin_dir}/pihole_${plugin_id}" || return
+                if ! rm "${node_plugin_dir}/pihole_${plugin_id}"; then
+                    reverberate "error" "Plugin not removed"
+                    reverberate "failure" "${node_plugin_dir}/pihole_${plugin_id}"
+                    reverberate "exit" "1"
+                fi
                 reverberate "success" "${node_plugin_dir}/pihole_${plugin_id} removed"
             fi
         done
@@ -569,12 +602,20 @@ install_plugins() {
         if [[ -d "${node_plugin_dir}" ]]; then
             reverberate "info" "Installing the munin-pihole-plugins plugin"
             download "${plugin_repo}/usr/share/munin/plugins/pihole_" -P "${munin_plugin_dir}"
-            chmod +x "${munin_plugin_dir}/pihole_" || return
+            if ! chmod +x "${munin_plugin_dir}/pihole_"; then
+                reverberate "error" "Plugin not installed"
+                reverberate "failure" "${munin_plugin_dir}/pihole_ not installed"
+                reverberate "exit" "1"
+            fi
             reverberate "additional_info" "A copy of the munin-pihole-plugins plugin was installed"
             reverberate "success" "${munin_plugin_dir}/pihole_"
             reverberate "info" "Creating selected munin-pihole-plugins plugin symbolic links"
             for plugin_id in ${plugin_list}; do
-                ln -s "${munin_plugin_dir}/pihole_" "${node_plugin_dir}/pihole_${plugin_id}" || return
+                if ! ln -s "${munin_plugin_dir}/pihole_" "${node_plugin_dir}/pihole_${plugin_id}"; then
+                    reverberate "error" "Symbolic link not created"
+                    reverberate "failure" "${node_plugin_dir}/pihole_${plugin_id}"
+                    reverberate "exit" "1"
+                fi
                 reverberate "success" "${node_plugin_dir}/pihole_${plugin_id}"
             done
         else
@@ -607,7 +648,11 @@ configure_plugins() {
             if [[ "${force_update_plugin_config}" != "false" ]]; then
                 if [[ -d "${external_config_dir}" ]]; then
                     reverberate "info" "Saving the existing pihole.conf plugin configuration file"
-                    cp "${plugin_config_dir}/pihole.conf" "${external_config_dir}/pihole.conf.save" || return
+                    if ! cp "${plugin_config_dir}/pihole.conf" "${external_config_dir}/pihole.conf.save"; then
+                        reverberate "error" "Configuration file not saved"
+                        reverberate "failure" "${external_config_dir}/pihole.conf.save"
+                        reverberate "exit" "1"
+                    fi
                     reverberate "additional_info" "The existing pihole.conf file was saved to"
                     reverberate "success" "${external_config_dir}/pihole.conf.save"
                 fi
@@ -680,7 +725,11 @@ install_script() {
         else
             download "${plugin_repo}/script/munin-pihole-plugins" -P "${script_dir}"
         fi
-        chmod +x "${script_dir}/munin-pihole-plugins" || return
+        if ! chmod +x "${script_dir}/munin-pihole-plugins"; then
+            reverberate "error" "Script not executable"
+            reverberate "failure" "${script_dir}/munin-pihole-plugins"
+            reverberate "exit" "1"
+        fi
         reverberate "additional_info" "A copy of the munin-pihole-plugins script was installed"
         reverberate "success" "${script_dir}/munin-pihole-plugins"
         if [[ -d "/usr/local/man" ]]; then
@@ -694,11 +743,15 @@ install_script() {
             reverberate "success" "${man_dir}/munin-pihole-plugins.1"
             if i_can_has "gzip" "noncritical"; then
                 reverberate "additional_info" "Compressing the munin-pihole-plugins manual"
-                gzip --force --quiet "${man_dir}/munin-pihole-plugins.1"
+                if ! gzip --force --quiet "${man_dir}/munin-pihole-plugins.1"; then
+                    reverberate "error" "Manual not compressed"
+                    reverberate "failure" "${man_dir}/munin-pihole-plugins.1"
+                fi
+                reverberate "additional_info" "Compressed munin-pihole-plugins manual saved as"
                 reverberate "success" "${man_dir}/munin-pihole-plugins.1.gz"
             fi
             reverberate "additional_info" "To access the munin-pihole-plugins manual, type"
-            reverberate "     man munin-pihole-plugins"
+            reverberate "  man munin-pihole-plugins"
         fi
         if [[ -d "/etc/bash_completion.d" ]]; then
             reverberate "info" "Installing the munin-pihole-plugins bash completion script"
@@ -710,13 +763,13 @@ install_script() {
             reverberate "additional_info" "A copy of the munin-pihole-plugins bash-completion script was installed"
             reverberate "success" "/etc/bash_completion.d/munin-pihole-plugins"
             reverberate "additional_info" "To begin using it immediately, open a new terminal or type"
-            reverberate "     . /etc/bash_completion"
+            reverberate "  . /etc/bash_completion"
         fi
         if [[ ":${PATH}:" != *":${script_dir}:"* ]]; then
             reverberate "warning" "The munin-pihole-plugins script directory is not in your \$PATH"
             reverberate "failure" "\$PATH"
             reverberate "additional_info" "To add the munin-pihole-plugins script directory to your \$PATH try"
-            reverberate "     export PATH=\"\$PATH:${script_dir}\""
+            reverberate "  export PATH=\"\$PATH:${script_dir}\""
         else
             reverberate "additional_info" "The munin-pihole-plugins script directory is in your \$PATH"
             reverberate "success" "\$PATH"
@@ -759,56 +812,96 @@ uninstall_now() {
     reverberate "runtime_disclaimer"
     if [[ -f "/etc/bash_completion.d/munin-pihole-plugins" ]]; then
         reverberate "info" "Removing the munin-pihole-plugins bash completion script"
-        rm "/etc/bash_completion.d/munin-pihole-plugins" || return
-        reverberate "success" "/etc/bash_completion.d/munin-pihole-plugins removed"
+        if ! rm "/etc/bash_completion.d/munin-pihole-plugins"; then
+            reverberate "error" "Script not removed"
+            reverberate "failure" "/etc/bash_completion.d/munin-pihole-plugins"
+            reverberate "exit" "1"
+        fi
+        reverberate "success" "/etc/bash_completion.d/munin-pihole-plugins"
     fi
     if [[ -f "${man_dir}/munin-pihole-plugins.1" ]]; then
         reverberate "info" "Removing the munin-pihole-plugins manual"
-        rm "${man_dir}/munin-pihole-plugins.1" || return
-        reverberate "success" "${man_dir}/munin-pihole-plugins.1 removed"
+        if ! rm "${man_dir}/munin-pihole-plugins.1"; then
+            reverberate "error" "Manual not removed"
+            reverberate "failure" "${man_dir}/munin-pihole-plugins.1"
+            reverberate "exit" "1"
+        fi
+        reverberate "success" "${man_dir}/munin-pihole-plugins.1"
     fi
     if [[ -f "${man_dir}/munin-pihole-plugins.1.gz" ]]; then
         reverberate "info" "Removing the munin-pihole-plugins manual"
-        rm "${man_dir}/munin-pihole-plugins.1.gz" || return
-        reverberate "success" "${man_dir}/munin-pihole-plugins.1.gz removed"
+        if ! rm "${man_dir}/munin-pihole-plugins.1.gz"; then
+            reverberate "error" "Manual not removed"
+            reverberate "failure" "${man_dir}/munin-pihole-plugins.1.gz"
+            reverberate "exit" "1"
+        fi
+        reverberate "success" "${man_dir}/munin-pihole-plugins.1.gz"
     fi
     if [[ "$(ls -A "${man_dir}")" ]]; then
         reverberate "additional_info" "The munin-pihole-plugins manual directory is empty"
         reverberate "info" "Removing the munin-pihole-plugins manual directory"
         if i_can_has "rmdir" "noncritical"; then
-            rmdir "${man_dir}" || return
+            if ! rmdir "${man_dir}"; then
+                reverberate "error" "Directory not removed"
+                reverberate "failure" "${man_dir}"
+                reverberate "exit" "1"
+            fi
         else
             reverberate "additional_info" "\"rmdir\" unavailable, falling back to \"rm\""
-            rm -r "${man_dir}" || return
+            if ! rm -r "${man_dir}"; then
+                reverberate "error" "Directory not removed"
+                reverberate "failure" "${man_dir}"
+                reverberate "exit" "1"
+            fi
         fi
-        reverberate "success" "${man_dir} removed"
+        reverberate "success" "${man_dir}"
     fi
     if [[ -f "${external_config_dir}/${external_config_file}" ]]; then
         reverberate "info" "Removing munin-pihole-plugins external configuration"
-        rm "${external_config_dir}/${external_config_file}" || return
-        reverberate "success" "${external_config_dir}/${external_config_file} removed"
+        if ! rm "${external_config_dir}/${external_config_file}"; then
+            reverberate "error" "External configuration file not removed"
+            reverberate "failure" "${external_config_dir}/${external_config_file}"
+            reverberate "exit" "1"
+        fi
+        reverberate "success" "${external_config_dir}/${external_config_file}"
     fi
     if [[ "$(ls -A "${external_config_dir}")" ]]; then
         reverberate "additional_info" "The munin-pihole-plugins script external configuration directory is empty"
         reverberate "info" "Removing the munin-pihole-plugins script external configuration directory"
         if i_can_has "rmdir" "noncritical"; then
-            rmdir "${external_config_dir}" || return
+            if ! rmdir "${external_config_dir}"; then
+                reverberate "error" "External configuration directory not removed"
+                reverberate "failure" "${external_config_dir}"
+                reverberate "exit" "1"
+            fi
         else
             reverberate "additional_info" "\"rmdir\" unavailable, falling back to \"rm\""
-            rm -r "${external_config_dir}" || return
+            if ! rm -r "${external_config_dir}"; then
+                reverberate "error" "External configuration directory not removed"
+                reverberate "failure" "${external_config_dir}"
+                reverberate "exit" "1"
+            fi
         fi
-        reverberate "success" "${external_config_dir} removed"
+        reverberate "success" "${external_config_dir}"
     fi
     if [[ -f "$(script_dir)/munin-pihole-plugins" ]]; then
         reverberate "info" "Removing the munin-pihole-plugins script"
-        rm "${script_dir}/munin-pihole-plugins" || return
-        reverberate "success" "${script_dir}/munin-pihole-plugins removed"
+        if ! rm "${script_dir}/munin-pihole-plugins"; then
+            reverberate "error" "Script not removed"
+            reverberate "failure" "${script_dir}/munin-pihole-plugins"
+            reverberate "exit" "1"
+        fi
+        reverberate "success" "${script_dir}/munin-pihole-plugins"
     reverberate "footer"
 }
 
 uninstall_now
 EOF
-    chmod +x "${temp_dir}/.munin-pihole-plugins_uninstall"
+    if ! chmod +x "${temp_dir}/.munin-pihole-plugins_uninstall"; then
+        reverberate "error" "Script not executable"
+        reverberate "failure" "${temp_dir}/.munin-pihole-plugins_uninstall"
+        reverberate "exit" "1"
+    fi
     exec /bin/bash "${temp_dir}/.munin-pihole-plugins_uninstall"
 }
 
@@ -903,7 +996,11 @@ transmogrify() {
         seperator="="
     fi
     if [[ ! -d "${external_config_dir}" ]]; then
-        mkdir -p "${external_config_dir}" || return
+        if ! mkdir -p "${external_config_dir}"; then
+            reverberate "error" "Directory not created"
+            reverberate "failure" "${external_config_dir}"
+            reverberate "exit" "1"
+        fi
     fi
     if [[ ! -f "${external_config_dir}/${external_config_file}" ]]; then
         cat > "${external_config_dir}/${external_config_file}" << EOF
@@ -919,15 +1016,15 @@ EOF
     case "$2" in
         "RESET")
             if grep -q "^${external_var}${seperator}" "${external_var_file}"; then
-                sed -i "/^${external_var}/d" "${external_var_file}" || return
+                sed -i "/^${external_var}/d" "${external_var_file}"
             fi
         ;;
         *)
             if grep -q "^${external_var}${seperator}" "${external_var_file}"; then
-                sed -i "/^${external_var}${seperator}/c\\${external_var}${seperator}\"${external_var_value}\"" "${external_var_file}" || return
+                sed -i "/^${external_var}${seperator}/c\\${external_var}${seperator}\"${external_var_value}\"" "${external_var_file}"
                 some "${external_var}: ${external_var_value}"
             else
-                echo "${external_var}${seperator}\"${external_var_value}\"" >> "${external_var_file}" || return
+                echo "${external_var}${seperator}\"${external_var_value}\"" >> "${external_var_file}"
                 some "${external_var}: ${external_var_value}"
             fi
         ;;
@@ -943,6 +1040,7 @@ EOF
 # - localhost  127.0.0.1
 # - opendns    208.67.222.222
 # - quad9      9.9.9.9
+# - sainternet 119.224.127.171
 config_function() {
     if [[ -n "$3" ]]; then
         external_var_list="BRANCH DNS_PORT DNS_SERVER EXTERNAL_CONFIG_DIR EXTERNAL_CONFIG_FILE FORCE_UPDATE_PLUGIN_CONFIG IGNORE_PIHOLE_ON_HOST INSTALL_PLUGINS INSTALL_SCRIPT INSTALL_WEBSERVER LIGHTTPD_WEBROOT MUNIN_BRANCH MUNIN_DIR MUNIN_CONFIG_DIR MUNIN_PLUGIN_DIR NODE_PLUGIN_DIR PLUGIN_CONFIG_DIR PLUGIN_LIST PROXY_CONFIG_DIR RESET_ALL SCRIPT_DIR SHOW_COLOUR SHOW_HEADER SKIP_DEPENDENCY_CHECK UPDATE_SELF VERBOSITY_LEVEL"
@@ -982,6 +1080,11 @@ config_function() {
                         "QUAD9")
                             if [[ "$2" == "DNS_SERVER" ]]; then
                                 transmogrify "$2" "9.9.9.9"
+                            fi
+                        ;;
+                        "SAINTERNET")
+                            if [[ "$2" == "DNS_SERVER" ]]; then
+                                transmogrify "$2" "119.224.127.171"
                             fi
                         ;;
                         *)
@@ -1171,7 +1274,11 @@ debug_function() {
                     reverberate "info" "Installing the munin-pihole-plugins debug plugin"
                     if [[ -f "${munin_plugin_dir}/pihole_" ]]; then
                         reverberate "additional_info" "Creating symbolic link pihole_${plugin_id}"
-                        ln -s "${munin_plugin_dir}/pihole_" "${node_plugin_dir}/pihole_${plugin_id}" || return
+                        if ! ln -s "${munin_plugin_dir}/pihole_" "${node_plugin_dir}/pihole_${plugin_id}"; then
+                            reverberate "error" "Symbolic link not created"
+                            reverberate "failure" "${node_plugin_dir}/pihole_${plugin_id}"
+                            reverberate "exit" "1"
+                        fi
                         reverberate "success" "${node_plugin_dir}/pihole_${plugin_id}"
                     else
                         reverberate "error" "No munin-pihole-plugins plugin found"
@@ -1204,8 +1311,12 @@ debug_function() {
                 fi
             fi
             reverberate "additional_info" "Removing symbolic link pihole_${plugin_id}"
-            rm "${node_plugin_dir}/pihole_${plugin_id}" || return
-            reverberate "success" "${node_plugin_dir}/pihole_${plugin_id} removed"
+            if ! rm "${node_plugin_dir}/pihole_${plugin_id}"; then
+                reverberate "error" "Symbolic link not removed"
+                reverberate "failure" "${node_plugin_dir}/pihole_${plugin_id}"
+                reverberate "exit" "1"
+            fi
+            reverberate "success" "${node_plugin_dir}/pihole_${plugin_id}"
         fi
     else
         reverberate "error" "INSTALL_PLUGINS value must be \"true\""
@@ -1532,7 +1643,11 @@ install_function() {
             check_version
             if [[ "${update_self}" == "true" ]]; then
                 if [[ -f "${temp_dir}/.munin-pihole-plugins_update" ]]; then
-                    rm "${temp_dir}/.munin-pihole-plugins_update" || return
+                    reverberate "additional_info" "Performing clean-up"
+                    if ! rm "${temp_dir}/.munin-pihole-plugins_update"; then
+                        reverberate "failure" "${temp_dir}/.munin-pihole-plugins_update"
+                    fi
+                    reverberate "success" "${temp_dir}/.munin-pihole-plugins_update"
                 fi
                 if [[ "${remote_version}" != "${VERSION}" ]]; then
                     update_script "$@"
@@ -1684,7 +1799,11 @@ uninstall_function() {
                 dependency_list+="munin-node "
                 if [[ -d "${plugin_config_dir}" ]]; then
                     if [[ -f  "${plugin_config_dir}/pihole.conf" ]]; then
-                        rm "${plugin_config_dir}/pihole.conf" || return
+                        if ! rm "${plugin_config_dir}/pihole.conf"; then
+                            reverberate "error" "Plugin configuration file not removed"
+                            reverberate "failure" "${plugin_config_dir}/pihole.conf"
+                            reverberate "exit" "1"
+                        fi
                     fi
                 fi
                 uninstall_plugins
@@ -1705,18 +1824,34 @@ uninstall_function() {
                 fi
                 if [[ -d "${proxy_config_dir}" ]]; then
                     if [[ -f "${proxy_config_dir}/external.conf.orig" ]]; then
-                        mv "${proxy_config_dir}/external.conf.orig" "${proxy_config_dir}/external.conf" || return
+                        if ! mv "${proxy_config_dir}/external.conf.orig" "${proxy_config_dir}/external.conf"; then
+                            reverberate "error" "Backup lighttpd external.conf not restored"
+                            reverberate "failure" "${proxy_config_dir}/external.conf not restored"
+                            reverberate "exit" "1"
+                        fi
                         reverberate "info" "Original lighttpd external.conf restored from backup"
                     else
                         if [[ -f "${proxy_config_dir}/external.conf" ]]; then
-                            rm "${proxy_config_dir}/external.conf" || return
-                            touch "${proxy_config_dir}/external.conf" || return
+                            if ! rm "${proxy_config_dir}/external.conf"; then
+                                reverberate "error" "lighttpd external.conf not removed"
+                                reverberate "failure" "${proxy_config_dir}/external.conf"
+                                reverberate "exit" "1"
+                            fi
+                            if ! touch "${proxy_config_dir}/external.conf"; then
+                                reverberate "error" "lighttpd external.conf not created"
+                                reverberate "failure" "${proxy_config_dir}/external.conf"
+                                reverberate "exit" "1"
+                            fi
                         fi
                     fi
                 fi
                 if [[ -d "${munin_config_dir}" ]]; then
                     if [[ -f "${munin_config_dir}/99-graph-strategy.conf" ]]; then
-                        rm "${munin_config_dir}/99-graph-strategy.conf" || return
+                        if ! rm "${munin_config_dir}/99-graph-strategy.conf"; then
+                            reverberate "error" "Munin graph strategy not removed"
+                            reverberate "failure" "${munin_config_dir}/99-graph-strategy.conf"
+                            reverberate "exit" "1"
+                        fi
                     fi
                 else
                     if [[ -d "${munin_dir}" ]]; then
