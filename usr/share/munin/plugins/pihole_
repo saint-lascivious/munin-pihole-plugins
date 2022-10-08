@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="07.07.00"
+VERSION="07.08.00"
 
 : <<=cut
 =head1 NAME
@@ -70,14 +70,17 @@ Either a Pi-hole setupVars.conf path or webpassword value must be supplied.
 Default munin-pihole-plugins pihole_ plugin configuration (default: /etc/munin/plugin-conf.d/pihole.conf).
 
 [pihole_*]
+
     user root
-    env.api /admin/api.php
-    env.cachesuffix ?getCacheInfo&auth=
-    env.querysuffix ?getQueryTypes&auth=
+
+    env.api_method telnet
     env.ftl_portfile /run/pihole-FTL.port
-    #env.ftlport 4711
+    #env.ftl_port 4711
     env.host 127.0.0.1
-    env.port 80
+    env.json_api /admin/api.php
+    env.json_cachesuffix ?getCacheInfo&auth=
+    env.json_port 80
+    env.json_querysuffix ?getQueryTypes&auth=
     env.setupvars /etc/pihole/setupVars.conf
     #env.webpassword PIHOLE_SETUPVARS_WEBPASSWORD_HERE
 
@@ -241,19 +244,20 @@ Copyright saint-lascivious (Hayden Pearce) 2022
 #%# family=auto
 #%# capabilities=autoconf suggest
 
-api="${api:-/admin/api.php}"
-cachesuffix="${cachesuffix:-?getCacheInfo&auth=}"
-querysuffix="${querysuffix:-?getQueryTypes&auth=}"
+api_method="${api_method:-telnet}"
 ftl_portfile="${ftl_portfile:-/run/pihole-FTL.port}"
 if [ -f "${ftl_portfile}" ]; then
-    get_ftlport="$(cat < "${ftl_portfile}")"
-    ftlport="${ftlport:-${get_ftlport}}"
+    get_ftl_port="$(cat < "${ftl_portfile}")"
+    ftl_port="${ftl_port:-${get_ftl_port}}"
 else
-    ftlport="${ftlport:-}"
+    ftl_port="${ftl_port:-}"
 fi
 host="${host:-127.0.0.1}"
+json_api="${json_api:-/admin/api.php}"
+json_cachesuffix="${json_cachesuffix:-?getCacheInfo&auth=}"
+json_port="${json_port:-80}"
 plugin_id="$(echo "$0" | sed -e 's/^.*pihole_//')"
-port="${port:-80}"
+json_querysuffix="${json_querysuffix:-?getQueryTypes&auth=}"
 setupvars="${setupvars:-/etc/pihole/setupVars.conf}"
 if [ -f "${setupvars}" ]; then
     get_webpassword="$(cat < "${setupvars}" | grep WEBPASSWORD | sed s/WEBPASSWORD=//g)"
@@ -391,46 +395,50 @@ if [ -z "${plugin_id}" ]; then
     plugin_id="percent"
 fi
 
-if [ "${host}" = "127.0.0.1" ] || [ "${host}" = "::1" ] && [ -n "${ftlport}" ]; then
-    api_method="telnet"
-    case ${plugin_id} in
-        "cache" | "cache_by_type")
-            get_stats="$(echo ">cacheinfo >quit" | nc "${host}" "${ftlport}" 2>/dev/null | sed 's/ipv4/a/; s/ipv6/aaaa/; s/ //' | sort -u)"
-        ;;
-        "queries_by_type")
-            get_stats="$(echo ">querytypes >quit" | nc "${host}" "${ftlport}" 2>/dev/null | sed 's/ (IPv4)//; s/ (IPv6)//; s/ //' | sort -u)"
-        ;;
-        *)
-            get_stats="$(echo ">stats >quit" | nc "${host}" "${ftlport}" 2>/dev/null | sed 's/ /:/' | sort -u)"
-        ;;
-    esac
-else
-    api_method="json"
-    case ${plugin_id} in
-        "cache" | "cache_by_type")
-            get_stats="$(echo "curl -sL ${host}:${port}${api}${cachesuffix}${webpassword} 2>/dev/null" | sed 's/[{}"]//g; s/cacheinfo://; s/ipv4/a/; s/ipv6/aaaa/' | tr "," "\\n" | sort -u)"
-        ;;
-        "queries_by_type")
-            get_stats="$(echo "curl -sL ${host}:${port}${api}${querysuffix}${webpassword} 2>/dev/null" | sed 's/[{}"]//g; s/querytypes://; s/ (IPv4)//; s/ (IPv6)//' | tr "," "\\n" | sort -u)"
-        ;;
-        *)
-            get_stats="$(echo "curl -sL ${host}:${port}${api} 2>/dev/null" | sed 's/[{}"]//g' | tr "," "\\n" | sort -u)"
-        ;;
-    esac
-fi
+case ${api_method} in
+    "json")
+        case ${plugin_id} in
+            "cache" | "cache_by_type")
+                get_stats="$(echo "curl -sL ${host}:${json_port}${json_api}${json_cachesuffix}${webpassword} 2>/dev/null" | sed 's/[{}"]//g; s/cacheinfo://; s/ipv4/a/; s/ipv6/aaaa/' | tr "," "\\n" | sort -u)"
+            ;;
+            "queries_by_type")
+                get_stats="$(echo "curl -sL ${host}:${json_port}${json_api}${json_querysuffix}${webpassword} 2>/dev/null" | sed 's/[{}"]//g; s/querytypes://; s/ (IPv4)//; s/ (IPv6)//' | tr "," "\\n" | sort -u)"
+            ;;
+            *)
+                get_stats="$(echo "curl -sL ${host}:${json_port}${json_api} 2>/dev/null" | sed 's/[{}"]//g' | tr "," "\\n" | sort -u)"
+            ;;
+        esac
+    ;;
+    "telnet")
+        case ${plugin_id} in
+            "cache" | "cache_by_type")
+                get_stats="$(echo ">cacheinfo >quit" | nc "${host}" "${ftl_port}" 2>/dev/null | sed 's/ipv4/a/; s/ipv6/aaaa/; s/ //' | sort -u)"
+            ;;
+            "queries_by_type")
+                get_stats="$(echo ">querytypes >quit" | nc "${host}" "${ftl_port}" 2>/dev/null | sed 's/ (IPv4)//; s/ (IPv6)//; s/ //' | sort -u)"
+            ;;
+            *)
+                get_stats="$(echo ">stats >quit" | nc "${host}" "${ftl_port}" 2>/dev/null | sed 's/ /:/' | sort -u)"
+            ;;
+        esac
+    ;;
+    *)
+        exit 1
+    ;;
+esac
 
 plugin_autoconf() {
-    if [ "${host}" = "127.0.0.1" ] || [ "${host}" = "::1" ] && [ -n "${ftlport}" ]; then
-        if [ ! -x "$(command -v "nc")" ]; then
-            echo "no (nc does not exist)"
+    if [ "${api_method}" = "json" ] && [ -n "${webpassword}" ]; then
+        if [ ! -x "$(command -v "curl")" ]; then
+            echo "no (curl does not exist)"
             exit 0
         fi
         echo "yes"
         exit 0
     else
-        if [ -n "${webpassword}" ]; then
-            if [ ! -x "$(command -v "curl")" ]; then
-                echo "no (curl does not exist)"
+        if [ "${api_method}" = "telnet" ] && [ -n "${ftl_port}" ]; then
+            if [ ! -x "$(command -v "nc")" ]; then
+                echo "no (nc does not exist)"
                 exit 0
             fi
             echo "yes"
@@ -1126,20 +1134,20 @@ plugin_data() {
         "debug")
             echo "plugin version:"
             echo "\"${VERSION}\""
-            echo "plugin api method:"
-            echo "${api_method}"
             echo "plugin variables:"
-            echo "api=\"${api}\""
-            echo "cachesuffix=\"${cachesuffix}\""
+            echo "api_method=\"${api_method}\""
             echo "ftl_portfile=\"${ftl_portfile}\""
             if [ -f "${ftl_portfile}" ]; then
                 echo "\"${ftl_portfile}\" exists"
             else
                 echo "\"${ftl_portfile}\" does not exist"
             fi
-            echo "ftlport=\"${ftlport}\""
+            echo "ftl_port=\"${ftl_port}\""
             echo "host=\"${host}\""
-            echo "port=\"${port}\""
+            echo "json_api=\"${json_api}\""
+            echo "json_cachesuffix=\"${json_cachesuffix}\""
+            echo "json_port=\"${json_port}\""
+            echo "json_querysuffix=\"${json_querysuffix}\""
             echo "setupvars=\"${setupvars}\""
             if [ -f "${setupvars}" ]; then
                 echo "\"${setupvars}\" exists"
