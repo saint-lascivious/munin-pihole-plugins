@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="08.15.00"
+VERSION="08.15.01"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -751,7 +751,7 @@ install_script() {
                 reverberate "success" "${man_dir}/munin-pihole-plugins.1.gz"
             fi
             reverberate "additional_info" "To access the munin-pihole-plugins manual, type"
-            reverberate "  man munin-pihole-plugins"
+            reverberate "    man munin-pihole-plugins"
         fi
         if [[ -d "/etc/bash_completion.d" ]]; then
             reverberate "info" "Installing the munin-pihole-plugins bash completion script"
@@ -763,13 +763,13 @@ install_script() {
             reverberate "additional_info" "A copy of the munin-pihole-plugins bash-completion script was installed"
             reverberate "success" "/etc/bash_completion.d/munin-pihole-plugins"
             reverberate "additional_info" "To begin using it immediately, open a new terminal or type"
-            reverberate "  . /etc/bash_completion"
+            reverberate "    . /etc/bash_completion"
         fi
         if [[ ":${PATH}:" != *":${script_dir}:"* ]]; then
             reverberate "warning" "The munin-pihole-plugins script directory is not in your \$PATH"
             reverberate "failure" "\$PATH"
             reverberate "additional_info" "To add the munin-pihole-plugins script directory to your \$PATH try"
-            reverberate "  export PATH=\"\$PATH:${script_dir}\""
+            reverberate "    export PATH=\"\$PATH:${script_dir}\""
         else
             reverberate "additional_info" "The munin-pihole-plugins script directory is in your \$PATH"
             reverberate "success" "\$PATH"
