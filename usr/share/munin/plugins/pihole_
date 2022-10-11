@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="08.15.01"
+VERSION="08.16.00"
 
 : <<=cut
 =head1 NAME
@@ -74,7 +74,7 @@ Default munin-pihole-plugins pihole_ plugin configuration (default: /etc/munin/p
     user root
 
     env.api_method telnet
-    env.ftl_portfile /run/pihole-FTL.port
+    env.ftl_conf /etc/pihole/pihole-FTL.conf
     #env.ftl_port 4711
     env.host 127.0.0.1
     env.json_api /admin/api.php
@@ -245,10 +245,14 @@ Copyright saint-lascivious (Hayden Pearce) 2022
 #%# capabilities=autoconf suggest
 
 api_method="${api_method:-telnet}"
-ftl_portfile="${ftl_portfile:-/run/pihole-FTL.port}"
-if [ -f "${ftl_portfile}" ]; then
-    get_ftl_port="$(cat < "${ftl_portfile}")"
-    ftl_port="${ftl_port:-${get_ftl_port}}"
+ftl_conf="${ftl_conf:-/etc/pihole/pihole-FTL.conf}"
+if [ -f "${ftl_conf}" ]; then
+    get_ftlport="$(cat < "${ftl_conf}" | grep FTLPORT | sed s/FTLPORT=//g)"
+    if [ -n "${get_ftlport}" ]; then
+        ftl_port="${ftl_port:-${get_ftlport}}"
+    else
+        ftl_port="${ftl_port:-4711}"
+    fi
 else
     ftl_port="${ftl_port:-}"
 fi
@@ -261,7 +265,11 @@ json_querysuffix="${json_querysuffix:-?getQueryTypes&auth=}"
 setupvars="${setupvars:-/etc/pihole/setupVars.conf}"
 if [ -f "${setupvars}" ]; then
     get_webpassword="$(cat < "${setupvars}" | grep WEBPASSWORD | sed s/WEBPASSWORD=//g)"
-    webpassword="${webpassword:-${get_webpassword}}"
+    if [ -n "${get_webpassword}" ]; then
+        webpassword="${webpassword:-${get_webpassword}}"
+    else
+        webpassword="${webpassword:-}"
+    fi
 else
     webpassword="${webpassword:-}"
 fi
@@ -1136,11 +1144,11 @@ plugin_data() {
             echo "\"${VERSION}\""
             echo "plugin variables:"
             echo "api_method=\"${api_method}\""
-            echo "ftl_portfile=\"${ftl_portfile}\""
-            if [ -f "${ftl_portfile}" ]; then
-                echo "\"${ftl_portfile}\" exists"
+            echo "ftl_conf=\"${ftl_conf}\""
+            if [ -f "${ftl_conf}" ]; then
+                echo "\"${ftl_conf}\" exists"
             else
-                echo "\"${ftl_portfile}\" does not exist"
+                echo "\"${ftl_conf}\" does not exist"
             fi
             echo "ftl_port=\"${ftl_port}\""
             echo "host=\"${host}\""
