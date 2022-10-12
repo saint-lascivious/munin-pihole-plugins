@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="08.16.00"
+VERSION="08.16.01"
 
 : <<=cut
 =head1 NAME
@@ -81,7 +81,7 @@ Default munin-pihole-plugins pihole_ plugin configuration (default: /etc/munin/p
     env.json_cachesuffix ?getCacheInfo&auth=
     env.json_port 80
     env.json_querysuffix ?getQueryTypes&auth=
-    env.setupvars /etc/pihole/setupVars.conf
+    #env.setupvars /etc/pihole/setupVars.conf
     #env.webpassword PIHOLE_SETUPVARS_WEBPASSWORD_HERE
 
     env.graph_category dns
@@ -246,23 +246,30 @@ Copyright saint-lascivious (Hayden Pearce) 2022
 
 api_method="${api_method:-telnet}"
 ftl_conf="${ftl_conf:-/etc/pihole/pihole-FTL.conf}"
-if [ -f "${ftl_conf}" ]; then
-    get_ftlport="$(cat < "${ftl_conf}" | grep FTLPORT | sed s/FTLPORT=//g)"
-    if [ -n "${get_ftlport}" ]; then
-        ftl_port="${ftl_port:-${get_ftlport}}"
-    else
-        ftl_port="${ftl_port:-4711}"
-    fi
-else
-    ftl_port="${ftl_port:-}"
-fi
 host="${host:-127.0.0.1}"
 json_api="${json_api:-/admin/api.php}"
 json_cachesuffix="${json_cachesuffix:-?getCacheInfo&auth=}"
 json_port="${json_port:-80}"
 plugin_id="$(echo "$0" | sed -e 's/^.*pihole_//')"
 json_querysuffix="${json_querysuffix:-?getQueryTypes&auth=}"
-setupvars="${setupvars:-/etc/pihole/setupVars.conf}"
+
+if [ -f "${ftl_conf}" ]; then
+    get_ftlport="$(cat < "${ftl_conf}" | grep FTLPORT | sed s/FTLPORT=//g)"
+    get_setupvars="$(cat < "${ftl_conf}" | grep SETUPVARSFILE | sed s/SETUPVARSFILE=//g)"
+    if [ -n "${get_ftlport}" ]; then
+        ftl_port="${ftl_port:-${get_ftlport}}"
+    else
+        ftl_port="${ftl_port:-4711}"
+    fi
+    if [ -n "${get_setupvars}" ]; then
+        setupvars="${setupvars:-${get_setupvars}}"
+    else
+        setupvars="${setupvars:-/etc/pihole/setupVars.conf}"
+    fi
+else
+    ftl_port="${ftl_port:-}"
+    setupvars="${setupvars:-}"
+fi
 if [ -f "${setupvars}" ]; then
     get_webpassword="$(cat < "${setupvars}" | grep WEBPASSWORD | sed s/WEBPASSWORD=//g)"
     if [ -n "${get_webpassword}" ]; then
