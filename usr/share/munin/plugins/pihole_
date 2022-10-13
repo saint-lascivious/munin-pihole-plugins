@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="08.16.01"
+VERSION="08.17.00"
 
 : <<=cut
 =head1 NAME
@@ -65,7 +65,7 @@ Note for cache_* plugins:
 Pi-hole API authentication required.
 Either a Pi-hole setupVars.conf path or webpassword value must be supplied.
 
-=head1 PLUGIN CONFIGURATION
+=head1 PLUGIN BASE CONFIGURATION
 
 Default munin-pihole-plugins pihole_ plugin configuration (default: /etc/munin/plugin-conf.d/pihole.conf).
 
@@ -92,11 +92,51 @@ Default munin-pihole-plugins pihole_ plugin configuration (default: /etc/munin/p
 
     # pihole_blocked
     env.blocked_rate 3600
-    env.domains_being_blocked_crit 1:5000000
-    env.domains_being_blocked_warn 0:3000000
 
     # pihole_cache
     #env.cache_rate
+
+    # pihole_cache_by_type
+    #env.cache_by_type_rate
+
+    # pihole_clients
+    #env.clients_rate
+
+    # pihole_percent
+    #env.percent_rate
+
+    # pihole_privacy
+    #env.privacy_rate
+
+    # pihole_queries
+    #env.queries_rate
+
+    # pihole_queries_by_type
+    #env.queries_by_type_rate
+
+    # pihole_replies_by_type
+    #env.replies_by_type_rate
+
+    # pihole_status
+    #env.status_rate
+
+    # pihole_unique_domains
+    #env.unique_domains_rate
+
+
+Uncomment and/or (re-)define relevant env.* variables to override the default values to suit your requirement.
+
+The graph_category value determines which category munin-pihole-plugins graphs will appear in Munin's interface.
+
+The values for *_rate is a value in seconds. E.g. "60", "300", "3600".
+
+=head1 PLUGIN ALERTS CONFIGURATION
+
+Default munin-pihole-plugins pihole_ plugin configuration (default: /etc/munin/plugin-conf.d/pihole_alerts.conf).
+
+[pihole_*]
+
+    # pihole_cache
     #env.cache_expired_crit
     #env.cache_expired_warn
     #env.cache_immortal_crit
@@ -109,7 +149,6 @@ Default munin-pihole-plugins pihole_ plugin configuration (default: /etc/munin/p
     env.cache_size_warn 10000:10000
 
     # pihole_cache_by_type
-    #env.cache_by_type_rate
     #env.cache_A_crit
     #env.cache_A_warn
     #env.cache_AAAA_crit
@@ -126,24 +165,20 @@ Default munin-pihole-plugins pihole_ plugin configuration (default: /etc/munin/p
     #env.cache_SRV_warn
 
     # pihole_clients
-    #env.clients_rate
     #env.clients_ever_seen_crit
     #env.clients_ever_seen_warn
     env.unique_clients_crit 100
     env.unique_clients_warn 1:50
 
     # pihole_percent
-    #env.percent_rate
     env.ads_percentage_today_crit 95
     env.ads_percentage_today_warn 1:85
 
     # pihole_privacy
-    #env.privacy_rate
     env.privacy_level_crit 1:3
     env.privacy_level_warn 3:3
 
     # pihole_queries
-    #env.queries_rate
     #env.dns_queries_today_crit
     #env.dns_queries_today_warn
     #env.ads_blocked_today_crit
@@ -154,7 +189,6 @@ Default munin-pihole-plugins pihole_ plugin configuration (default: /etc/munin/p
     #env.queries_cached_warn
 
     # pihole_queries_by_type
-    #env.queries_by_type_rate
     #env.query_A_crit
     #env.query_AAAA_warn
     #env.query_ANY_crit
@@ -187,7 +221,6 @@ Default munin-pihole-plugins pihole_ plugin configuration (default: /etc/munin/p
     #env.query_TXT_warn
 
     # pihole_replies_by_type
-    #env.replies_by_type_rate
     #env.reply_BLOB_crit
     #env.reply_BLOB_warn
     #env.reply_CNAME_crit
@@ -218,20 +251,14 @@ Default munin-pihole-plugins pihole_ plugin configuration (default: /etc/munin/p
     #env.reply_UNKNOWN_warn
 
     # pihole_status
-    #env.status_rate
     env.status_crit 0:1
     env.status_warn 1:1
 
     # pihole_unique_domains
-    #env.unique_domains_rate
     env.unique_domains_crit 1:20000
     env.unique_domains_warn 0:10000
 
 Uncomment and/or (re-)define relevant env.* variables to override the default values to suit your requirement.
-
-The graph_category value determines which category munin-pihole-plugins graphs will appear in Munin's interface.
-
-The values for *_rate is a value in seconds. E.g. "60", "300", "3600".
 
 The values for *_crit and *_warn can be a max value or a range separated by colon. E.g. "min:", ":max", "min:max", "max".
 
