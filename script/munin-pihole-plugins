@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="07.09.00"
+VERSION="07.10.00"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -52,6 +52,7 @@ munin_config_dir="${MUNIN_CONFIG_DIR:-${munin_dir}/munin-conf.d}"
 munin_plugin_dir="${MUNIN_PLUGIN_DIR:-/usr/share/munin/plugins}"
 node_plugin_dir="${NODE_PLUGIN_DIR:-${munin_dir}/plugins}"
 plugin_config_dir="${PLUGIN_CONFIG_DIR:-${munin_dir}/plugin-conf.d}"
+plugin_config_list="${PLUGIN_CONFIG_LIST:-pihole pihole_alerts}"
 plugin_list="${PLUGIN_LIST:-blocked cache cache_by_type clients percent privacy queries queries_by_type replies_by_type status unique_domains}"
 proxy_config_dir="${PROXY_CONFIG_DIR:-/etc/lighttpd}"
 script_dir="${SCRIPT_DIR:-/usr/local/bin}"
@@ -634,34 +635,36 @@ install_plugins() {
     fi
 }
 
-# installs a default configuration file
+# installs default plugin configuration files
 # this should not be required but if it does have to be configured it is nicer
 # if it already exists
 configure_plugins() {
     if [[ -d "${plugin_config_dir}" ]]; then
-        if [[ ! -f  "${plugin_config_dir}/pihole.conf" ]]; then
-            reverberate "info" "Installing the default plugin configuration"
-            download "${plugin_repo}/etc/munin/plugin-conf.d/pihole.conf" -P "${plugin_config_dir}"
-            reverberate "additional_info" "A copy of the default plugin configuration was installed"
-            reverberate "success" "${plugin_config_dir}/pihole.conf"
-        else
-            if [[ "${force_update_plugin_config}" != "false" ]]; then
-                if [[ -d "${external_config_dir}" ]]; then
-                    reverberate "info" "Saving the existing pihole.conf plugin configuration file"
-                    if ! cp "${plugin_config_dir}/pihole.conf" "${external_config_dir}/pihole.conf.save"; then
-                        reverberate "error" "Configuration file not saved"
-                        reverberate "failure" "${external_config_dir}/pihole.conf.save"
-                        reverberate "exit" "1"
+        for plugin_conf in ${plugin_config_list}; do
+            if [[ ! -f  "${plugin_config_dir}/${plugin_conf}.conf" ]]; then
+                reverberate "info" "Installing default plugin configuration file ${plugin_conf}.conf"
+                download "${plugin_repo}/etc/munin/plugin-conf.d/${plugin_conf}.conf" -P "${plugin_config_dir}"
+                reverberate "additional_info" "A copy of the config file ${plugin_conf}.conf was installed"
+                reverberate "success" "${plugin_config_dir}/${plugin_conf}.conf"
+            else
+                if [[ "${force_update_plugin_config}" != "false" ]]; then
+                    if [[ -d "${external_config_dir}" ]]; then
+                        reverberate "info" "Saving the existing ${plugin_conf}.conf plugin configuration file"
+                        if ! cp "${plugin_config_dir}/${plugin_conf}.conf" "${external_config_dir}/${plugin_conf}.conf.save"; then
+                            reverberate "error" "Configuration file not saved"
+                            reverberate "failure" "${external_config_dir}/${plugin_conf}.conf.save"
+                            reverberate "exit" "1"
+                        fi
+                        reverberate "additional_info" "The existing ${plugin_conf}.conf file was saved to"
+                        reverberate "success" "${external_config_dir}/${plugin_conf}.conf.save"
                     fi
-                    reverberate "additional_info" "The existing pihole.conf file was saved to"
-                    reverberate "success" "${external_config_dir}/pihole.conf.save"
+                    reverberate "info" "Updating the default plugin configuration"
+                    download "${plugin_repo}/etc/munin/plugin-conf.d/${plugin_conf}.conf" -O "${plugin_config_dir}/${plugin_conf}.conf"
+                    reverberate "additional_info" "The default plugin configuration was updated"
+                    reverberate "success" "${plugin_config_dir}/${plugin_conf}.conf"
                 fi
-                reverberate "info" "Updating the default plugin configuration"
-                download "${plugin_repo}/etc/munin/plugin-conf.d/pihole.conf" -O "${plugin_config_dir}/pihole.conf"
-                reverberate "additional_info" "The default plugin configuration was updated"
-                reverberate "success" "${plugin_config_dir}/pihole.conf"
             fi
-        fi
+        done
     else
         reverberate "error" "No Munin plugin configuration directory found"
         reverberate "failure" "${plugin_config_dir}"
@@ -1043,7 +1046,7 @@ EOF
 # - sainternet 119.224.127.171
 config_function() {
     if [[ -n "$3" ]]; then
-        external_var_list="BRANCH DNS_PORT DNS_SERVER EXTERNAL_CONFIG_DIR EXTERNAL_CONFIG_FILE FORCE_UPDATE_PLUGIN_CONFIG IGNORE_PIHOLE_ON_HOST INSTALL_PLUGINS INSTALL_SCRIPT INSTALL_WEBSERVER LIGHTTPD_WEBROOT MUNIN_BRANCH MUNIN_DIR MUNIN_CONFIG_DIR MUNIN_PLUGIN_DIR NODE_PLUGIN_DIR PLUGIN_CONFIG_DIR PLUGIN_LIST PROXY_CONFIG_DIR RESET_ALL SCRIPT_DIR SHOW_COLOUR SHOW_HEADER SKIP_DEPENDENCY_CHECK UPDATE_SELF VERBOSITY_LEVEL"
+        external_var_list="BRANCH DNS_PORT DNS_SERVER EXTERNAL_CONFIG_DIR EXTERNAL_CONFIG_FILE FORCE_UPDATE_PLUGIN_CONFIG IGNORE_PIHOLE_ON_HOST INSTALL_PLUGINS INSTALL_SCRIPT INSTALL_WEBSERVER LIGHTTPD_WEBROOT MUNIN_BRANCH MUNIN_DIR MUNIN_CONFIG_DIR MUNIN_PLUGIN_DIR NODE_PLUGIN_DIR PLUGIN_CONFIG_DIR PLUGIN_CONFIG_LIST PLUGIN_LIST PROXY_CONFIG_DIR RESET_ALL SCRIPT_DIR SHOW_COLOUR SHOW_HEADER SKIP_DEPENDENCY_CHECK UPDATE_SELF VERBOSITY_LEVEL"
         for external_var_id in ${external_var_list}; do
             if [[ "$2" == "${external_var_id}" ]]; then
                 if [[ -f "${script_dir}/munin-pihole-plugins" ]]; then
@@ -1183,6 +1186,9 @@ Type \"munin-pihole-plugins --install --script\" to install it now"
             "PLUGIN_CONFIG_DIR")
                 some "PLUGIN_CONFIG_DIR: ${plugin_config_dir}"
             ;;
+            "PLUGIN_CONFIG_LIST")
+                some "PLUGIN_CONFIG_LIST: ${plugin_config_list}"
+            ;;
             "PLUGIN_LIST")
                 some "PLUGIN_LIST: ${plugin_list}
 \\nPlugin          Description
@@ -1247,6 +1253,7 @@ Type \"munin-pihole-plugins --install --script\" to install it now"
  MUNIN_PLUGIN_DIR=\"${munin_plugin_dir}\"
  NODE_PLUGIN_DIR=\"${node_plugin_dir}\"
  PLUGIN_CONFIG_DIR=\"${plugin_config_dir}\"
+ PLUGIN_CONFIG_LIST=\"${plugin_config_list}\"
  PLUGIN_LIST=\"${plugin_list}\"
  PROXY_CONFIG_DIR=\"${proxy_config_dir}\"
  SCRIPT_DIR=\"${script_dir}\"

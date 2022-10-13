@@ -18,16 +18,16 @@
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
 # shellcheck disable=SC2034
-VERSION="07.09.00"
+VERSION="07.10.00"
 
 # shellcheck disable=SC2207
 _munin-pihole-plugins() {
     local cur allopts lolopts_help longopts longopts_installuninstall \
         longopts_restart longopts_show opts_branch opts_dnsserver opts \
-        opts_holdduration opts_installuninstall opts_muninbranch opts_restart \
-        opts_show opts_truefalse opts_variables opts_verbositylevel prev \
-        prev2 shortopts shortopts_installuninstall shortopts_restart \
-        shortopts_show
+        opts_holdduration opts_installuninstall opts_muninbranch \
+        opts_plugin_config_list opts_restart opts_show opts_truefalse \
+        opts_variables opts_verbositylevel prev prev2 shortopts \
+        shortopts_installuninstall shortopts_restart shortopts_show
     COMPREPLY=()
     cur="${COMP_WORDS[COMP_CWORD]}"
     allopts="-c configure --configure -d debug --debug -h help --help -i \
@@ -46,6 +46,7 @@ _munin-pihole-plugins() {
         webserver-only"
     opts_dnsserver="CLOUDFLARE COMODO GOOGLE LOCALHOST QUAD9 RESET SAINTERNET"
     opts_muninbranch="latest stable"
+    opts_plugin_config_list="pihole pihole_alerts"
     opts_restart="plugins webserver"
     opts_show="conditions gnu-gpl liability warranty"
     opts_truefalse="true false RESET"
@@ -53,9 +54,9 @@ _munin-pihole-plugins() {
         EXTERNAL_CONFIG_FILE FORCE_UPDATE_PLUGIN_CONFIG HOLD_DURATION \
         IGNORE_PIHOLE_ON_HOST INSTALL_PLUGINS INSTALL_SCRIPT INSTALL_WEBSERVER \
         LIGHTTPD_WEBROOT MUNIN_BRANCH MUNIN_DIR MUNIN_CONFIG_DIR \
-        MUNIN_PLUGIN_DIR NODE_PLUGIN_DIR PLUGIN_CONFIG_DIR PLUGIN_LIST \
-        PROXY_CONFIG_DIR RESET_ALL SCRIPT_DIR SHOW_COLOUR SHOW_HEADER \
-        SKIP_DEPENDENCY_CHECK UPDATE_SELF VERBOSITY_LEVEL"
+        MUNIN_PLUGIN_DIR NODE_PLUGIN_DIR PLUGIN_CONFIG_DIR PLUGIN_CONFIG_LIST \
+        PLUGIN_LIST PROXY_CONFIG_DIR RESET_ALL SCRIPT_DIR SHOW_COLOUR \
+        SHOW_HEADER SKIP_DEPENDENCY_CHECK UPDATE_SELF VERBOSITY_LEVEL"
     opts_verbositylevel="0 1 2 3 4 RESET"
     prev="${COMP_WORDS[COMP_CWORD-1]}"
     prev2="${COMP_WORDS[COMP_CWORD-2]}"
@@ -154,6 +155,11 @@ _munin-pihole-plugins() {
         "MUNIN_BRANCH")
             if [[ "${prev2}" == "-c" ]] || [[ "${prev2}" == "configure" ]] || [[ "${prev2}" == "--configure" ]]; then
                 COMPREPLY=( $(compgen -W "${opts_muninbranch}" -- "${cur}") )
+            fi
+        ;;
+        "PLUGIN_CONFIG_LIST")
+            if [[ "${prev2}" == "-c" ]] || [[ "${prev2}" == "configure" ]] || [[ "${prev2}" == "--configure" ]]; then
+                COMPREPLY=( $(compgen -W "${opts_plugin_config_list}" -- "${cur}") )
             fi
         ;;
         "VERBOSITY_LEVEL")

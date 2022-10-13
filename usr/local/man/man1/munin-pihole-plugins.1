@@ -1,10 +1,10 @@
-.TH man 1 "11 October 2022" "07.09.00" "munin-pihole-plugins man page"
+.TH man 1 "13 October 2022" "07.10.00" "munin-pihole-plugins man page"
 
 .SH NAME
 munin-pihole-plugins
 
 .SH VERSION
-07.09.00
+07.10.00
 
 .SH BRANCH
 master
@@ -211,8 +211,8 @@ Note for cache_* plugins:
 Pi-hole API authentication required.
 Either a Pi-hole setupVars.conf path or webpassword value must be supplied.
 
-.SH PLUGIN CONFIGURATION
-Default /etc/munin/plugin-conf.d/pihole.conf plugin configuration:
+.SH PLUGIN BASE CONFIGURATION
+Default /etc/munin/plugin-conf.d/pihole.conf plugin configuration file:
 
 ---
 [pihole_*]
@@ -227,7 +227,7 @@ Default /etc/munin/plugin-conf.d/pihole.conf plugin configuration:
     env.json_cachesuffix ?getCacheInfo&auth=
     env.json_port 80
     env.json_querysuffix ?getQueryTypes&auth=
-    env.setupvars /etc/pihole/setupVars.conf
+    #env.setupvars /etc/pihole/setupVars.conf
     #env.webpassword PIHOLE_SETUPVARS_WEBPASSWORD_HERE
 
     env.graph_category dns
@@ -238,11 +238,49 @@ Default /etc/munin/plugin-conf.d/pihole.conf plugin configuration:
 
     # pihole_blocked
     env.blocked_rate 3600
+
+    # pihole_cache
+    #env.cache_rate
+
+    # pihole_cache_by_type
+    #env.cache_by_type_rate
+
+    # pihole_clients
+    #env.clients_rate
+
+    # pihole_percent
+    #env.percent_rate
+
+    # pihole_privacy
+    #env.privacy_rate
+
+    # pihole_queries
+    #env.queries_rate
+
+    # pihole_queries_by_type
+    #env.queries_by_type_rate
+
+    # pihole_replies_by_type
+    #env.replies_by_type_rate
+
+    # pihole_status
+    #env.status_rate
+
+    # pihole_unique_domains
+    #env.unique_domains_rate
+---
+
+.SH PLUGIN ALERTS CONFIGURATION
+Default /etc/munin/plugin-conf.d/pihole_alerts.conf plugin configuration file:
+
+---
+[pihole_*]
+
+    # pihole_blocked
     env.domains_being_blocked_crit 1:5000000
     env.domains_being_blocked_warn 0:3000000
 
     # pihole_cache
-    #env.cache_rate
     #env.cache_expired_crit
     #env.cache_expired_warn
     #env.cache_immortal_crit
@@ -255,7 +293,6 @@ Default /etc/munin/plugin-conf.d/pihole.conf plugin configuration:
     env.cache_size_warn 10000:10000
 
     # pihole_cache_by_type
-    #env.cache_by_type_rate
     #env.cache_A_crit
     #env.cache_A_warn
     #env.cache_AAAA_crit
@@ -272,24 +309,20 @@ Default /etc/munin/plugin-conf.d/pihole.conf plugin configuration:
     #env.cache_SRV_warn
 
     # pihole_clients
-    #env.clients_rate
     #env.clients_ever_seen_crit
     #env.clients_ever_seen_warn
     env.unique_clients_crit 100
     env.unique_clients_warn 1:50
 
     # pihole_percent
-    #env.percent_rate
     env.ads_percentage_today_crit 95
     env.ads_percentage_today_warn 1:85
 
     # pihole_privacy
-    #env.privacy_rate
     env.privacy_level_crit 1:3
     env.privacy_level_warn 3:3
 
     # pihole_queries
-    #env.queries_rate
     #env.dns_queries_today_crit
     #env.dns_queries_today_warn
     #env.ads_blocked_today_crit
@@ -300,7 +333,6 @@ Default /etc/munin/plugin-conf.d/pihole.conf plugin configuration:
     #env.queries_cached_warn
 
     # pihole_queries_by_type
-    #env.queries_by_type_rate
     #env.query_A_crit
     #env.query_AAAA_warn
     #env.query_ANY_crit
@@ -333,7 +365,6 @@ Default /etc/munin/plugin-conf.d/pihole.conf plugin configuration:
     #env.query_TXT_warn
 
     # pihole_replies_by_type
-    #env.replies_by_type_rate
     #env.reply_BLOB_crit
     #env.reply_BLOB_warn
     #env.reply_CNAME_crit
@@ -364,12 +395,10 @@ Default /etc/munin/plugin-conf.d/pihole.conf plugin configuration:
     #env.reply_UNKNOWN_warn
 
     # pihole_status
-    #env.status_rate
     env.status_crit 0:1
     env.status_warn 1:1
 
     # pihole_unique_domains
-    #env.unique_domains_rate
     env.unique_domains_crit 1:20000
     env.unique_domains_warn 0:10000
 ---
@@ -421,6 +450,7 @@ Variable                       Default Value
  MUNIN_PLUGIN_DIR               "/usr/share/munin/plugins"
  NODE_PLUGIN_DIR                "/etc/munin/plugins"
  PLUGIN_CONFIG_DIR              "/etc/munin/plugin-conf.d"
+ PLUGIN_CONFIG_LIST             "pihole pihole_alerts"
  PLUGIN_LIST                    "blocked cache cache_by_type clients percent privacy queries replies_by_type status unique_domains"
  PROXY_CONFIG_DIR               "/etc/lighttpd"
  SCRIPT_DIR                     "/usr/local/bin"
@@ -553,6 +583,17 @@ The directory in which munin-node plugin symbolic links should be created.
 
 Example munin-pihole-plugins --configure NODE_PLUGIN_DIR "/etc/munin/plugins"
 
+.SS PLUGIN_CONFIG_LIST
+
+A comma separated list of configuration file IDs used to determine which plugin configuration files will be installed.
+
+Config ID       Config Name             Description
+
+pihole          pihole.conf             Plugin configuration base file.
+pihole_alerts   pihole_alerts.conf      Plugin warning/critical alert configuration file.
+
+Example munin-pihole-plugins --configure PLUGIN_CONFIG_LIST "pihole"
+
 .SS PLUGIN_CONFIG_DIR
 
 The directory in which individual munin-node plugin configurations should be located.
@@ -565,17 +606,17 @@ A space separated list of munin-pihole-plugins plugin IDs used to determine whic
 
 Plugin ID       Plugin Name             Description
 
-blocked         pihole_blocked          This plugin shows the number of domains blocked by Pi-hole®. |
-cache           pihole_cache            This plugin shows Pi-hole®'s cache. |
-cache_by_type   pihole_cache_by_type    This plugin shows Pi-hole®'s cache by type. |
-clients         pihole_clients          This plugin shows clients seen by Pi-hole®. |
-percent         pihole_percent          This plugin shows Pi-hole®'s blocked query percentage. |
-privacy         pihole_privacy          This plugin shows Pi-hole®'s [privacy level](https://docs.pi-hole.net/ftldns/privacylevels/). |
-queries         pihole_queries          This plugin shows queries seen by Pi-hole®. |
-queries_by_type pihole_queries_by_type  This plugin shows Pi-hole®'s queries by type. |
-replies_by_type pihole_replies_by_type  This plugin shows Pi-hole®'s replies by type. |
-status          pihole_status           This plugin shows Pi-hole®'s blocking status. |
-unique_domains  pihole_unique_domains   This plugin shows unique domains seen by Pi-hole®. |
+blocked         pihole_blocked          This plugin shows the number of domains blocked by Pi-hole®.
+cache           pihole_cache            This plugin shows Pi-hole®'s cache.
+cache_by_type   pihole_cache_by_type    This plugin shows Pi-hole®'s cache by type.
+clients         pihole_clients          This plugin shows clients seen by Pi-hole®.
+percent         pihole_percent          This plugin shows Pi-hole®'s blocked query percentage.
+privacy         pihole_privacy          This plugin shows Pi-hole®'s [privacy level](https://docs.pi-hole.net/ftldns/privacylevels/).
+queries         pihole_queries          This plugin shows queries seen by Pi-hole®.
+queries_by_type pihole_queries_by_type  This plugin shows Pi-hole®'s queries by type.
+replies_by_type pihole_replies_by_type  This plugin shows Pi-hole®'s replies by type.
+status          pihole_status           This plugin shows Pi-hole®'s blocking status.
+unique_domains  pihole_unique_domains   This plugin shows unique domains seen by Pi-hole®.
 
 Example: munin-pihole-plugins --configure PLUGIN_LIST "blocked percent unique_domains"
 
