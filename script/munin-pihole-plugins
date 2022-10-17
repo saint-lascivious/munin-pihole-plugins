@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="08.17.00"
+VERSION="08.17.01"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -374,7 +374,6 @@ ${BLUE} ${RED}M${ORANGE}u${YELLOW}n${GREEN}i${BLUE}n${INDIGO} ${VIOLET}p${RED}l$
 }
 
 # is this a pihole host?
-# and if so, can we support its API?
 # yes - i am aware that pihole_version is...non optimal, there is probably
 # going to be a much better way to strip the text and formatting from pihole's
 # version output
@@ -382,16 +381,9 @@ check_pihole() {
     reverberate "info" "Checking if this is a Pi-hole® host"
     if i_can_has "pihole" "noncritical"; then
         pihole_version="$(pihole -v | grep "Pi-hole" | sed 's/Pi-hole version is v//; s/[(][^)]*[)]//; s/[^.0-9]*//g')"
-        # shellcheck disable=SC2071
-        if [[ ! "${pihole_version}" < "6" ]]; then
-            if [[ "${ignore_pihole_on_host}" != "false" ]]; then
-                reverberate "error" "Incompatible Pi-hole® version v${pihole_version}"
-                reverberate "info" "Supported Pi-hole® versions ≤ v5.*"
-                reverberate "exit" "1"
-            else
+        if [[ "${ignore_pihole_on_host}" != "false" ]]; then
                 reverberate "info" "Ignoring Pi-hole® version v${pihole_version}"
                 pihole_on_host="false"
-            fi
         else
             reverberate "success" "$(command -v pihole) v${pihole_version}"
             pihole_on_host="true"
@@ -639,44 +631,47 @@ install_plugins() {
 # this should not be required but if it does have to be configured it is nicer
 # if it already exists
 configure_plugins() {
-    if [[ -d "${plugin_config_dir}" ]]; then
-        for plugin_conf in ${plugin_config_list}; do
-            if [[ ! -f  "${plugin_config_dir}/${plugin_conf}.conf" ]]; then
-                reverberate "info" "Installing default plugin configuration file ${plugin_conf}.conf"
-                download "${plugin_repo}/etc/munin/plugin-conf.d/${plugin_conf}.conf" -P "${plugin_config_dir}"
-                reverberate "additional_info" "A copy of the config file ${plugin_conf}.conf was installed"
-                reverberate "success" "${plugin_config_dir}/${plugin_conf}.conf"
-            else
-                if [[ "${force_update_plugin_config}" != "false" ]]; then
-                    if [[ -d "${external_config_dir}" ]]; then
-                        reverberate "info" "Saving the existing ${plugin_conf}.conf plugin configuration file"
-                        if ! cp "${plugin_config_dir}/${plugin_conf}.conf" "${external_config_dir}/${plugin_conf}.conf.save"; then
-                            reverberate "error" "Configuration file not saved"
-                            reverberate "failure" "${external_config_dir}/${plugin_conf}.conf.save"
-                            reverberate "exit" "1"
-                        fi
-                        reverberate "additional_info" "The existing ${plugin_conf}.conf file was saved to"
-                        reverberate "success" "${external_config_dir}/${plugin_conf}.conf.save"
-                    fi
-                    reverberate "info" "Updating the default plugin configuration"
-                    download "${plugin_repo}/etc/munin/plugin-conf.d/${plugin_conf}.conf" -O "${plugin_config_dir}/${plugin_conf}.conf"
-                    reverberate "additional_info" "The default plugin configuration was updated"
+    if [[ -n "${plugin_config_list}" ]]; then
+        if [[ -d "${plugin_config_dir}" ]]; then
+            for plugin_conf in ${plugin_config_list}; do
+                if [[ ! -f  "${plugin_config_dir}/${plugin_conf}.conf" ]]; then
+                    reverberate "info" "Installing default plugin configuration"
+                    download "${plugin_repo}/etc/munin/plugin-conf.d/${plugin_conf}.conf" -P "${plugin_config_dir}"
+                    reverberate "additional_info" "A copy of the config file ${plugin_conf}.conf was installed"
                     reverberate "success" "${plugin_config_dir}/${plugin_conf}.conf"
+                else
+                    if [[ "${force_update_plugin_config}" != "false" ]]; then
+                        if [[ -d "${external_config_dir}" ]]; then
+                            reverberate "info" "Saving the existing plugin configuration"
+                            if ! cp "${plugin_config_dir}/${plugin_conf}.conf" "${external_config_dir}/${plugin_conf}.conf.save"; then
+                                reverberate "error" "Configuration file not saved"
+                                reverberate "failure" "${external_config_dir}/${plugin_conf}.conf.save"
+                                reverberate "exit" "1"
+                            fi
+                            reverberate "additional_info" "The existing ${plugin_conf}.conf file was saved to"
+                            reverberate "success" "${external_config_dir}/${plugin_conf}.conf.save"
+                        fi
+                        reverberate "info" "Updating default plugin configuration"
+                        download "${plugin_repo}/etc/munin/plugin-conf.d/${plugin_conf}.conf" -O "${plugin_config_dir}/${plugin_conf}.conf"
+                        reverberate "additional_info" "The default plugin config file ${plugin_conf}.conf was updated"
+                        reverberate "success" "${plugin_config_dir}/${plugin_conf}.conf"
+                    fi
                 fi
-            fi
-        done
-    else
-        reverberate "error" "No Munin plugin configuration directory found"
-        reverberate "failure" "${plugin_config_dir}"
-        reverberate "additional_info" "If this directory is located at a different path try"
-        reverberate "config" "PLUGIN_CONFIG_DIR"
-        reverberate "exit" "1"
-    fi
-    if [[ "${pihole_on_host}" == "false" ]]; then
-        reverberate "warning" "The Pi-hole® command 'pihole' was not found on this host"
-        reverberate "additional_info" "If this was intentional you will need to edit"
-        reverberate "${plugin_config_dir}/pihole.conf"
-        reverberate "and replace the host and setupvars values with those of your Pi-hole® host"
+            done
+        else
+            reverberate "error" "No Munin plugin configuration directory found"
+            reverberate "failure" "${plugin_config_dir}"
+            reverberate "additional_info" "If this directory is located at a different path try"
+            reverberate "config" "PLUGIN_CONFIG_DIR"
+            reverberate "exit" "1"
+        fi
+        if [[ "${ignore_pihole_on_host}" == "false" ]] && [[ "${pihole_on_host}" == "false" ]]; then
+            reverberate "warning" "The Pi-hole® command 'pihole' was not found on this host"
+            reverberate "additional_info" "If this was intentional you will need to edit"
+            reverberate "${plugin_config_dir}/pihole.conf"
+            reverberate "and replace the host and setupvars values with those of your Pi-hole® host"
+            reverberate "in addition to changing the api_method to json"
+        fi
     fi
 }
 

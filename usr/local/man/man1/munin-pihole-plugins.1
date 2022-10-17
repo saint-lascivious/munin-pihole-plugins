@@ -1,10 +1,10 @@
-.TH man 1 "13 October 2022" "08.17.00" "munin-pihole-plugins man page"
+.TH man 1 "17 October 2022" "08.17.01" "munin-pihole-plugins man page"
 
 .SH NAME
 munin-pihole-plugins
 
 .SH VERSION
-08.17.00
+08.17.01
 
 .SH BRANCH
 development
@@ -270,6 +270,30 @@ Default /etc/munin/plugin-conf.d/pihole.conf plugin configuration file:
     #env.unique_domains_rate
 ---
 
+Uncomment and/or (re-)define relevant env.* variables to override the default values to suit your requirement.
+
+The graph_category value determines which category munin-pihole-plugins graphs will appear in Munin's interface. This value MUST be lower case, allowed characters [a-z0-9].
+
+The graph_scale value determines graph y axis value scaling and may be either "no" or "yes".
+
+The graph_type value determines the graph data type, and can be one of "ABSOLUTE", "COUNTER", "DERIVE", or "GAUGE". This value MUST be upper case.
+
+The values for *_rate is a value in seconds. E.g. "60", "300", "3600".
+
+The values for graph_height and graph_width specify the dimensions of the graph in pixels, not including the graph legend.
+
+More specific definitions will override less specific definitions, allowing for a very high degree of customisation on a per-plugin basis. For example:
+---
+[pihole_*]
+    env.graph_category pihole
+
+[pihole_clients]
+    env.graph_type COUNTER
+
+[pihole_replies_by_type]
+    env.graph_type DERIVE
+---
+
 .SH PLUGIN ALERTS CONFIGURATION
 Default /etc/munin/plugin-conf.d/pihole_alerts.conf plugin configuration file:
 
@@ -405,30 +429,7 @@ Default /etc/munin/plugin-conf.d/pihole_alerts.conf plugin configuration file:
 
 Uncomment and/or (re-)define relevant env.* variables to override the default values to suit your requirement.
 
-The graph_category value determines which category munin-pihole-plugins graphs will appear in Munin's interface. This value MUST be lower case, allowed characters [a-z0-9].
-
-The graph_scale value determines graph y axis value scaling and may be either "no" or "yes".
-
-The graph_type value determines the graph data type, and can be one of "ABSOLUTE", "COUNTER", "DERIVE", or "GAUGE". This value MUST be upper case.
-
-The values for *_rate is a value in seconds. E.g. "60", "300", "3600".
-
 The values for *_crit and *_warn can be a max value or a range separated by colon. E.g. "min:", ":max", "min:max", "max".
-
-The values for graph_height and graph_width specify the dimensions of the graph in pixels, not including the graph legend.
-
-More specific definitions will override less specific definitions, allowing for a very high degree of customisation on a per-plugin basis. For example:
-
----
-[pihole_*]
-    env.graph_category pihole
-
-[pihole_clients]
-    env.graph_type COUNTER
-
-[pihole_replies_by_type]
-    env.graph_type DERIVE
----
 
 .SH SCRIPT CONFIGURATION
 Variable                       Default Value
@@ -464,13 +465,13 @@ Variable                       Default Value
 
 The branch used when checking the munin-pihole-plugins script version or installing munin-pihole-plugins. Valid options are development and master, of which the default is master. Invalid options will be rejected.
 
-Example munin-pihole-plugins --configure BRANCH development
+Example: munin-pihole-plugins --configure BRANCH development
 
 .SS DNS_PORT
 
 The port which the munin-pihole-plugins script will use in order to contact DNS_SERVER.
 
-Example munin-pihole-plugins --configure DNS_PORT 53
+Example: munin-pihole-plugins --configure DNS_PORT 53
 
 .SS DNS_SERVER
 
@@ -520,7 +521,7 @@ Note: Somewhat of an oddity this one. Added upon user request (I'm happy to acco
 
 .SS IGNORE_PIHOLE_ON_HOST
 
-Ignore the existance of any potentially incompatible (≥ v6.*) pihole binary on the host server. Potentially required under some (albeit unusual and unlikely) circumstances.
+Ignore the existance of any pihole binary on the host server.
 
 Example: munin-pihole-plugins --configure IGNORE_PIHOLE_ON_HOST true
 
@@ -528,25 +529,25 @@ Example: munin-pihole-plugins --configure IGNORE_PIHOLE_ON_HOST true
 
 Disables installation of munin-node and munin-pihole-plugins plugins if set to any value other than true.
 
-Example munin-pihole-plugins --configure INSTALL_PLUGINS false
+Example: munin-pihole-plugins --configure INSTALL_PLUGINS false
 
 .SS INSTALL_SCRIPT
 
 Disables installation of the munin-pihole-plugins script if set to any value other than true.
 
-Example munin-pihole-plugins --configure INSTALL_SCRIPT false
+Example: munin-pihole-plugins --configure INSTALL_SCRIPT false
 
 .SS INSTALL_WEBSERVER
 
 Disables installation of the munin webserver and lighttpd proxy if set to any value other than true. Useful for additional Munin nodes in a multi-node, single-server environment.
 
-Example munin-pihole-plugins --configure INSTALL_WEBSERVER false
+Example: munin-pihole-plugins --configure INSTALL_WEBSERVER false
 
 .SS LIGHTTPD_WEBROOT
 
 The directory in which, if installed, the Pi-hole® AdminLTE web interface should be found. The presence or absence of a pihole directory here is used to determine whether or not munin-pihole-plugins should offer to remove lighttpd during munin-pihole-plugins uninstallation. The admin directory is not used for this purpose due to the ambiguity of its name.
 
-Example munin-pihole-plugins --configure LIGHTTPD_WEBROOT "/var/www/html"
+Example: munin-pihole-plugins --configure LIGHTTPD_WEBROOT "/var/www/html"
 
 .SS MUNIN_BRANCH
 
@@ -557,31 +558,31 @@ Tag     Munin Version Target
 latest  munin 2.99+
 stable  munin 2.*
 
-Example munin-pihole-plugins --configure MUNIN_BRANCH latest
+Example: munin-pihole-plugins --configure MUNIN_BRANCH latest
 
 .SS MUNIN_DIR
 
 The directory in which the munin munin.conf file should be located.
 
-Example munin-pihole-plugins --configure MUNIN_DIR "/etc/munin"
+Example: munin-pihole-plugins --configure MUNIN_DIR "/etc/munin"
 
 .SS MUNIN_CONFIG_DIR
 
 The directory in which additional munin configuration files may be placed, the munin-pihole-plugins script will attempt to use this in favour of editing munin.conf directly.
 
-Example munin-pihole-plugins --configure MUNIN_CONFIG_DIR "/etc/munin/munin-conf.d"
+Example: munin-pihole-plugins --configure MUNIN_CONFIG_DIR "/etc/munin/munin-conf.d"
 
 .SS MUNIN_PLUGIN_DIR
 
 The directory in which munin plugins should be located.
 
-Example munin-pihole-plugins --configure MUNIN_PLUGIN_DIR "/usr/share/munin/plugins"
+Example: munin-pihole-plugins --configure MUNIN_PLUGIN_DIR "/usr/share/munin/plugins"
 
 .SS NODE_PLUGIN_DIR
 
 The directory in which munin-node plugin symbolic links should be created.
 
-Example munin-pihole-plugins --configure NODE_PLUGIN_DIR "/etc/munin/plugins"
+Example: munin-pihole-plugins --configure NODE_PLUGIN_DIR "/etc/munin/plugins"
 
 .SS PLUGIN_CONFIG_LIST
 
@@ -592,13 +593,13 @@ Config ID       Config Name             Description
 pihole          pihole.conf             Plugin configuration base file.
 pihole_alerts   pihole_alerts.conf      Plugin warning/critical alert configuration file.
 
-Example munin-pihole-plugins --configure PLUGIN_CONFIG_LIST "pihole"
+Example: munin-pihole-plugins --configure PLUGIN_CONFIG_LIST "pihole"
 
 .SS PLUGIN_CONFIG_DIR
 
 The directory in which individual munin-node plugin configurations should be located.
 
-Example munin-pihole-plugins --configure PLUGIN_CONFIG_DIR "/etc/munin/plugin-conf.d"
+Example: munin-pihole-plugins --configure PLUGIN_CONFIG_DIR "/etc/munin/plugin-conf.d"
 
 .SS PLUGIN_LIST
 
@@ -624,19 +625,19 @@ Example: munin-pihole-plugins --configure PLUGIN_LIST "blocked percent unique_do
 
 The directory in which lighttpd's external.conf should be located.
 
-Example munin-pihole-plugins --configure PROXY_CONFIG_DIR "/etc/lighttpd"
+Example: munin-pihole-plugins --configure PROXY_CONFIG_DIR "/etc/lighttpd"
 
 .SS SCRIPT_DIR
 
 The directory in which the munin-pihole-plugins script should be located when installed, the munin-pihole-plugins script will warn if this directory is not located in the host's $PATH variable and suggest how to correct this.
 
-Example munin-pihole-plugins --configure SCRIPT_DIR "/etc/munin-pihole-plugins"
+Example: munin-pihole-plugins --configure SCRIPT_DIR "/etc/munin-pihole-plugins"
 
 .SS SHOW_COLOUR
 
 Disables coloured terminal output if set to any value other than true.
 
-Example munin-pihole-plugins --configure SHOW_COLOUR false
+Example: munin-pihole-plugins --configure SHOW_COLOUR false
 
 .SS SHOW_HEADER
 
@@ -644,13 +645,13 @@ I get it. It's not for everyone.
 
 Disables the (super-duper, totally awesome) munin-pihole-plugins script ascii header if set to any value other than true.
 
-Example munin-pihole-plugins --configure SHOW_HEADER false
+Example: munin-pihole-plugins --configure SHOW_HEADER false
 
 .SS SKIP_DEPENDENCY_CHECK
 
 Disables apt and dpkg-query based dependency management if set to any value other than false.
 
-Example munin-pihole-plugins --configure SKIP_DEPENDENCY_CHECK true
+Example: munin-pihole-plugins --configure SKIP_DEPENDENCY_CHECK true
 
 Note: Basic test-before-use for required binaries is still performed in either case.
 
@@ -658,7 +659,7 @@ Note: Basic test-before-use for required binaries is still performed in either c
 
 Disables self update of the munin-pihole-plugins script if set to any value other than true.
 
-Example munin-pihole-plugins --configure UPDATE_SELF false
+Example: munin-pihole-plugins --configure UPDATE_SELF false
 
 .SS VERBOSITY_LEVEL
 
@@ -675,7 +676,7 @@ Verbosity Level     Output
 Example: munin-pihole-plugins --configure VERBOSITY_LEVEL 4
 
 .SH Munin Node Configuration
-Example /etc/munin/munin-node.conf multi-server, multi-node access control configuration
+Example: /etc/munin/munin-node.conf multi-server, multi-node access control configuration
 
 # Set this if the client doesn't report the correct hostname when
 # telnetting to localhost, port 4949
@@ -706,7 +707,7 @@ cidr_allow 192.168.1.100/32
 
 
 .SH Munin Server Configuration
-Example /etc/munin/munin.conf or /etc/munin/munin-conf.d/00-nodes.conf multi-server, multi-node access control configuration
+Example: /etc/munin/munin.conf or /etc/munin/munin-conf.d/00-nodes.conf multi-server, multi-node access control configuration
 
 # primary.home
 [primary.home]
