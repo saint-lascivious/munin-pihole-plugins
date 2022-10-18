@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="08.17.03"
+VERSION="08.17.04"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -550,7 +550,7 @@ uninstall_plugins() {
                 reverberate "failure" "${munin_plugin_dir}/pihole_"
                 reverberate "exit" "1"
             fi
-            reverberate "success" "${munin_plugin_dir}/pihole_ removed"
+            reverberate "success" "${munin_plugin_dir}/pihole_"
         fi
         for plugin_id in ${all_plugins}; do
             if [[ -f "${munin_plugin_dir}/pihole_${plugin_id}" ]]; then
@@ -559,7 +559,7 @@ uninstall_plugins() {
                     reverberate "failure" "${munin_plugin_dir}/pihole_${plugin_id}"
                     reverberate "exit" "1"
                 fi
-                reverberate "success" "${munin_plugin_dir}pihole_${plugin_id} removed"
+                reverberate "success" "${munin_plugin_dir}pihole_${plugin_id}"
             fi
         done
     else
@@ -577,7 +577,7 @@ uninstall_plugins() {
                     reverberate "failure" "${node_plugin_dir}/pihole_${plugin_id}"
                     reverberate "exit" "1"
                 fi
-                reverberate "success" "${node_plugin_dir}/pihole_${plugin_id} removed"
+                reverberate "success" "${node_plugin_dir}/pihole_${plugin_id}"
             fi
         done
     else
