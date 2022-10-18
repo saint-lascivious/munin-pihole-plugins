@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="08.17.02"
+VERSION="08.17.03"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -635,14 +635,14 @@ configure_plugins() {
         if [[ -d "${plugin_config_dir}" ]]; then
             for plugin_conf in ${plugin_config_list}; do
                 if [[ ! -f  "${plugin_config_dir}/${plugin_conf}.conf" ]]; then
-                    reverberate "info" "Installing default plugin configuration"
+                    reverberate "info" "Installing default plugin configuration ${plugin_conf}.conf"
                     download "${plugin_repo}/etc/munin/plugin-conf.d/${plugin_conf}.conf" -P "${plugin_config_dir}"
                     reverberate "additional_info" "A copy of the config file ${plugin_conf}.conf was installed"
                     reverberate "success" "${plugin_config_dir}/${plugin_conf}.conf"
                 else
                     if [[ "${force_update_plugin_config}" != "false" ]]; then
                         if [[ -d "${external_config_dir}" ]]; then
-                            reverberate "info" "Saving the existing plugin configuration"
+                            reverberate "info" "Saving the existing plugin configuration ${plugin_conf}.conf"
                             if ! cp "${plugin_config_dir}/${plugin_conf}.conf" "${external_config_dir}/${plugin_conf}.conf.save"; then
                                 reverberate "error" "Configuration file not saved"
                                 reverberate "failure" "${external_config_dir}/${plugin_conf}.conf.save"
@@ -651,7 +651,7 @@ configure_plugins() {
                             reverberate "additional_info" "The existing ${plugin_conf}.conf file was saved to"
                             reverberate "success" "${external_config_dir}/${plugin_conf}.conf.save"
                         fi
-                        reverberate "info" "Updating default plugin configuration"
+                        reverberate "info" "Updating default plugin configuration ${plugin_conf}.conf"
                         download "${plugin_repo}/etc/munin/plugin-conf.d/${plugin_conf}.conf" -O "${plugin_config_dir}/${plugin_conf}.conf"
                         reverberate "additional_info" "The default plugin config file ${plugin_conf}.conf was updated"
                         reverberate "success" "${plugin_config_dir}/${plugin_conf}.conf"
