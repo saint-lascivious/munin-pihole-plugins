@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="08.17.01"
+VERSION="08.17.02"
 
 : <<=cut
 =head1 NAME
@@ -529,6 +529,7 @@ plugin_config() {
             fi
             for stat_id in ${get_stats}; do
                 stat="$(echo "${stat_id}" | sed 's/:.*//')"
+                # shellcheck disable=SC2249
                 case "${stat}" in
                     "expired")
                         echo "${stat}.critical ${cache_expired_crit}"
@@ -588,6 +589,7 @@ plugin_config() {
             fi
             for stat_id in ${get_stats}; do
                 stat="$(echo "${stat_id}" | sed 's/:.*//')"
+                # shellcheck disable=SC2249
                 case "${stat}" in
                     "a")
                         echo "${stat}.critical ${cache_A_crit}"
@@ -662,6 +664,7 @@ plugin_config() {
             fi
             for stat_id in ${get_stats}; do
                 stat="$(echo "${stat_id}" | sed 's/:.*//')"
+                # shellcheck disable=SC2249
                 case "${stat}" in
                     "clients_ever_seen")
                         echo "${stat}.critical ${clients_ever_seen_crit}"
@@ -746,6 +749,7 @@ plugin_config() {
             fi
             for stat_id in ${get_stats}; do
                 stat="$(echo "${stat_id}" | sed 's/:.*//')"
+                # shellcheck disable=SC2249
                 case "${stat}" in
                     "ads_blocked_today")
                         echo "${stat}.critical ${ads_blocked_today_crit}"
@@ -796,6 +800,7 @@ plugin_config() {
             fi
             for stat_id in ${get_stats}; do
                 stat="$(echo "${stat_id}" | sed 's/:.*//')"
+                # shellcheck disable=SC2249
                 case "${stat}" in
                     "A")
                         echo "${stat}.critical ${query_A_crit}"
@@ -943,6 +948,7 @@ plugin_config() {
             fi
             for stat_id in ${get_stats}; do
                 stat="$(echo "${stat_id}" | sed 's/:.*//')"
+                # shellcheck disable=SC2249
                 case "${stat}" in
                     "reply_BLOB")
                         echo "${stat}.critical ${reply_BLOB_crit}"
@@ -1438,12 +1444,12 @@ plugin_suggest() {
     exit 0
 }
 
+# shellcheck disable=SC2154
 case $1 in
     "autoconf")
         plugin_autoconf
     ;;
     "config")
-        # shellcheck disable=SC2154
         plugin_config
         if [ "${MUNIN_CAP_DIRTYCONFIG}" = "1" ]; then
             plugin_data
