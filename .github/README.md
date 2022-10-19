@@ -5,7 +5,14 @@
 # Quick Start
 
 ## Step One: Download
-* Download munin-pihole-plugins
+* Download munin-pihole-plugins `master` branch
+```
+curl -sSL munin-pihole-plugins.sainternet.xyz -o munin-pihole-plugins && chmod +x munin-pihole-plugins
+```
+
+Or,
+
+* Download munin-pihole-plugins `development` branch
 ```
 curl -sSL munin-pihole-plugins-dev.sainternet.xyz -o munin-pihole-plugins && chmod +x munin-pihole-plugins
 ```
