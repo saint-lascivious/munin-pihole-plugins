@@ -1,10 +1,10 @@
-.TH man 1 "18 October 2022" "09.00.00" "munin-pihole-plugins man page"
+.TH man 1 "21 October 2022" "09.01.00" "munin-pihole-plugins man page"
 
 .SH NAME
 munin-pihole-plugins
 
 .SH VERSION
-09.00.00
+09.01.00
 
 .SH BRANCH
 development
@@ -62,6 +62,17 @@ this functionality is only available if the munin-pihole-plugins script is
 found to exist within 'SCRIPT_DIR', whereby it's considered "installed".
 
 Example: "munin-pihole-plugins --configure RESET_ALL"
+
+.SS -C, checkout, --checkout
+Usage: munin-pihole-plugins {--checkout [BRANCH]}
+
+Option             GNU long option      Function
+ -C, checkout       --checkout           Change munin-pihole-plugins branch
+
+Shortcut command to (re)install munin-pihole-plugins using the selected branch.
+Branches available for selection are "development" and "master".
+
+Example: "munin-pihole-plugins --checkout development"
 
 .SS -d, debug, --debug
 Usage: munin-pihole-plugins {--debug}

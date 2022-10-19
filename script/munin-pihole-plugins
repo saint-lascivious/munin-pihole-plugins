@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="09.00.00"
+VERSION="09.01.00"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -93,6 +93,15 @@ terminal_width="$(stty size | cut -d " " -f2)"
 
 # we just won't talk about this
 temp_dir="${TMPDIR:-${TEMP:-${TMP:-/tmp}}}"
+
+# direct examples to installed script if present
+# otherwise fall back to the current calling method
+# makes for slightly nicer example texts, at least in my mind
+if [[ -f "${script_dir}/munin-pihole-plugins" ]]; then
+    example_prefix="munin-pihole-plugins"
+else
+    example_prefix="${0}"
+fi
 
 # fallbacks for out of range or unexpected hold durations
 # set to 0 when lower than 0, 5 when higher than 5
@@ -1029,6 +1038,27 @@ EOF
     esac
 }
 
+checkout_function() {
+    case ${2} in
+        master)
+            exec env BRANCH="${2}" /bin/bash "$0" "--install"
+        ;;
+        development)
+            exec env BRANCH="${2}" /bin/bash "$0" "--install"
+        ;;
+        "")
+            some "munin-pihole-plugins: additional argument required
+\\nFor a list of available options, type
+\"${example_prefix} --help --checkout\""
+        ;;
+        *)
+            some "munin-pihole-plugins: unrecognised option \"${RED}$2${RESET}\"
+\\nFor a list of available options, type
+\"${example_prefix} --help --checkout\""
+        ;;
+    esac
+}
+
 # display munin-pihole-plugins environment variables and their current values
 # there were too many variables to list in the main help text
 # triggers are available for popular DNS_SERVER values
@@ -1331,13 +1361,16 @@ debug_function() {
 # its sprawling nature is actually a good thing i guess
 # interactive help is always better than a giant wall of text
 help_function() {
-    if [[ -f "${script_dir}/munin-pihole-plugins" ]]; then
-        example_prefix="munin-pihole-plugins"
-    else
-        example_prefix="./munin-pihole-plugins"
-    fi
     case "${2}" in
-        "-c" | "--configure" | "configure")
+        "-c" | "--checkout" | "checkout")
+            some "Usage: munin-pihole-plugins {$2 [BRANCH]}
+\\nOption             GNU long option      Function
+ -C, checkout       --checkout           Change munin-pihole-plugins branch
+\\nShortcut command to install munin-pihole-plugins using the selected branch.
+Branches available for selection are 'development' and 'master'.
+\\nExample: \"${example_prefix} $2 development\""
+        ;;
+        "-C" | "--configure" | "configure")
             some "Usage: munin-pihole-plugins {$2 [RESET_ALL]|[VARIABLE [VALUE]]}
 \\nOption             GNU long option      Function
  -c, configure      --configure          Display or set environment variables
@@ -1594,7 +1627,8 @@ the latest munin-pihole-plugins script version.
         "")
             some "Usage: munin-pihole-plugins {OPTION [PARAMETER]}
 Option             GNU long option      Function
- -c, configure      --configure          Display or set environment variables
+ -c, checkout       --checkout           Change munin-pihole-plugins branch
+ -C, configure      --configure          Display or set environment variables
  -d, debug          --debug              Install and run the debug plugin
  -h, help           --help               Display this and other help dialogues
  -i, install        --install            Install munin-pihole-plugins
@@ -1699,11 +1733,6 @@ install_function() {
 # spits out some boilerplate that's technically required
 # (and a little that isn't {-l,liability,--liability})
 gnugpl_info_function() {
-    if [[ -f "${script_dir}/munin-pihole-plugins" ]]; then
-        example_prefix="munin-pihole-plugins"
-    else
-        example_prefix="./munin-pihole-plugins"
-    fi
     case "${2}" in
         "-c" | "conditions" | "--conditions")
             some "munin-pihole-plugins saint-lascivious (Hayden Pearce) ©2022
@@ -1726,7 +1755,7 @@ gnugpl_info_function() {
         ;;
         "-l" | "liability" | "--liability")
             some "munin-pihole-plugins saint-lascivious (Hayden Pearce) ©2022
-\\n  IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING
+\\n  IN ${RED}NO EVENT${RESET} UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING
   WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MODIFIES AND/OR CONVEYS
   THE PROGRAM AS PERMITTED ABOVE, BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY
   GENERAL, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE
@@ -1955,7 +1984,10 @@ version_function() {
 # whinges about being run with invalid input
 function_handler() {
     case "${1}" in
-        "-c" | "--configure" | "configure")
+        "-c" | "--checkout" | "checkout")
+            checkout_function "$@"
+        ;;
+        "-C" | "--configure" | "configure")
             config_function "$@"
         ;;
         "-d" | "debug" | "--debug")
