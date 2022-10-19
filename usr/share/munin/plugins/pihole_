@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="08.17.04"
+VERSION="09.00.00"
 
 : <<=cut
 =head1 NAME
@@ -1138,6 +1138,7 @@ plugin_config() {
                     echo "${stat}.warning ${ads_percentage_today_warn}"
                 fi
             done
+        ;;
     esac
 }
 

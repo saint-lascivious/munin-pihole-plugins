@@ -1,10 +1,10 @@
-.TH man 1 "18 October 2022" "08.17.04" "munin-pihole-plugins man page"
+.TH man 1 "18 October 2022" "09.00.00" "munin-pihole-plugins man page"
 
 .SH NAME
 munin-pihole-plugins
 
 .SH VERSION
-08.17.04
+09.00.00
 
 .SH BRANCH
 development
@@ -676,8 +676,9 @@ Verbosity Level     Output
 Example: munin-pihole-plugins --configure VERBOSITY_LEVEL 4
 
 .SH Munin Node Configuration
-Example: /etc/munin/munin-node.conf multi-server, multi-node access control configuration
+Example /etc/munin/munin-node.conf multi-server, multi-node access control configuration
 
+---
 # Set this if the client doesn't report the correct hostname when
 # telnetting to localhost, port 4949
 
@@ -704,11 +705,12 @@ cidr_allow 192.168.1.20/32
 cidr_allow 192.168.1.40/32
 # laptop.home
 cidr_allow 192.168.1.100/32
-
+---
 
 .SH Munin Server Configuration
 Example: /etc/munin/munin.conf or /etc/munin/munin-conf.d/00-nodes.conf multi-server, multi-node access control configuration
 
+---
 # primary.home
 [primary.home]
     address 192.168.1.10
@@ -728,6 +730,7 @@ Example: /etc/munin/munin.conf or /etc/munin/munin-conf.d/00-nodes.conf multi-se
 [laptop.home]
     address 192.168.1.100
     use_node_name yes
+---
 
 .SH SEE ALSO
 munin(8), munin-node(1p)
