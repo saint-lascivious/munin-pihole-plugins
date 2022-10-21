@@ -18,49 +18,52 @@
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
 # shellcheck disable=SC2034
-VERSION="08.00.00"
+VERSION="08.01.00"
 
 # shellcheck disable=SC2207
 _munin-pihole-plugins() {
     local cur allopts lolopts_help longopts longopts_installuninstall \
         longopts_restart longopts_show opts_branch opts_dnsserver opts \
         opts_holdduration opts_installuninstall opts_muninbranch \
-        opts_plugin_config_list opts_restart opts_show opts_truefalse \
-        opts_variables opts_verbositylevel prev prev2 shortopts \
-        shortopts_installuninstall shortopts_restart shortopts_show
+        opts_plugin_config_list opts_reset opts_resetall opts_restart \
+        opts_show opts_truefalse opts_variables opts_verbositylevel prev \
+        prev2 shortopts shortopts_installuninstall shortopts_restart \
+        shortopts_show
     COMPREPLY=()
     cur="${COMP_WORDS[COMP_CWORD]}"
-    allopts="-c configure --configure -d debug --debug -h help --help -i \
-        install --install -r restart --restart -s show --show -u uninstall \
-        --uninstall -v version --version"
-    longopts="--configure --debug --help --install --restart --show \
+    allopts="-c checkout --checkout -C configure --configure -d debug --debug \
+        -h help --help -i install --install -r restart --restart -s show \
+        --show -u uninstall --uninstall -v version --version"
+    longopts="--checkout --configure --debug --help --install --restart --show \
         --uninstall --version"
     longopts_installuninstall="--plugins --plugins-only --script --script-only \
         --webserver --webserver-only"
     longopts_restart="--plugins --webserver"
     longopts_show="--conditions --gnu-gpl --liability --warranty"
     opts="configure debug help install show uninstall version"
-    opts_branch="development master RESET"
-    opts_holdduration="0 1 2 3 4 5 RESET"
+    opts_branch="development master"
+    opts_holdduration="0 1 2 3 4 5"
     opts_installuninstall="plugins plugins-only script script-only webserver \
         webserver-only"
-    opts_dnsserver="CLOUDFLARE COMODO GOOGLE LOCALHOST QUAD9 RESET SAINTERNET"
+    opts_dnsserver="CLOUDFLARE COMODO GOOGLE LOCALHOST QUAD9 SAINTERNET"
     opts_muninbranch="latest stable"
     opts_plugin_config_list="pihole pihole_alerts"
+    opts_reset="RESET"
+    opts_resetall="RESET_ALL"
     opts_restart="plugins webserver"
     opts_show="conditions gnu-gpl liability warranty"
-    opts_truefalse="true false RESET"
+    opts_truefalse="true false"
     opts_variables="BRANCH DNS_PORT DNS_SERVER EXTERNAL_CONFIG_DIR \
         EXTERNAL_CONFIG_FILE FORCE_UPDATE_PLUGIN_CONFIG HOLD_DURATION \
         IGNORE_PIHOLE_ON_HOST INSTALL_PLUGINS INSTALL_SCRIPT INSTALL_WEBSERVER \
         LIGHTTPD_WEBROOT MUNIN_BRANCH MUNIN_DIR MUNIN_CONFIG_DIR \
         MUNIN_PLUGIN_DIR NODE_PLUGIN_DIR PLUGIN_CONFIG_DIR PLUGIN_CONFIG_LIST \
-        PLUGIN_LIST PROXY_CONFIG_DIR RESET_ALL SCRIPT_DIR SHOW_COLOUR \
-        SHOW_HEADER SKIP_DEPENDENCY_CHECK UPDATE_SELF VERBOSITY_LEVEL"
-    opts_verbositylevel="0 1 2 3 4 RESET"
+        PLUGIN_LIST PROXY_CONFIG_DIR SCRIPT_DIR SHOW_COLOUR SHOW_HEADER \
+        SKIP_DEPENDENCY_CHECK UPDATE_SELF VERBOSITY_LEVEL"
+    opts_verbositylevel="0 1 2 3 4"
     prev="${COMP_WORDS[COMP_CWORD-1]}"
     prev2="${COMP_WORDS[COMP_CWORD-2]}"
-    shortopts="-c -d -h -i -r -s -u -v"
+    shortopts="-c -C -d -h -i -r -s -u -v"
     shortopts_installuninstall="-p -P -s -S -w -W"
     shortopts_restart="-p -w"
     shortopts_show="-c -g -l -w"
@@ -77,9 +80,14 @@ _munin-pihole-plugins() {
                     COMPREPLY=( $(compgen -W "${allopts}" -- "${cur}") )
             esac
         ;;
-        "-c"|"configure"|"--configure")
+        "-c"|"checkout"|"--checkout")
             if [[ "${prev2}" != "-h" ]] && [[ "${prev2}" != "help" ]] && [[ "${prev2}" != "--help" ]]; then
-                COMPREPLY=( $(compgen -W "${opts_variables}" -- "${cur}") )
+                COMPREPLY=( $(compgen -W "${opts_branch}" -- "${cur}") )
+            fi
+        ;;
+        "-C"|"configure"|"--configure")
+            if [[ "${prev2}" != "-h" ]] && [[ "${prev2}" != "help" ]] && [[ "${prev2}" != "--help" ]]; then
+                COMPREPLY=( $(compgen -W "${opts_variables} ${opts_resetall}" -- "${cur}") )
             fi
         ;;
        "-h")
@@ -128,43 +136,43 @@ _munin-pihole-plugins() {
             COMPREPLY=( $(compgen -W "${longopts_show}" -- "${cur}") )
         ;;
         "BRANCH")
-            if [[ "${prev2}" == "-c" ]] || [[ "${prev2}" == "configure" ]] || [[ "${prev2}" == "--configure" ]]; then
-                COMPREPLY=( $(compgen -W "${opts_branch}" -- "${cur}") )
+            if [[ "${prev2}" == "-C" ]] || [[ "${prev2}" == "configure" ]] || [[ "${prev2}" == "--configure" ]]; then
+                COMPREPLY=( $(compgen -W "${opts_branch} ${opts_reset}" -- "${cur}") )
             fi
         ;;
         "DNS_PORT"|"EXTERNAL_CONFIG_DIR"|"EXTERNAL_CONFIG_FILE"|"MUNIN_DIR"|"MUNIN_CONFIG_DIR"|"MUNIN_PLUGIN_DIR"|"NODE_PLUGIN_DIR"|"PLUGIN_CONFIG_DIR"|"PLUGIN_LIST"|"PROXY_CONFIG_DIR"|"SCRIPT_DIR")
-            if [[ "${prev2}" == "-c" ]] || [[ "${prev2}" == "configure" ]] || [[ "${prev2}" == "--configure" ]]; then
-                COMPREPLY=( $(compgen -W "RESET" -- "${cur}") )
+            if [[ "${prev2}" == "-C" ]] || [[ "${prev2}" == "configure" ]] || [[ "${prev2}" == "--configure" ]]; then
+                COMPREPLY=( $(compgen -W "${opts_reset}" -- "${cur}") )
             fi
         ;;
         "DNS_SERVER")
-            if [[ "${prev2}" == "-c" ]] || [[ "${prev2}" == "configure" ]] || [[ "${prev2}" == "--configure" ]]; then
-                COMPREPLY=( $(compgen -W "${opts_dnsserver}" -- "${cur}") )
+            if [[ "${prev2}" == "-C" ]] || [[ "${prev2}" == "configure" ]] || [[ "${prev2}" == "--configure" ]]; then
+                COMPREPLY=( $(compgen -W "${opts_dnsserver} ${opts_reset}" -- "${cur}") )
             fi
         ;;
         "HOLD_DURATION")
-            if [[ "${prev2}" == "-c" ]] || [[ "${prev2}" == "configure" ]] || [[ "${prev2}" == "--configure" ]]; then
-                COMPREPLY=( $(compgen -W "${opts_holdduration}" -- "${cur}") )
+            if [[ "${prev2}" == "-C" ]] || [[ "${prev2}" == "configure" ]] || [[ "${prev2}" == "--configure" ]]; then
+                COMPREPLY=( $(compgen -W "${opts_holdduration} ${opts_reset}" -- "${cur}") )
             fi
         ;;
         "FORCE_UPDATE_PLUGIN_CONFIG"|"IGNORE_PIHOLE_ON_HOST"|"INSTALL_PLUGINS"|"INSTALL_SCRIPT"|"INSTALL_WEBSERVER"|"SHOW_COLOR"|"SHOW_COLOUR"|"SHOW_HEADER"|"SKIP_DEPENDENCY_CHECK"|"UPDATE_SELF")
-            if [[ "${prev2}" == "-c" ]] || [[ "${prev2}" == "configure" ]] || [[ "${prev2}" == "--configure" ]]; then
-                COMPREPLY=( $(compgen -W "${opts_truefalse}" -- "${cur}") )
+            if [[ "${prev2}" == "-C" ]] || [[ "${prev2}" == "configure" ]] || [[ "${prev2}" == "--configure" ]]; then
+                COMPREPLY=( $(compgen -W "${opts_truefalse} ${opts_reset}" -- "${cur}") )
             fi
         ;;
         "MUNIN_BRANCH")
-            if [[ "${prev2}" == "-c" ]] || [[ "${prev2}" == "configure" ]] || [[ "${prev2}" == "--configure" ]]; then
-                COMPREPLY=( $(compgen -W "${opts_muninbranch}" -- "${cur}") )
+            if [[ "${prev2}" == "-C" ]] || [[ "${prev2}" == "configure" ]] || [[ "${prev2}" == "--configure" ]]; then
+                COMPREPLY=( $(compgen -W "${opts_muninbranch} ${opts_reset}" -- "${cur}") )
             fi
         ;;
         "PLUGIN_CONFIG_LIST")
-            if [[ "${prev2}" == "-c" ]] || [[ "${prev2}" == "configure" ]] || [[ "${prev2}" == "--configure" ]]; then
-                COMPREPLY=( $(compgen -W "${opts_plugin_config_list}" -- "${cur}") )
+            if [[ "${prev2}" == "-C" ]] || [[ "${prev2}" == "configure" ]] || [[ "${prev2}" == "--configure" ]]; then
+                COMPREPLY=( $(compgen -W "${opts_plugin_config_list} ${opts_reset}" -- "${cur}") )
             fi
         ;;
         "VERBOSITY_LEVEL")
-            if [[ "${prev2}" == "-c" ]] || [[ "${prev2}" == "configure" ]] || [[ "${prev2}" == "--configure" ]]; then
-                COMPREPLY=( $(compgen -W "${opts_verbositylevel}" -- "${cur}") )
+            if [[ "${prev2}" == "-C" ]] || [[ "${prev2}" == "configure" ]] || [[ "${prev2}" == "--configure" ]]; then
+                COMPREPLY=( $(compgen -W "${opts_verbositylevel} ${opts_reset}" -- "${cur}") )
             fi
         ;;
         *)

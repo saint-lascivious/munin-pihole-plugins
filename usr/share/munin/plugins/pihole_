@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="08.00.00"
+VERSION="08.01.00"
 
 : <<=cut
 =head1 NAME
