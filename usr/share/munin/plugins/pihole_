@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="09.01.00"
+VERSION="09.02.00"
 
 : <<=cut
 =head1 NAME
@@ -81,6 +81,9 @@ Default munin-pihole-plugins pihole_ plugin configuration (default: /etc/munin/p
     env.json_cachesuffix ?getCacheInfo&auth=
     env.json_port 80
     env.json_querysuffix ?getQueryTypes&auth=
+    env.json_statussuffix ?status&auth=
+    env.json_summarysuffix ?summaryRaw&auth=
+
     #env.setupvars /etc/pihole/setupVars.conf
     #env.webpassword PIHOLE_SETUPVARS_WEBPASSWORD_HERE
 
@@ -279,6 +282,8 @@ json_cachesuffix="${json_cachesuffix:-?getCacheInfo&auth=}"
 json_port="${json_port:-80}"
 plugin_id="$(echo "$0" | sed -e 's/^.*pihole_//')"
 json_querysuffix="${json_querysuffix:-?getQueryTypes&auth=}"
+json_statussuffix="${json_statussuffix:-?status&auth=}"
+json_summarysuffix="${json_summarysuffix:-?summaryRaw&auth=}"
 
 if [ -f "${ftl_conf}" ]; then
     get_ftlport="$(cat < "${ftl_conf}" | grep FTLPORT | sed s/FTLPORT=//g)"
@@ -446,8 +451,11 @@ case ${api_method} in
             "queries_by_type")
                 get_stats="$(echo "curl -sL ${host}:${json_port}${json_api}${json_querysuffix}${webpassword} 2>/dev/null" | sed 's/[{}"]//g; s/querytypes://; s/ (IPv4)//; s/ (IPv6)//' | tr "," "\\n" | sort -u)"
             ;;
+            "status")
+                get_stats="$(echo "curl -sL ${host}:${json_port}${json_api}${json_statussuffix}${webpassword} 2>/dev/null" | sed 's/[{}"]//g' | tr "," "\\n" | sort -u)"
+            ;;
             *)
-                get_stats="$(echo "curl -sL ${host}:${json_port}${json_api} 2>/dev/null" | sed 's/[{}"]//g' | tr "," "\\n" | sort -u)"
+                get_stats="$(echo "curl -sL ${host}:${json_port}${json_api}${json_summarysuffix}${webpassword} 2>/dev/null" | sed 's/[{}"]//g' | tr "," "\\n" | sort -u)"
             ;;
         esac
     ;;
@@ -1197,6 +1205,8 @@ plugin_data() {
             echo "json_cachesuffix=\"${json_cachesuffix}\""
             echo "json_port=\"${json_port}\""
             echo "json_querysuffix=\"${json_querysuffix}\""
+            echo "json_statussuffix=\"${json_statussuffix}\""
+            echo "json_summarysuffix=\"${json_summarysuffix}\""
             echo "setupvars=\"${setupvars}\""
             if [ -f "${setupvars}" ]; then
                 echo "\"${setupvars}\" exists"
