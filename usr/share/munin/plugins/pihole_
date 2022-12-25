@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="09.02.00"
+VERSION="09.03.00"
 
 : <<=cut
 =head1 NAME
@@ -61,10 +61,6 @@ Plugin name:             Plugin description
  pihole_status           - Shows Pi-hole's blocking status.
  pihole_unique_domains   - Shows unique domains seen by Pi-hole.
 
-Note for cache_* plugins:
-Pi-hole API authentication required.
-Either a Pi-hole setupVars.conf path or webpassword value must be supplied.
-
 =head1 PLUGIN BASE CONFIGURATION
 
 Default munin-pihole-plugins pihole_ plugin configuration (default: /etc/munin/plugin-conf.d/pihole.conf).
@@ -74,15 +70,16 @@ Default munin-pihole-plugins pihole_ plugin configuration (default: /etc/munin/p
     user root
 
     env.api_method telnet
+    env.auth_suffix &auth=
     env.ftl_conf /etc/pihole/pihole-FTL.conf
     #env.ftl_port 4711
     env.host 127.0.0.1
     env.json_api /admin/api.php
-    env.json_cachesuffix ?getCacheInfo&auth=
+    env.json_cachesuffix ?getCacheInfo
     env.json_port 80
-    env.json_querysuffix ?getQueryTypes&auth=
-    env.json_statussuffix ?status&auth=
-    env.json_summarysuffix ?summaryRaw&auth=
+    env.json_querysuffix ?getQueryTypes
+    env.json_statussuffix ?status
+    env.json_summarysuffix ?summaryRaw
 
     #env.setupvars /etc/pihole/setupVars.conf
     #env.webpassword PIHOLE_SETUPVARS_WEBPASSWORD_HERE
@@ -125,7 +122,6 @@ Default munin-pihole-plugins pihole_ plugin configuration (default: /etc/munin/p
 
     # pihole_unique_domains
     #env.unique_domains_rate
-
 
 Uncomment and/or (re-)define relevant env.* variables to override the default values to suit your requirement.
 
@@ -275,15 +271,16 @@ Copyright saint-lascivious (Hayden Pearce) 2022
 #%# capabilities=autoconf suggest
 
 api_method="${api_method:-telnet}"
+auth_suffix="${auth_suffix:-&auth=}"
 ftl_conf="${ftl_conf:-/etc/pihole/pihole-FTL.conf}"
 host="${host:-127.0.0.1}"
 json_api="${json_api:-/admin/api.php}"
-json_cachesuffix="${json_cachesuffix:-?getCacheInfo&auth=}"
+json_cachesuffix="${json_cachesuffix:-?getCacheInfo}"
 json_port="${json_port:-80}"
 plugin_id="$(echo "$0" | sed -e 's/^.*pihole_//')"
-json_querysuffix="${json_querysuffix:-?getQueryTypes&auth=}"
-json_statussuffix="${json_statussuffix:-?status&auth=}"
-json_summarysuffix="${json_summarysuffix:-?summaryRaw&auth=}"
+json_querysuffix="${json_querysuffix:-?getQueryTypes}"
+json_statussuffix="${json_statussuffix:-?status}"
+json_summarysuffix="${json_summarysuffix:-?summaryRaw}"
 
 if [ -f "${ftl_conf}" ]; then
     get_ftlport="$(cat < "${ftl_conf}" | grep FTLPORT | sed s/FTLPORT=//g)"
@@ -444,18 +441,20 @@ fi
 
 case ${api_method} in
     "json")
+        json_auth="${auth_suffix}${webpassword}"
+        json_base_query="${host}:${json_port}${json_api}"
         case ${plugin_id} in
             "cache" | "cache_by_type")
-                get_stats="$(echo "curl -sL ${host}:${json_port}${json_api}${json_cachesuffix}${webpassword} 2>/dev/null" | sed 's/[{}"]//g; s/cacheinfo://; s/ipv4/a/; s/ipv6/aaaa/' | tr "," "\\n" | sort -u)"
+                get_stats="$(echo "curl -sL ${json_base_query}${json_cachesuffix}${json_auth} 2>/dev/null" | sed 's/[{}"]//g; s/cacheinfo://; s/ipv4/a/; s/ipv6/aaaa/' | tr "," "\\n" | sort -u)"
             ;;
             "queries_by_type")
-                get_stats="$(echo "curl -sL ${host}:${json_port}${json_api}${json_querysuffix}${webpassword} 2>/dev/null" | sed 's/[{}"]//g; s/querytypes://; s/ (IPv4)//; s/ (IPv6)//' | tr "," "\\n" | sort -u)"
+                get_stats="$(echo "curl -sL ${json_base_query}${json_querysuffix}${json_auth} 2>/dev/null" | sed 's/[{}"]//g; s/querytypes://; s/ (IPv4)//; s/ (IPv6)//' | tr "," "\\n" | sort -u)"
             ;;
             "status")
-                get_stats="$(echo "curl -sL ${host}:${json_port}${json_api}${json_statussuffix}${webpassword} 2>/dev/null" | sed 's/[{}"]//g' | tr "," "\\n" | sort -u)"
+                get_stats="$(echo "curl -sL ${json_base_query}${json_statussuffix}${json_auth} 2>/dev/null" | sed 's/[{}"]//g' | tr "," "\\n" | sort -u)"
             ;;
             *)
-                get_stats="$(echo "curl -sL ${host}:${json_port}${json_api}${json_summarysuffix}${webpassword} 2>/dev/null" | sed 's/[{}"]//g' | tr "," "\\n" | sort -u)"
+                get_stats="$(echo "curl -sL ${json_base_query}${json_summarysuffix}${json_auth} 2>/dev/null" | sed 's/[{}"]//g' | tr "," "\\n" | sort -u)"
             ;;
         esac
     ;;
@@ -492,6 +491,9 @@ plugin_autoconf() {
                 exit 0
             fi
             echo "yes"
+            exit 0
+        else
+            echo "no"
             exit 0
         fi
     fi
@@ -1193,6 +1195,7 @@ plugin_data() {
             echo "\"${VERSION}\""
             echo "plugin variables:"
             echo "api_method=\"${api_method}\""
+            echo "auth_suffix=\"${auth_suffix}\""
             echo "ftl_conf=\"${ftl_conf}\""
             if [ -f "${ftl_conf}" ]; then
                 echo "\"${ftl_conf}\" exists"
@@ -1441,6 +1444,9 @@ plugin_data() {
 }
 
 plugin_suggest() {
+    if [ -z "${webpassword}" ] && [ "${api_method}" = "json" ]; then
+        exit 0
+    fi
     echo "blocked"
     echo "cache"
     echo "cache_by_type"
