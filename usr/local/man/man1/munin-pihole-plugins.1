@@ -1,10 +1,10 @@
-.TH man 1 "21 October 2022" "09.01.00" "munin-pihole-plugins man page"
+.TH man 1 "02 February 2023" "09.04.00" "munin-pihole-plugins man page"
 
 .SH NAME
 munin-pihole-plugins
 
 .SH VERSION
-09.03.00
+09.04.00
 
 .SH BRANCH
 development
@@ -459,6 +459,7 @@ Variable                       Default Value
  INSTALL_PLUGINS                "true"
  INSTALL_SCRIPT                 "true"
  INSTALL_WEBSERVER              "true"
+ LIGHTTPD_PORT                  "80"
  LIGHTTPD_WEBROOT               "/var/www/html"
  MUNIN_BRANCH                   "stable"
  MUNIN_DIR                      "/etc/munin"
@@ -557,6 +558,12 @@ Example: munin-pihole-plugins --configure INSTALL_SCRIPT false
 Disables installation of the munin webserver and lighttpd proxy if set to any value other than true. Useful for additional Munin nodes in a multi-node, single-server environment.
 
 Example: munin-pihole-plugins --configure INSTALL_WEBSERVER false
+
+.SS LIGHTTPD_PORT
+
+The port which the lighttpd webserver will listen on.
+
+Example: munin-pihole-plugins --configure LIGHTTPD_PORT 81
 
 .SS LIGHTTPD_WEBROOT
 

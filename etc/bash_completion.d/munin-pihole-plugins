@@ -18,7 +18,7 @@
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
 # shellcheck disable=SC2034
-VERSION="09.03.00"
+VERSION="09.04.00"
 
 # shellcheck disable=SC2207
 _munin-pihole-plugins() {
@@ -56,7 +56,7 @@ _munin-pihole-plugins() {
     opts_variables="BRANCH DNS_PORT DNS_SERVER EXTERNAL_CONFIG_DIR \
         EXTERNAL_CONFIG_FILE FORCE_UPDATE_PLUGIN_CONFIG HOLD_DURATION \
         IGNORE_PIHOLE_ON_HOST INSTALL_PLUGINS INSTALL_SCRIPT INSTALL_WEBSERVER \
-        LIGHTTPD_WEBROOT MUNIN_BRANCH MUNIN_DIR MUNIN_CONFIG_DIR \
+        LIGHTTPD_PORT LIGHTTPD_WEBROOT MUNIN_BRANCH MUNIN_DIR MUNIN_CONFIG_DIR \
         MUNIN_PLUGIN_DIR NODE_PLUGIN_DIR PLUGIN_CONFIG_DIR PLUGIN_CONFIG_LIST \
         PLUGIN_LIST PROXY_CONFIG_DIR SCRIPT_DIR SHOW_COLOUR SHOW_HEADER \
         SKIP_DEPENDENCY_CHECK UPDATE_SELF VERBOSITY_LEVEL"
@@ -140,7 +140,7 @@ _munin-pihole-plugins() {
                 COMPREPLY=( $(compgen -W "${opts_branch} ${opts_reset}" -- "${cur}") )
             fi
         ;;
-        "DNS_PORT"|"EXTERNAL_CONFIG_DIR"|"EXTERNAL_CONFIG_FILE"|"MUNIN_DIR"|"MUNIN_CONFIG_DIR"|"MUNIN_PLUGIN_DIR"|"NODE_PLUGIN_DIR"|"PLUGIN_CONFIG_DIR"|"PLUGIN_LIST"|"PROXY_CONFIG_DIR"|"SCRIPT_DIR")
+        "DNS_PORT"|"EXTERNAL_CONFIG_DIR"|"EXTERNAL_CONFIG_FILE"|"LIGHTTPD_PORT"|"LIGHTTPD_WEBROOT"|"MUNIN_DIR"|"MUNIN_CONFIG_DIR"|"MUNIN_PLUGIN_DIR"|"NODE_PLUGIN_DIR"|"PLUGIN_CONFIG_DIR"|"PLUGIN_LIST"|"PROXY_CONFIG_DIR"|"SCRIPT_DIR")
             if [[ "${prev2}" == "-C" ]] || [[ "${prev2}" == "configure" ]] || [[ "${prev2}" == "--configure" ]]; then
                 COMPREPLY=( $(compgen -W "${opts_reset}" -- "${cur}") )
             fi

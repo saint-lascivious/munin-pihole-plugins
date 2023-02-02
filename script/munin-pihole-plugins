@@ -17,7 +17,7 @@
 
 # munin-pihole-plugins version
 # must follow 8 character major.minor.micro scheme
-VERSION="09.03.00"
+VERSION="09.04.00"
 
 # source any external variables from munin-pihole-plugins.conf
 # somewhat of a security risk honestly, i don't particularly
@@ -45,6 +45,7 @@ ignore_pihole_on_host="${IGNORE_PIHOLE_ON_HOST:-false}"
 install_plugins="${INSTALL_PLUGINS:-true}"
 install_script="${INSTALL_SCRIPT:-true}"
 install_webserver="${INSTALL_WEBSERVER:-true}"
+lighttpd_port="${LIGHTTPD_PORT:-80}"
 lighttpd_webroot="${LIGHTTPD_WEBROOT:-/var/www/html}"
 munin_branch="${MUNIN_BRANCH:-stable}"
 munin_dir="${MUNIN_DIR:-/etc/munin}"
@@ -490,6 +491,11 @@ configure_proxy() {
                 reverberate "success" "stable"
                 reverberate "exit" "1"
             fi
+        fi
+        if [[ -n "${LIGHTTPD_PORT}" ]] && [[ "${LIGHTTPD_PORT}" != "${lighttpd_port}" ]]; then
+            reverberate "info" "Configuring lighttpd port"
+            transmogrify "server.port" "${LIGHTTPD_PORT}" "${proxy_config}" " := "
+            reverberate "success" "${proxy_config}"
         fi
         reverberate "info" "A copy of lighttpd-external-munin-proxy was installed"
         reverberate "success" "${proxy_config}"
@@ -1071,7 +1077,7 @@ checkout_function() {
 # - sainternet 119.224.127.171
 config_function() {
     if [[ -n "$3" ]]; then
-        external_var_list="BRANCH DNS_PORT DNS_SERVER EXTERNAL_CONFIG_DIR EXTERNAL_CONFIG_FILE FORCE_UPDATE_PLUGIN_CONFIG IGNORE_PIHOLE_ON_HOST INSTALL_PLUGINS INSTALL_SCRIPT INSTALL_WEBSERVER LIGHTTPD_WEBROOT MUNIN_BRANCH MUNIN_DIR MUNIN_CONFIG_DIR MUNIN_PLUGIN_DIR NODE_PLUGIN_DIR PLUGIN_CONFIG_DIR PLUGIN_CONFIG_LIST PLUGIN_LIST PROXY_CONFIG_DIR RESET_ALL SCRIPT_DIR SHOW_COLOUR SHOW_HEADER SKIP_DEPENDENCY_CHECK UPDATE_SELF VERBOSITY_LEVEL"
+        external_var_list="BRANCH DNS_PORT DNS_SERVER EXTERNAL_CONFIG_DIR EXTERNAL_CONFIG_FILE FORCE_UPDATE_PLUGIN_CONFIG IGNORE_PIHOLE_ON_HOST INSTALL_PLUGINS INSTALL_SCRIPT INSTALL_WEBSERVER LIGHTTPD_PORT LIGHTTPD_WEBROOT MUNIN_BRANCH MUNIN_DIR MUNIN_CONFIG_DIR MUNIN_PLUGIN_DIR NODE_PLUGIN_DIR PLUGIN_CONFIG_DIR PLUGIN_CONFIG_LIST PLUGIN_LIST PROXY_CONFIG_DIR RESET_ALL SCRIPT_DIR SHOW_COLOUR SHOW_HEADER SKIP_DEPENDENCY_CHECK UPDATE_SELF VERBOSITY_LEVEL"
         for external_var_id in ${external_var_list}; do
             if [[ "$2" == "${external_var_id}" ]]; then
                 if [[ -f "${script_dir}/munin-pihole-plugins" ]]; then
@@ -1116,17 +1122,17 @@ config_function() {
                             fi
                         ;;
                         *)
-                            if [[ "$2" == "DNS_PORT" ]]; then
+                            if [[ "$2" == "DNS_PORT" ]] || [[ "$2" == "LIGHTTPD_PORT" ]] ; then
                                 if [[ "$3" =~ ^[0-9]+$ ]]; then
                                     if [[ "$3" -ge "0" ]] && [[ "$3" -le "65535" ]]; then
                                         transmogrify "$2" "$3"
                                     else
                                         some "munin-pihole-plugins: $3 doesn't look like a port number
-The DNS_PORT value must be from 0 to 65535"
+The $2 value must be from 0 to 65535"
                                     fi
                                 else
                                     some "munin-pihole-plugins: $3 doesn't look like a port number
-The DNS_PORT value must be from 0 to 65535"
+The $2 value must be from 0 to 65535"
                                 fi
                             else
                                 if [[ "$2" == "DNS_SERVER" ]]; then
@@ -1189,6 +1195,9 @@ Type \"munin-pihole-plugins --install --script\" to install it now"
             ;;
             "INSTALL_WEBSERVER")
                 some "INSTALL_WEBSERVER: ${install_webserver}"
+            ;;
+            "LIGHTTPD_PORT")
+                some "LIGHTTPD_PORT: ${lighttpd_port}"
             ;;
             "LIGHTTPD_WEBROOT")
                 some "LIGHTTPD_WEBROOT: ${lighttpd_webroot}"
